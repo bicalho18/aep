@@ -351,9 +351,15 @@ const FAIXA_CURTA = { fav:"favorável", int:"intermédia", ris:"alta" };
 const CONCLUSOES = [
   "Adequado – manter condições existentes",
   "Atenção – manter acompanhamento e condições existentes",
-  "Convergência – campo confirma; perigo lançado na AEP",
-  "Divergência – instrumento e campo não concordam; registrada para investigação"
+  "Necessita melhorias – implementar medidas na AEP",
+  "Evidências insuficientes – aprofundar avaliação e revisar medidas",
+  "Não aplicável"
 ];
+/* Conclusões da versão anterior → equivalente atual (AEPs já preenchidas) */
+const CONCL_ANTIGAS = {
+  "Convergência – campo confirma; perigo lançado na AEP": "Necessita melhorias – implementar medidas na AEP",
+  "Divergência – instrumento e campo não concordam; registrada para investigação": "Evidências insuficientes – aprofundar avaliação e revisar medidas"
+};
 
 /* Textos fixos do documento */
 const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
@@ -428,6 +434,28 @@ function resultadoDominio(a, domId){
   const manual = a.copsoq?.dominios?.[domId]?.manual || "";
   return { auto: false, nota: null, faixa: manual || null, subs: [], altas: [], inter: [] };
 }
+/* Modelos de texto da observação em campo — um para cada conclusão do cruzamento.
+   Trechos entre colchetes são para o analista completar; a AEP não conclui com colchetes pendentes. */
+const MODELOS_OBS = [
+  { id:"adequado",    rot:"Adequado — sem achado relevante",               concl:0 },
+  { id:"controle",    rot:"Atenção — controles existentes",                concl:1 },
+  { id:"confirmado",  rot:"Necessita melhorias — achado confirmado",       concl:2 },
+  { id:"divergencia", rot:"Evidências insuficientes — aprofundar",         concl:3 },
+  { id:"na",          rot:"Não aplicável",                                 concl:4 }
+];
+function perigosDoDominio(a, domId){
+  return Array.from(new Set((a.perigos||[]).filter(h => SUBS.some(s => s.dom === domId && (h.origemCopsoq === s.id || s.tax === h.codigo))).map(h => h.codigo)));
+}
+function textoModelo(a, domId, tipo){
+  const d = DOMINIOS.find(x => x.id === domId), r = resultadoDominio(a, domId);
+  const fmt = l => l.length ? ` (${l.map(x => `${x.s.nome} ${num2(x.m)}`).join("; ")})` : "";
+  const res = fmt([...r.altas, ...r.inter]), resFoco = fmt(r.altas.length ? r.altas : r.inter), cods = perigosDoDominio(a, domId);
+  if (tipo === "adequado") return d.padrao;
+  if (tipo === "controle") return `O resultado do setor neste domínio${res} indica ponto de atenção. Em campo, a condição foi observada, mas se mantém sob controle pelas medidas existentes: [descrever as medidas e a evidência observada — por exemplo, pausas, rodízio, apoio da liderança, canal de escuta, programa de acolhimento]. [Se houver, oportunidade de melhoria: descrever.] Recomenda-se manter as medidas e acompanhar no próximo ciclo. Nenhum perigo adicional caracterizado neste eixo.`;
+  if (tipo === "confirmado") return `O resultado do setor neste domínio${resFoco} foi confirmado na observação da atividade: [descrever a condição observada — tarefa, frequência, relato dos trabalhadores]. Medidas existentes: [descrever, ou “não identificadas”]. [Suporte ou melhoria necessária: descrever.] Perigos identificados: ${cods.length ? cods.join(", ") : "[códigos]"}.`;
+  if (tipo === "na") return `Domínio não aplicável a este cargo: [justificar — por que as condições avaliadas neste domínio não existem na atividade].`;
+  return `O resultado do setor neste domínio${resFoco} não foi confirmado nem afastado com segurança na observação da atividade deste cargo: [descrever o que foi observado e o que falta verificar — por exemplo, a exigência sinalizada pode ser de outra função do setor, ou a condição não ocorreu no dia da avaliação]. Prevalece a observação em campo; recomenda-se aprofundar a avaliação [como: nova observação, escuta dos trabalhadores, análise documental] e revisar as medidas. Nenhum perigo caracterizado neste eixo até a conclusão da verificação.`;
+}
 const conclusaoSugerida = r => (!r.faixa ? "" : r.altas.length ? "" : r.faixa === "fav" && !r.inter.length ? CONCLUSOES[0] : CONCLUSOES[1]);
 
 /* =========================================================================
@@ -459,7 +487,7 @@ function completar(a){
   r.escuta = r.escuta || []; r.perigos = r.perigos || []; r.fotos = r.fotos || [];
   r.checklist = CHECKLIST.map((_,i) => Object.assign({ r:"", obs:"" }, (r.checklist||[])[i]||{}));
   r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
-  DOMINIOS.forEach(d => { r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); });
+  DOMINIOS.forEach(d => { const dd = r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); if (CONCL_ANTIGAS[dd.concl]) dd.concl = CONCL_ANTIGAS[dd.concl]; });
   r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
   r.conclusao = Object.assign({ interpretacao:"", parecer:"", recomendacoes: TXT_RECOMENDACOES, oportunidades:"Não há." }, r.conclusao||{});
   return r;
@@ -526,7 +554,10 @@ function pendencias(a){
   if (!a.trabalho?.sumaria?.trim()) p[1].push("Escrever a descrição sumária da atividade");
   const semResp = (a.checklist||[]).filter(c => !c.r).length; if (semResp) p[2].push(`${semResp} item(ns) do checklist sem resposta`);
   DOMINIOS.forEach(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq?.dominios?.[d.id]||{};
-    if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`); });
+    if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`);
+    if (/\[[^\]]*\]/.test(dd.obs||"")) p[3].push(`${d.nome}: complete os trechos entre colchetes da observação`);
+    if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && (dd.obs||"").trim() === d.padrao) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
+    if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   (a.checklist||[]).forEach((c,i) => { if (c.r === "sim" && !perigoDoItem(a, i+1)) p[4].push(`Item ${i+1} do checklist marcado Sim sem perigo vinculado`); });
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
@@ -787,10 +818,11 @@ function st5(){
       <div class="dom-b">
         ${r.auto ? ((r.altas.length || r.inter.length) ? `<div class="stack tight"><span class="eyebrow">Subescalas fora da faixa favorável</span>${[...r.altas, ...r.inter].map(linha).join("")}</div>` : `<p class="small muted">Todas as subescalas do domínio em faixa favorável.</p>`) : ""}
         <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="4" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
-        <div><button class="btn ghost small" type="button" data-act="txtPadrao" data-dom="${d.id}">Usar texto padrão (sem achado relevante)</button></div>
+        <div class="row" style="gap:6px"><span class="tiny muted">Modelo de texto:</span>${MODELOS_OBS.map(m => `<button class="btn small" type="button" data-act="txtModelo" data-dom="${d.id}" data-tipo="${m.id}">${esc(m.rot)}</button>`).join("")}</div>
+        <span class="hint">O modelo preenche a observação e a conclusão correspondente. Complete os trechos entre colchetes com o que foi visto no posto.</span>
         <label class="f"><span>Conclusão do cruzamento <em>*</em></span><select data-b="copsoq.dominios.${d.id}.concl" data-rr="1"><option value="">Escolha…</option>${CONCLUSOES.map(c => `<option ${dd.concl===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
           ${!dd.concl && sug ? `<span class="hint">Sugestão: “${esc(sug)}”. <button class="btn ghost small" type="button" data-act="usarSug" data-dom="${d.id}" style="padding:0">Aplicar</button></span>` : ""}
-          ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, é convergência e o perigo entra na AEP; se não confirmar, registre a divergência — prevalece a observação em campo.</span>` : ""}</label>
+          ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, a conclusão é “Necessita melhorias” e o perigo entra na AEP; se o campo não permitir confirmar nem afastar, “Evidências insuficientes” — prevalece a observação em campo.</span>` : ""}</label>
       </div></div>`; }).join("");
   return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${blocos}</div>`;
 }
@@ -1306,6 +1338,15 @@ document.addEventListener("click", async e => {
     case "cancelarHz": S.editHz = null; S.hzErr = ""; renderStep(); break;
     case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; S.editHz.fonte = tx.fonte; const ta = document.getElementById("f-editHz.fonte"); if (ta){ ta.value = tx.fonte; ta.focus(); } toast("Fórmula copiada: troque os termos genéricos pela condição real deste cargo."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
+    case "txtModelo": {
+      const dd = a.copsoq.dominios[d.dom], novo = textoModelo(a, d.dom, d.tipo), atual = (dd.obs||"").trim();
+      const intocado = !atual || MODELOS_OBS.some(m => textoModelo(a, d.dom, m.id) === atual);
+      dd.obs = intocado ? novo : atual + "\n\n" + novo;
+      dd.concl = CONCLUSOES[MODELOS_OBS.find(m => m.id === d.tipo).concl];
+      marcar(); renderStep(); renderRail(); renderAside();
+      if (!intocado) toast("Seu texto foi mantido e o modelo entrou no final: revise e apague o que não se aplica.");
+      break;
+    }
     case "usarSug": { const r = resultadoDominio(a, d.dom); a.copsoq.dominios[d.dom].concl = conclusaoSugerida(r); marcar(); renderStep(); renderRail(); renderAside(); break; }
     case "atualizarSnap": { const set = S.areas[a.copsoq.snapshot?.setorId] || setorPorNome(a.meta.setorCopsoq); a.copsoq.snapshot = snapDe(set); marcar(); renderBanner(); renderStep(); renderRail(); renderAside(); toast("Notas do setor atualizadas nesta AEP."); break; }
     case "ftUp": case "ftDown": { const i = Number(d.i), j = d.act === "ftUp" ? i-1 : i+1, F = a.fotos; [F[i],F[j]] = [F[j],F[i]]; marcar(); renderStep(); break; }
