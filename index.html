@@ -1,0 +1,1524 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="logo.png">
+<style>[hidden]:not([hidden=until-found i]){display:none!important}img{max-width:100%}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<title>AEP · Mina de Serra Azul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+:root{
+  --paper:#F4F4F3; --surface:#FFFFFF; --surface-2:#F8F8F7;
+  --ink:#232323; --ink-2:#4F4F4F; --ink-3:#767676;
+  --rule:#E0DFDD; --rule-strong:#BEBCB9;
+  --brand:#EA5B26; --brand-ink:#414141;
+  --accent:#C2451A; --accent-ink:#FFFFFF; --accent-soft:#FDF2EC; --accent-line:#F1B89F;
+  --warn-bg:#FFF6E0; --warn-ink:#7A5200; --warn-line:#EBCB7C;
+  --bad-bg:#FCEBEA; --bad-ink:#8E1C1C; --bad-line:#E9A9A5;
+  --ok-bg:#E8F4EC; --ok-ink:#1E6B3E; --ok-line:#A5D2B5;
+  --dot-ok:#2E7D4F; --dot-pend:#D9A21B; --crit:#A51C1C;
+  --f-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --radius:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#141414; --surface:#1D1D1D; --surface-2:#242424;
+    --ink:#ECECEC; --ink-2:#B9B9B9; --ink-3:#8A8A8A;
+    --rule:#313131; --rule-strong:#474747;
+    --brand:#F07A4C; --brand-ink:#ECECEC;
+    --accent:#F4885C; --accent-ink:#1A0C05; --accent-soft:#3A2218; --accent-line:#7A3D22;
+    --crit:#D2453F;
+    --warn-bg:#2E2510; --warn-ink:#F0CF84; --warn-line:#5E4A1C;
+    --bad-bg:#321717; --bad-ink:#F2A9A4; --bad-line:#6A2A28;
+    --ok-bg:#132A1D; --ok-ink:#9FD9B4; --ok-line:#2C5A3D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#141414; --surface:#1D1D1D; --surface-2:#242424;
+  --ink:#ECECEC; --ink-2:#B9B9B9; --ink-3:#8A8A8A;
+  --rule:#313131; --rule-strong:#474747;
+  --brand:#F07A4C; --brand-ink:#ECECEC;
+  --accent:#F4885C; --accent-ink:#1A0C05; --accent-soft:#3A2218; --accent-line:#7A3D22;
+  --crit:#D2453F;
+  --warn-bg:#2E2510; --warn-ink:#F0CF84; --warn-line:#5E4A1C;
+  --bad-bg:#321717; --bad-ink:#F2A9A4; --bad-line:#6A2A28;
+  --ok-bg:#132A1D; --ok-ink:#9FD9B4; --ok-line:#2C5A3D;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--f-cond);font-weight:600;line-height:1.2;margin:0;text-wrap:balance;letter-spacing:.005em}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:.92em}
+.num{font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--f-cond);font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.muted{color:var(--ink-2)}
+.faint{color:var(--ink-3)}
+.small{font-size:12.5px}
+.tiny{font-size:11.5px}
+
+/* ---------- Topo ---------- */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--rule);box-shadow:inset 0 3px 0 var(--brand)}
+.topbar-in{max-width:1400px;margin:0 auto;padding-inline:16px;padding-top:3px;display:flex;align-items:center;gap:20px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;padding-block:8px;min-width:0}
+.brand-logo{display:flex;align-items:center;padding-right:14px;border-right:1px solid var(--rule)}
+.brand-logo img{height:30px;width:auto;display:block}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .brand-logo img{background:#fff;padding:3px 6px;border-radius:4px;height:32px}}
+:root[data-theme="dark"] .brand-logo img{background:#fff;padding:3px 6px;border-radius:4px;height:32px}
+.login{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;align-items:center;justify-content:center;padding:16px}
+.login form{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--brand);border-radius:var(--radius);padding:26px 24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.login img{height:36px;width:auto;align-self:flex-start}
+.login h1{font-size:20px}
+.login .msg{font-size:12.5px;color:var(--bad-ink);min-height:1.2em}
+.brand-txt{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.brand-txt b{font-family:var(--f-cond);font-size:18px;font-weight:700;letter-spacing:.04em;color:var(--brand-ink)}
+.brand-txt span{font-size:11.5px;color:var(--ink-3)}
+@media (max-width:560px){.brand-txt span{display:none}}
+.nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+.nav button{background:none;border:0;padding:8px 12px;border-radius:var(--radius);cursor:pointer;color:var(--ink-2);font-weight:500}
+.nav button:hover{background:var(--surface-2);color:var(--ink)}
+.nav button[aria-current="page"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.savestate{font-size:12px;color:var(--ink-3);min-width:90px;text-align:right}
+
+.wrap{max-width:1400px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
+
+/* ---------- Controles ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-strong);background:var(--surface);padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-weight:500;white-space:nowrap}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn:not(.primary):not(.ghost):not(.danger):hover{color:var(--accent);border-color:var(--accent-line)}
+.btn.ghost{border-color:transparent;background:none;color:var(--accent);padding-inline:8px}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn.danger{color:var(--bad-ink);border-color:var(--bad-line)}
+.btn.small{padding:5px 10px;font-size:12.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+label.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+label.f > span:not(.hint){font-size:12px;font-weight:600;color:var(--ink-2)}
+label.f > span em{font-style:normal;color:var(--bad-ink)}
+.hint{font-size:11.5px;color:var(--ink-3);line-height:1.45}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:8px 10px;min-width:0}
+textarea{resize:vertical;min-height:72px;line-height:1.5}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.span2{grid-column:span 2}.span3{grid-column:span 3}.spanall{grid-column:1/-1}
+@media (max-width:760px){.g2,.g3,.g4{grid-template-columns:minmax(0,1fr)}.span2,.span3{grid-column:auto}}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+label.row > input[type=checkbox]{flex:none}
+label.row > input[type=checkbox] + span{flex:1 1 0;min-width:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+.stack.tight{gap:8px}
+
+/* ---------- Superfícies ---------- */
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.panel-h{padding:13px 18px;border-bottom:1px solid var(--rule);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.panel-b{padding:18px}
+.note{border:1px solid var(--rule);background:var(--surface-2);border-radius:var(--radius);padding:10px 12px;font-size:12.5px;color:var(--ink-2)}
+.note.warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn-ink)}
+.note.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad-ink)}
+.note.ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-ink)}
+.note b{font-weight:600}
+
+/* ---------- Chips ---------- */
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--rule-strong);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip.fav{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
+.chip.int{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.chip.ris{border-color:var(--bad-line);background:var(--bad-bg);color:var(--bad-ink)}
+.chip.draft{border-color:var(--warn-line);color:var(--warn-ink);background:var(--warn-bg)}
+.chip.done{border-color:var(--ok-line);color:var(--ok-ink);background:var(--ok-bg)}
+.code{font-family:var(--f-mono);font-size:12px;font-weight:600;color:var(--accent)}
+
+/* ---------- Lista de AEPs ---------- */
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.pagehead h1{font-size:28px;font-weight:700;padding-left:12px;border-left:4px solid var(--brand)}
+.pagehead p{margin-top:4px;color:var(--ink-2);max-width:68ch}
+.stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
+.stat{padding-left:12px;border-left:2px solid var(--rule)}
+.stat b{display:block;font-family:var(--f-cond);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:12px;color:var(--ink-3)}
+.tablewrap{overflow-x:auto}
+table.list{width:100%;border-collapse:collapse;min-width:760px}
+table.list th{text-align:left;font-family:var(--f-cond);font-weight:600;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:10px 14px;border-bottom:1px solid var(--rule);background:var(--surface-2)}
+table.list td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:middle}
+table.list tr.click{cursor:pointer}
+table.list tr.click:hover td{background:var(--surface-2)}
+table.list tr:last-child td{border-bottom:0}
+.empty{padding:38px 18px;text-align:center;color:var(--ink-2)}
+
+/* ---------- Editor da AEP ---------- */
+.editor{display:grid;grid-template-columns:230px minmax(0,1fr) 290px;gap:20px;align-items:start}
+@media (max-width:1180px){.editor{grid-template-columns:210px minmax(0,1fr)}.aside{grid-column:1/-1}}
+@media (max-width:760px){.editor{grid-template-columns:minmax(0,1fr)}}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rail button{width:100%;display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;text-align:left;background:none;border:0;border-left:2px solid transparent;padding:8px 10px;cursor:pointer;color:var(--ink-2);border-radius:0 var(--radius) var(--radius) 0}
+.rail button:hover{background:var(--surface);color:var(--ink)}
+.rail button[aria-current="step"]{border-left-color:var(--brand);background:var(--surface);color:var(--ink);font-weight:600}
+.rail button[aria-current="step"] .n{color:var(--accent)}
+.rail .n{font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.rail .dot{width:8px;height:8px;border-radius:50%;background:var(--rule-strong)}
+.rail .dot.ok{background:var(--dot-ok)}
+.rail .dot.pend{background:var(--dot-pend)}
+@media (max-width:760px){
+  .rail{position:static}
+  .rail ol{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .rail li{flex:0 0 auto}
+  .rail button{grid-template-columns:auto auto auto;border-left:0;border-bottom:2px solid transparent;border-radius:var(--radius) var(--radius) 0 0}
+  .rail button[aria-current="step"]{border-bottom-color:var(--accent)}
+  .rail .lbl{white-space:nowrap}
+}
+.stephead{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.stephead h2{font-size:23px;font-weight:700}
+.stephead p{color:var(--ink-2);max-width:72ch}
+.stepnav{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+.aeptitle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.aeptitle h1{font-size:24px;font-weight:700}
+.aside .panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px)}
+@media (max-width:1180px){.aside .panel{position:static}}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpis > div{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:8px 10px}
+.kpis b{display:block;font-family:var(--f-cond);font-size:24px;font-weight:700;line-height:1.1;color:var(--ink)}
+.kpis span{font-size:11.5px;color:var(--ink-3);line-height:1.3}
+.pendlist{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-2)}
+
+/* ---------- Checklist / tabelas de formulário ---------- */
+.ckl{display:flex;flex-direction:column;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden}
+.ck{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;padding:12px 14px;border-bottom:1px solid var(--rule);background:var(--surface)}
+.ck:last-child{border-bottom:0}
+.ck.sim{background:var(--bad-bg)}
+.ck .i{font-family:var(--f-mono);font-weight:600;color:var(--ink-3);padding-top:2px}
+.ck p{font-size:13px}
+@media (max-width:760px){.ck{grid-template-columns:30px minmax(0,1fr)}.ck .seg{grid-column:2}}
+.seg{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius);overflow:hidden;height:max-content}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-2);border-right:1px solid var(--rule-strong);background:var(--surface)}
+.seg label:last-of-type{border-right:0}
+.seg input:checked + label{background:var(--accent);color:var(--accent-ink)}
+.seg input.s-sim:checked + label{background:var(--crit);color:#fff}
+.seg input:focus-visible + label{outline:2px solid var(--accent);outline-offset:-2px}
+
+.dom{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface)}
+.dom-h{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.dom-h h3{font-size:16px}
+.dom-b{padding:14px;display:flex;flex-direction:column;gap:12px}
+.subs{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---------- Perigos ---------- */
+.hz{border:1px solid var(--rule);border-left:3px solid var(--brand);border-radius:var(--radius);background:var(--surface);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
+.hz h4{font-family:var(--f-sans);font-size:14px;font-weight:600}
+.hz .meta{font-size:12px;color:var(--ink-3)}
+.hz .acts{grid-row:span 3;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.edbox{border:1px solid var(--accent-line);background:var(--surface);border-radius:var(--radius)}
+.edbox .panel-h{background:var(--accent-soft);border-bottom-color:var(--accent-line)}
+
+/* ---------- Fotos ---------- */
+.photos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.photos{grid-template-columns:minmax(0,1fr)}}
+.ph{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface);overflow:hidden;display:flex;flex-direction:column}
+.ph .img{aspect-ratio:4/3;background:var(--surface-2);display:flex;align-items:center;justify-content:center;max-width:100%}
+.ph .img img{width:100%;height:100%;object-fit:contain}
+.ph .cap{padding:10px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--rule)}
+.drop{border:1.5px dashed var(--rule-strong);border-radius:var(--radius);padding:22px;text-align:center;color:var(--ink-2);background:var(--surface);cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+
+/* ---------- COPSOQ por área ---------- */
+.subtable{width:100%;border-collapse:collapse}
+.subtable td,.subtable th{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}
+.subtable th{font-family:var(--f-cond);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.subtable input{max-width:92px;text-align:right}
+.subtable tr.efeito td{color:var(--ink-3)}
+
+/* ---------- Prévia do documento ---------- */
+.docprev{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:0;overflow:hidden}
+.docprev iframe{width:100%;height:80vh;border:0;display:block;background:#fff}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:var(--radius);font-size:13px;z-index:50;max-width:calc(100% - 32px)}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bad-bg);border:1px solid var(--bad-line);color:var(--bad-ink);padding:8px 10px;border-radius:var(--radius);font-size:12.5px}
+@media (prefers-reduced-motion:no-preference){.btn,.nav button,.rail button{transition:background .12s,border-color .12s,color .12s}}
+</style>
+
+</head><body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="brand-logo"><img src="logo.png" alt="ArcelorMittal" width="68" height="28"></span><span class="brand-txt"><b>AEP</b><span>Avaliação Ergonômica Preliminar · Mina de Serra Azul</span></span></div>
+    <nav class="nav" aria-label="Seções">
+      <button type="button" data-go="home" id="nav-home">AEPs</button>
+      <button type="button" data-go="painel" id="nav-painel">Painel</button>
+      <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
+      <button type="button" data-go="config" id="nav-config">Unidade</button>
+    </nav>
+    <div class="savestate" id="savestate" aria-live="polite"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div class="login" id="login" hidden><form id="login-form">
+  <img src="logo.png" alt="ArcelorMittal">
+  <div><h1>AEP · Mina de Serra Azul</h1><p class="small muted">Avaliação Ergonômica Preliminar</p></div>
+  <label class="f"><span>E-mail</span><input type="text" id="login-email" autocomplete="username" inputmode="email" required></label>
+  <label class="f"><span>Senha</span><input type="password" id="login-senha" autocomplete="current-password" required style="width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:8px 10px"></label>
+  <button class="btn primary" id="login-btn" type="submit" style="justify-content:center">Entrar</button>
+  <div class="msg" id="login-msg" role="status"></div>
+</form></div>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script>
+const TAX_RAW = [{"codigo": "OT-01", "nome": "Sobrecarga quantitativa e ritmo de trabalho intenso", "cat": "Organização do Trabalho", "sub": "Ritmo e Carga de Trabalho", "area": "org", "ancora": 3, "danos": "Desgaste físico e mental, cansaço acentuado e sofrimento psíquico relacionados à sobrecarga de trabalho", "fonte": "Execução de tarefas sob volume de demanda e ritmo impostos pelo processo produtivo, com restrição de pausas voluntárias de recuperação.", "campos": "Local; tarefa; volume/meta; prazo; efetivo; duração/frequência; evidência", "cid": "F32; F33; F41; F43; F43.2; F48.0", "medidas": "4-Adm: dimensionamento de efetivo frente à demanda; revisão de metas e prazos; gestão de frequência. | 3-Eng: automação da etapa gargalo.", "evidencia": "Relatório de horas/PNS do setor; efetivo x demanda; ata com o gestor; reavaliação após implantação.", "subescalas": "Exigências quantitativas; Ritmo de trabalho", "itens": [11], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-02", "nome": "Jornada prolongada, turnos ou trabalho noturno com recuperação insuficiente", "cat": "Organização do Trabalho", "sub": "Jornada de Trabalho", "area": "org", "ancora": 3, "danos": "Fadiga física e mental, alteração do sono e desgaste relacionados à jornada prolongada ou ao trabalho em turnos/noturno", "fonte": "Cumprimento de jornada em regime de turnos ou trabalho noturno, com recuperação interjornada insuficiente para reposição do desgaste.", "campos": "Escala; horas; turnos; extras; intervalos; trabalhadores; registros", "cid": "F51.2; G47.2; F32; F41; I10", "medidas": "4-Adm: escalas e regras formais de jornada; controle de prorrogação; indicadores de absenteísmo.", "evidencia": "Escala vigente; registro de jornada; acordo coletivo (nº e data); indicador de absenteísmo.", "subescalas": "(sem subescala) — escala, registro de jornada e acordo coletivo", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-03", "nome": "Pausas insuficientes para recuperação psicofisiológica", "cat": "Organização do Trabalho", "sub": "Pausas e Recuperação", "area": "org", "ancora": 2, "danos": "Fadiga física e desconforto musculoesquelético por insuficiência de pausas de recuperação", "fonte": "Execução de tarefas de forma contínua, sem concessão formal de pausas de recuperação psicofisiológica compatíveis com a exigência da atividade.", "campos": "Ciclo; pausas previstas/observadas; duração; jornada; tarefa; grupo", "cid": "M65; M65.3; M65.4; M54.5; F48.0", "medidas": "4-Adm: pausas programadas de recuperação; alternância de atividade.", "evidencia": "Procedimento de pausas; registro de cumprimento; observação em campo.", "subescalas": "(sem subescala) — observação do ciclo de trabalho", "itens": [6, 11], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-04", "nome": "Monotonia, repetitividade e baixa variabilidade da tarefa", "cat": "Organização do Trabalho", "sub": "Organização da Tarefa", "area": "org", "ancora": 2, "danos": "Desmotivação, tédio e desgaste psíquico relacionados à monotonia e repetitividade da tarefa", "fonte": "Execução de tarefa fragmentada e de ciclo curto, sob método rígido, sem variabilidade ou rodízio de atividades.", "campos": "Ciclo; repetição; alternância; método; duração; grupo", "cid": "F32; F41; F43.2; F48.0; M65", "medidas": "4-Adm: rodízio e ampliação do conteúdo da tarefa. | 1/2: automação da etapa repetitiva.", "evidencia": "Matriz de rodízio; registro de execução.", "subescalas": "(indireta) Significado do trabalho; Compromisso — nunca lançar só por elas", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-05", "nome": "Demanda cognitiva elevada (atenção, memória, decisão)", "cat": "Organização do Trabalho", "sub": "Exigências Cognitivas", "area": "org", "ancora": 2, "danos": "Fadiga mental e desgaste psíquico relacionados à sobrecarga de atenção, memória e processamento de informações", "fonte": "Execução de tarefa com exigência elevada de atenção, memória ou tomada de decisão, sem recursos de regulação (autonomia, pausas, suporte) suficientes para amortecê-la.", "campos": "Tarefa; sistemas; alarmes; decisões; tempo;", "cid": "F41; F43; F48.0; F32", "medidas": "3-Eng: racionalização de alarmes e telas. | 4-Adm: redução de tarefas simultâneas; apoio a decisões críticas.", "evidencia": "Registro de revisão de alarmes/telas; observação em campo.", "subescalas": "Exigências cognitivas", "itens": [], "inerente": true, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-06", "nome": "Baixo controle sobre método, ritmo, sequência ou pausas", "cat": "Organização do Trabalho", "sub": "Autonomia e Controle", "area": "org", "ancora": 2, "danos": "Desgaste psíquico e tensão relacionados à baixa autonomia sobre método, ritmo ou pausas", "fonte": "Execução de tarefa sob supervisão rígida, sem autonomia sobre método, ritmo, sequência ou pausas.", "campos": "Tarefa; regra de controle; supervisão; autonomia; evidência; grupo", "cid": "F41; F43; F43.2; M65", "medidas": "4-Adm: alçada formalizada; participação do trabalhador na definição do método.", "evidencia": "Procedimento revisado com participação registrada; alçada formalizada.", "subescalas": "Influência no trabalho", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-07", "nome": "Ambiguidade ou conflito de papéis ocupacionais", "cat": "Organização do Trabalho", "sub": "Papéis e Responsabilidades", "area": "org", "ancora": 2, "danos": "Tensão e desgaste psíquico relacionados à ambiguidade ou conflito de papéis ocupacionais", "fonte": "Execução de função com atribuições mal definidas ou sujeita a ordens conflitantes entre diferentes níveis de chefia.", "campos": "Cargo; ordens; chefias; descrição; evidência; grupo", "cid": "F41; F43.2; F48.0", "medidas": "4-Adm: descrição de cargo padronizada; ordem de serviço assinada; linha única de comando.", "evidencia": "Descrição de cargo vigente; OS assinada pelo trabalhador.", "subescalas": "Conflitos de papeis; Transparência do papel laboral; Previsibilidade", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-08", "nome": "Capacitação insuficiente ou suporte inadequado para a tarefa", "cat": "Organização do Trabalho", "sub": "Desenvolvimento e Capacitação", "area": "org", "ancora": 1, "danos": "Insegurança e desgaste psíquico relacionados à capacitação insuficiente para a função", "fonte": "Execução de tarefa nova ou alterada sem capacitação prévia ou suporte técnico compatível com a mudança introduzida.", "campos": "Mudança; treinamento; suporte; tempo; erros; grupo", "cid": "F43.2; F41; F48.8", "medidas": "4-Adm: treinamento em procedimentos; capacitação prévia a mudança; reciclagem.", "evidencia": "Lista de presença e conteúdo; matriz de capacitação do cargo.", "subescalas": "Possibilidade de desenvolvimento", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-12", "nome": "Demanda emocional elevada (lidar com sofrimento, agressividade ou risco de terceiros)", "cat": "Organização do Trabalho", "sub": "Exigências Emocionais", "area": "org", "ancora": 2, "danos": "Desgaste emocional e sofrimento psíquico relacionados à exposição a situações de alta carga emocional", "fonte": "Execução de tarefa que exige lidar com sofrimento, agressividade ou risco de terceiros, sem suporte emocional estruturado disponível.", "campos": "Tarefa; natureza da exigência emocional; frequência; suporte disponível; evidência; grupo", "cid": "F43; F43.1; F48.0; Z73.0", "medidas": "4-Adm: acolhimento e acompanhamento (Equilíbrium); registro de atendimentos; suporte pós-evento crítico.", "evidencia": "Registro de atendimentos do setor; protocolo de acolhimento pós-evento.", "subescalas": "Exigências emocionais", "itens": [], "inerente": true, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-13", "nome": "Interferência do trabalho na vida pessoal/familiar e/ou insegurança quanto à estabilidade no emprego", "cat": "Organização do Trabalho", "sub": "Interface Trabalho-Família e Insegurança Laboral", "area": "org", "ancora": 2, "danos": "Desgaste emocional relacionado à interferência do trabalho na vida pessoal e/ou à percepção de instabilidade no emprego", "fonte": "Rotina de trabalho com interferência relevante na vida pessoal/familiar e/ou contexto de mudança organizacional sem comunicação estruturada.", "campos": "Fonte da interferência ou insegurança; frequência; comunicação existente; evidência; grupo", "cid": "F41; F43.2; F48.0", "medidas": "4-Adm: regras de jornada e de contato fora do expediente; comunicação estruturada de mudanças; acordo coletivo.", "evidencia": "Acordo coletivo (nº e data); comunicado formal de mudança organizacional.", "subescalas": "Insegurança laboral; Trabalho x família", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-09", "nome": "Apoio social insuficiente ou liderança inadequada", "cat": "Organização do Trabalho", "sub": "Relações Sociais e Liderança", "area": "org", "ancora": 3, "danos": "Desgaste emocional e sofrimento psíquico relacionados a apoio social insuficiente ou liderança inadequada", "fonte": "Convivência sob estilo de liderança pouco acessível ou clima de baixo apoio entre colegas, sem canais estruturados de escuta.", "campos": "Conduta; frequência; canal; equipe; evidência; grupo", "cid": "F10; F32; F33; F41; F43; F43.1; F43.2; F48.0", "medidas": "4-Adm: treinamento de liderança (Equilíbrium); treinamento com gestores; canais de escuta da equipe.", "evidencia": "Lista de presença de liderança; atas de DDS; ata de devolutiva ao gestor.", "subescalas": "Apoio social de colegas; Apoio social de superiores; Qualidade da liderança; Comunidade social; Confiança vertical; Confiança horizontal", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-10", "nome": "Baixo reconhecimento, recompensas inadequadas ou justiça organizacional precária", "cat": "Organização do Trabalho", "sub": "Reconhecimento e Justiça Organizacional", "area": "org", "ancora": 2, "danos": "Desgaste emocional relacionado à percepção de injustiça ou falta de reconhecimento no trabalho", "fonte": "Distribuição de tarefas, promoções ou reconhecimento com critérios pouco transparentes ou inconsistentes, sem canal formal de feedback.", "campos": "Critério; decisões; transparência; feedback; evidência; grupo", "cid": "F32; F33; F41; F43.2; F48.0", "medidas": "4-Adm: critérios transparentes de distribuição e reconhecimento; feedback estruturado; código de conduta.", "evidencia": "Critério documentado; registro de ciclo de feedback; cobertura do treinamento de conduta.", "subescalas": "Recompensas; Justiça e respeito", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-11", "nome": "Exposição a violência, assédio moral ou sexual", "cat": "Organização do Trabalho", "sub": "Violência e Assédio", "area": "org", "ancora": 4, "danos": "Sofrimento psíquico e desgaste emocional relacionados à exposição a condutas de violência ou assédio no trabalho", "fonte": "Exposição do grupo de trabalhadores a condutas potencialmente configuradoras de assédio moral ou sexual, sujeitas às barreiras de prevenção e apuração mantidas pela organização.", "campos": "Conduta; tipo; relação; frequência; evidência; grupo; canal", "cid": "F32; F33; F41; F43; F43.1; F43.2; F48.0; R49", "medidas": "4-Adm: canal de denúncia e compliance; rito formal de apuração; treinamento de conduta e direitos humanos.", "evidencia": "Divulgação do canal; registro de apuração; cobertura do treinamento de conduta.", "subescalas": "Comportamentos ofensivos", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-01", "nome": "Posturas extremas, nocivas ou estáticas prolongadas", "cat": "Biomecânicos", "sub": "Posturas", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, pescoço, ombros e membros superiores e/ou inferiores", "fonte": "Permanência em postura extrema ou estática prolongada durante a atividade, sem alternância postural ou pausas de recuperação suficientes.", "campos": "Ângulos/descrição; tempo; frequência; tarefa; posto; grupo; fotos/observação", "cid": "M50; M50.1; M51; M51.1; M54; M54.2; M54.5; M75; M75.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [1, 2, 3], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-02", "nome": "Movimentos articulares repetitivos de membros superiores", "cat": "Biomecânicos", "sub": "Movimentos Repetitivos", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão em punhos, mãos, cotovelos e ombros", "fonte": "Execução de movimentos articulares repetitivos de membros superiores em ciclo curto, sem tempos de recuperação muscular adequados.", "campos": "Ciclo; repetição; força; pausas; tempo; região corporal; grupo", "cid": "G56.0; M50; M51; M54; M65; M65.3; M65.4; M70; M75; M77; M79.8", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [6], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-03", "nome": "Aplicação de força elevada, empurrar, puxar ou preensão", "cat": "Biomecânicos", "sub": "Aplicação de Força", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão em coluna, membros superiores e/ou inferiores", "fonte": "Aplicação de força manual elevada (empurrar, puxar ou preensão) sem dispositivo auxiliar ou balancim disponível no posto.", "campos": "Força; resistência; frequência; postura; ferramenta; grupo", "cid": "I83; M16; M17; M50; M51; M54; M75; M77", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [5, 7, 10], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-04", "nome": "Manipulação manual de cargas com potencial de comprometer a segurança", "cat": "Biomecânicos", "sub": "Movimentação Manual de Materiais", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, abdômen e membros superiores e/ou inferiores", "fonte": "Manuseio e transporte manual não eventual de cargas, com pega distante do centro de gravidade do corpo e sem disponibilidade de auxílio mecânico no posto.", "campos": "Peso; pega; altura; distância; frequência; rota; grupo; auxílio", "cid": "I83; K40; K41; K42; K43; K44; K46; M16; M17; M47.8; M50; M51; M54", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [8, 9], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-05", "nome": "Alcance inadequado ou restrição de espaço corporal", "cat": "Biomecânicos", "sub": "Alcance e Espaço de Trabalho", "area": "mov", "ancora": 1, "danos": "Dor e desconforto / lesão em coluna, pescoço e ombros", "fonte": "Execução de tarefa em posto com alcance excessivo ou espaço corporal restrito, exigindo compensação postural.", "campos": "Medidas; direção; frequência; postura; tarefa; grupo", "cid": "M54; M54.2; M75; M79.8", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-06", "nome": "Pressão ou fricção localizada da pele contra superfícies rígidas", "cat": "Biomecânicos", "sub": "Contato Mecânico", "area": "mov", "ancora": 1, "danos": "Desconforto e lesão cutânea localizada (pressão/fricção) em mãos, antebraços ou joelhos", "fonte": "Apoio ou fricção continuada de segmento corporal contra superfície rígida ou aresta viva do posto de trabalho.", "campos": "Parte do corpo; superfície; tempo; frequência; tarefa; grupo", "cid": "L84; L60", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-07", "nome": "Exposição ocupacional a vibração de corpo inteiro ou mãos-braços", "cat": "Biomecânicos", "sub": "Vibração", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna e/ou em mãos e braços relacionados à exposição a vibração", "fonte": "Operação de equipamento ou permanência em estrutura com transmissão de vibração ao corpo, sem sistema de amortecimento eficaz.", "campos": "Tipo; equipamento; aceleração; tempo; frequência; método; grupo", "cid": "I73.0; I73.8; M16; M17; M50; M50.1; M51; M51.1; M54; M93.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-01", "nome": "Mobiliário sem ajuste ou incompatível com a tarefa", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Mobiliário", "area": "mob", "ancora": 1, "danos": "Dor e desconforto / lesão na coluna, pescoço e membros inferiores relacionados ao mobiliário inadequado", "fonte": "Utilização de mobiliário sem regulagem ou incompatível com a antropometria do posto de trabalho.", "campos": "Alturas; ajustes; tempo; postura; tarefa; grupo; fotos/medidas", "cid": "M50; M51; M54; M54.2; M75; I83", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [4], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-02", "nome": "Arranjo físico que exige deslocamentos, alcances ou posturas inadequados", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Layout", "area": "mob", "ancora": 1, "danos": "Fadiga muscular e desconforto relacionados a deslocamentos e posturas exigidas pelo layout", "fonte": "Arranjo físico do posto que exige deslocamentos, alcances ou posturas inadequadas para execução da tarefa.", "campos": "Distâncias; fluxos; obstáculos; tarefa; frequência; grupo", "cid": "M54; M54.2; M75; I83", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-03", "nome": "Máquina com operação/manutenção ergonomicamente inadequada", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Máquinas", "area": "maq", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, pescoço e ombros relacionados à operação/manutenção de máquinas", "fonte": "Operação ou manutenção de máquina com pontos de acesso ou controle fora da zona de alcance confortável.", "campos": "Máquina; ponto; postura; acesso; tempo; frequência; grupo", "cid": "M50.1; M51.1; M54.2; M54.5; M75.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-04", "nome": "Equipamento ou posto informatizado inadequado", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Equipamentos", "area": "maq", "ancora": 1, "danos": "Desconforto visual e dor/desconforto cervical relacionados ao uso de equipamento ou posto informatizado inadequado", "fonte": "Utilização de equipamento ou posto informatizado sem possibilidade de ajuste às características do usuário.", "campos": "Altura; distância; ângulo; tempo; tarefa; grupo", "cid": "H55; M54.2; M53.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-05", "nome": "Ferramenta manual inadequada quanto a peso, pega, força ou vibração", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Ferramentas", "area": "maq", "ancora": 2, "danos": "Dor e desconforto / lesão em mãos, punhos e antebraços relacionados ao uso de ferramenta manual inadequada", "fonte": "Utilização de ferramenta manual com peso, empunhadura ou vibração inadequados à tarefa executada.", "campos": "Ferramenta; peso; pega; força; vibração; tempo; grupo", "cid": "G56.0; M65.4; M70; I73.0; M93.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-06", "nome": "Interface complexa, sinais confusos ou alarmes inadequados", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Interfaces Homem-Máquina", "area": "maq", "ancora": 1, "danos": "Fadiga mental e desgaste psíquico relacionados à complexidade da interface ou sinalização", "fonte": "Operação de interface (software/IHM) com sinalização confusa ou excesso de alarmes concorrentes, sem priorização por criticidade.", "campos": "Sistema; telas; alarmes; tarefa; tempo; grupo; evidência", "cid": "F41; F43; F48.0", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-01", "nome": "Iluminamento inadequado, ofuscamento ou reflexos", "cat": "Conforto Ambiental", "sub": "Iluminação", "area": "conf", "ancora": 1, "danos": "Desconforto e fadiga visual relacionados à iluminação inadequada", "fonte": "Execução de tarefa sob iluminamento insuficiente, excessivo ou sujeito a ofuscamento/reflexo no posto de trabalho.", "campos": "Lux; método; horário; tarefa visual; ofuscamento; grupo", "cid": "H55", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; NHO 11", "prov": false}, {"codigo": "AMB-02", "nome": "Calor, frio ou correntes de ar incompatíveis com a tarefa fora dos parâmetros de conforto", "cat": "Conforto Ambiental", "sub": "Ambiente Térmico", "area": "conf", "ancora": 1, "danos": "Desconforto térmico e fadiga relacionados a calor, frio ou correntes de ar incompatíveis com a tarefa", "fonte": "Permanência em ambiente com temperatura ou correntes de ar fora da faixa de conforto térmico de referência, de forma crônica.", "campos": "Temperatura; umidade; velocidade; tarefa; tempo; vestimenta; grupo", "cid": "L50.2; I73.0; I73.8; T33; T34; T67", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-03", "nome": "Ruído de fundo que interfere no conforto, comunicação ou concentração", "cat": "Conforto Ambiental", "sub": "Ambiente Acústico", "area": "conf", "ancora": 1, "danos": "Desconforto, dificuldade de comunicação e fadiga relacionados ao ruído de fundo", "fonte": "Permanência em ambiente com ruído de fundo que interfere na comunicação ou concentração, sem controle de fonte.", "campos": "Nível; método; tempo; fonte; comunicação; grupo", "cid": "R49; H83.3; I10", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-04", "nome": "Vibração transmitida por piso/estrutura que interfere na tarefa ou conforto", "cat": "Conforto Ambiental", "sub": "Vibração Ambiental", "area": "conf", "ancora": 1, "danos": "Desconforto e exacerbação de dores relacionados à vibração transmitida pelo piso/estrutura", "fonte": "Permanência em posto sujeito a vibração transmitida por piso ou estrutura predial, sem isolamento ou amortecimento.", "campos": "Medição; método; fonte; tempo; posto; grupo", "cid": "M54; M54.5", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-14", "nome": "Má gestão de mudanças organizacionais", "cat": "Organização do Trabalho", "sub": "Mudanças Organizacionais", "area": "org", "ancora": 2, "danos": "Insegurança e desgaste psíquico relacionados a mudanças organizacionais conduzidas sem comunicação ou adaptação", "fonte": "Introdução de mudança de processo, estrutura, equipe ou sistema sem comunicação prévia, participação dos afetados ou período de adaptação compatível.", "campos": "Mudança; data; comunicação realizada; participação; tempo de adaptação; evidência; grupo", "cid": "—", "medidas": "4-Adm: comunicação estruturada e antecipada da mudança; participação dos afetados; avaliação ergonômica prévia à implantação.", "evidencia": "Comunicado formal da mudança; registro de participação; AEP/AET prévia à implantação.", "subescalas": "(sem subescala) — identificação em campo", "itens": [], "inerente": false, "base": "NR-1; NR-17 (PCRE, Anexo B)", "prov": true}, {"codigo": "OT-15", "nome": "Subcarga de trabalho (baixa demanda)", "cat": "Organização do Trabalho", "sub": "Organização da Tarefa", "area": "org", "ancora": 1, "danos": "Desmotivação e queda de vigilância relacionadas à baixa demanda de trabalho", "fonte": "Permanência em posto com demanda de trabalho insuficiente para ocupar a jornada, com longos períodos de espera ou vigilância passiva.", "campos": "Tarefa; tempo ocioso/espera; vigilância exigida; duração; grupo; evidência", "cid": "—", "medidas": "4-Adm: ampliação e enriquecimento do conteúdo da tarefa; rodízio com atividades de maior demanda.", "evidencia": "Registro de redistribuição de tarefas; observação em campo.", "subescalas": "(sem subescala) — identificação em campo", "itens": [], "inerente": false, "base": "NR-1; NR-17 (PCRE, Anexo B)", "prov": true}, {"codigo": "OT-16", "nome": "Trabalho isolado ou remoto sem suporte adequado", "cat": "Organização do Trabalho", "sub": "Relações Sociais e Liderança", "area": "org", "ancora": 2, "danos": "Desgaste psíquico e insegurança relacionados ao trabalho isolado sem suporte", "fonte": "Execução de tarefa isolada ou em local remoto, sem contato regular com equipe ou liderança e sem meio de acionamento de apoio.", "campos": "Local; duração do isolamento; meio de comunicação; frequência de contato; apoio disponível; grupo", "cid": "—", "medidas": "4-Adm: protocolo de contato periódico; meio de comunicação garantido; procedimento de acionamento de apoio.", "evidencia": "Protocolo de contato; registro de comunicação; teste do meio de acionamento.", "subescalas": "(sem subescala) — identificação em campo", "itens": [], "inerente": false, "base": "NR-1; NR-17 (PCRE, Anexo B)", "prov": true}, {"codigo": "OT-17", "nome": "Exposição a evento crítico, violento ou potencialmente traumático no trabalho", "cat": "Organização do Trabalho", "sub": "Eventos Críticos", "area": "org", "ancora": 3, "danos": "Sofrimento psíquico agudo e desgaste emocional relacionados à exposição a evento crítico ou traumático", "fonte": "Exposição a evento crítico (acidente grave, fatalidade, resgate, quase-acidente de alta potencialidade) no exercício da atividade, sem protocolo de acolhimento pós-evento.", "campos": "Tipo de evento; data; envolvimento; acolhimento realizado; interface com PCMSO; grupo", "cid": "—", "medidas": "4-Adm: protocolo de acolhimento pós-evento crítico (SESMT/PCMSO), com critério de acionamento, prazo e responsável.", "evidencia": "Protocolo formalizado; registro de acionamentos e atendimentos.", "subescalas": "(sem subescala) — identificação em campo", "itens": [], "inerente": false, "base": "NR-1; NR-17 (PCRE, Anexo B)", "prov": true}, {"codigo": "OT-18", "nome": "Trabalho em condições de comunicação difícil ou insuficiente", "cat": "Organização do Trabalho", "sub": "Comunicação", "area": "org", "ancora": 2, "danos": "Fadiga mental e tensão relacionadas à comunicação difícil ou insuficiente, com repercussão sobre a segurança", "fonte": "Execução de tarefa que depende de comunicação por rádio ou a distância, sob ruído, em turno noturno ou com cobertura de sinal insuficiente.", "campos": "Meio de comunicação; cobertura; ruído; distância; turno; falhas registradas; grupo", "cid": "—", "medidas": "3-Eng: melhoria de cobertura e equipamento de comunicação. | 4-Adm: protocolo de comunicação e confirmação de mensagens críticas.", "evidencia": "Teste de cobertura; registro de falhas de comunicação; procedimento revisado.", "subescalas": "(sem subescala) — identificação em campo", "itens": [], "inerente": false, "base": "NR-1; NR-17 (PCRE, Anexo B)", "prov": true}];
+const SUBS_RAW = [{"id": "exigencias-cognitivas", "nome": "Exigências cognitivas", "dom": "EL", "tax": "OT-05", "natureza": "org"}, {"id": "exigencias-emocionais", "nome": "Exigências emocionais", "dom": "EL", "tax": "OT-12", "natureza": "org"}, {"id": "exigencias-quantitativas", "nome": "Exigências quantitativas", "dom": "EL", "tax": "OT-01", "natureza": "org"}, {"id": "ritmo-de-trabalho", "nome": "Ritmo de trabalho", "dom": "EL", "tax": "OT-01", "natureza": "org"}, {"id": "inseguranca-laboral", "nome": "Insegurança laboral", "dom": "IT", "tax": "OT-13", "natureza": "org"}, {"id": "satisfacao-laboral", "nome": "Satisfação laboral", "dom": "IT", "tax": "", "natureza": "efeito"}, {"id": "trabalho-x-familia", "nome": "Trabalho x família", "dom": "IT", "tax": "OT-13", "natureza": "org"}, {"id": "compromisso-face-ao-local-de-trabalho", "nome": "Compromisso face ao local de trabalho", "dom": "OT", "tax": "", "natureza": "protetor"}, {"id": "influencia-no-trabalho", "nome": "Influência no trabalho", "dom": "OT", "tax": "OT-06", "natureza": "org"}, {"id": "possibilidade-de-desenvolvimento", "nome": "Possibilidade de desenvolvimento", "dom": "OT", "tax": "OT-08", "natureza": "org"}, {"id": "significado-do-trabalho", "nome": "Significado do trabalho", "dom": "OT", "tax": "", "natureza": "protetor"}, {"id": "apoio-social-de-colegas", "nome": "Apoio social de colegas", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "apoio-social-de-superiores", "nome": "Apoio social de superiores", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "conflitos-de-papeis", "nome": "Conflitos de papeis", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "previsibilidade", "nome": "Previsibilidade", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "qualidade-da-lideranca", "nome": "Qualidade da liderança", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "recompensas", "nome": "Recompensas", "dom": "RS", "tax": "OT-10", "natureza": "org"}, {"id": "transparencia-do-papel-laboral", "nome": "Transparência do papel laboral", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "comunidade-social", "nome": "Comunidade social", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "confianca-horizontal", "nome": "Confiança horizontal", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "confianca-vertical", "nome": "Confiança vertical", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "justica-e-respeito", "nome": "Justiça e respeito", "dom": "VL", "tax": "OT-10", "natureza": "org"}, {"id": "comportamentos-ofensivos", "nome": "Comportamentos ofensivos", "dom": "CO", "tax": "OT-11", "natureza": "org"}];
+const DOM_NOMES = {"EL": "Exigências Laborais", "IT": "Interface Trabalho-Indivíduo", "OT": "Organização do Trabalho e Conteúdo", "RS": "Relações Sociais e Liderança", "VL": "Valores no Local de Trabalho", "CO": "Comportamentos Ofensivos"};
+const DOM_ORDEM = ["EL", "IT", "OT", "RS", "VL", "CO"];
+const DEPARA_RAW = {"Administração|Apoio Administrativo": "APOIO ADM", "Administração|Comunicação": "APOIO ADM", "Administração|Controladoria": "APOIO ADM", "Administração|Medicina do Trabalho": "SESMT", "Administração|Recursos Humanos": "PESSOAS BP", "Administração|Segurança do Trabalho": "SESMT", "Administração|Segurança do Trabalho - Adm": "SESMT", "Almoxarifado|Almoxarifado": "ALMOX SUPRI", "Almoxarifado|Almoxarifado - Adm": "ALMOX SUPRI", "Almoxarifado|Inflamáveis": "ALMOX SUPRI", "Beneficiamento Britagem/Concentração/Via Seca e Úmida (Hídrico)|Beneficiamento Britagem/Concentração/Via Seca e Úmida (Hídrico)": "BENEFICIAMENTO", "Centro de Monitoramento|Centro de Monitoramento": "MEIO AMB", "Civil|Apoio Administrativo Civil": "APOIO ADM", "ECJ|Segurança do Trabalho": "SESMT", "Engenharia de Processos|Serviços Técnicos": "TEC CTO MINA", "Gerência|Gerência Geral Operações Serra Azul": "APOIO ADM", "Gerência|Meio Ambiente": "MEIO AMB", "Gerência|Relação Comunidade Corporativa": "RELAC COMUNIDADE", "Gerência Engenharia de Manutenção|Planejamento de Manutenção": "MANUT IND", "Gerência Geral|Serviços Técnicos": "TEC CTO MINA", "Gerência Manutenção|Equipamentos Móveis Borracharia": "EQM", "Gerência Manutenção|Equipamentos Móveis Comboio": "EQM", "Gerência Manutenção|Lubrificação Manutenção Industrial": "MANUT IND", "Gerência Manutenção|Lubrificação de Equipamentos Móveis": "EQM", "Gerência Manutenção|Manutenção Elétrica": "MANUT IND", "Gerência Manutenção|Manutenção Elétrica Industrial": "MANUT IND", "Gerência Manutenção|Manutenção Elétrica Industrial - Automação, Instrumentação e Elétrica (Pellet Feed)": "BENEFICIAMENTO", "Gerência Manutenção|Manutenção Elétrica Industrial - Especialistas Automação, Instrumentação e Elétrica (Pellet Feed)": "BENEFICIAMENTO", "Gerência Manutenção|Manutenção Elétrica Industrial - Técnico Especializado Inspeção Elétrica (Pellet Feed)": "BENEFICIAMENTO", "Gerência Manutenção|Manutenção Elétrica de Equipamentos Móveis": "EQM", "Gerência Manutenção|Manutenção Equipamentos Móveis": "EQM", "Gerência Manutenção|Manutenção Equipamentos Móveis Solda": "EQM", "Gerência Manutenção|Manutenção Equipamentos Móveis “PPCM”": "EQM", "Gerência Manutenção|Manutenção Industrial": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Concentração e Britagem": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Elétrica “PPCM”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Mecânicos": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Pellet Feed": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Preditiva": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Solda": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnico Especializado em Mecânica “PPCM - PELLET FEED”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnico Especializado “PPCM - PELLET FEED”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnico de Inspeção “PPCM - PELLET FEED”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnico “PPCM”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnicos de Manutenção": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Técnicos de Manutenção e Mecânicos \"PELLET FEED”": "MANUT IND", "Gerência Manutenção|Manutenção Industrial Vulcanização": "MANUT IND", "Gerência Manutenção|Manutenção Industrial e Manutenção Equipamentos Móveis": "EQM", "Gerência Manutenção|Manutenção Industrial e Manutenção Equipamentos Móveis (ADM)": "EQM", "Gerência Manutenção|Manutenção Industrial “PPCM”": "MANUT IND", "Gerência Manutenção|Manutenção Mecânica de Equipamentos Móveis": "EQM", "Gerência Manutenção|Operação de Caminhão Munck": "EQM", "Gerência Manutenção|Técnico de Manutenção de Equipamentos Móveis": "EQM", "Gerência Mina|Auxiliares Operacionais": "OP MINA", "Gerência Mina|Controlador de Lavra": "OP MINA", "Gerência Mina|Controle de Produção": "OP MINA", "Gerência Mina|Operação Mini Carregadeira": "OP MINA", "Gerência Mina|Operação de  Trator de Esteira": "OP MINA", "Gerência Mina|Operação de Caminhão  Scania (Báscula/Pipa)": "OP MINA", "Gerência Mina|Operação de Caminhão Sany (Báscula/Pipa)": "OP MINA", "Gerência Mina|Operação de Escavadeira": "OP MINA", "Gerência Mina|Operação de Motoniveladora": "OP MINA", "Gerência Mina|Operação de Pá Carregadeira": "OP MINA", "Gerência Mina|Supervisão de Operação Mina": "OP MINA", "Gerência Mina|Treinamento Equipamentos Mina": "OP MINA", "Gerência Operação Mina|Engenharia de Mina": "OP MINA", "Gerência Operações|Beneficiamento Pellet Feed (ADM)": "BENEFICIAMENTO", "Gerência Operações Beneficiamento|Pellet Feed Adm": "BENEFICIAMENTO", "Gerência Perfuração e Desmonte|Afiação de BITS": "OP MINA", "Gerência Perfuração e Desmonte|Auxiliar de Desmonte": "OP MINA", "Gerência Perfuração e Desmonte|Blasters e Técnicos": "OP MINA", "Gerência Perfuração e Desmonte|Caminhão Baú - Explosivos": "OP MINA", "Gerência Perfuração e Desmonte|Operação de Perfuratriz": "OP MINA", "Gerência Perfuração e Desmonte|Supervisão de Perfuração e Desmonte": "OP MINA", "Gerência “Estagiários e Aprendizes”|Gerência “Estagiários e Aprendizes”": "PESSOAS BP", "Logística|Balança": "COMERC LOG", "Logística|Comercial Logística": "COMERC LOG", "Logística|Controlador Máquinas Veículos Logística": "COMERC LOG", "Logística|Gerência": "COMERC LOG", "Logística|Operação": "COMERC LOG", "Meio Ambiente|Meio Ambiente": "MEIO AMB", "Pellet Feed|Beneficiamento Técnicos e Líderes": "BENEFICIAMENTO", "Pellet Feed|Gerência Beneficiamento Pellet Feed": "BENEFICIAMENTO", "Planejamento Geotécnico|Serviços Técnicos": "MEIO AMB", "Planta de Beneficiamento|Beneficiamento Britagem": "BENEFICIAMENTO", "Planta de Beneficiamento|Beneficiamento Concentração": "BENEFICIAMENTO", "Planta de Beneficiamento|Operação de Sala Controle Beneficiamento Concentração/Britagem/Pellet Feed": "BENEFICIAMENTO", "Planta de Beneficiamento|Supervisão Beneficiamento Geral": "BENEFICIAMENTO", "Planta de Beneficiamento (Planta Antiga)|Beneficiamento Britagem (Planta Antiga)": "BENEFICIAMENTO", "Planta de Beneficiamento (Planta Antiga)|Beneficiamento Concentração (Planta Antiga)": "BENEFICIAMENTO", "Projetos|Engenharia de Projetos": "TEC CTO MINA", "Projetos|Gerência Projetos": "TEC CTO MINA", "Projetos|Projeto Geotécnico": "TEC CTO MINA", "Projetos|Reparação Social": "RELAC COMUNIDADE", "Qualidade|Laboratório Físico": "LABORATÓRIO", "Qualidade|Laboratório Químico": "LABORATÓRIO", "Qualidade|Laboratório Químico - Adm": "LABORATÓRIO", "Suprimentos|Compras": "ALMOX SUPRI"};
+
+</script>
+<script>
+/* =========================================================================
+   CRITÉRIOS — os mesmos da planilha AEP 2026 (aba CRITÉRIOS DO GRO) e do PCRE
+   ========================================================================= */
+const HIERARQUIA = ["1 - Eliminação","2 - Substituição","3 - Engenharia","4 - Administrativo"];
+const TECNICAS = ["Inspeção no local de trabalho","Inspeção no local de trabalho, entrevistas e aplicação de ferramenta psicossocial","Avaliação Ergonômica Preliminar (AEP)","AEP e COPSOQ II","Aplicação de ferramenta psicossocial (COPSOQ II)","Análise documental"];
+const TIPOS_EXPOSICAO = ["Habitual e permanente","Intermitente","Eventual"];
+const ORIGENS = ["Observação em campo","Campo + rastreamento","Rastreamento coletivo (COPSOQ)","Análise documental"];
+const ESTADOS = [
+  ["E3","Caracterizada em campo","AEP concluída, com observação da atividade real e escuta dos trabalhadores. Fonte geradora real do cargo."],
+  ["E0","Presente e controlada","Fator aplicável e presente, rastreamento em faixa favorável, sem achado relevante em campo. Permanece registrado no inventário como fator presente e controlado."],
+  ["E2","Provisória","Subescala acima de 3,66 sem AEP concluída. Exige data de revisão — sem ela o registro é inválido."]
+];
+const INTERPRETACOES = [
+  "Não há itens de desqualificação ou condições críticas",
+  "Existem riscos ergonômicos moderados (Estado de Alerta)",
+  "Necessita de melhorias",
+  "Evidências insuficientes",
+  "Não aplicável",
+  "Existem condições ergonômicas críticas na atividade"
+];
+const STATUS = { nao_iniciada:"Não iniciada", andamento:"Em andamento", concluida:"Concluída", revisao:"Em revisão" };
+const STATUS_CLS = { nao_iniciada:"", andamento:"draft", concluida:"done", revisao:"int" };
+
+/* Taxonomia (planilha + 5 do PCRE) — com a área da NR-17 17.1.1.1 */
+const TAX = TAX_RAW;
+const TAXMAP = Object.fromEntries(TAX.map(t => [t.codigo,t]));
+const CATEG = { OT:"Organização do Trabalho", BIO:"Biomecânicos", EQ:"Mobiliário, máquinas, equipamentos e ferramentas", AMB:"Conforto ambiental" };
+const prefixo = c => String(c).split("-")[0];
+const AREAS_NR17 = [
+  ["org","A própria organização do trabalho"],["mov","Levantamento, transporte e descarga de materiais"],
+  ["mob","Mobiliário dos postos de trabalho"],["maq","Trabalho com máquinas, equipamentos e ferramentas manuais"],
+  ["conf","Condições de conforto no ambiente de trabalho"]
+];
+const CHECKLIST = [
+ "Postura de trabalho em desvio extremo: postura forçada ou desvio postural extremo de algum segmento corpóreo (agachado fazendo força, ajoelhado, ajoelhado com o tronco encurvado para frente, agachado ou ajoelhado com os membros superiores acima do nível dos ombros, carregando peso sobre a cabeça, compressão de partes do corpo por superfícies rígidas ou com quinas vivas).",
+ "Tronco encurvado para a frente ou torcido durante mais que 50% do ciclo ou jornada, com pouca probabilidade de mudar de posição e retornar à posição de equilíbrio, mesmo em pequeno grau de desvio.",
+ "Trabalho de pé, parado, durante mais que 85% da jornada, com pouca possibilidade de se sentar.",
+ "Posição sentada em cadeira muito ruim ou em posto de trabalho com desvios muito forçados.",
+ "Esforços extremos evidenciados por observação do trabalho: usar marreta com grande esforço, usar alavancas com grande esforço, dar pancadas com grande esforço, puxar ou empurrar carrinho com peso excessivo ou com rodas em mau estado.",
+ "Trabalhar e concluir mais que 15.000 peças em um turno ou 1.800 peças por hora sem tempos previstos de recuperação de fadiga ou com rodízio ineficaz.",
+ "Esforço nítido, com mãos, braços ou coluna, aplicando força extrema; utilização de pinça pulpar, pinça lateral ou pinça palmar com esforço nítido.",
+ "Levantamento individual de algum peso superior a 25 kg.",
+ "Levantar ou depositar com precaução carga mais pesada que 15 kg em frequência maior que 2 vezes por minuto e/ou em distância entre os tornozelos e o centro de massa da carga maior que 50 cm.",
+ "Empurrar ou puxar carrinhos ou transpaleteiras manuais com peso maior que 1500 kg, ou maior que 700 kg em aclives, declives ou em condições nitidamente ruins do piso ou do equipamento.",
+ "Ritmo intenso de trabalho mantido, tempo apertado, pressão de tempo, operação crítica com alto impacto na qualidade sem o tempo necessário, uso rigoroso de metas de produção, impossibilidade de pausas voluntárias em trabalho com alta demanda mental; ou outro fator de carga mental bem evidente.",
+ "A forma de se realizar o trabalho predispõe para a ocorrência de acidentes.",
+ "Alto nível de ruído, calor, vibração ou algum outro fator da Higiene Ocupacional bastante evidente.",
+ "Outros."
+];
+/* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA) */
+const CK_PERIGOS = Object.fromEntries(CHECKLIST.map((_,i) => [i+1, TAX.filter(t => (t.itens||[]).includes(i+1)).map(t => t.codigo)]));
+
+/* COPSOQ — 23 subescalas dos 6 domínios acionáveis, com a ponte para o perigo */
+const SUBS = SUBS_RAW;
+const SUBMAP = Object.fromEntries(SUBS.map(s => [s.id,s]));
+const DOMINIOS = DOM_ORDEM.map(id => ({ id, nome: DOM_NOMES[id], padrao: ({
+  EL:"Os resultados do domínio foram confrontados com a atividade observada (exigências cognitivas, emocionais, quantitativas e ritmo de trabalho). Não se evidenciou, no momento da avaliação, sobrecarga laboral relevante ou condição crítica: as exigências presentes mantêm-se em níveis administráveis pelos processos de autorregulação dos próprios trabalhadores.",
+  IT:"Durante a avaliação em campo, foram observados aspectos da interação entre as demandas do trabalho e as características individuais dos trabalhadores, considerando autonomia, reconhecimento, expectativas, equilíbrio e possibilidades de conciliação. Não foram identificadas, no momento da avaliação, situações que indicassem comprometimento relevante dessa interface.",
+  OT:"Durante a avaliação em campo, observou-se a condução da atividade de forma planejada e controlada, considerando o tempo necessário para sua execução e a composição da equipe disponível. Não foram identificadas, no momento da avaliação, situações que indicassem comprometimento relevante dos aspectos relacionados à organização e ao conteúdo do trabalho.",
+  RS:"Durante a avaliação em campo, foram observadas as interações entre trabalhadores e liderança, considerando comunicação, cooperação, apoio, respeito e disponibilidade da liderança no contexto do trabalho. Não foram identificadas, no momento da avaliação, situações que indicassem comprometimento relevante dessas relações.",
+  VL:"Durante a avaliação em campo, foram observados aspectos relacionados ao respeito, confiança, reconhecimento, equidade e coerência nas relações e práticas de trabalho. Não foram identificadas, no momento da avaliação, situações que indicassem comprometimento relevante dos valores no local de trabalho.",
+  CO:"Durante a avaliação, não foram identificadas, nas atividades e condições de trabalho observadas, evidências de comportamentos ofensivos relacionados a insultos ou provocações verbais, assédio sexual indesejado, ameaças de violência ou violência física. Também não foram relatadas pelos trabalhadores ocorrências relacionadas a esses fatores."
+})[id] }));
+const FAIXAS = { fav:"Situação favorável para a saúde", int:"Situação intermédia", ris:"Risco para a saúde" };
+const FAIXA_CURTA = { fav:"favorável", int:"intermédia", ris:"alta" };
+const CONCLUSOES = [
+  "Adequado – manter condições existentes",
+  "Atenção – manter acompanhamento e condições existentes",
+  "Convergência – campo confirma; perigo lançado na AEP",
+  "Divergência – instrumento e campo não concordam; registrada para investigação"
+];
+
+/* Textos fixos do documento */
+const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
+const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade — trabalho real —, por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais — indicador de onde olhar, não caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
+const TXT_RECOMENDACOES = [
+  "Manter as condições ergonômicas observadas e as medidas de prevenção existentes, assegurando sua continuidade e eficácia.",
+  "Manter o acompanhamento das condições de trabalho e da eficácia das medidas existentes, incluindo inspeções, observações e participação dos trabalhadores, conforme aplicável.",
+  "Manter os mecanismos de consulta e comunicação com os trabalhadores para identificação de eventuais mudanças ou novas situações que possam alterar as condições avaliadas.",
+  "Realizar nova avaliação quando ocorrerem mudanças nos processos, equipamentos, ambiente, condições, procedimentos ou organização do trabalho, quando forem identificadas inadequações ou perda de eficácia das medidas existentes, ou nas demais hipóteses previstas no gerenciamento de riscos ocupacionais."
+].join("\n");
+const TXT_NOTA_AET = "Se as medidas de prevenção implementadas forem consideradas ineficazes ou a situação for muito complexa, esta AEP serve como gatilho para a realização de uma AET — Análise Ergonômica do Trabalho, nos termos do item 17.3.2 da NR-17.";
+const GATILHOS = [
+  ["a","Observada a necessidade de uma avaliação mais aprofundada da situação"],
+  ["b","Identificadas inadequações ou insuficiência das ações adotadas"],
+  ["c","Sugerida pelo acompanhamento de saúde dos trabalhadores (PCMSO)"],
+  ["d","Indicada causa relacionada às condições de trabalho na análise de acidentes e doenças"]
+];
+/* Cabeçalho das 26 colunas da aba EXPORTA PGR (A e B auxiliares + 24 do PGR) */
+const PGR_COLS = ["EG / GHE (auxiliar)","Cargo (auxiliar)","Id. Risco","Agente / Tipo","Perigo / Fator de Risco","Fonte(s) Geradora(s)","Trajetória / Meio de Propagação","Via de Ingresso","Possíveis Danos à Saúde","Tipo de Exposição","Técnica Utilizada","Intensidade/ Concentração","LT NR-15","LT ACGIH","Nível de Ação","Unidade","Categoria Risco","POAD / EPC","POAD / EPC Eficaz?","EPI","EPI Eficaz?","Probabilidade","Severidade","Nível do Risco","Categoria Risco","Ações Resultantes da Análise Preliminar"];
+</script>
+
+<script>
+/* =========================================================================
+   UTILITÁRIOS
+   ========================================================================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const escBr = v => esc(v).replace(/\n/g,"<br>");
+const clone = o => JSON.parse(JSON.stringify(o));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^a-zA-Z0-9-]/g,"");
+const hojeISO = () => new Date().toISOString().slice(0,10);
+const fmtData = iso => { if(!iso) return "—"; const [y,m,d] = String(iso).slice(0,10).split("-"); return d && m && y ? `${d}/${m}/${y}` : esc(iso); };
+const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const clamp = n => Math.min(5, Math.max(1, Math.round(Number(n) || 1)));
+const num2 = v => (v === "" || v == null || isNaN(Number(v))) ? "—" : Number(v).toFixed(2).replace(".",",");
+const idNum = a => Number(String(a.numero||"").replace(/\D+/g,"")) || 0;
+function getPath(obj, path){ return path.split(".").reduce((o,k) => (o == null ? undefined : o[k]), obj); }
+function setPath(obj, path, val){
+  const ks = path.split("."); let o = obj;
+  for (let i=0;i<ks.length-1;i++){ const k = ks[i]; if (o[k] == null || typeof o[k] !== "object") o[k] = /^\d+$/.test(ks[i+1]) ? [] : {}; o = o[k]; }
+  o[ks[ks.length-1]] = val;
+}
+let toastTimer;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
+function setSaveState(txt){ $("#savestate").textContent = txt; }
+
+/* =========================================================================
+   RESUMO DOS PERIGOS (só contagem — a graduação do risco é feita na planilha de controle)
+   ========================================================================= */
+const ESTADO_ORDEM = ["E3","E0","E2"];
+function contaEstados(perigos){
+  const c = {}; (perigos||[]).forEach(h => { const k = h.estado || "—"; c[k] = (c[k]||0) + 1; });
+  return c;
+}
+const chipsEstado = (c, vazio) => { const ks = [...ESTADO_ORDEM, ...Object.keys(c).filter(k => !ESTADO_ORDEM.includes(k))].filter(k => c[k]);
+  return ks.length ? ks.map(k => `<span class="chip${k==="E2"?" int":""}" title="${esc((ESTADOS.find(x=>x[0]===k)||[,""])[1])}">${esc(k)} · ${c[k]}</span>`).join(" ") : (vazio ?? '<span class="faint tiny">—</span>'); };
+const temDesqualificacao = aep => (aep.checklist||[]).some(c => c && c.r === "sim");
+
+/* =========================================================================
+   COPSOQ POR SETOR
+   ========================================================================= */
+function faixaDe(m){ if (m === "" || m == null || isNaN(Number(m))) return null; const v = Number(m); return v < 2.34 ? "fav" : v <= 3.66 ? "int" : "ris"; }
+const chipFaixa = (f, txt) => f ? `<span class="chip ${f}">${esc(txt || FAIXAS[f])}</span>` : `<span class="chip">sem dado</span>`;
+const setorPorNome = nome => Object.values(S.areas).find(a => norm(a.nome) === norm(nome));
+function altasDe(setor){ if (!setor) return []; return SUBS.map(s => ({ s, m: setor.medias?.[s.id] })).filter(x => faixaDe(x.m) === "ris").sort((a,b) => b.m - a.m); }
+function snapDe(setor){ return setor ? { setorId: setor.id, nome: setor.nome, n: setor.n||"", onda: setor.onda||"", dataCorte: setor.dataCorte||"", dominios: clone(setor.dominios||{}), medias: clone(setor.medias||{}), atualizadoEm: setor.atualizadoEm||"" } : null; }
+function copsoqDaAEP(a){ return a.copsoq?.snapshot || snapDe(setorPorNome(a.meta?.setorCopsoq)); }
+function resultadoDominio(a, domId){
+  const snap = copsoqDaAEP(a);
+  if (snap){
+    const nota = snap.dominios?.[domId];
+    const subs = SUBS.filter(s => s.dom === domId).map(s => ({ s, m: snap.medias?.[s.id], f: faixaDe(snap.medias?.[s.id]) })).filter(x => x.f);
+    return { auto: true, nota, faixa: faixaDe(nota), subs, altas: subs.filter(x => x.f === "ris"), inter: subs.filter(x => x.f === "int") };
+  }
+  const manual = a.copsoq?.dominios?.[domId]?.manual || "";
+  return { auto: false, nota: null, faixa: manual || null, subs: [], altas: [], inter: [] };
+}
+const conclusaoSugerida = r => (!r.faixa ? "" : r.altas.length ? "" : r.faixa === "fav" && !r.inter.length ? CONCLUSOES[0] : CONCLUSOES[1]);
+
+/* =========================================================================
+   ESTADO E BANCO
+   ========================================================================= */
+const S = {
+  view:"home", aepId:null, step:1, aeps:{}, areas:{}, config:{},
+  draft:null, dirty:false, saveTimer:null,
+  editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
+  editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
+  cfgDraft:null, cfgTimer:null, confirm:null,
+  busca:"", fStatus:"", fSetor:"", exportAberto:false, expEscopo:"concluidas", expGHE:"",
+  db:null, assets:null, downloads:null, dbOk:false, carregado:false
+};
+function proximoNumero(){ return Math.max(0, ...Object.values(S.aeps).map(idNum).filter(n => n < 1000)) + 1; }
+function novaAEP(){
+  const n = proximoNumero();
+  return completar({ id: "AEP-" + String(n).padStart(2,"0"), numero: `AEP ${String(n).padStart(2,"0")}`, status:"andamento", criadoEm: new Date().toISOString() });
+}
+function completar(a){
+  const r = clone(a||{});
+  r.status = r.status || "nao_iniciada";
+  r.meta = Object.assign({ cargo:"", setor:"", area:"", eg:"", setorCopsoq:"", cargosAbrangidos:"", justAgrup:"", turnos:"", nTrab:"", data:"", analista: S.config.analista||"", registroAnalista: S.config.registroAnalista||"" }, r.meta||{});
+  if (!r.meta.analista) r.meta.analista = S.config.analista || "";
+  if (!r.meta.registroAnalista) r.meta.registroAnalista = S.config.registroAnalista || "";
+  r.trabalho = Object.assign({ sumaria:"", prescrito:"", real:"" }, r.trabalho||{});
+  if (!r.trabalho.sumaria.trim() && r.trabalho.prescrito.trim()) r.trabalho.sumaria = r.trabalho.prescrito.trim();
+  if (!r.meta.setorCopsoq) r.meta.setorCopsoq = setorPeloDepara(r.meta.setor, r.meta.area);
+  r.escuta = r.escuta || []; r.perigos = r.perigos || []; r.fotos = r.fotos || [];
+  r.checklist = CHECKLIST.map((_,i) => Object.assign({ r:"", obs:"" }, (r.checklist||[])[i]||{}));
+  r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
+  DOMINIOS.forEach(d => { r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); });
+  r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
+  r.conclusao = Object.assign({ interpretacao:"", parecer:"", recomendacoes: TXT_RECOMENDACOES, oportunidades:"Não há." }, r.conclusao||{});
+  return r;
+}
+/* Setor do COPSOQ pelo DE-PARA da planilha (Setor | Área) */
+const DEPARA = Object.fromEntries(Object.entries(DEPARA_RAW).map(([k,v]) => [norm(k.split("|")[0]) + "|" + norm(k.split("|")[1]||""), v]));
+function setorPeloDepara(setor, area){ return DEPARA[norm(setor) + "|" + norm(area)] || ""; }
+async function iniciar(){
+  render();
+  let db = null;
+  try { db = await window.claude?.use?.("db"); } catch(e){ db = null; }
+  S.db = db; S.dbOk = !!db;
+  if (!db){ S.carregado = true; setSaveState("Modo sem banco — nada é salvo"); render(); return; }
+  try { S.assets = await window.claude.use("assets"); } catch(e){ S.assets = null; }
+  try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
+  db.collection("aeps").onSnapshot(snap => {
+    const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); });
+    S.aeps = m; S.carregado = true;
+    if (S.view === "home") atualizarHome(); else if (S.view === "painel") render();
+  }, () => setSaveState("Erro ao ler dados"));
+  db.collection("copsoq").onSnapshot(snap => {
+    const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); });
+    S.areas = m;
+    if (S.view === "copsoq" && !S.editArea) render();
+    else if (S.view === "home") atualizarHome(); else if (S.view === "painel") render();
+    if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
+  }, () => {});
+  db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
+}
+async function salvarAEP(){
+  clearTimeout(S.saveTimer);
+  if (!S.draft || !S.dirty) return;
+  numerarRiscos(S.draft);
+  S.draft.atualizadoEm = new Date().toISOString();
+  const corpo = clone(S.draft); S.aeps[corpo.id] = corpo;
+  if (!S.db){ S.dirty = false; return; }
+  setSaveState("Salvando…");
+  try { await S.db.doc("aeps/" + corpo.id).set(corpo); S.dirty = false; setSaveState("Salvo"); }
+  catch(e){ setSaveState("Erro ao salvar"); toast(e && e.code === "quota_exceeded" ? "O banco atingiu o limite de registros." : "Não foi possível salvar. Tente de novo em instantes."); }
+}
+function numerarRiscos(a){
+  let max = Math.max(0, ...a.perigos.map(h => Number(String(h.idRisco||"").replace(/\D+/g,"")) || 0));
+  a.perigos.forEach(h => { if (!h.idRisco) { max++; h.idRisco = "R" + String(max).padStart(2,"0"); } });
+}
+function marcar(){
+  S.dirty = true;
+  if (S.draft){
+    if (S.draft.status === "nao_iniciada") { S.draft.status = "andamento"; renderTitulo(); }
+    else if (S.draft.status === "concluida") { S.draft.status = "revisao"; S.draft.concluidoEm = null; toast("Alteração numa AEP concluída: ela passou para “Em revisão” até ser concluída de novo."); renderTitulo(); }
+  }
+  setSaveState("Alterações não salvas");
+  clearTimeout(S.saveTimer); S.saveTimer = setTimeout(salvarAEP, 700);
+}
+
+/* =========================================================================
+   PENDÊNCIAS
+   ========================================================================= */
+function pendencias(a){
+  const p = {1:[],2:[],3:[],4:[],5:[]}, m = a.meta||{};
+  if (!m.cargo?.trim()) p[1].push("Informar o cargo/função");
+  if (!m.setor?.trim()) p[1].push("Informar o setor");
+  if (!m.data) p[1].push("Informar a data da avaliação");
+  if (!m.analista?.trim()) p[1].push("Informar o responsável técnico");
+  if (!a.trabalho?.sumaria?.trim()) p[1].push("Escrever a descrição sumária da atividade");
+  const semResp = (a.checklist||[]).filter(c => !c.r).length; if (semResp) p[2].push(`${semResp} item(ns) do checklist sem resposta`);
+  DOMINIOS.forEach(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq?.dominios?.[d.id]||{};
+    if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`); });
+  (a.checklist||[]).forEach((c,i) => { if (c.r === "sim" && !(a.perigos||[]).some(h => Number(h.checkItem) === i+1)) p[4].push(`Item ${i+1} do checklist marcado Sim sem perigo vinculado`); });
+  (a.perigos||[]).forEach(h => { if (h.estado === "E2" && !h.dataRevisao) p[4].push(`${h.codigo}: E2 sem data de revisão — registro inválido`); });
+  (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
+  if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
+  if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
+  if (!a.aet?.justificativa?.trim()) p[5].push("Justificar a decisão sobre AET");
+  if (a.aet?.decisao === "sim" && !(a.aet.gatilhos||[]).length) p[5].push("Indicar o gatilho da AET (17.3.2)");
+  if (!a.conclusao?.parecer?.trim()) p[5].push("Escrever as observações complementares");
+  return p;
+}
+const totalPend = p => Object.values(p).reduce((s,l) => s + l.length, 0);
+/* Mesmo alerta da coluna N da aba AEP */
+function alertaAET(a){
+  if (a.status !== "concluida") return "";
+  const crit = ["Existem condições ergonômicas críticas na atividade","Necessita de melhorias"].includes(a.conclusao?.interpretacao);
+  if (crit && !a.aet?.decisao) return "Concluída com achado relevante e sem decisão de AET";
+  if (!a.aet?.decisao) return "Decisão de AET não registrada";
+  if (a.aet?.decisao === "sim" && !a.aet?.justificativa) return "AET acionada sem justificativa";
+  return "";
+}
+
+/* =========================================================================
+   NAVEGAÇÃO
+   ========================================================================= */
+async function ir(view, extra){
+  if (S.view === "aep") await salvarAEP();
+  if (S.view === "copsoq" && S.editArea) await salvarArea();
+  if (S.view === "config") await salvarConfig();
+  S.view = view; S.confirm = null;
+  if (view === "home" || view === "painel") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view !== "copsoq") S.editArea = null;
+  if (view !== "config") S.cfgDraft = null;
+  Object.assign(S, extra||{});
+  render(); window.scrollTo(0,0);
+}
+async function abrirAEP(id){ const a = S.aeps[id]; if (!a) return; S.draft = completar(a); S.aepId = id; S.step = 1; S.editHz = null; S.dirty = false; await ir("aep"); }
+async function criarAEP(){ const a = novaAEP(); S.aeps[a.id] = a; S.draft = a; S.aepId = a.id; S.step = 1; S.dirty = true; await salvarAEP(); await ir("aep"); }
+function irEtapa(n){ S.step = n; S.editHz = null; S.confirm = null; renderRail(); renderStep(); renderAside(); window.scrollTo({top:0}); salvarAEP(); }
+
+/* =========================================================================
+   RENDERIZAÇÃO GERAL
+   ========================================================================= */
+function render(){
+  const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view;
+  ["home","painel","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
+  const app = $("#app");
+  if (S.view === "home") app.innerHTML = vHome();
+  else if (S.view === "painel") app.innerHTML = vPainel();
+  else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
+  else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
+  else if (S.view === "copsoq") app.innerHTML = S.editArea ? vArea() : vAreas();
+  else if (S.view === "config") app.innerHTML = vConfig();
+}
+
+/* ---------------- Lista de AEPs ---------------- */
+function listaFiltrada(){
+  const t = norm(S.busca);
+  return Object.values(S.aeps)
+    .filter(a => !S.fStatus || (a.status||"nao_iniciada") === S.fStatus)
+    .filter(a => !S.fSetor || (a.meta?.setor||"").trim() === S.fSetor)
+    .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t))
+    .sort((a,b) => idNum(a) - idNum(b));
+}
+function linhasHome(lista){
+  return lista.map(a => {
+    const st = a.status || "nao_iniciada", altas = altasDe(setorPorNome(a.meta?.setorCopsoq)).length, al = alertaAET(a);
+    return `<tr class="click" data-open="${esc(a.id)}" tabindex="0">
+      <td class="mono">${esc(a.numero)}</td>
+      <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
+      <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
+      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
+      <td class="num">${(a.perigos||[]).length || "—"}</td>
+      <td><span class="row" style="gap:4px">${chipsEstado(contaEstados(a.perigos))}</span></td></tr>`;
+  }).join("");
+}
+/* Atualiza só a tabela e a contagem, sem redesenhar os filtros (não perde o foco da busca) */
+function atualizarHome(){
+  if (S.view !== "home") return;
+  const tb = $("#tbody-aeps"), ct = $("#contagem");
+  if (!tb || !ct) { render(); return; }
+  const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
+  const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
+}
+function vHome(){
+  const todas = Object.values(S.aeps);
+  const setores = Array.from(new Set(todas.map(a => (a.meta?.setor||"").trim()).filter(Boolean))).sort();
+  const lista = listaFiltrada();
+  const aviso = !S.dbOk && S.carregado ? `<div class="note warn" style="margin-bottom:16px"><b>Banco indisponível nesta visualização.</b> Você pode navegar e testar, mas nada será salvo.</div>` : "";
+  return `
+  <div class="pagehead">
+    <div><h1>AEPs 2026</h1><p>Uma AEP por cargo/função. As notas do COPSOQ vêm do setor ligado a cada cargo pelo de-para; a subescala acima de 3,66 aparece sinalizada.</p></div>
+    <div class="row"><button class="btn" type="button" data-act="toggleExport">Exportar para o PGR</button><button class="btn primary" type="button" data-act="nova">+ Nova AEP</button></div>
+  </div>
+  ${aviso}
+  <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
+  <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
+    <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
+    <label class="f"><span>Situação</span><select id="f-status" data-filtro="fStatus"><option value="">Todas</option>${Object.entries(STATUS).map(([k,v]) => `<option value="${k}" ${S.fStatus===k?"selected":""}>${v}</option>`).join("")}</select></label>
+    <label class="f"><span>Setor</span><select id="f-setor" data-filtro="fSetor"><option value="">Todos</option>${setores.map(s => `<option ${S.fSetor===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+  </div></div>
+  <p class="small muted" style="margin-bottom:8px" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
+  <div class="panel">
+    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Estado de evidência dos perigos registrados">Estado dos perigos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
+    : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
+  </div>`;
+}
+function vExportPanel(){
+  const ghes = Array.from(new Set(Object.values(S.aeps).map(a => a.meta?.eg).filter(Boolean).map(String))).sort();
+  const n = linhasPGR().length;
+  return `<div class="panel" style="margin-bottom:14px"><div class="panel-h"><b>Exportar para o Inventário de Riscos / PGR</b><button class="btn ghost small" type="button" data-act="toggleExport">Fechar</button></div>
+    <div class="panel-b stack tight">
+      <p class="small muted">Gera um Excel com as mesmas 26 colunas da aba EXPORTA PGR. As colunas A e B (GHE e cargo) são auxiliares, para achar o bloco: cole da coluna C até a Z. O Id. Risco sai como “AEP nn / Rnn” — renumere na colagem seguindo o bloco do GHE.</p>
+      <div class="grid g3">
+        <label class="f"><span>Quais AEPs</span><select data-exp="expEscopo"><option value="concluidas" ${S.expEscopo==="concluidas"?"selected":""}>Só as concluídas</option><option value="todas" ${S.expEscopo==="todas"?"selected":""}>Todas com perigos lançados</option></select></label>
+        <label class="f"><span>GHE</span><select data-exp="expGHE"><option value="">Todos os GHEs</option>${ghes.map(g => `<option ${S.expGHE===g?"selected":""}>${esc(g)}</option>`).join("")}</select></label>
+        <div class="f"><span class="small" style="font-weight:600;color:var(--ink-2)">${n} linha${n===1?"":"s"} para exportar</span><button class="btn primary" type="button" data-act="exportarPGR" id="btnExp" ${n && S.downloads ? "" : "disabled"}>Baixar Excel</button></div>
+      </div>
+      ${!S.downloads ? `<p class="hint">O download não está disponível nesta visualização.</p>` : ""}
+    </div></div>`;
+}
+
+/* ---------------- Painel de andamento ---------------- */
+function vPainel(){
+  const L = Object.values(S.aeps), tot = L.length, c = st => L.filter(a => (a.status||"nao_iniciada") === st).length;
+  const concl = c("concluida"), and = c("andamento"), nao = c("nao_iniciada"), rev = c("revisao"), pct = tot ? concl / tot : 0;
+  const ini = S.config.dataInicio ? new Date(S.config.dataInicio + "T00:00") : null, meta = S.config.dataMeta ? new Date(S.config.dataMeta + "T00:00") : null, hoje = new Date();
+  const dias = ini ? Math.max(1, Math.round((hoje - ini) / 864e5)) : null, ritmo = dias ? concl / dias : null, faltam = tot - concl;
+  const previsao = ritmo ? new Date(hoje.getTime() + (faltam / ritmo) * 864e5) : null;
+  const diasMeta = meta ? Math.round((meta - hoje) / 864e5) : null, ritmoNec = diasMeta > 0 ? faltam / diasMeta : null;
+  const fmt = d => d ? d.toLocaleDateString("pt-BR") : "—", mes = v => v != null ? (v*30).toFixed(1).replace(".",",") : "—";
+  const hzConcl = L.filter(a => a.status === "concluida").flatMap(a => a.perigos||[]), estConcl = contaEstados(hzConcl);
+  const itensCrit = hzConcl.filter(h => h.checkItem).length, descNR = hzConcl.filter(h => h.descumprNR).length;
+  const fila = L.filter(a => (a.status||"nao_iniciada") !== "concluida").map(a => { const set = setorPorNome(a.meta?.setorCopsoq), al = altasDe(set);
+      return { a, al, n: Number(set?.n)||0, ine: al.filter(x => TAXMAP[x.s.tax]?.inerente).length }; })
+    .sort((x,y) => y.al.length - x.al.length || (y.a.status==="andamento") - (x.a.status==="andamento") || y.n - x.n || idNum(x.a) - idNum(y.a)).slice(0,25);
+  const alertas = L.map(a => ({ a, al: alertaAET(a) })).filter(x => x.al);
+  return `<div class="pagehead"><div><h1>Painel de andamento</h1><p>Ritmo e previsão pela data de início e pela meta cadastradas em <button class="btn ghost small" type="button" data-go="config" style="padding:0">Unidade</button>.</p></div></div>
+  <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs cadastradas</span></div><div class="stat"><b>${concl}</b><span>Concluídas</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div><div class="stat"><b>${rev}</b><span>Em revisão</span></div></div>
+  <div class="panel" style="margin-bottom:16px"><div class="panel-b stack tight">
+    <div class="row between"><b>${(pct*100).toFixed(1).replace(".",",")}% concluído</b><span class="small muted">${concl} de ${tot}</span></div>
+    <div role="progressbar" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${concl}" aria-label="AEPs concluídas" style="height:10px;background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;overflow:hidden"><div style="height:100%;width:${(pct*100).toFixed(2)}%;background:var(--accent);border-radius:999px"></div></div>
+    <div class="grid g4" style="margin-top:8px">
+      <div><span class="eyebrow">Ritmo atual</span><p class="num"><b>${mes(ritmo)}</b> AEP/mês</p></div>
+      <div><span class="eyebrow">Ritmo necessário</span><p class="num"><b>${mes(ritmoNec)}</b> AEP/mês até a meta</p></div>
+      <div><span class="eyebrow">Previsão no ritmo atual</span><p class="num"><b>${previsao && concl >= 5 ? fmt(previsao) : "—"}</b>${concl < 5 ? '<span class="tiny faint"> (a partir de 5 concluídas)</span>' : ""}</p></div>
+      <div><span class="eyebrow">Meta</span><p class="num"><b>${fmt(meta)}</b>${previsao && meta && concl >= 5 ? (previsao > meta ? ' <span class="chip ris">atrasado</span>' : ' <span class="chip fav">no prazo</span>') : ""}</p></div>
+    </div></div></div>
+  <div class="grid g2" style="align-items:start">
+    <div class="panel"><div class="panel-h"><b>Fila sugerida</b><span class="tiny muted">mais subescalas altas no setor primeiro</span></div>
+      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Setor COPSOQ</th><th>Subescalas altas</th></tr></thead><tbody>
+      ${fila.map(({a,al,ine}) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo)}<div class="tiny faint">${STATUS[a.status||"nao_iniciada"]}</div></td><td class="small">${esc(a.meta?.setorCopsoq||"—")}</td>
+        <td class="small">${al.length ? al.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : "—"}${ine ? `<div class="tiny faint">${ine} de exigência inerente (E1 — prioridade de AEP)</div>` : ""}</td></tr>`).join("")}
+      </tbody></table></div></div>
+    <div class="stack">
+      <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
+        <div class="stats" style="margin:0"><div class="stat"><b>${hzConcl.length}</b><span>perigos</span></div><div class="stat"><b>${itensCrit}</b><span>ligados a item crítico</span></div><div class="stat"><b>${descNR}</b><span>com descumprimento de NR</span></div></div>
+        <div class="row" style="gap:6px"><span class="tiny muted">Estado de evidência:</span> ${chipsEstado(estConcl)}</div></div></div>
+      <div class="panel"><div class="panel-h"><b>Alertas</b></div><div class="panel-b stack tight">
+        ${alertas.length ? alertas.map(({a,al}) => `<div class="row between"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
+      </div></div>
+    </div></div>`;
+}
+
+/* ---------------- Editor ---------------- */
+const ETAPAS = [[1,"Identificação e atividade"],[2,"Checklist NR-17"],[3,"COPSOQ × campo"],[4,"Perigos e fotos"],[5,"Interpretação e conclusão"]];
+function vEditorShell(){ return `<div class="aeptitle" id="titulo"></div><div id="banner"></div><div class="editor"><nav class="rail" id="rail" aria-label="Etapas da AEP"></nav><section id="stepbody" aria-live="polite"></section><aside class="aside" id="aside"></aside></div>`; }
+function renderTitulo(){
+  const a = S.draft, el = $("#titulo"); if (!el || !a) return; const st = a.status || "nao_iniciada", conf = S.confirm === "delAEP";
+  el.innerHTML = `<button class="btn ghost" type="button" data-go="home">← AEPs</button>
+    <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> ${esc(a.meta.cargo || "Nova AEP")}</h1>
+    <span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>
+    <span style="margin-left:auto" class="row">${conf ? `<span class="confirm">Excluir esta AEP e suas fotos de vez? <button class="btn small danger" type="button" data-act="delAEPsim">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="delAEP">Excluir AEP</button>`}</span>`;
+}
+/* Faixa com as subescalas altas do setor — visível em todas as etapas */
+function renderBanner(){
+  const el = $("#banner"); if (!el || !S.draft) return;
+  const snap = copsoqDaAEP(S.draft);
+  if (!snap){ el.innerHTML = S.draft.meta.setorCopsoq ? `<div class="note warn" style="margin-bottom:16px">Setor COPSOQ “${esc(S.draft.meta.setorCopsoq)}” sem notas cadastradas.</div>` : ""; return; }
+  const altas = SUBS.map(s => ({ s, m: snap.medias?.[s.id] })).filter(x => faixaDe(x.m) === "ris").sort((a,b) => b.m - a.m);
+  el.innerHTML = altas.length
+    ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas em alta no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes, acima de 3,66): ${altas.map(x => `<b>${esc(x.s.nome)} ${num2(x.m)}</b>${x.s.tax ? ` → <span class="code">${esc(x.s.tax)}</span>${TAXMAP[x.s.tax]?.inerente ? " (exigência inerente)" : ""}` : ""}`).join("; ")}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button></div>`
+    : `<div class="note ok" style="margin-bottom:16px">Setor ${esc(snap.nome)}: nenhuma subescala acima de 3,66.</div>`;
+}
+function renderRail(){
+  const el = $("#rail"); if (!el) return; const p = pendencias(S.draft);
+  el.innerHTML = `<ol>${ETAPAS.map(([n,t]) => { const pend = p[n].length, dot = pend ? "pend" : "ok";
+    return `<li><button type="button" data-step="${n}" ${S.step===n?'aria-current="step"':""}><span class="n">${n}</span><span class="lbl">${esc(t)}</span><span class="dot ${dot}" title="${pend?pend+" pendência(s)":"Completo"}"></span></button></li>`; }).join("")}</ol>`;
+}
+function renderAside(){
+  const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = (a.checklist||[]).filter(c => c.r==="sim").length;
+  const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
+  el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
+      <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
+      ${nHz ? `<div class="row" style="gap:6px">${chipsEstado(contaEstados(a.perigos))}</div>` : ""}
+      <p class="tiny muted">Os perigos ficam registrados aqui; a graduação do risco é feita na planilha de controle.</p>
+      <hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">
+      <span class="eyebrow">${tot ? `${tot} pendência(s) para concluir` : "Pronta para concluir"}</span>
+      ${tot ? `<ul class="pendlist">${lista.slice(0,12).join("")}${lista.length>12?`<li>+ ${lista.length-12} outra(s)</li>`:""}</ul>` : `<p class="small muted">Todas as etapas obrigatórias estão preenchidas.</p>`}
+      <div class="row" style="margin-top:6px"><button class="btn" type="button" data-act="verDoc">Ver documento</button>
+        ${a.status === "concluida" ? `<span class="chip done">Concluída em ${fmtData((a.concluidoEm||"").slice(0,10))}</span>` : `<button class="btn primary" type="button" data-act="concluir" ${tot?"disabled":""}>Concluir AEP</button>`}</div>
+    </div></div>`;
+}
+function stepHead(n, titulo, texto){ return `<div class="stephead"><span class="eyebrow">Etapa ${n} de ${ETAPAS.length}</span><h2>${esc(titulo)}</h2>${texto?`<p>${texto}</p>`:""}</div>`; }
+function stepNav(){ return `<div class="stepnav">${S.step>1 ? `<button class="btn" type="button" data-step="${S.step-1}">← ${esc(ETAPAS[S.step-2][1])}</button>` : "<span></span>"}${S.step<ETAPAS.length ? `<button class="btn primary" type="button" data-step="${S.step+1}">${esc(ETAPAS[S.step][1])} →</button>` : `<button class="btn primary" type="button" data-act="verDoc">Ver documento →</button>`}</div>`; }
+const fld = (b, rotulo, o={}) => {
+  const v = getPath(S.draft, b) ?? "", req = o.req ? " <em>*</em>" : "", hint = o.hint ? `<span class="hint">${o.hint}</span>` : "", cls = ` class="f ${o.cls||""}"`;
+  if (o.area) return `<label${cls}><span>${rotulo}${req}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||4}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${hint}</label>`;
+  return `<label${cls}><span>${rotulo}${req}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}" ${o.type==="number"?'min="0" inputmode="numeric"':""}>${hint}</label>`;
+};
+function renderStep(){ const el = $("#stepbody"); if (!el || !S.draft) return; el.innerHTML = [null, st1, st4, st5, st6, st8][S.step]() + stepNav(); }
+
+function vSetorCop(){
+  const m = S.draft.meta, auto = setorPeloDepara(m.setor, m.area), setores = Object.values(S.areas).map(a => a.nome).sort();
+  return auto && auto === m.setorCopsoq
+    ? `<div class="f"><span>Setor no COPSOQ</span><p class="small" style="margin:6px 0 0"><b>${esc(auto)}</b> <span class="faint">— pelo DE-PARA, notas puxadas automaticamente</span></p></div>`
+    : `<label class="f"><span>Setor no COPSOQ</span><select id="f-setorcop" data-b="meta.setorCopsoq" data-rr="1"><option value="">—</option>${setores.map(s => `<option ${m.setorCopsoq===s?"selected":""}>${esc(s)}</option>`).join("")}</select><span class="hint">${auto ? `O DE-PARA indica ${esc(auto)}.` : "Setor e área sem correspondência no DE-PARA: escolha aqui."}</span></label>`;
+}
+function st1(){
+  return stepHead(1,"Identificação e atividade","A descrição sumária já vem com a descrição de atividades do cargo da planilha. Ajuste com o que foi observado em campo.") +
+  `<div class="panel"><div class="panel-b grid g4">
+    ${fld("numero","ID da AEP")}${fld("meta.data","Data da avaliação",{type:"date",req:1})}
+    ${fld("meta.cargo","Cargo / função",{req:1,cls:"span2"})}
+    ${fld("meta.setor","Setor",{req:1,cls:"span2"})}${fld("meta.area","Área",{cls:"span2"})}
+    <div class="spanall" id="setorcop">${vSetorCop()}</div>
+    ${fld("meta.analista","Responsável técnico",{req:1,cls:"span2"})}${fld("meta.registroAnalista","Qualificação / registro",{cls:"span2"})}
+    ${fld("trabalho.sumaria","Descrição sumária da atividade",{area:1,rows:9,req:1,cls:"spanall"})}
+  </div></div>`;
+}
+function st4(){
+  const a = S.draft;
+  const rows = CHECKLIST.map((txt,i) => { const c = a.checklist[i], n = i+1, vinc = a.perigos.find(h => Number(h.checkItem) === n), cands = CK_PERIGOS[n];
+    const opt = (v,rot,cls="") => `<input type="radio" id="ck${n}${v}" name="ck${n}" value="${v}" data-b="checklist.${i}.r" data-rr="1" class="${cls}" ${c.r===v?"checked":""}><label for="ck${n}${v}">${rot}</label>`;
+    return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
+      <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}
+        ${c.r==="sim" ? `${fld(`checklist.${i}.obs`,"O que foi observado",{area:1,rows:2})}
+          ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
+          ${n===13 ? `<p class="hint">Ruído, calor e vibração como exposição ocupacional são agentes da NR-9; na AEP entra o conforto ambiental da NR-17 (AMB).</p>`:""}` : ""}
+      </div><div class="seg" role="radiogroup" aria-label="Resultado do item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; }).join("");
+  const sim = a.checklist.filter(c => c.r==="sim").length;
+  return stepHead(2,"Checklist NR-17 — desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: deve ser registrado como perigo na etapa 4.") +
+  `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim — ${sim} item(ns).` : (a.checklist.every(c=>c.r) ? "Não." : "Responda todos os itens.")}</div>`;
+}
+function st5(){
+  const a = S.draft, snap = copsoqDaAEP(a);
+  if (!a.copsoq.snapshot && snap) { a.copsoq.snapshot = snap; S.dirty = true; clearTimeout(S.saveTimer); S.saveTimer = setTimeout(salvarAEP, 700); }
+  const atual = snap ? S.areas[snap.setorId] : null;
+  const desatual = atual && a.copsoq.snapshot && atual.atualizadoEm && atual.atualizadoEm !== a.copsoq.snapshot.atualizadoEm;
+  const decl = snap ? `<div class="note ${Number(snap.n) < 15 ? "warn" : ""}"><b>Rastreamento coletivo:</b> setor ${esc(snap.nome)} · ${esc(snap.n||"?")} respondente(s)${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""}. Indicador de contexto coletivo do setor: todas as AEPs do setor partem do mesmo resultado, e ele não caracteriza o cargo isoladamente.
+      ${Number(snap.n) < 15 ? "<br><b>Amostra pequena:</b> pelo PCRE, com menos de 15 respondentes o resultado é indício, não caracterização — conduza a identificação principalmente por observação e diálogo." : ""}
+      ${desatual ? `<br><button class="btn small" type="button" data-act="atualizarSnap" style="margin-top:6px">Atualizar com as notas atuais do setor</button>` : ""}</div>`
+    : `<div class="note warn">Esta AEP não tem setor COPSOQ ligado (etapa 1). Informe o resultado de cada domínio manualmente.</div>`;
+  const blocos = DOMINIOS.map(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq.dominios[d.id], sug = conclusaoSugerida(r);
+    const linha = x => { const tx = TAXMAP[x.s.tax], ja = a.perigos.some(h => h.origemCopsoq === x.s.id);
+      return `<div class="row" style="gap:8px;align-items:flex-start"><span class="chip ${x.f}">${x.f==="ris"?"ALTA · ":""}${esc(x.s.nome)} ${num2(x.m)}</span>
+        ${x.s.natureza==="efeito" ? `<span class="hint">Indicador de efeito — não vira perigo; prioriza a leitura das demais subescalas.</span>`
+        : x.s.natureza==="protetor" ? `<span class="hint">Protetor — se desfavorável, investigar OT-04, OT-06 ou OT-10.</span>`
+        : tx ? (ja ? `<span class="tiny" style="color:var(--ok-ink)">perigo <span class="code">${tx.codigo}</span> já lançado</span>` : `<button class="btn small" type="button" data-act="hzDoCopsoq" data-sub="${x.s.id}">Lançar perigo <span class="code">${tx.codigo}</span></button>`) : ""}
+        ${tx?.inerente && x.f==="ris" ? `<span class="hint" style="flex-basis:100%">Exigência inerente à atividade: acima de 3,66 prioriza a AEP (E1) e não gera linha provisória. Só vira risco se o campo mostrar que autonomia, pausas e suporte são insuficientes para a demanda.</span>` : ""}</div>`; };
+    return `<div class="dom"><div class="dom-h"><h3>${esc(d.nome)}</h3>
+      ${r.auto ? `<span class="row" style="gap:6px"><span class="small muted">nota do domínio ${num2(r.nota)}</span>${chipFaixa(r.faixa)}</span>` : `<select data-b="copsoq.dominios.${d.id}.manual" data-rr="1" style="width:auto" aria-label="Resultado de ${esc(d.nome)}"><option value="">Resultado…</option>${Object.entries(FAIXAS).map(([k,v]) => `<option value="${k}" ${dd.manual===k?"selected":""}>${v}</option>`).join("")}</select>`}</div>
+      <div class="dom-b">
+        ${r.auto ? ((r.altas.length || r.inter.length) ? `<div class="stack tight"><span class="eyebrow">Subescalas fora da faixa favorável</span>${[...r.altas, ...r.inter].map(linha).join("")}</div>` : `<p class="small muted">Todas as subescalas do domínio em faixa favorável.</p>`) : ""}
+        <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="4" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
+        <div><button class="btn ghost small" type="button" data-act="txtPadrao" data-dom="${d.id}">Usar texto padrão (sem achado relevante)</button></div>
+        <label class="f"><span>Conclusão do cruzamento <em>*</em></span><select data-b="copsoq.dominios.${d.id}.concl" data-rr="1"><option value="">Escolha…</option>${CONCLUSOES.map(c => `<option ${dd.concl===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
+          ${!dd.concl && sug ? `<span class="hint">Sugestão: “${esc(sug)}”. <button class="btn ghost small" type="button" data-act="usarSug" data-dom="${d.id}" style="padding:0">Aplicar</button></span>` : ""}
+          ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, é convergência e o perigo entra na AEP; se não confirmar, registre a divergência — prevalece a observação em campo.</span>` : ""}</label>
+      </div></div>`; }).join("");
+  return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${blocos}</div>`;
+}
+function st6(){
+  const a = S.draft, faltam = a.checklist.map((c,i)=>({c,n:i+1})).filter(({c,n}) => c.r==="sim" && !a.perigos.some(h => Number(h.checkItem)===n));
+  const cards = a.perigos.map(h => { const t = TAXMAP[h.codigo], conf = S.confirm === "hz-"+h.id;
+    return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> <span class="chip${h.estado==="E2"?" int":""}" title="Estado de evidência">${esc(h.estado||"—")}</span> ${h.checkItem?`<span class="chip ris">item crítico ${h.checkItem}</span>`:""}${h.descumprNR?` <span class="chip ris">descumprimento de NR</span>`:""}</div>
+      <div class="acts">${conf ? `<span class="confirm">Remover? <button class="btn small danger" type="button" data-act="rmHzSim" data-id="${esc(h.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="edHz" data-id="${esc(h.id)}">Editar</button><button class="btn small danger" type="button" data-act="rmHz" data-id="${esc(h.id)}">Remover</button>`}</div>
+      <h4>${esc(t ? t.nome : h.codigo)}</h4><p class="small muted">${esc((h.fonte||"").slice(0,220))}${(h.fonte||"").length>220?"…":""}</p>
+      <p class="meta">${[h.tipoExp, h.controles ? `POAD/EPC${h.poadEficaz?` eficaz? ${h.poadEficaz}`:""}` : "", h.medida ? "medida proposta registrada" : ""].filter(Boolean).map(esc).join(" · ") || "&nbsp;"}</p></div>`; }).join("");
+  return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo vem da taxonomia; a fonte geradora é sempre específica desta situação.") +
+  `<div class="stack">${faltam.length ? `<div class="note bad"><b>Itens críticos do checklist sem perigo vinculado:</b> ${faltam.map(({n}) => `<button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Item ${n}</button>`).join(" ")}</div>` : ""}
+    ${S.editHz ? vHzEditor() : `<div><button class="btn primary" type="button" data-act="novoHz">+ Adicionar perigo</button></div>`}
+    ${cards || (!S.editHz ? `<div class="panel"><div class="empty">Nenhum perigo lançado. Fator presente e controlado permanece registrado (E0) — só sai o que não se aplica, com justificativa.</div></div>` : "")}
+    ${vFotos()}</div>`;
+}
+function opcoesTax(){ const cat = S.hzCat, t = norm(S.hzFiltro); return TAX.filter(x => (!cat || prefixo(x.codigo) === cat) && (!t || norm(x.codigo+" "+x.nome+" "+x.sub).includes(t))); }
+function fonteRepetida(h){
+  const k = norm(h.fonte).slice(0,120); if (k.length < 20) return null;
+  const outra = Object.values(S.aeps).find(a => a.id !== S.draft.id && norm(a.meta?.cargo) !== norm(S.draft.meta.cargo) && (a.perigos||[]).some(x => norm(x.fonte).slice(0,120) === k));
+  return outra ? `${outra.numero} (${outra.meta?.cargo})` : null;
+}
+function vHzEditor(){
+  const h = S.editHz, t = TAXMAP[h.codigo], ops = opcoesTax(), itensSim = S.draft.checklist.map((c,i)=>({c,n:i+1})).filter(x => x.c.r==="sim");
+  const el = (b, rot, o={}) => { const v = getPath(S, b) ?? "";
+    if (o.area) return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
+    return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}">${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`; };
+  const sel = (b, rot, lista, o={}) => `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><select data-b="${b}"><option value="">—</option>${lista.map(x => `<option ${String(getPath(S,b)??"")===String(x)?"selected":""}>${esc(x)}</option>`).join("")}</select>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
+  const rep = fonteRepetida(h);
+  return `<div class="edbox"><div class="panel-h"><b>${h._novo ? "Novo perigo" : `Editar perigo ${esc(h.idRisco||"")}`}</b><span class="tiny muted">Os campos com * são obrigatórios</span></div>
+    <div class="panel-b stack">
+      <div class="grid g4">
+        <label class="f span2"><span>Categoria</span><select id="f-hzcat" data-hz-cat="1"><option value="">Todas as categorias</option>${Object.entries(CATEG).map(([k,v]) => `<option value="${k}" ${S.hzCat===k?"selected":""}>${k} — ${esc(v)}</option>`).join("")}</select></label>
+        <label class="f span2"><span>Buscar na taxonomia</span><input id="f-hzbusca" type="text" data-hz-busca="1" value="${esc(S.hzFiltro)}" placeholder="Código ou palavra: OT-05, postura, ruído…"></label>
+        <label class="f spanall"><span>Perigo / fator de risco padronizado <em>*</em></span><select id="f-hzcod" data-b="editHz.codigo">
+            <option value="">— Selecione (${ops.length} opção/ões) —</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("")}</select>
+          <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}${t.prov ? " · <b>incluído do PCRE: textos provisórios, confirmar</b>" : ""}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span></label>
+      </div>
+      ${t ? `<div class="note"><b>Fórmula modular:</b> ${esc(t.fonte)}<br><b>Campos locais a coletar:</b> ${esc(t.campos)} <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">Usar a fórmula como ponto de partida</button></div>` : ""}
+      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:3,ph:"Condição concreta observada + contexto da atividade + origem da evidência, específica deste cargo."})}
+      <div id="hz-rep">${rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""}</div>
+      <div class="grid g2">
+        ${el("editHz.danos","Possíveis danos à saúde",{area:1,rows:3,hint:t && t.cid && t.cid!=="—" ? `Em descrição, sem CID. CID-10 de referência (só apoio ao PCMSO, não vai para o PGR): ${esc(t.cid)}` : "Em descrição, sem CID."})}
+        ${el("editHz.exposicao","Caracterização da exposição",{area:1,rows:3,ph:"Tempo, frequência e intensidade"})}
+      </div>
+      <div class="grid g4">
+        ${sel("editHz.tipoExp","Tipo de exposição",TIPOS_EXPOSICAO,{req:1})}
+        ${sel("editHz.tecnica","Técnica utilizada",TECNICAS,{req:1,cls:"span3"})}
+      </div>
+      <div class="grid g2">
+        ${el("editHz.controles","POAD / EPC — medidas existentes",{area:1,rows:3,ph:"Uma por linha, com o nível: 3 - Carrinho elevatório; 4 - Treinamento…",hint:t ? `Padrão da taxonomia: ${esc(t.medidas)}` : ""})}
+        <div class="stack tight">
+          ${sel("editHz.poadEficaz","POAD / EPC eficaz?",["Sim","Não"])}
+          <label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-b="editHz.evidencia" data-hz-live="1" ${h.evidencia?"checked":""} style="margin-top:3px"><span><b>Há evidência registrada da medida nesta unidade.</b> Programa corporativo genérico não conta como evidência local.${t ? ` Evidência mínima: ${esc(t.evidencia)}` : ""}</span></label>
+          <label class="f"><span>Item crítico do checklist que origina este perigo</span><select data-b="editHz.checkItem"><option value="">Nenhum</option>${itensSim.map(x => `<option value="${x.n}" ${Number(h.checkItem)===x.n?"selected":""}>Item ${x.n}</option>`).join("")}</select></label>
+        </div>
+      </div>
+      <div class="stack tight">
+        <label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-b="editHz.descumprNR" data-hz-live="1" ${h.descumprNR?"checked":""} style="margin-top:3px"><span><b>Descumprimento de requisito específico de NR</b> — registrar qual requisito, para a análise na planilha de controle.</span></label>
+        <div id="hz-div">${vHzDiv()}</div>
+      </div>
+      <div class="grid g4">
+        <label class="f span2"><span>Estado de evidência <em>*</em></span><select data-b="editHz.estado" data-hz-live="1"><option value="">—</option>${ESTADOS.map(([k,n]) => `<option value="${k}" ${h.estado===k?"selected":""}>${k} — ${n}</option>`).join("")}</select></label>
+        ${sel("editHz.origem","Origem da evidência",ORIGENS,{cls:"span2"})}
+        <div id="hz-e2" class="span2">${vHzE2()}</div>
+      </div>
+      <p class="hint" id="hz-estado-txt">${h.estado ? esc(ESTADOS.find(x=>x[0]===h.estado)[2]) : "NA (não aplicável) e E1 (prioridade de AEP) não geram linha no inventário."}</p>
+      <div class="grid g4">
+        ${el("editHz.medida","Medida proposta",{area:1,rows:2,cls:"spanall",ph:"O que deve ser introduzido, aprimorado ou mantido"})}
+        ${sel("editHz.hierarquia","Hierarquia (NR-1)",HIERARQUIA,{hint:"EPI não é medida para fator ergonômico (decisão D-12)."})}
+        ${el("editHz.respSug","Responsável sugerido",{cls:"span2"})}${el("editHz.prazoSug","Prazo sugerido",{type:"date"})}
+      </div>
+      ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
+      <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
+    </div></div>`;
+}
+function vHzDiv(){ const h = S.editHz;
+  return h.descumprNR ? `<label class="f"><span>Requisito de NR descumprido <em>*</em></span><input id="f-editHz.requisitoNR" type="text" data-b="editHz.requisitoNR" value="${esc(h.requisitoNR||"")}" placeholder="Ex.: NR-17, item 17.6.6"></label>` : ""; }
+function vHzE2(){ const h = S.editHz; return h.estado === "E2" ? `<label class="f"><span>Data prevista de revisão (E2) <em>*</em></span><input type="date" data-b="editHz.dataRevisao" value="${esc(h.dataRevisao||"")}"></label>` : ""; }
+
+function vFotos(){
+  const F = S.draft.fotos;
+  const cards = F.map((f,i) => { const conf = S.confirm === "ft-"+f.id;
+    return `<div class="ph"><div class="img"><img data-foto="${esc(f.assetId)}" alt="${esc(f.titulo||"Foto "+(i+1))}" loading="lazy"></div>
+      <div class="cap"><label class="f"><span>Foto ${i+1} — legenda <em>*</em></span><input id="f-ft-${esc(f.id)}" type="text" data-b="fotos.${i}.titulo" value="${esc(f.titulo)}" maxlength="140" placeholder="Ex.: Conferência de parâmetros de furo"></label>
+      <div class="row">${i>0?`<button class="btn small" type="button" data-act="ftUp" data-i="${i}" aria-label="Mover para cima">↑</button>`:""}${i<F.length-1?`<button class="btn small" type="button" data-act="ftDown" data-i="${i}" aria-label="Mover para baixo">↓</button>`:""}
+        ${conf ? `<span class="confirm">Remover a foto de vez? <button class="btn small danger" type="button" data-act="rmFtSim" data-id="${esc(f.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="rmFt" data-id="${esc(f.id)}" style="margin-left:auto">Remover</button>`}</div></div></div>`; }).join("");
+  return `<div class="panel" style="margin-top:8px"><div class="panel-h"><b>Principais ações técnicas da atividade (fotos)</b><span class="tiny muted">Legenda curta em cada foto. No documento saem numeradas, em duas colunas.</span></div>
+    <div class="panel-b stack">${S.assets ? `<label class="drop" id="drop" for="fileFotos"><b>Clique para escolher fotos</b> ou arraste para cá<br><span class="tiny faint">JPG ou PNG — comprimidas no envio</span></label><input type="file" id="fileFotos" accept="image/*" multiple hidden>` : `<div class="note warn">O envio de fotos não está disponível nesta visualização.</div>`}
+    <div id="upmsg" class="small muted" aria-live="polite"></div>${F.length ? `<div class="photos">${cards}</div>` : ""}</div></div>`;
+}
+function st8(){
+  const a = S.draft;
+  const opt = (v,rot) => `<input type="radio" id="aet-${v}" name="aetdec" value="${v}" data-b="aet.decisao" data-rr="1" ${a.aet.decisao===v?"checked":""}><label for="aet-${v}">${rot}</label>`;
+  return stepHead(5,"Interpretação, decisão sobre AET e conclusão","A decisão sobre a AET é registrada em toda AEP, inclusive quando negativa: sem o registro, a ausência de AET parece omissão.") +
+  `<div class="stack">
+   <div class="panel"><div class="panel-b stack">
+     <label class="f"><span>Interpretação da AEP <em>*</em></span><select data-b="conclusao.interpretacao" data-rr="1"><option value="" ${a.conclusao.interpretacao?"":"selected"}>Escolha…</option>${INTERPRETACOES.map(x => `<option ${a.conclusao.interpretacao===x?"selected":""}>${esc(x)}</option>`).join("")}</select>
+       <span class="hint">Escolha manual do analista.</span></label>
+   </div></div>
+   <div class="panel"><div class="panel-h"><b>AET acionada?</b><div class="seg" role="radiogroup" aria-label="Decisão sobre AET">${opt("nao","Não — AEP suficiente")}${opt("sim","Sim — AET acionada")}${opt("analise","Em análise")}</div></div>
+    <div class="panel-b stack">
+      <fieldset style="border:0;padding:0;margin:0" class="stack tight"><legend class="small" style="font-weight:600;color:var(--ink-2);margin-bottom:6px">Gatilhos da NR-17, item 17.3.2</legend>
+        ${GATILHOS.map(([k,t]) => `<label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-gat="${k}" ${(a.aet.gatilhos||[]).includes(k)?"checked":""} style="margin-top:3px"><span><b>${k})</b> ${esc(t)}</span></label>`).join("")}</fieldset>
+      ${fld("aet.justificativa","Justificativa da decisão (gatilhos a–d)",{area:1,rows:3,req:1})}
+    </div></div>
+   <div class="panel"><div class="panel-b stack">
+      ${fld("conclusao.parecer","Observações complementares",{area:1,rows:5,req:1,ph:"Base da avaliação, condições observadas e condicionantes da conclusão"})}
+      ${fld("conclusao.recomendacoes","Recomendações",{area:1,rows:7,hint:"Uma recomendação por linha."})}
+      ${fld("conclusao.oportunidades","Oportunidades de melhoria (condição de exigência não crítica)",{area:1,rows:3})}
+   </div></div></div>`;
+}
+
+/* ---------------- Perigos: ações ---------------- */
+function abrirHz(h){
+  S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", controles:"", checkItem:"", evidencia:false,
+    descumprNR:false, requisitoNR:"", tipoExp:"", tecnica:"AEP e COPSOQ II", poadEficaz:"", estado:"E3", dataRevisao:"", origem:"Observação em campo",
+    medida:"", hierarquia:"", respSug:"", prazoSug:"", origemCopsoq:"" }, h);
+  S.hzErr = ""; S.hzFiltro = ""; S.hzCat = h && h.codigo ? prefixo(h.codigo) : "";
+}
+function salvarHz(){
+  const h = S.editHz, t = TAXMAP[h.codigo]; const erro = m => { S.hzErr = m; renderStep(); };
+  if (!t) return erro("Selecione o perigo na taxonomia.");
+  if (!h.fonte?.trim()) return erro("Descreva a fonte geradora específica desta situação.");
+  if (!h.tipoExp) return erro("Informe o tipo de exposição.");
+  if (!h.tecnica) return erro("Informe a técnica utilizada.");
+  if (!h.estado) return erro("Informe o estado de evidência.");
+  if (h.estado === "E2" && !h.dataRevisao) return erro("E2 exige data prevista de revisão — sem ela o registro é inválido.");
+  if (h.descumprNR && !h.requisitoNR?.trim()) return erro("Informe qual requisito de NR foi descumprido.");
+  if (h.medida?.trim() && !h.hierarquia) return erro("Informe o nível da hierarquia da medida proposta.");
+  const novo = clone(h); delete novo._novo;
+  const i = S.draft.perigos.findIndex(x => x.id === novo.id);
+  if (i >= 0) S.draft.perigos[i] = novo; else S.draft.perigos.push(novo);
+  S.editHz = null; S.hzErr = ""; marcar(); numerarRiscos(S.draft); renderStep(); renderRail(); renderAside(); toast("Perigo salvo.");
+}
+
+/* ---------------- Fotos ---------------- */
+async function comprimir(file){
+  const url = URL.createObjectURL(file);
+  try { const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement("canvas"); c.width = Math.round(img.naturalWidth*k); c.height = Math.round(img.naturalHeight*k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return await new Promise(ok => c.toBlob(ok, "image/jpeg", .82));
+  } finally { URL.revokeObjectURL(url); }
+}
+async function enviarFotos(files){
+  if (!S.assets) return; const lista = Array.from(files).filter(f => f.type.startsWith("image/")), msg = $("#upmsg");
+  for (let k=0; k<lista.length; k++){ if (msg) msg.textContent = `Enviando foto ${k+1} de ${lista.length}…`;
+    try { const r = await S.assets.upload(await comprimir(lista[k]), { type: "image/jpeg" }); S.draft.fotos.push({ id: uid(), assetId: r.id, titulo: "" }); marcar(); await salvarAEP(); }
+    catch(e){ toast(e && e.code === "too_large" ? "Foto grande demais." : e && e.code === "quota_or_state" ? "O espaço para fotos acabou." : "Não foi possível enviar uma das fotos."); } }
+  if (msg) msg.textContent = lista.length ? "Envio concluído. Escreva a legenda de cada ação técnica." : ""; renderStep(); renderRail();
+}
+
+/* =========================================================================
+   COPSOQ POR SETOR
+   ========================================================================= */
+function vAreas(){
+  const L = Object.values(S.areas).sort((x,y)=>String(x.nome).localeCompare(String(y.nome)));
+  const cont = nome => Object.values(S.aeps).filter(a => norm(a.meta?.setorCopsoq) === norm(nome)).length;
+  const linhas = L.map(ar => { const altas = altasDe(ar);
+    return `<tr class="click" data-area="${esc(ar.id)}" tabindex="0"><td><b>${esc(ar.nome)}</b><div class="tiny faint">${cont(ar.nome)} AEP(s)</div></td><td class="num">${esc(ar.n||"—")}</td>
+      ${DOMINIOS.map(d => { const f = faixaDe(ar.dominios?.[d.id]); return `<td class="num"><span class="chip ${f||""}">${num2(ar.dominios?.[d.id])}</span></td>`; }).join("")}
+      <td class="small">${altas.length ? altas.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : '<span class="faint">—</span>'}</td></tr>`; }).join("");
+  return `<div class="pagehead"><div><h1>COPSOQ II por setor</h1><p>Notas por setor e subescala, já com a polaridade corrigida (valor alto = pior em todas). Faixas: abaixo de 2,34 favorável; 2,34 a 3,66 intermédia; acima de 3,66 risco para a saúde. O domínio é panorama; a unidade de leitura é a subescala.</p></div><button class="btn" type="button" data-act="novaArea">+ Novo setor</button></div>
+  <div class="panel">${L.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>Setor</th><th>n</th>${DOMINIOS.map(d => `<th title="${esc(d.nome)}">${esc(d.id)}</th>`).join("")}<th>Subescalas altas</th></tr></thead><tbody>${linhas}</tbody></table></div>` : `<div class="empty">Nenhum setor cadastrado.</div>`}</div>
+  <p class="tiny faint" style="margin-top:8px">${DOMINIOS.map(d => `${d.id} = ${d.nome}`).join(" · ")}</p>`;
+}
+function vArea(){
+  const ar = S.editArea, conf = S.confirm === "delArea";
+  const tabela = DOMINIOS.map(d => `<tr><th colspan="2" style="padding-top:16px">${esc(d.nome)}</th><td style="padding-top:16px"><input type="text" inputmode="decimal" id="f-d-${d.id}" data-b="editArea.dominios.${d.id}" data-area-live="d:${d.id}" value="${esc(ar.dominios?.[d.id] ?? "")}" aria-label="Nota do domínio ${esc(d.nome)}"></td><td id="fx-d-${d.id}">${chipFaixa(faixaDe(ar.dominios?.[d.id]))}</td></tr>` +
+    SUBS.filter(s => s.dom === d.id).map(s => `<tr class="${s.natureza!=="org"?"efeito":""}"><td style="padding-left:18px">${esc(s.nome)}</td><td>${s.tax?`<span class="code">${s.tax}</span>`:`<span class="tiny faint">(${s.natureza})</span>`}</td>
+      <td><input type="text" inputmode="decimal" id="f-m-${s.id}" data-b="editArea.medias.${s.id}" data-area-live="${s.id}" value="${esc(ar.medias?.[s.id] ?? "")}" aria-label="Nota de ${esc(s.nome)}"></td><td id="fx-${s.id}">${faixaDe(ar.medias?.[s.id]) ? chipFaixa(faixaDe(ar.medias?.[s.id])) : ""}</td></tr>`).join("")).join("");
+  return `<div class="aeptitle"><button class="btn ghost" type="button" data-act="voltarAreas">← Setores</button><h1>${esc(ar.nome || "Novo setor")}</h1>
+    <span style="margin-left:auto">${conf ? `<span class="confirm">Excluir este setor? AEPs que já usaram as notas mantêm a cópia delas. <button class="btn small danger" type="button" data-act="delAreaSim">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="delArea">Excluir setor</button>`}</span></div>
+  <div class="stack"><div class="panel"><div class="panel-b grid g4">
+    <label class="f span2"><span>Setor (como no painel do COPSOQ) <em>*</em></span><input id="f-arnome" type="text" data-b="editArea.nome" value="${esc(ar.nome)}"></label>
+    <label class="f"><span>Nº de respondentes</span><input id="f-arn" type="number" min="0" data-b="editArea.n" value="${esc(ar.n)}"></label>
+    <label class="f"><span>Data do export</span><input id="f-arcorte" type="date" data-b="editArea.dataCorte" value="${esc(ar.dataCorte)}"></label>
+    <label class="f spanall"><span>Aplicação</span><input id="f-aronda" type="text" data-b="editArea.onda" value="${esc(ar.onda)}" placeholder="Ex.: aplicação de janeiro/2025"></label>
+  </div></div>
+  <div class="panel"><div class="panel-h"><b>Colar da planilha</b><span class="tiny muted">Uma linha por subescala ou domínio: nome e nota, separados por tabulação ou ponto e vírgula</span></div>
+    <div class="panel-b stack tight"><textarea id="f-colar" data-colar="1" rows="4" placeholder="Exigências cognitivas	4,50&#10;Ritmo de trabalho	3,25">${esc(S.colar)}</textarea>
+    <div class="row"><button class="btn" type="button" data-act="colar">Importar notas</button><span class="small muted" aria-live="polite">${esc(S.colarMsg)}</span></div></div></div>
+  <div class="panel"><div class="tablewrap"><table class="subtable" style="min-width:560px"><thead><tr><th>Domínio / subescala</th><th>Perigo</th><th>Nota</th><th>Faixa</th></tr></thead><tbody>${tabela}</tbody></table></div></div></div>`;
+}
+function marcarArea(){ S.areaDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.areaTimer); S.areaTimer = setTimeout(salvarArea, 700); }
+async function salvarArea(){
+  clearTimeout(S.areaTimer); if (!S.editArea || !S.areaDirty) return;
+  S.editArea.atualizadoEm = new Date().toISOString(); const corpo = clone(S.editArea); S.areas[corpo.id] = corpo;
+  if (!S.db){ S.areaDirty = false; return; } setSaveState("Salvando…");
+  try { await S.db.doc("copsoq/" + corpo.id).set(corpo); S.areaDirty = false; setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); toast("Não foi possível salvar o setor."); }
+}
+function importarColagem(){
+  const linhas = String(S.colar||"").split(/\r?\n/).map(l => l.trim()).filter(Boolean); let ok = 0; const falhas = [];
+  linhas.forEach(l => { const m = l.match(/^(.*?)[\t;]+\s*([0-9]+(?:[.,][0-9]+)?)\s*$/) || l.match(/^(.*\S)\s+([0-9]+(?:[.,][0-9]+)?)\s*$/); if (!m) { falhas.push(l); return; }
+    const nome = norm(m[1]), val = m[2].replace(",", ".");
+    const d = DOMINIOS.find(x => norm(x.nome) === nome); if (d) { S.editArea.dominios = S.editArea.dominios || {}; S.editArea.dominios[d.id] = val; ok++; return; }
+    const s = SUBS.find(x => norm(x.nome) === nome) || SUBS.find(x => nome && (norm(x.nome).includes(nome) || nome.includes(norm(x.nome))));
+    if (s) { S.editArea.medias = S.editArea.medias || {}; S.editArea.medias[s.id] = val; ok++; return; } falhas.push(m[1]); });
+  S.colarMsg = `${ok} nota(s) importada(s)` + (falhas.length ? `; não reconhecido: ${falhas.slice(0,4).join(", ")}${falhas.length>4?"…":""}` : "."); marcarArea(); render();
+}
+
+/* =========================================================================
+   UNIDADE
+   ========================================================================= */
+function vConfig(){
+  if (!S.cfgDraft) S.cfgDraft = Object.assign({ empresa:"", unidade:"", cnpj:"", analista:"", registroAnalista:"", dataInicio:"", dataMeta:"" }, clone(S.config||{}));
+  const c = S.cfgDraft, f = (k, rot, o={}) => `<label class="f ${o.cls||""}"><span>${rot}</span><input id="f-cfg-${k}" type="${o.type||"text"}" data-b="cfgDraft.${k}" value="${esc(c[k]||"")}" placeholder="${esc(o.ph||"")}"></label>`;
+  return `<div class="pagehead"><div><h1>Dados da unidade</h1><p>Aparecem no cabeçalho dos documentos. O responsável técnico padrão é sugerido em cada AEP; início e meta alimentam o painel.</p></div></div>
+  <div class="panel"><div class="panel-b grid g2">${f("empresa","Empresa")}${f("unidade","Unidade / estabelecimento")}${f("cnpj","CNPJ")}${f("analista","Responsável técnico padrão")}${f("registroAnalista","Qualificação / registro")}<span></span>${f("dataInicio","Início do projeto de AEPs",{type:"date"})}${f("dataMeta","Meta de conclusão",{type:"date"})}</div></div>`;
+}
+async function salvarConfig(){ clearTimeout(S.cfgTimer); if (!S.cfgDraft) return; S.config = clone(S.cfgDraft); if (!S.db) return; setSaveState("Salvando…");
+  try { await S.db.doc("config/unidade").set(clone(S.cfgDraft)); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); } }
+</script>
+
+<script>
+/* =========================================================================
+   DOCUMENTO DA AEP (prévia e arquivo para imprimir / salvar em PDF)
+   ========================================================================= */
+const DOC_CSS = `
+@page{size:A4;margin:12mm 12mm 14mm}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#e6e6e6;color:#1d1d1d;font:10.5px/1.45 "IBM Plex Sans",Arial,Helvetica,sans-serif}
+.tools{position:sticky;top:0;z-index:5;background:#414141;color:#fff;padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;border-bottom:3px solid #EA5B26}
+.tools button{font:600 13px Arial,sans-serif;background:#C2451A;color:#fff;border:0;border-radius:4px;padding:8px 14px;cursor:pointer}
+.folha{max-width:210mm;margin:16px auto;background:#fff;padding:12mm;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+table.page{width:100%;border-collapse:collapse}
+table.page > thead td{padding-bottom:12px}
+.cab{width:100%;border-collapse:collapse}
+.cab .top td{padding:0 0 7px;border-bottom:3px solid #EA5B26;vertical-align:bottom}
+.cab .logo{width:30%}
+.cab .logo img{height:15mm;width:auto;display:block}
+.cab .tt{text-align:center;color:#414141}
+.cab .tt b{display:block;font-size:15.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1.15}
+.cab .tt span{display:block;font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b6b6b;margin-top:3px}
+.cab .id{width:22%;text-align:right;color:#414141}
+.cab .id b{display:block;font-size:15px;font-weight:700;color:#C2451A}
+.cab .id span{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#6b6b6b}
+.meta{width:100%;border-collapse:collapse;margin-top:6px}
+.meta td{padding:3px 7px;font-size:9.5px;border-bottom:1px solid #d6d6d6;vertical-align:top}
+.meta .k{width:13%;font-weight:700;color:#6b6b6b;text-transform:uppercase;font-size:8.5px;letter-spacing:.06em;padding-top:4px}
+h2{break-after:avoid;page-break-after:avoid;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;background:#f2f2f2;color:#414141;border-left:4px solid #EA5B26;padding:5px 8px;margin:16px 0 7px}
+h3{font-size:10.5px;margin:10px 0 4px;break-after:avoid;color:#414141}
+p{margin:0 0 6px;text-align:justify}
+table.t{width:100%;border-collapse:collapse;margin:4px 0 8px}
+table.t th,table.t td{border:1px solid #bdbdbd;padding:4px 6px;vertical-align:top;text-align:left}
+table.t th{background:#414141;color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em;border-color:#414141}
+table.t tbody th{background:#f2f2f2;color:#414141;border-color:#bdbdbd}
+table.t tr{break-inside:avoid}
+table.t thead{display:table-header-group}
+.c{text-align:center!important}
+.b{font-weight:700}
+.est{display:inline-block;font-weight:700;font-size:9px;padding:1px 6px;border:1px solid #9a9a9a;border-radius:9px;white-space:nowrap}
+.bar{border:1.5px solid #414141;border-left:5px solid #EA5B26;padding:7px 10px;font-weight:700;margin:6px 0;letter-spacing:.02em}
+.fotos{width:100%;border-collapse:collapse;margin-top:4px}
+.fotos td{width:50%;padding:6px;vertical-align:top;border:1px solid #bdbdbd;break-inside:avoid}
+.fotos .cap{font-weight:700;font-size:10px;margin-bottom:4px}
+.fotos img{width:100%;max-height:85mm;object-fit:contain;display:block;background:#f4f4f4}
+.sim{color:#A51C1C;font-weight:700}.nao{color:#1E6B3E;font-weight:600}
+.alta{color:#A51C1C;font-weight:700}
+.small{font-size:9.5px;color:#444}
+ul{margin:2px 0 8px 16px;padding:0}li{margin:0 0 3px}
+.ass{margin-top:30px;display:flex;justify-content:flex-end}
+.ass div{width:70mm;border-top:1px solid #414141;padding-top:4px;text-align:center;font-size:10px}
+.nota{font-size:9.5px;color:#333;border-left:3px solid #EA5B26;padding:4px 8px;margin-top:8px;background:#f7f7f7}
+@media print{body{background:#fff}.tools{display:none}.folha{box-shadow:none;margin:0;padding:0;max-width:none}}
+`;
+function docHTML(a, cfg, fotos, opt={}){
+  const m = a.meta; cfg = cfg || {};
+  const logo = opt.logo || "logo.png";
+  const cab = `<table class="cab"><tr class="top">
+      <td class="logo"><img src="${esc(logo)}" alt="ArcelorMittal"></td>
+      <td class="tt"><b>Avaliação Ergonômica Preliminar</b><span>${esc(cfg.unidade || "Mina de Serra Azul")} · NR-17</span></td>
+      <td class="id"><span>Documento</span><b>${esc(a.numero)}</b></td></tr></table>
+    <table class="meta">
+      <tr><td class="k">Empresa</td><td>${esc(cfg.empresa||"—")}${cfg.cnpj?` · CNPJ ${esc(cfg.cnpj)}`:""}</td><td class="k">Data</td><td>${fmtData(m.data)}</td></tr>
+      <tr><td class="k">Setor</td><td>${esc((m.setor||"—").trim())}${m.area?` · ${esc(m.area)}`:""}</td><td class="k">Cargo/Função</td><td>${esc((m.cargo||"—").trim())}</td></tr>
+      <tr><td class="k">Unidade</td><td>${esc(cfg.unidade||"—")}</td><td class="k">Analista</td><td>${esc(m.analista||"—")}${m.registroAnalista?` – ${esc(m.registroAnalista)}`:""}</td></tr></table>`;
+  const ck = CHECKLIST.map((t,i) => { const c = a.checklist[i]||{}, r = c.r==="sim"?'<span class="sim">Sim</span>':c.r==="nao"?'<span class="nao">Não</span>':c.r==="na"?"N.A.":"—";
+    return `<tr><td class="c">${i+1}</td><td>${esc(t)}${c.r==="sim"&&c.obs?`<div class="small"><b>Observado:</b> ${escBr(c.obs)}</div>`:""}</td><td class="c">${r}</td></tr>`; }).join("");
+  const desq = temDesqualificacao(a), snap = copsoqDaAEP(a);
+  const altasSetor = snap ? SUBS.map(x => ({ s:x, m: snap.medias?.[x.id] })).filter(x => faixaDe(x.m) === "ris").sort((p,q) => q.m - p.m) : [];
+  const cruz = DOMINIOS.map(d => { const r = resultadoDominio(a,d.id), dd = a.copsoq.dominios[d.id]||{};
+    const subs = [...r.altas, ...r.inter].map(x => `<span class="${x.f==="ris"?"alta":""}">${esc(x.s.nome)} ${num2(x.m)}${x.f==="ris"?" (alta)":""}</span>`).join("<br>");
+    return `<tr><td class="b">${esc(d.nome)}</td><td class="c">${r.auto?`${num2(r.nota)}<br>`:""}${r.faixa?esc(FAIXAS[r.faixa]):"—"}${subs?`<div class="small" style="text-align:left;margin-top:3px">${subs}</div>`:""}</td><td>${escBr(dd.obs||"")}</td><td class="c">${esc(dd.concl||"—")}</td></tr>`; }).join("");
+  const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo];
+    return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b> — ${esc(t?t.nome:"")}<div class="small">${escBr(h.danos||"")}</div></td>
+      <td>${escBr(h.fonte||"")}${h.exposicao?`<div class="small"><b>Exposição:</b> ${escBr(h.exposicao)}${h.tipoExp?` (${esc(h.tipoExp)})`:""}</div>`:h.tipoExp?`<div class="small"><b>Exposição:</b> ${esc(h.tipoExp)}</div>`:""}${h.controles?`<div class="small"><b>POAD / EPC:</b> ${escBr(h.controles)}${h.poadEficaz?` — eficaz? ${esc(h.poadEficaz)}`:""}</div>`:""}${h.checkItem?`<div class="small"><b>Vinculado ao item crítico ${h.checkItem} do checklist.</b></div>`:""}${h.descumprNR?`<div class="small"><b>Descumprimento de requisito de NR:</b> ${esc(h.requisitoNR||"")}</div>`:""}</td>
+      <td class="c"><span class="est">${esc(h.estado||"—")}</span>${h.estado==="E2"&&h.dataRevisao?`<div class="small">revisão até ${fmtData(h.dataRevisao)}</div>`:""}</td>
+      <td>${escBr(h.medida||"—")}${h.hierarquia?`<div class="small">${esc(h.hierarquia)}</div>`:""}${h.respSug||h.prazoSug?`<div class="small">${esc(h.respSug||"")}${h.prazoSug?` · até ${fmtData(h.prazoSug)}`:""}</div>`:""}</td></tr>`; }).join("");
+  const areasNR = AREAS_NR17.map(([id,nome]) => { const n = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.area===id).length;
+    return `<tr><td>${esc(nome)}</td><td class="c">${n || "—"}</td></tr>`; }).join("");
+  const fotosT = []; for (let i=0;i<fotos.length;i+=2){ fotosT.push(`<tr>${[fotos[i],fotos[i+1]].map((f,k) => f?`<td><div class="cap">${i+k+1} – ${esc(f.titulo||"")}</div><img src="${f.src}" alt=""></td>`:"<td></td>").join("")}</tr>`); }
+  const recs = String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const dec = {nao:"Não — AEP suficiente",sim:"Sim — AET acionada",analise:"Em análise"}[a.aet?.decisao] || "—";
+  const gat = (a.aet?.gatilhos||[]).map(k => GATILHOS.find(g=>g[0]===k)).filter(Boolean);
+  const corpo = `
+  <h2>Objetivo e metodologia</h2><p>${esc(TXT_OBJETIVO)}</p><p>${esc(TXT_METODOLOGIA)}</p>
+  <h2>Descrição sumária da atividade</h2><p>${escBr(a.trabalho.sumaria||"—")}</p>
+  ${fotos.length?`<h2>Principais ações técnicas da atividade</h2><table class="fotos">${fotosT.join("")}</table>`:""}
+  <h2>Checklist para avaliação ergonômica preliminar (atividades operacionais em geral)</h2>
+  <table class="t"><thead><tr><th style="width:36px">Item</th><th>Descrição</th><th style="width:70px">Resultado</th></tr></thead><tbody>${ck}
+  <tr><td colspan="2" class="b" style="text-align:right">Foram identificados itens de desqualificação ergonômica?</td><td class="c">${desq?'<span class="sim">Sim</span>':'<span class="nao">Não</span>'}</td></tr></tbody></table>
+  <h2>Integração: cruzamento COPSOQ II × observação em campo</h2>
+  <p>Os indicadores de percepção coletiva (COPSOQ II, versão média) são confrontados com as evidências físicas e organizacionais observadas. O instrumento é triagem: orienta onde olhar, e a caracterização do risco é feita pela AEP.</p>
+  ${snap?`<p class="small"><b>Nível de agregação:</b> setor ${esc(snap.nome)}${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""} · ${esc(snap.n||"?")} respondente(s). Indicador de contexto coletivo do setor; não caracteriza o cargo isoladamente.${Number(snap.n)<15?" Com menos de 15 respondentes, o resultado é tratado como indício, não caracterização.":""}</p>
+  <p class="small"><b>Subescalas acima de 3,66 no setor:</b> ${altasSetor.length ? altasSetor.map(x => `${esc(x.s.nome)} (${num2(x.m)})`).join("; ") : "nenhuma"}.</p>`:`<p class="small">Resultado por domínio informado pelo analista, sem notas de setor vinculadas a esta AEP.</p>`}
+  <table class="t"><thead><tr><th style="width:17%">Domínio COPSOQ</th><th style="width:20%">Resultado</th><th>Observação em campo</th><th style="width:19%">Conclusão</th></tr></thead><tbody>${cruz}</tbody></table>
+  <h2>Inventário de perigos</h2>
+  <p class="small">Perigos identificados e respectivas fontes geradoras, com os possíveis danos em descrição, sem CID. A graduação do risco (probabilidade, severidade e nível) é feita na planilha de controle do GRO da unidade, a partir deste registro.</p>
+  <table class="t"><thead><tr><th style="width:24%">Perigo / possíveis danos</th><th>Fonte geradora / exposição / medidas existentes</th><th class="c" style="width:52px">Estado</th><th style="width:21%">Medida proposta</th></tr></thead><tbody>
+  ${hz || `<tr><td colspan="4" class="c">Nenhum perigo lançado — ver observações complementares.</td></tr>`}</tbody></table>
+  <h3>Perigos por área de condições de trabalho</h3>
+  <table class="t"><thead><tr><th>Área de condições de trabalho (NR-17, 17.1.1.1)</th><th class="c" style="width:90px">Perigos</th></tr></thead><tbody>${areasNR}</tbody></table>
+  <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
+  <div class="bar">${esc(a.conclusao?.interpretacao || "—")}</div>
+  <h2>Decisão sobre AET (NR-17, 17.3.2)</h2>
+  <table class="t"><tr><th style="width:26%">AET acionada?</th><td class="b">${esc(dec)}</td></tr>
+  ${gat.length?`<tr><th>Gatilhos</th><td>${gat.map(g=>`${g[0]}) ${esc(g[1])}`).join("<br>")}</td></tr>`:""}
+  <tr><th>Justificativa</th><td>${escBr(a.aet?.justificativa||"—")}</td></tr></table>
+  <h2>Observações complementares</h2><p>${escBr(a.conclusao?.parecer||"—")}</p>
+  <h2>Recomendações</h2>${recs.length?`<ul>${recs.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:"<p>—</p>"}
+  <h2>Oportunidades de melhoria (condição de exigência não crítica)</h2><p>${escBr(a.conclusao?.oportunidades||"Não há.")}</p>
+  <div class="nota">${esc(TXT_NOTA_AET)}</div>
+  <div class="ass"><div>${esc(m.analista||"Responsável técnico")}${m.registroAnalista?`<br>${esc(m.registroAnalista)}`:""}</div></div>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(a.numero)} — ${esc((m.cargo||"AEP").trim())}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap">
+<style>${DOC_CSS}</style></head><body>
+${opt.preview?"":`<div class="tools"><button onclick="window.print()">Imprimir / salvar em PDF</button><span>No diálogo de impressão, escolha “Salvar como PDF”. O cabeçalho se repete em cada página.</span></div>`}
+<div class="folha"><table class="page"><thead><tr><td>${cab}</td></tr></thead><tbody><tr><td>${corpo}</td></tr></tbody></table></div>
+</body></html>`;
+}
+function vDoc(){
+  const a = S.draft;
+  return `<div class="aeptitle"><button class="btn ghost" type="button" data-act="voltarAEP">← Voltar à AEP</button>
+    <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> Documento</h1>
+    <span style="margin-left:auto" class="row">${S.downloads ? `<button class="btn primary" type="button" data-act="baixar" id="btnBaixar">Baixar documento</button>` : ""}</span></div>
+  <div class="stack">
+    <div class="note">${S.downloads ? `<b>Para imprimir ou gerar o PDF:</b> baixe o documento, abra o arquivo no navegador e use o botão <b>Imprimir / salvar em PDF</b> no topo. O cabeçalho se repete em cada página e as fotos vão dentro do arquivo.` : `<b>O download não está disponível nesta visualização.</b> Abra o sistema pelo link no claude.ai para baixar o documento.`}
+    ${a.status !== "concluida" ? `<br><b>Esta AEP ainda não foi concluída</b> — ${totalPend(pendencias(a))} pendência(s).` : ""}</div>
+    <div class="docprev"><iframe id="prev" title="Prévia do documento da AEP"></iframe></div>
+  </div>`;
+}
+async function montarPrevia(){
+  const f = $("#prev"); if (!f) return;
+  const lista = S.draft.fotos||[], urls = await urlsFotos(lista.map(x => x.assetId));
+  const fotos = lista.map((x,i) => ({ src: urls[i], titulo: x.titulo })).filter(x => x.src);
+  f.srcdoc = docHTML(S.draft, S.config, fotos, { preview: true, logo: new URL("logo.png", location.href).href });
+}
+const nomeArquivo = s => String(s).replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,120);
+async function baixarDoc(){
+  if (!S.downloads) return;
+  const btn = $("#btnBaixar"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
+  try {
+    const fotos = [];
+    for (const f of S.draft.fotos||[]) fotos.push({ src: await paraDataURL(f.assetId), titulo: f.titulo });
+    const html = docHTML(S.draft, S.config, fotos.filter(f => f.src), { logo: (await logoDataURL()) || undefined });
+    await S.downloads.save({ filename: nomeArquivo(`${S.draft.numero} - ${S.draft.meta.cargo || "AEP"}`) + ".html", data: html });
+    toast("Documento baixado. Abra o arquivo para imprimir ou salvar em PDF.");
+  } catch(e){
+    if (!e || e.code !== "declined") toast(e && e.code === "rate_limited" ? "Aguarde um instante e tente de novo." : "Não foi possível baixar o documento.");
+  } finally { if (btn){ btn.disabled = false; btn.textContent = "Baixar documento"; } }
+}
+
+/* =========================================================================
+   EXPORTAÇÃO PARA O PGR (mesmas 26 colunas da aba EXPORTA PGR)
+   ========================================================================= */
+function linhasPGR(){
+  const L = Object.values(S.aeps)
+    .filter(a => S.expEscopo === "todas" || a.status === "concluida")
+    .filter(a => !S.expGHE || String(a.meta?.eg||"") === S.expGHE)
+    .sort((x,y) => String(x.meta?.eg||"").localeCompare(String(y.meta?.eg||"")) || idNum(x) - idNum(y));
+  const out = [];
+  L.forEach(a => (a.perigos||[]).forEach(h => {
+    const t = TAXMAP[h.codigo]; if (!t) return;
+    // Colunas de graduação (Categoria Risco, Probabilidade, Severidade, Nível, Categoria, Ações) saem em
+    // branco: são preenchidas à mão na planilha de controle.
+    out.push([a.meta?.eg||"", (a.meta?.cargo||"").trim(), `${a.numero} / ${h.idRisco||"R??"}`, "Ergonomico", t.nome, h.fonte||"", "NA", "NA", h.danos||"", h.tipoExp||"", h.tecnica||"",
+      "NA","NA","NA","NA","NA", "", h.controles||"", h.poadEficaz||"", "NA","NA", "", "", "", "", ""]);
+  }));
+  return out;
+}
+let xlsxCarregando = null;
+function carregarXLSX(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (!xlsxCarregando) xlsxCarregando = new Promise((ok, no) => {
+    const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    sc.onload = () => window.XLSX ? ok(window.XLSX) : no(new Error("xlsx")); sc.onerror = () => { xlsxCarregando = null; no(new Error("xlsx")); };
+    document.head.appendChild(sc);
+  });
+  return xlsxCarregando;
+}
+async function exportarPGR(){
+  if (!S.downloads) return;
+  const linhas = linhasPGR(); if (!linhas.length) return;
+  const btn = $("#btnExp"); if (btn){ btn.disabled = true; btn.textContent = "Gerando…"; }
+  try {
+    const X = await carregarXLSX();
+    const ws = X.utils.aoa_to_sheet([PGR_COLS, ...linhas]);
+    ws["!cols"] = [12,28,16,12,40,60,10,10,45,20,26,10,8,8,8,8,18,45,10,6,6,20,34,8,18,40].map(w => ({ wch: w }));
+    ws["!autofilter"] = { ref: X.utils.encode_range({ s:{r:0,c:0}, e:{r:linhas.length, c:PGR_COLS.length-1} }) };
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "EXPORTA PGR");
+    const buf = X.write(wb, { bookType: "xlsx", type: "array" });
+    const hoje = new Date().toLocaleDateString("pt-BR").replace(/\//g,"-");
+    await S.downloads.save({ filename: `Exporta PGR - AEP 2026${S.expGHE ? " - GHE " + nomeArquivo(S.expGHE) : ""} - ${hoje}.xlsx`, data: buf });
+    toast(`${linhas.length} linha(s) exportada(s).`);
+  } catch(e){
+    if (e && e.code === "declined") {}
+    else if (e && e.message === "xlsx") toast("Não foi possível carregar o gerador de Excel. Verifique a internet e tente de novo.");
+    else toast(e && e.code === "rate_limited" ? "Aguarde um instante e tente de novo." : "Não foi possível gerar o Excel.");
+  } finally { const b = $("#btnExp"); if (b){ b.disabled = false; b.textContent = "Baixar Excel"; } }
+}
+
+/* =========================================================================
+   EVENTOS
+   ========================================================================= */
+const completarArea = ar => Object.assign({ id: uid(), nome:"", onda:"", dataCorte: hojeISO(), n:"", dominios:{}, medias:{} }, clone(ar||{}));
+const rootOf = b => /^(editHz|editArea|cfgDraft)\./.test(b) ? S : S.draft;
+
+function atualizarSelectTax(){
+  const sel = $("#f-hzcod"); if (!sel) return;
+  const ops = opcoesTax(), h = S.editHz, t = TAXMAP[h.codigo];
+  sel.innerHTML = `<option value="">— Selecione (${ops.length} opção/ões) —</option>` +
+    (t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : "") +
+    ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("");
+}
+function onHzChange(b, el){
+  const h = S.editHz;
+  if (b === "editHz.codigo"){
+    const t = TAXMAP[h.codigo];
+    if (t){
+      const antigo = TAX.find(x => x.danos === h.danos);
+      if (!h.danos || antigo) h.danos = t.danos;
+    }
+    renderStep(); const s = $("#f-hzcod"); if (s) s.focus(); return;
+  }
+  if (b === "editHz.descumprNR"){ const d = $("#hz-div"); if (d) d.innerHTML = vHzDiv(); }
+  if (b === "editHz.estado"){ const e = $("#hz-e2"); if (e) e.innerHTML = vHzE2(); const tx = $("#hz-estado-txt"); if (tx){ const x = ESTADOS.find(z => z[0] === h.estado); tx.textContent = x ? x[2] : "NA (não aplicável) e E1 (prioridade de AEP) não geram linha no inventário."; } }
+  if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""; } return; }
+}
+function onAreaChange(b, el){
+  const ar = S.editArea, live = el.dataset.areaLive;
+  if (live){
+    const v = String(el.value).trim().replace(",", ".");
+    setPath(S, b, v);
+    const id = live.startsWith("d:") ? "d-" + live.slice(2) : live, c = $("#fx-" + id);
+    if (c) c.innerHTML = faixaDe(v) ? chipFaixa(faixaDe(v)) : "";
+  }
+  if (b === "editArea.nome"){ const h = document.querySelector(".aeptitle h1"); if (h) h.textContent = ar.nome || "Novo setor"; }
+  marcarArea();
+}
+function campo(e, isChange){
+  const el = e.target; if (!el || !el.dataset) return;
+  if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
+  if (el.dataset.filtro){
+    if (el.tagName === "SELECT" && !isChange) return;
+    if (el.tagName !== "SELECT" && isChange) return;
+    S[el.dataset.filtro] = el.value; atualizarHome(); return;
+  }
+  if (el.dataset.exp){ if (!isChange) return; S[el.dataset.exp] = el.value; const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); return; }
+  if (el.dataset.hzBusca !== undefined){ S.hzFiltro = el.value; atualizarSelectTax(); return; }
+  if (el.dataset.hzCat !== undefined){ if (isChange){ S.hzCat = el.value; atualizarSelectTax(); } return; }
+  if (el.dataset.colar !== undefined){ S.colar = el.value; return; }
+  if (el.dataset.gat !== undefined){
+    if (!isChange) return;
+    const g = new Set(S.draft.aet.gatilhos||[]); el.checked ? g.add(el.dataset.gat) : g.delete(el.dataset.gat);
+    S.draft.aet.gatilhos = Array.from(g).sort(); marcar(); renderRail(); renderAside(); return;
+  }
+  const b = el.dataset.b; if (!b) return;
+  const discreto = el.type === "radio" || el.type === "checkbox" || el.tagName === "SELECT";
+  if (discreto && !isChange) return;
+  // Campo de texto: o valor já foi tratado a cada tecla ("input"). O "change"
+  // chega ao sair do campo — muitas vezes no meio de um clique em outro botão;
+  // redesenhar a tela nesse instante faria o clique se perder.
+  if (!discreto && isChange && el.type !== "date") return;
+  const v = el.type === "checkbox" ? el.checked : el.value;
+  if (b.startsWith("editArea.")) { setPath(S, b, v); onAreaChange(b, el); return; }
+  setPath(rootOf(b), b, v);
+  if (b.startsWith("editHz.")) { onHzChange(b, el); return; }
+  if (b.startsWith("cfgDraft.")) { setSaveState("Alterações não salvas"); clearTimeout(S.cfgTimer); S.cfgTimer = setTimeout(salvarConfig, 700); return; }
+  if (b === "meta.setor" || b === "meta.area"){
+    const auto = setorPeloDepara(S.draft.meta.setor, S.draft.meta.area);
+    if (auto && auto !== S.draft.meta.setorCopsoq){ S.draft.meta.setorCopsoq = auto; S.draft.copsoq.snapshot = snapDe(setorPorNome(auto)); renderBanner(); }
+    const box = $("#setorcop"); if (box && !box.contains(document.activeElement)) box.innerHTML = vSetorCop();
+  }
+  if (b === "meta.setorCopsoq"){ S.draft.copsoq.snapshot = snapDe(setorPorNome(v)); renderBanner(); }
+  marcar();
+  if (el.dataset.rr) renderStep();
+  renderRail(); renderAside();
+  if (b === "meta.cargo" || b === "numero") renderTitulo();
+}
+document.addEventListener("input", e => campo(e, false));
+document.addEventListener("change", e => campo(e, true));
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter") return;
+  const r = e.target.closest && e.target.closest("tr[data-open], tr[data-area]");
+  if (r) { e.preventDefault(); r.click(); }
+});
+
+/* Arrastar fotos para a área de envio */
+document.addEventListener("dragover", e => { const d = e.target.closest && e.target.closest("#drop"); if (d){ e.preventDefault(); d.classList.add("over"); } });
+document.addEventListener("dragleave", e => { const d = e.target.closest && e.target.closest("#drop"); if (d) d.classList.remove("over"); });
+document.addEventListener("drop", e => { const d = e.target.closest && e.target.closest("#drop"); if (d){ e.preventDefault(); d.classList.remove("over"); enviarFotos(e.dataTransfer.files); } });
+
+function aposHz(){ S.step = 4; renderRail(); renderStep(); renderAside(); window.scrollTo({top:0}); }
+document.addEventListener("click", async e => {
+  const t = e.target; if (!t.closest) return;
+  const go = t.closest("[data-go]"); if (go){ e.preventDefault(); ir(go.dataset.go); return; }
+  const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
+  const op = t.closest("[data-open]"); if (op){ abrirAEP(op.dataset.open); return; }
+  const ar = t.closest("tr[data-area]"); if (ar && S.view === "copsoq"){ S.editArea = completarArea(S.areas[ar.dataset.area]); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); window.scrollTo(0,0); return; }
+  const btn = t.closest("[data-act]"); if (!btn) return;
+  const d = btn.dataset, a = S.draft;
+  switch (d.act){
+    case "nova": criarAEP(); break;
+    case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
+    case "exportarPGR": exportarPGR(); break;
+    case "cancelConfirm": S.confirm = null; rerender(); break;
+    case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
+    case "delAEPsim": {
+      const id = a.id; clearTimeout(S.saveTimer); S.dirty = false;
+      if (S.assets) for (const f of a.fotos||[]) { try { await S.assets.delete(f.assetId); } catch(_){} }
+      if (S.db) { try { await S.db.doc("aeps/" + id).delete(); } catch(_){ toast("Não foi possível excluir."); return; } }
+      delete S.aeps[id]; S.draft = null; await ir("home"); toast("AEP excluída."); break;
+    }
+    case "verDoc": await salvarAEP(); S.view = "doc"; S.confirm = null; render(); window.scrollTo(0,0); break;
+    case "voltarAEP": S.view = "aep"; render(); window.scrollTo(0,0); break;
+    case "baixar": baixarDoc(); break;
+    case "concluir": {
+      if (totalPend(pendencias(a))) return;
+      a.status = "concluida"; a.concluidoEm = new Date().toISOString(); S.dirty = true; await salvarAEP();
+      renderTitulo(); renderAside(); toast("AEP concluída."); break;
+    }
+    case "addEsc": a.escuta.push({ id: uid(), nome:"", matricula:"", funcao: (a.meta.cargo||"").trim(), turno:"", data: hojeISO(), condutor: a.meta.analista||"", conteudo:"" }); marcar(); renderStep(); renderRail(); renderAside(); break;
+    case "rmEsc": S.confirm = "esc-" + d.id; renderStep(); break;
+    case "rmEscSim": a.escuta = a.escuta.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
+    case "hzDoItem": {
+      const n = Number(d.n), cod = (CK_PERIGOS[n]||[])[0] || "", tx = TAXMAP[cod], obs = a.checklist[n-1]?.obs;
+      abrirHz({ _novo:true, checkItem: n, codigo: cod, danos: tx ? tx.danos : "", fonte: obs || "" });
+      S.hzCat = ""; aposHz();
+      if ((CK_PERIGOS[n]||[]).length > 1) toast(`O item ${n} aciona ${CK_PERIGOS[n].join(", ")}. Confira se o perigo sugerido é o certo.`);
+      break;
+    }
+    case "hzDoCopsoq": {
+      const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), tx = TAXMAP[s.tax]; if (!tx) break;
+      const med = snap?.medias?.[s.id], f = faixaDe(med) || "int";
+      abrirHz({ _novo:true, codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos, origem: "Campo + rastreamento", tecnica: "AEP e COPSOQ II",
+        fonte: `Sinal de triagem COPSOQ na subescala “${s.nome}” (média ${num2(med)}, ${FAIXAS[f]}, setor ${snap?.nome||"—"}). Fonte geradora a confirmar e redigir em campo: o resultado indica onde olhar, não caracteriza o posto.`,
+        controles: "" });
+      S.hzCat = ""; aposHz();
+      toast("Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
+    }
+    case "novoHz": abrirHz({ _novo:true }); renderStep(); break;
+    case "edHz": { const h = a.perigos.find(x => x.id === d.id); if (h) { abrirHz(clone(h)); renderStep(); window.scrollTo({top:0}); } break; }
+    case "rmHz": S.confirm = "hz-" + d.id; renderStep(); break;
+    case "rmHzSim": a.perigos = a.perigos.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
+    case "salvarHz": salvarHz(); break;
+    case "cancelarHz": S.editHz = null; S.hzErr = ""; renderStep(); break;
+    case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; S.editHz.fonte = tx.fonte; const ta = document.getElementById("f-editHz.fonte"); if (ta){ ta.value = tx.fonte; ta.focus(); } toast("Fórmula copiada: troque os termos genéricos pela condição real deste cargo."); break; }
+    case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
+    case "usarSug": { const r = resultadoDominio(a, d.dom); a.copsoq.dominios[d.dom].concl = conclusaoSugerida(r); marcar(); renderStep(); renderRail(); renderAside(); break; }
+    case "atualizarSnap": { const set = S.areas[a.copsoq.snapshot?.setorId] || setorPorNome(a.meta.setorCopsoq); a.copsoq.snapshot = snapDe(set); marcar(); renderBanner(); renderStep(); renderRail(); renderAside(); toast("Notas do setor atualizadas nesta AEP."); break; }
+    case "ftUp": case "ftDown": { const i = Number(d.i), j = d.act === "ftUp" ? i-1 : i+1, F = a.fotos; [F[i],F[j]] = [F[j],F[i]]; marcar(); renderStep(); break; }
+    case "rmFt": S.confirm = "ft-" + d.id; renderStep(); break;
+    case "rmFtSim": {
+      const f = a.fotos.find(x => x.id === d.id);
+      a.fotos = a.fotos.filter(x => x.id !== d.id); S.confirm = null; marcar(); await salvarAEP();
+      if (f && S.assets) { try { await S.assets.delete(f.assetId); } catch(_){} }
+      renderStep(); renderRail(); break;
+    }
+    case "novaArea": S.editArea = completarArea(null); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); break;
+    case "voltarAreas": await salvarArea(); S.editArea = null; S.confirm = null; render(); break;
+    case "delArea": S.confirm = "delArea"; render(); break;
+    case "delAreaSim": {
+      const id = S.editArea.id; clearTimeout(S.areaTimer); S.areaDirty = false;
+      if (S.db) { try { await S.db.doc("copsoq/" + id).delete(); } catch(_){ toast("Não foi possível excluir."); return; } }
+      delete S.areas[id]; S.editArea = null; S.confirm = null; render(); toast("Setor excluído."); break;
+    }
+    case "colar": importarColagem(); break;
+  }
+});
+function rerender(){
+  if (S.view === "aep"){ renderTitulo(); renderStep(); }
+  else render();
+}
+
+/* Salva antes de sair da página */
+window.addEventListener("pagehide", () => { salvarAEP(); salvarArea(); });
+
+</script>
+<script>
+/* =========================================================================
+   PONTE SUPABASE — substitui o banco, as fotos e os downloads do Artifact.
+   O resto do sistema chama window.claude.use("db" | "assets" | "downloads")
+   exatamente como antes.
+   ========================================================================= */
+const SUPA_URL = "https://ewtbcwubdlxaybaqiqzx.supabase.co";
+const SUPA_KEY = "sb_publishable_XCL2AkQyHHA6-F-Pu5ERgA_3WSZFqpY";
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const BUCKET = "fotos";
+
+async function lerTudo(col){
+  let out = [], from = 0;
+  for (;;){
+    const { data, error } = await sb.from(col).select("id,data").range(from, from + 999);
+    if (error) throw error;
+    out = out.concat(data || []);
+    if (!data || data.length < 1000) break;
+    from += 1000;
+  }
+  return out;
+}
+const docSnap = (id, data) => ({ id, exists: data != null, data: () => data });
+const dbShim = {
+  collection(col){
+    return { onSnapshot(cb, err){
+      lerTudo(col).then(rows => cb({ docs: rows.map(r => docSnap(r.id, r.data)) })).catch(e => { console.error(e); err && err(e); });
+      return () => {};
+    } };
+  },
+  doc(path){
+    const [col, id] = path.split("/");
+    return {
+      async set(obj){
+        const { error } = await sb.from(col).upsert({ id, data: obj, updated_at: new Date().toISOString() });
+        if (error) throw error;
+      },
+      async delete(){
+        const { error } = await sb.from(col).delete().eq("id", id);
+        if (error) throw error;
+      },
+      onSnapshot(cb, err){
+        sb.from(col).select("data").eq("id", id).maybeSingle()
+          .then(({ data, error }) => { if (error) throw error; cb(docSnap(id, data ? data.data : null)); })
+          .catch(e => { console.error(e); err && err(e); });
+        return () => {};
+      }
+    };
+  }
+};
+const novoIdFoto = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
+const assetsShim = {
+  async upload(blob, opt = {}){
+    const id = novoIdFoto();
+    const { error } = await sb.storage.from(BUCKET).upload(id + ".jpg", blob, { contentType: opt.type || "image/jpeg", upsert: false });
+    if (error) throw error;
+    return { id };
+  },
+  async delete(id){
+    const { error } = await sb.storage.from(BUCKET).remove([id + ".jpg"]);
+    if (error) throw error;
+    FOTO_URL.delete(id);
+  }
+};
+const downloadsShim = {
+  async save({ filename, data }){
+    const blob = data instanceof Blob ? data : new Blob([data], { type: typeof data === "string" ? "text/html;charset=utf-8" : "application/octet-stream" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = filename; a.style.display = "none"; document.body.appendChild(a); a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 4000);
+  }
+};
+window.claude = { use: async n => ({ db: dbShim, assets: assetsShim, downloads: downloadsShim })[n] || null };
+
+/* ---------- Fotos: o bucket é privado; cada <img data-foto="id"> recebe um link temporário ---------- */
+const FOTO_URL = new Map();
+let fotoPend = new Set(), fotoTimer = null;
+async function buscarFotos(){
+  const ids = [...fotoPend]; fotoPend = new Set();
+  for (let i = 0; i < ids.length; i += 100){
+    const lote = ids.slice(i, i + 100);
+    const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(lote.map(x => x + ".jpg"), 12 * 3600);
+    if (error) { console.error(error); continue; }
+    (data || []).forEach(r => { if (r.signedUrl) FOTO_URL.set(String(r.path).replace(/\.jpg$/, ""), r.signedUrl); });
+  }
+  aplicarFotos();
+}
+function aplicarFotos(){
+  let falta = false;
+  document.querySelectorAll("img[data-foto]").forEach(img => {
+    const id = img.dataset.foto, u = FOTO_URL.get(id);
+    if (u) { if (img.getAttribute("src") !== u) img.src = u; }
+    else if (id) { fotoPend.add(id); falta = true; }
+  });
+  if (falta) { clearTimeout(fotoTimer); fotoTimer = setTimeout(buscarFotos, 40); }
+}
+async function urlsFotos(ids){
+  const falta = ids.filter(i => !FOTO_URL.has(i));
+  if (falta.length) { falta.forEach(i => fotoPend.add(i)); await buscarFotos(); }
+  return ids.map(i => FOTO_URL.get(i) || "");
+}
+new MutationObserver(aplicarFotos).observe(document.body, { childList: true, subtree: true });
+
+const blobParaDataURL = b => new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = no; fr.readAsDataURL(b); });
+async function paraDataURL(assetId){
+  try { const { data, error } = await sb.storage.from(BUCKET).download(assetId + ".jpg"); if (error) throw error; return await blobParaDataURL(data); }
+  catch(e){ return ""; }
+}
+async function logoDataURL(){
+  try { const r = await fetch("logo.png"); if (!r.ok) throw 0; return await blobParaDataURL(await r.blob()); } catch(e){ return ""; }
+}
+
+/* ---------- Login ---------- */
+async function entrar(){
+  const { data } = await sb.auth.getSession();
+  if (data && data.session) { document.getElementById("login").hidden = true; iniciar(); return; }
+  document.getElementById("login").hidden = false;
+  document.getElementById("login-email").focus();
+}
+document.getElementById("login-form").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const btn = document.getElementById("login-btn"), msg = document.getElementById("login-msg");
+  btn.disabled = true; msg.textContent = "Entrando…";
+  const { error } = await sb.auth.signInWithPassword({ email: document.getElementById("login-email").value.trim(), password: document.getElementById("login-senha").value });
+  btn.disabled = false;
+  if (error) { msg.textContent = /invalid/i.test(error.message) ? "E-mail ou senha incorretos." : "Não foi possível entrar: " + error.message; return; }
+  msg.textContent = ""; document.getElementById("login").hidden = true; iniciar();
+});
+document.getElementById("btn-sair").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+
+entrar();
+</script>
+</body>
+</html>

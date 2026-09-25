@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Importar backup · AEP</title>
+<link rel="icon" href="logo.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<style>
+:root{--paper:#F4F4F3;--surface:#fff;--ink:#232323;--ink-2:#4F4F4F;--rule:#E0DFDD;--brand:#EA5B26;--accent:#C2451A;--ok:#1E6B3E;--bad:#8E1C1C}
+@media (prefers-color-scheme:dark){:root{--paper:#141414;--surface:#1D1D1D;--ink:#ECECEC;--ink-2:#B9B9B9;--rule:#313131;--accent:#F4885C;--ok:#9FD9B4;--bad:#F2A9A4}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:24px 16px 60px}
+.card{background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--brand);border-radius:6px;padding:20px;margin-bottom:16px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 10px}
+p{margin:0 0 10px;color:var(--ink-2)}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input{font:inherit;color:inherit;max-width:100%}
+input[type=text],input[type=password]{width:100%;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--surface)}
+button{font:inherit;font-weight:600;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:9px 16px;cursor:pointer;margin-top:14px}
+button:disabled{opacity:.5;cursor:not-allowed}
+#log{font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px;max-height:320px;overflow:auto;margin-top:12px}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+progress{width:100%;height:14px;margin-top:10px}
+img.logo{height:34px;margin-bottom:10px}
+</style>
+</head><body><main>
+<img class="logo" src="logo.png" alt="ArcelorMittal">
+<h1>Importar backup</h1>
+<p>Página usada uma vez, para trazer as AEPs, o COPSOQ, a configuração e as fotos do sistema antigo para o Supabase. Pode ser repetida sem duplicar nada: registros e fotos com o mesmo código são substituídos.</p>
+
+<div class="card" id="c-login">
+  <h2>1. Entrar</h2>
+  <label for="email">E-mail</label><input type="text" id="email" autocomplete="username">
+  <label for="senha">Senha</label><input type="password" id="senha" autocomplete="current-password">
+  <button id="b-login" type="button">Entrar</button>
+  <p id="m-login" style="margin-top:10px"></p>
+</div>
+
+<div class="card" id="c-imp" hidden>
+  <h2>2. Escolher os arquivos</h2>
+  <label for="f-json">Arquivo <b>backup-aep.json</b></label><input type="file" id="f-json" accept=".json,application/json">
+  <label for="f-fotos">Todas as fotos da pasta <b>fotos</b> (abra a pasta e use Ctrl+A)</label><input type="file" id="f-fotos" accept="image/jpeg" multiple>
+  <p id="m-sel" style="margin-top:8px"></p>
+  <button id="b-imp" type="button" disabled>Importar</button>
+  <progress id="prog" value="0" max="1" hidden></progress>
+  <div id="log" hidden></div>
+</div>
+</main>
+<script>
+const sb = supabase.createClient("https://ewtbcwubdlxaybaqiqzx.supabase.co", "sb_publishable_XCL2AkQyHHA6-F-Pu5ERgA_3WSZFqpY");
+const $ = s => document.querySelector(s);
+const log = (t, cls) => { const l = $("#log"); l.hidden = false; const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = t; l.appendChild(d); l.scrollTop = l.scrollHeight; };
+let backup = null, fotos = [];
+
+async function pronto(){ $("#c-login").hidden = true; $("#c-imp").hidden = false; }
+sb.auth.getSession().then(({ data }) => { if (data && data.session) pronto(); });
+$("#b-login").onclick = async () => {
+  $("#m-login").textContent = "Entrando…";
+  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value.trim(), password: $("#senha").value });
+  if (error) { $("#m-login").textContent = "Não foi possível entrar: " + error.message; return; }
+  pronto();
+};
+function atualizarSel(){
+  const n = backup ? `${Object.keys(backup.aeps||{}).length} AEPs, ${Object.keys(backup.copsoq||{}).length} setores COPSOQ, ${Object.keys(backup.config||{}).length} configuração` : "backup não escolhido";
+  $("#m-sel").textContent = `${n} · ${fotos.length} foto(s)`;
+  $("#b-imp").disabled = !backup;
+}
+$("#f-json").onchange = async e => {
+  try { backup = JSON.parse(await e.target.files[0].text()); if (!backup.aeps) throw 0; }
+  catch(_){ backup = null; alert("Esse arquivo não é o backup-aep.json."); }
+  atualizarSel();
+};
+$("#f-fotos").onchange = e => { fotos = Array.from(e.target.files).filter(f => /^[0-9a-f]{32}\.jpg$/i.test(f.name)); atualizarSel(); };
+
+async function gravar(tabela, obj){
+  const linhas = Object.entries(obj).map(([id, data]) => ({ id, data, updated_at: new Date().toISOString() }));
+  for (let i = 0; i < linhas.length; i += 50){
+    const { error } = await sb.from(tabela).upsert(linhas.slice(i, i + 50));
+    if (error) throw new Error(`${tabela}: ${error.message}`);
+  }
+  log(`${tabela}: ${linhas.length} registro(s) gravado(s)`);
+  return linhas.length;
+}
+async function contar(tabela){ const { count, error } = await sb.from(tabela).select("id", { count: "exact", head: true }); if (error) throw error; return count; }
+async function contarFotos(){
+  let n = 0, off = 0;
+  for (;;){ const { data, error } = await sb.storage.from("fotos").list("", { limit: 1000, offset: off }); if (error) throw error; n += data.filter(x => x.name.endsWith(".jpg")).length; if (data.length < 1000) break; off += 1000; }
+  return n;
+}
+
+$("#b-imp").onclick = async () => {
+  $("#b-imp").disabled = true; $("#log").innerHTML = "";
+  const prog = $("#prog"); prog.hidden = false; prog.max = 3 + fotos.length; prog.value = 0;
+  try {
+    const esperado = { aeps: await gravar("aeps", backup.aeps) }; prog.value++;
+    esperado.copsoq = await gravar("copsoq", backup.copsoq || {}); prog.value++;
+    esperado.config = await gravar("config", backup.config || {}); prog.value++;
+    let ok = 0, falhas = [];
+    const fila = fotos.slice();
+    async function trabalhador(){
+      while (fila.length){
+        const f = fila.shift();
+        const { error } = await sb.storage.from("fotos").upload(f.name.toLowerCase(), f, { contentType: "image/jpeg", upsert: true });
+        if (error) falhas.push(`${f.name}: ${error.message}`); else ok++;
+        prog.value++;
+        if ((ok + falhas.length) % 20 === 0) log(`fotos: ${ok + falhas.length} de ${fotos.length}`);
+      }
+    }
+    await Promise.all([trabalhador(), trabalhador(), trabalhador(), trabalhador()]);
+    log(`fotos: ${ok} enviada(s)` + (falhas.length ? `, ${falhas.length} com erro` : ""));
+    falhas.forEach(x => log(x, "bad"));
+
+    log("— Conferindo o que ficou no Supabase —");
+    const ref = new Set(); Object.values(backup.aeps).forEach(a => (a.fotos||[]).forEach(x => ref.add(x.assetId)));
+    const real = { aeps: await contar("aeps"), copsoq: await contar("copsoq"), config: await contar("config"), fotos: await contarFotos() };
+    const linha = (nome, r, e) => log(`${nome}: ${r} no Supabase (esperado ${e})`, r >= e ? "ok" : "bad");
+    linha("AEPs", real.aeps, esperado.aeps); linha("Setores COPSOQ", real.copsoq, esperado.copsoq);
+    linha("Configuração", real.config, esperado.config); linha("Fotos", real.fotos, ref.size);
+    const tudo = real.aeps >= esperado.aeps && real.copsoq >= esperado.copsoq && real.config >= esperado.config && real.fotos >= ref.size;
+    log(tudo ? "Importação completa. Pode abrir o sistema." : "Faltou algo — veja as linhas em vermelho e rode de novo.", tudo ? "ok" : "bad");
+  } catch(e){ log("Erro: " + (e.message || e), "bad"); }
+  $("#b-imp").disabled = false;
+};
+</script>
+</body></html>
