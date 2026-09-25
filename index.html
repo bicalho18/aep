@@ -434,27 +434,57 @@ function resultadoDominio(a, domId){
   const manual = a.copsoq?.dominios?.[domId]?.manual || "";
   return { auto: false, nota: null, faixa: manual || null, subs: [], altas: [], inter: [] };
 }
-/* Modelos de texto da observação em campo — um para cada conclusão do cruzamento.
-   Trechos entre colchetes são para o analista completar; a AEP não conclui com colchetes pendentes. */
-const MODELOS_OBS = [
-  { id:"adequado",    rot:"Adequado — sem achado relevante",               concl:0 },
-  { id:"controle",    rot:"Atenção — controles existentes",                concl:1 },
-  { id:"confirmado",  rot:"Necessita melhorias — achado confirmado",       concl:2 },
-  { id:"divergencia", rot:"Evidências insuficientes — aprofundar",         concl:3 },
-  { id:"na",          rot:"Não aplicável",                                 concl:4 }
+/* Sugestões de texto da observação em campo, por subescala sinalizada e pela situação encontrada no posto.
+   o = o que a subescala sinaliza; ctrl = exemplos de medidas existentes; melh = exemplos de melhoria.
+   Trechos entre colchetes são para o analista completar com o que viu. */
+const SUB_TXT = {
+  "exigencias-cognitivas": { o:"demanda elevada de atenção, memória e tomada de decisão", ctrl:"autonomia para organizar a sequência das tarefas, pausas, apoio técnico para decisões críticas, sistemas com alarmes priorizados", melh:"racionalizar alarmes e telas, reduzir tarefas simultâneas, apoio nas decisões críticas" },
+  "exigencias-emocionais": { o:"contato com situações de alta carga emocional, como sofrimento, agressividade ou risco de terceiros", ctrl:"acolhimento e acompanhamento pelo programa de apoio, suporte da liderança após eventos críticos, rodízio nas tarefas mais expostas", melh:"protocolo de acolhimento pós-evento, registro de atendimentos, suporte psicológico estruturado" },
+  "exigencias-quantitativas": { o:"volume de trabalho elevado em relação ao tempo e ao efetivo disponíveis", ctrl:"dimensionamento de efetivo, redistribuição de tarefas nos picos, gestão de horas extras", melh:"revisar metas e prazos, dimensionar o efetivo frente à demanda, planejar os picos de produção" },
+  "ritmo-de-trabalho": { o:"ritmo intenso ou imposto pelo processo, com pouca margem para pausas voluntárias", ctrl:"pausas programadas, possibilidade de ajustar o ritmo, alternância de tarefas", melh:"pausas de recuperação formalizadas, rodízio, revisão do ritmo imposto na etapa gargalo" },
+  "inseguranca-laboral": { o:"percepção de instabilidade no emprego ou de mudanças sem comunicação", ctrl:"comunicação estruturada das mudanças, canais de esclarecimento com a liderança", melh:"comunicar mudanças com antecedência, ouvir a equipe antes de implantar mudanças" },
+  "trabalho-x-familia": { o:"interferência do trabalho na vida pessoal e familiar por jornada, escalas ou contato fora do expediente", ctrl:"regras de escala e de jornada, controle de prorrogação, acordo coletivo", melh:"limitar contato fora do expediente, previsibilidade de escalas, controle de horas extras" },
+  "influencia-no-trabalho": { o:"baixa influência do trabalhador sobre método, ritmo ou sequência da tarefa", ctrl:"participação na definição do método, alçada formalizada para decisões do dia a dia", melh:"envolver os trabalhadores na revisão dos procedimentos, ampliar a alçada de decisão" },
+  "possibilidade-de-desenvolvimento": { o:"poucas oportunidades de aprendizado e de desenvolvimento na função", ctrl:"matriz de capacitação, treinamentos e reciclagens, trilha de desenvolvimento", melh:"capacitação prévia às mudanças, plano de desenvolvimento, ampliação do conteúdo da tarefa" },
+  "apoio-social-de-colegas": { o:"pouco apoio e cooperação entre colegas", ctrl:"trabalho em equipe, DDS, espaços de troca na equipe", melh:"integração da equipe, divisão de tarefas que favoreça a cooperação" },
+  "apoio-social-de-superiores": { o:"pouco apoio da liderança imediata", ctrl:"liderança acessível, reuniões de alinhamento, canal de escuta", melh:"treinamento de liderança, rotina de feedback, devolutiva dos resultados à equipe" },
+  "conflitos-de-papeis": { o:"exigências contraditórias ou ordens conflitantes", ctrl:"linha de comando definida, procedimentos claros, ordem de serviço", melh:"definir uma linha única de comando, revisar atribuições conflitantes" },
+  "previsibilidade": { o:"pouca informação antecipada sobre mudanças e decisões", ctrl:"comunicação prévia das mudanças, reuniões de planejamento", melh:"antecipar informações sobre mudanças, programação e escalas" },
+  "qualidade-da-lideranca": { o:"percepção negativa sobre a qualidade da liderança no planejamento, no apoio e no desenvolvimento da equipe", ctrl:"treinamento de liderança, acompanhamento pelo RH, canais de escuta", melh:"desenvolvimento de liderança, feedback estruturado, devolutiva dos resultados do COPSOQ" },
+  "recompensas": { o:"percepção de pouco reconhecimento pelo trabalho realizado", ctrl:"critérios de reconhecimento divulgados, avaliação de desempenho com feedback", melh:"critérios transparentes de reconhecimento, feedback estruturado" },
+  "transparencia-do-papel-laboral": { o:"pouca clareza sobre atribuições, objetivos e responsabilidades", ctrl:"descrição de cargo atualizada, ordem de serviço assinada, integração na função", melh:"revisar a descrição de cargo, alinhar atribuições com a equipe" },
+  "comunidade-social": { o:"pouco senso de comunidade e bom convívio no ambiente de trabalho", ctrl:"integração da equipe, ações de convivência, trabalho em equipe", melh:"ações de integração, espaços de convivência" },
+  "confianca-horizontal": { o:"baixa confiança entre colegas", ctrl:"trabalho em equipe, regras de convivência, mediação pela liderança", melh:"ações de integração, mediação de conflitos" },
+  "confianca-vertical": { o:"baixa confiança entre trabalhadores e gestão", ctrl:"comunicação aberta da gestão, devolutivas, canal de escuta", melh:"devolutiva dos resultados, presença da gestão na área, coerência entre discurso e prática" },
+  "justica-e-respeito": { o:"percepção de tratamento desigual ou falta de respeito", ctrl:"código de conduta, critérios claros de distribuição de tarefas, canal de denúncia", melh:"critérios transparentes, treinamento de conduta, apuração formal de ocorrências" },
+  "comportamentos-ofensivos": { o:"relatos de comportamentos ofensivos, como insultos, ameaças, assédio ou violência", ctrl:"canal de denúncia e compliance, rito de apuração, treinamento de conduta e direitos humanos", melh:"divulgar o canal de denúncia, apurar os relatos, reforçar o treinamento de conduta" }
+};
+const VAR_SUB = [
+  { id:"nao",  rot:"Não observado" },
+  { id:"ctrl", rot:"Existe · controles eficazes" },
+  { id:"melh", rot:"Existe · controles parciais" },
+  { id:"conf", rot:"Existe · sem controle suficiente" }
 ];
+const FAIXA_TXT = { ris:"acima de 3,66", int:"faixa intermédia" };
+function fraseSub(a, s, m, f, v){
+  const k = SUB_TXT[s.id], tx = TAXMAP[s.tax], cab = `${s.nome} (${num2(m)}, ${FAIXA_TXT[f] || "faixa favorável"})`;
+  if (s.natureza === "efeito") return `${cab}: indicador de efeito, lido em conjunto com as demais subescalas do domínio; não caracteriza perigo isoladamente. [Descrever o que a observação e o diálogo mostraram.]`;
+  if (s.natureza === "protetor") return `${cab}: fator protetor em faixa desfavorável. Na observação, investigaram-se monotonia (OT-04), controle sobre o trabalho (OT-06) e reconhecimento (OT-10): [descrever o resultado].`;
+  if (!k) return `${cab}: [descrever o que foi observado].`;
+  const inerente = tx?.inerente;
+  if (v === "nao") return `${cab}: na observação da atividade deste cargo e no diálogo com os trabalhadores não se evidenciou a condição sinalizada (${k.o}).`;
+  if (v === "ctrl") return `${cab}: a exigência está presente (${k.o}), mas as medidas existentes estão implantadas e se mostraram eficazes para mantê-la sob controle: [descrever as medidas e a evidência de que funcionam no dia a dia — por exemplo, ${k.ctrl}].${inerente ? " Por ser exigência inerente à atividade, o que se verificou foi a suficiência dos recursos de regulação (autonomia, pausas, suporte) diante da demanda." : ""}`;
+  if (v === "melh") return `${cab}: a exigência está presente (${k.o}) e há medidas implantadas, mas apenas parcialmente eficazes. Oportunidade de melhoria: [descrever — por exemplo, ${k.melh}].`;
+  return `${cab}: a exigência está presente (${k.o}) sem controle ou suporte suficiente: [descrever a condição observada — tarefa, frequência, relato dos trabalhadores].${tx ? ` Perigo correspondente na taxonomia: ${tx.codigo}.` : ""}`;
+}
 function perigosDoDominio(a, domId){
   return Array.from(new Set((a.perigos||[]).filter(h => SUBS.some(s => s.dom === domId && (h.origemCopsoq === s.id || s.tax === h.codigo))).map(h => h.codigo)));
 }
-function textoModelo(a, domId, tipo){
-  const d = DOMINIOS.find(x => x.id === domId), r = resultadoDominio(a, domId);
-  const fmt = l => l.length ? ` (${l.map(x => `${x.s.nome} ${num2(x.m)}`).join("; ")})` : "";
-  const res = fmt([...r.altas, ...r.inter]), resFoco = fmt(r.altas.length ? r.altas : r.inter), cods = perigosDoDominio(a, domId);
-  if (tipo === "adequado") return d.padrao;
-  if (tipo === "controle") return `O resultado do setor neste domínio${res} indica ponto de atenção. Em campo, a condição foi observada, mas se mantém sob controle pelas medidas existentes: [descrever as medidas e a evidência observada — por exemplo, pausas, rodízio, apoio da liderança, canal de escuta, programa de acolhimento]. [Se houver, oportunidade de melhoria: descrever.] Recomenda-se manter as medidas e acompanhar no próximo ciclo. Nenhum perigo adicional caracterizado neste eixo.`;
-  if (tipo === "confirmado") return `O resultado do setor neste domínio${resFoco} foi confirmado na observação da atividade: [descrever a condição observada — tarefa, frequência, relato dos trabalhadores]. Medidas existentes: [descrever, ou “não identificadas”]. [Suporte ou melhoria necessária: descrever.] Perigos identificados: ${cods.length ? cods.join(", ") : "[códigos]"}.`;
-  if (tipo === "na") return `Domínio não aplicável a este cargo: [justificar — por que as condições avaliadas neste domínio não existem na atividade].`;
-  return `O resultado do setor neste domínio${resFoco} não foi confirmado nem afastado com segurança na observação da atividade deste cargo: [descrever o que foi observado e o que falta verificar — por exemplo, a exigência sinalizada pode ser de outra função do setor, ou a condição não ocorreu no dia da avaliação]. Prevalece a observação em campo; recomenda-se aprofundar a avaliação [como: nova observação, escuta dos trabalhadores, análise documental] e revisar as medidas. Nenhum perigo caracterizado neste eixo até a conclusão da verificação.`;
+function fraseFecho(a, domId, v){
+  if (v === "padrao") return DOMINIOS.find(x => x.id === domId).padrao;
+  if (v === "semhz") return "Nenhum perigo adicional caracterizado neste eixo.";
+  const c = perigosDoDominio(a, domId);
+  return `Perigos identificados: ${c.length ? c.join(", ") : "[códigos]"}.`;
 }
 const conclusaoSugerida = r => (!r.faixa ? "" : r.altas.length ? "" : r.faixa === "fav" && !r.inter.length ? CONCLUSOES[0] : CONCLUSOES[1]);
 
@@ -817,9 +847,12 @@ function st5(){
       ${r.auto ? `<span class="row" style="gap:6px"><span class="small muted">nota do domínio ${num2(r.nota)}</span>${chipFaixa(r.faixa)}</span>` : `<select data-b="copsoq.dominios.${d.id}.manual" data-rr="1" style="width:auto" aria-label="Resultado de ${esc(d.nome)}"><option value="">Resultado…</option>${Object.entries(FAIXAS).map(([k,v]) => `<option value="${k}" ${dd.manual===k?"selected":""}>${v}</option>`).join("")}</select>`}</div>
       <div class="dom-b">
         ${r.auto ? ((r.altas.length || r.inter.length) ? `<div class="stack tight"><span class="eyebrow">Subescalas fora da faixa favorável</span>${[...r.altas, ...r.inter].map(linha).join("")}</div>` : `<p class="small muted">Todas as subescalas do domínio em faixa favorável.</p>`) : ""}
-        <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="4" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
-        <div class="row" style="gap:6px"><span class="tiny muted">Modelo de texto:</span>${MODELOS_OBS.map(m => `<button class="btn small" type="button" data-act="txtModelo" data-dom="${d.id}" data-tipo="${m.id}">${esc(m.rot)}</button>`).join("")}</div>
-        <span class="hint">O modelo preenche a observação e a conclusão correspondente. Complete os trechos entre colchetes com o que foi visto no posto.</span>
+        <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="7" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
+        <div class="stack tight" style="gap:6px">
+          <span class="tiny muted">Sugestões de texto — clique para acrescentar à observação:</span>
+          ${[...r.altas, ...r.inter].map(x => `<div class="row" style="gap:6px"><span class="chip ${x.f}">${esc(x.s.nome)} ${num2(x.m)}</span>${(x.s.natureza === "efeito" || x.s.natureza === "protetor" ? [{ id:"nao", rot:"Registrar leitura" }] : VAR_SUB).map(v => `<button class="btn small" type="button" data-act="txtSub" data-dom="${d.id}" data-sub="${x.s.id}" data-v="${v.id}">${esc(v.rot)}</button>`).join("")}</div>`).join("")}
+          <div class="row" style="gap:6px"><span class="tiny muted">Geral:</span>${!(r.altas.length || r.inter.length) ? `<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="padrao">Texto padrão (sem achado relevante)</button>` : ""}<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="semhz">Fechar: nenhum perigo adicional</button><button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="hz">Fechar: perigos identificados</button></div>
+          <span class="hint">Monte a observação com uma frase por subescala, conforme o que o posto mostrou, e feche com a linha de perigos. Complete os trechos entre colchetes. A conclusão abaixo é escolhida por você.</span></div>
         <label class="f"><span>Conclusão do cruzamento <em>*</em></span><select data-b="copsoq.dominios.${d.id}.concl" data-rr="1"><option value="">Escolha…</option>${CONCLUSOES.map(c => `<option ${dd.concl===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
           ${!dd.concl && sug ? `<span class="hint">Sugestão: “${esc(sug)}”. <button class="btn ghost small" type="button" data-act="usarSug" data-dom="${d.id}" style="padding:0">Aplicar</button></span>` : ""}
           ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, a conclusão é “Necessita melhorias” e o perigo entra na AEP; se o campo não permitir confirmar nem afastar, “Evidências insuficientes” — prevalece a observação em campo.</span>` : ""}</label>
@@ -1338,13 +1371,15 @@ document.addEventListener("click", async e => {
     case "cancelarHz": S.editHz = null; S.hzErr = ""; renderStep(); break;
     case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; S.editHz.fonte = tx.fonte; const ta = document.getElementById("f-editHz.fonte"); if (ta){ ta.value = tx.fonte; ta.focus(); } toast("Fórmula copiada: troque os termos genéricos pela condição real deste cargo."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
-    case "txtModelo": {
-      const dd = a.copsoq.dominios[d.dom], novo = textoModelo(a, d.dom, d.tipo), atual = (dd.obs||"").trim();
-      const intocado = !atual || MODELOS_OBS.some(m => textoModelo(a, d.dom, m.id) === atual);
-      dd.obs = intocado ? novo : atual + "\n\n" + novo;
-      dd.concl = CONCLUSOES[MODELOS_OBS.find(m => m.id === d.tipo).concl];
+    case "txtSub": case "txtFecho": {
+      const dd = a.copsoq.dominios[d.dom], dm = DOMINIOS.find(x => x.id === d.dom), atual = (dd.obs||"").trim();
+      let novo;
+      if (d.act === "txtSub"){ const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), m = snap?.medias?.[s.id]; novo = fraseSub(a, s, m, faixaDe(m), d.v); }
+      else novo = fraseFecho(a, d.dom, d.v);
+      if (d.v === "padrao" && atual && atual !== dm.padrao){ toast("Apague o texto atual antes de usar o texto padrão."); break; }
+      dd.obs = (!atual || atual === dm.padrao) ? novo : atual + "\n" + novo;
       marcar(); renderStep(); renderRail(); renderAside();
-      if (!intocado) toast("Seu texto foi mantido e o modelo entrou no final: revise e apague o que não se aplica.");
+      const ta = $("#f-obs-" + d.dom); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
       break;
     }
     case "usarSug": { const r = resultadoDominio(a, d.dom); a.copsoq.dominios[d.dom].concl = conclusaoSugerida(r); marcar(); renderStep(); renderRail(); renderAside(); break; }
