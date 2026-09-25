@@ -403,13 +403,10 @@ function setSaveState(txt){ $("#savestate").textContent = txt; }
 /* =========================================================================
    RESUMO DOS PERIGOS (só contagem — a graduação do risco é feita na planilha de controle)
    ========================================================================= */
-const ESTADO_ORDEM = ["E3","E0","E2"];
-function contaEstados(perigos){
-  const c = {}; (perigos||[]).forEach(h => { const k = h.estado || "—"; c[k] = (c[k]||0) + 1; });
-  return c;
-}
-const chipsEstado = (c, vazio) => { const ks = [...ESTADO_ORDEM, ...Object.keys(c).filter(k => !ESTADO_ORDEM.includes(k))].filter(k => c[k]);
-  return ks.length ? ks.map(k => `<span class="chip${k==="E2"?" int":""}" title="${esc((ESTADOS.find(x=>x[0]===k)||[,""])[1])}">${esc(k)} · ${c[k]}</span>`).join(" ") : (vazio ?? '<span class="faint tiny">—</span>'); };
+/* Vínculo item crítico ↔ perigo: pelo item informado ao lançar (checkItem) ou pela ponte da taxonomia (coluna "itens") */
+const perigoLigaItem = (h, n) => Number(h.checkItem) === n || (TAXMAP[h.codigo]?.itens || []).includes(n);
+const perigoDoItem = (a, n) => (a.perigos||[]).find(h => perigoLigaItem(h, n));
+const itensDoPerigo = (a, h) => (a.checklist||[]).map((c,i) => ({ c, n: i+1 })).filter(x => x.c && x.c.r === "sim" && perigoLigaItem(h, x.n)).map(x => x.n);
 const temDesqualificacao = aep => (aep.checklist||[]).some(c => c && c.r === "sim");
 
 /* =========================================================================
@@ -530,8 +527,7 @@ function pendencias(a){
   const semResp = (a.checklist||[]).filter(c => !c.r).length; if (semResp) p[2].push(`${semResp} item(ns) do checklist sem resposta`);
   DOMINIOS.forEach(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq?.dominios?.[d.id]||{};
     if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`); });
-  (a.checklist||[]).forEach((c,i) => { if (c.r === "sim" && !(a.perigos||[]).some(h => Number(h.checkItem) === i+1)) p[4].push(`Item ${i+1} do checklist marcado Sim sem perigo vinculado`); });
-  (a.perigos||[]).forEach(h => { if (h.estado === "E2" && !h.dataRevisao) p[4].push(`${h.codigo}: E2 sem data de revisão — registro inválido`); });
+  (a.checklist||[]).forEach((c,i) => { if (c.r === "sim" && !perigoDoItem(a, i+1)) p[4].push(`Item ${i+1} do checklist marcado Sim sem perigo vinculado`); });
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
   if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
@@ -602,7 +598,7 @@ function linhasHome(lista){
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
       <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
-      <td><span class="row" style="gap:4px">${chipsEstado(contaEstados(a.perigos))}</span></td></tr>`;
+      <td class="num">${(a.checklist||[]).filter(c => c && c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
 }
 /* Atualiza só a tabela e a contagem, sem redesenhar os filtros (não perde o foco da busca) */
@@ -632,7 +628,7 @@ function vHome(){
   </div></div>
   <p class="small muted" style="margin-bottom:8px" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
   <div class="panel">
-    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Estado de evidência dos perigos registrados">Estado dos perigos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
+    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
   </div>`;
 }
@@ -660,8 +656,8 @@ function vPainel(){
   const previsao = ritmo ? new Date(hoje.getTime() + (faltam / ritmo) * 864e5) : null;
   const diasMeta = meta ? Math.round((meta - hoje) / 864e5) : null, ritmoNec = diasMeta > 0 ? faltam / diasMeta : null;
   const fmt = d => d ? d.toLocaleDateString("pt-BR") : "—", mes = v => v != null ? (v*30).toFixed(1).replace(".",",") : "—";
-  const hzConcl = L.filter(a => a.status === "concluida").flatMap(a => a.perigos||[]), estConcl = contaEstados(hzConcl);
-  const itensCrit = hzConcl.filter(h => h.checkItem).length, descNR = hzConcl.filter(h => h.descumprNR).length;
+  const LC = L.filter(a => a.status === "concluida"), hzConcl = LC.flatMap(a => a.perigos||[]);
+  const itensCrit = LC.reduce((s,a) => s + (a.perigos||[]).filter(h => itensDoPerigo(a,h).length).length, 0);
   const fila = L.filter(a => (a.status||"nao_iniciada") !== "concluida").map(a => { const set = setorPorNome(a.meta?.setorCopsoq), al = altasDe(set);
       return { a, al, n: Number(set?.n)||0, ine: al.filter(x => TAXMAP[x.s.tax]?.inerente).length }; })
     .sort((x,y) => y.al.length - x.al.length || (y.a.status==="andamento") - (x.a.status==="andamento") || y.n - x.n || idNum(x.a) - idNum(y.a)).slice(0,25);
@@ -685,8 +681,7 @@ function vPainel(){
       </tbody></table></div></div>
     <div class="stack">
       <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
-        <div class="stats" style="margin:0"><div class="stat"><b>${hzConcl.length}</b><span>perigos</span></div><div class="stat"><b>${itensCrit}</b><span>ligados a item crítico</span></div><div class="stat"><b>${descNR}</b><span>com descumprimento de NR</span></div></div>
-        <div class="row" style="gap:6px"><span class="tiny muted">Estado de evidência:</span> ${chipsEstado(estConcl)}</div></div></div>
+        <div class="stats" style="margin:0"><div class="stat"><b>${hzConcl.length}</b><span>perigos</span></div><div class="stat"><b>${itensCrit}</b><span>ligados a item crítico</span></div></div></div></div>
       <div class="panel"><div class="panel-h"><b>Alertas</b></div><div class="panel-b stack tight">
         ${alertas.length ? alertas.map(({a,al}) => `<div class="row between"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
       </div></div>
@@ -723,7 +718,6 @@ function renderAside(){
   const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
   el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
       <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
-      ${nHz ? `<div class="row" style="gap:6px">${chipsEstado(contaEstados(a.perigos))}</div>` : ""}
       <p class="tiny muted">Os perigos ficam registrados aqui; a graduação do risco é feita na planilha de controle.</p>
       <hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">
       <span class="eyebrow">${tot ? `${tot} pendência(s) para concluir` : "Pronta para concluir"}</span>
@@ -760,7 +754,7 @@ function st1(){
 }
 function st4(){
   const a = S.draft;
-  const rows = CHECKLIST.map((txt,i) => { const c = a.checklist[i], n = i+1, vinc = a.perigos.find(h => Number(h.checkItem) === n), cands = CK_PERIGOS[n];
+  const rows = CHECKLIST.map((txt,i) => { const c = a.checklist[i], n = i+1, vinc = perigoDoItem(a, n), cands = CK_PERIGOS[n];
     const opt = (v,rot,cls="") => `<input type="radio" id="ck${n}${v}" name="ck${n}" value="${v}" data-b="checklist.${i}.r" data-rr="1" class="${cls}" ${c.r===v?"checked":""}><label for="ck${n}${v}">${rot}</label>`;
     return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
       <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}
@@ -801,16 +795,17 @@ function st5(){
   return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${blocos}</div>`;
 }
 function st6(){
-  const a = S.draft, faltam = a.checklist.map((c,i)=>({c,n:i+1})).filter(({c,n}) => c.r==="sim" && !a.perigos.some(h => Number(h.checkItem)===n));
+  const a = S.draft, faltam = a.checklist.map((c,i)=>({c,n:i+1})).filter(({c,n}) => c.r==="sim" && !perigoDoItem(a, n));
   const cards = a.perigos.map(h => { const t = TAXMAP[h.codigo], conf = S.confirm === "hz-"+h.id;
-    return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> <span class="chip${h.estado==="E2"?" int":""}" title="Estado de evidência">${esc(h.estado||"—")}</span> ${h.checkItem?`<span class="chip ris">item crítico ${h.checkItem}</span>`:""}${h.descumprNR?` <span class="chip ris">descumprimento de NR</span>`:""}</div>
+    const its = itensDoPerigo(a, h);
+    return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> ${its.map(n => `<span class="chip ris">item crítico ${n}</span>`).join(" ")}</div>
       <div class="acts">${conf ? `<span class="confirm">Remover? <button class="btn small danger" type="button" data-act="rmHzSim" data-id="${esc(h.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="edHz" data-id="${esc(h.id)}">Editar</button><button class="btn small danger" type="button" data-act="rmHz" data-id="${esc(h.id)}">Remover</button>`}</div>
       <h4>${esc(t ? t.nome : h.codigo)}</h4><p class="small muted">${esc((h.fonte||"").slice(0,220))}${(h.fonte||"").length>220?"…":""}</p>
-      <p class="meta">${[h.tipoExp, h.controles ? `POAD/EPC${h.poadEficaz?` eficaz? ${h.poadEficaz}`:""}` : "", h.medida ? "medida proposta registrada" : ""].filter(Boolean).map(esc).join(" · ") || "&nbsp;"}</p></div>`; }).join("");
+    </div>`; }).join("");
   return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo vem da taxonomia; a fonte geradora é sempre específica desta situação.") +
   `<div class="stack">${faltam.length ? `<div class="note bad"><b>Itens críticos do checklist sem perigo vinculado:</b> ${faltam.map(({n}) => `<button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Item ${n}</button>`).join(" ")}</div>` : ""}
     ${S.editHz ? vHzEditor() : `<div><button class="btn primary" type="button" data-act="novoHz">+ Adicionar perigo</button></div>`}
-    ${cards || (!S.editHz ? `<div class="panel"><div class="empty">Nenhum perigo lançado. Fator presente e controlado permanece registrado (E0) — só sai o que não se aplica, com justificativa.</div></div>` : "")}
+    ${cards || (!S.editHz ? `<div class="panel"><div class="empty">Nenhum perigo lançado. Fator presente e controlado também é registrado — só fica de fora o que não se aplica, com justificativa nas observações.</div></div>` : "")}
     ${vFotos()}</div>`;
 }
 function opcoesTax(){ const cat = S.hzCat, t = norm(S.hzFiltro); return TAX.filter(x => (!cat || prefixo(x.codigo) === cat) && (!t || norm(x.codigo+" "+x.nome+" "+x.sub).includes(t))); }
@@ -820,7 +815,7 @@ function fonteRepetida(h){
   return outra ? `${outra.numero} (${outra.meta?.cargo})` : null;
 }
 function vHzEditor(){
-  const h = S.editHz, t = TAXMAP[h.codigo], ops = opcoesTax(), itensSim = S.draft.checklist.map((c,i)=>({c,n:i+1})).filter(x => x.c.r==="sim");
+  const h = S.editHz, t = TAXMAP[h.codigo], ops = opcoesTax();
   const el = (b, rot, o={}) => { const v = getPath(S, b) ?? "";
     if (o.area) return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
     return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}">${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`; };
@@ -838,44 +833,10 @@ function vHzEditor(){
       ${t ? `<div class="note"><b>Fórmula modular:</b> ${esc(t.fonte)}<br><b>Campos locais a coletar:</b> ${esc(t.campos)} <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">Usar a fórmula como ponto de partida</button></div>` : ""}
       ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:3,ph:"Condição concreta observada + contexto da atividade + origem da evidência, específica deste cargo."})}
       <div id="hz-rep">${rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""}</div>
-      <div class="grid g2">
-        ${el("editHz.danos","Possíveis danos à saúde",{area:1,rows:3,hint:t && t.cid && t.cid!=="—" ? `Em descrição, sem CID. CID-10 de referência (só apoio ao PCMSO, não vai para o PGR): ${esc(t.cid)}` : "Em descrição, sem CID."})}
-        ${el("editHz.exposicao","Caracterização da exposição",{area:1,rows:3,ph:"Tempo, frequência e intensidade"})}
-      </div>
-      <div class="grid g4">
-        ${sel("editHz.tipoExp","Tipo de exposição",TIPOS_EXPOSICAO,{req:1})}
-        ${sel("editHz.tecnica","Técnica utilizada",TECNICAS,{req:1,cls:"span3"})}
-      </div>
-      <div class="grid g2">
-        ${el("editHz.controles","POAD / EPC — medidas existentes",{area:1,rows:3,ph:"Uma por linha, com o nível: 3 - Carrinho elevatório; 4 - Treinamento…",hint:t ? `Padrão da taxonomia: ${esc(t.medidas)}` : ""})}
-        <div class="stack tight">
-          ${sel("editHz.poadEficaz","POAD / EPC eficaz?",["Sim","Não"])}
-          <label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-b="editHz.evidencia" data-hz-live="1" ${h.evidencia?"checked":""} style="margin-top:3px"><span><b>Há evidência registrada da medida nesta unidade.</b> Programa corporativo genérico não conta como evidência local.${t ? ` Evidência mínima: ${esc(t.evidencia)}` : ""}</span></label>
-          <label class="f"><span>Item crítico do checklist que origina este perigo</span><select data-b="editHz.checkItem"><option value="">Nenhum</option>${itensSim.map(x => `<option value="${x.n}" ${Number(h.checkItem)===x.n?"selected":""}>Item ${x.n}</option>`).join("")}</select></label>
-        </div>
-      </div>
-      <div class="stack tight">
-        <label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-b="editHz.descumprNR" data-hz-live="1" ${h.descumprNR?"checked":""} style="margin-top:3px"><span><b>Descumprimento de requisito específico de NR</b> — registrar qual requisito, para a análise na planilha de controle.</span></label>
-        <div id="hz-div">${vHzDiv()}</div>
-      </div>
-      <div class="grid g4">
-        <label class="f span2"><span>Estado de evidência <em>*</em></span><select data-b="editHz.estado" data-hz-live="1"><option value="">—</option>${ESTADOS.map(([k,n]) => `<option value="${k}" ${h.estado===k?"selected":""}>${k} — ${n}</option>`).join("")}</select></label>
-        ${sel("editHz.origem","Origem da evidência",ORIGENS,{cls:"span2"})}
-        <div id="hz-e2" class="span2">${vHzE2()}</div>
-      </div>
-      <p class="hint" id="hz-estado-txt">${h.estado ? esc(ESTADOS.find(x=>x[0]===h.estado)[2]) : "NA (não aplicável) e E1 (prioridade de AEP) não geram linha no inventário."}</p>
-      <div class="grid g4">
-        ${el("editHz.medida","Medida proposta",{area:1,rows:2,cls:"spanall",ph:"O que deve ser introduzido, aprimorado ou mantido"})}
-        ${sel("editHz.hierarquia","Hierarquia (NR-1)",HIERARQUIA,{hint:"EPI não é medida para fator ergonômico (decisão D-12)."})}
-        ${el("editHz.respSug","Responsável sugerido",{cls:"span2"})}${el("editHz.prazoSug","Prazo sugerido",{type:"date"})}
-      </div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
       <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
     </div></div>`;
 }
-function vHzDiv(){ const h = S.editHz;
-  return h.descumprNR ? `<label class="f"><span>Requisito de NR descumprido <em>*</em></span><input id="f-editHz.requisitoNR" type="text" data-b="editHz.requisitoNR" value="${esc(h.requisitoNR||"")}" placeholder="Ex.: NR-17, item 17.6.6"></label>` : ""; }
-function vHzE2(){ const h = S.editHz; return h.estado === "E2" ? `<label class="f"><span>Data prevista de revisão (E2) <em>*</em></span><input type="date" data-b="editHz.dataRevisao" value="${esc(h.dataRevisao||"")}"></label>` : ""; }
 
 function vFotos(){
   const F = S.draft.fotos;
@@ -912,22 +873,14 @@ function st8(){
 
 /* ---------------- Perigos: ações ---------------- */
 function abrirHz(h){
-  S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", controles:"", checkItem:"", evidencia:false,
-    descumprNR:false, requisitoNR:"", tipoExp:"", tecnica:"AEP e COPSOQ II", poadEficaz:"", estado:"E3", dataRevisao:"", origem:"Observação em campo",
-    medida:"", hierarquia:"", respSug:"", prazoSug:"", origemCopsoq:"" }, h);
+  S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", checkItem:"", origemCopsoq:"" }, h);
   S.hzErr = ""; S.hzFiltro = ""; S.hzCat = h && h.codigo ? prefixo(h.codigo) : "";
 }
 function salvarHz(){
   const h = S.editHz, t = TAXMAP[h.codigo]; const erro = m => { S.hzErr = m; renderStep(); };
   if (!t) return erro("Selecione o perigo na taxonomia.");
   if (!h.fonte?.trim()) return erro("Descreva a fonte geradora específica desta situação.");
-  if (!h.tipoExp) return erro("Informe o tipo de exposição.");
-  if (!h.tecnica) return erro("Informe a técnica utilizada.");
-  if (!h.estado) return erro("Informe o estado de evidência.");
-  if (h.estado === "E2" && !h.dataRevisao) return erro("E2 exige data prevista de revisão — sem ela o registro é inválido.");
-  if (h.descumprNR && !h.requisitoNR?.trim()) return erro("Informe qual requisito de NR foi descumprido.");
-  if (h.medida?.trim() && !h.hierarquia) return erro("Informe o nível da hierarquia da medida proposta.");
-  const novo = clone(h); delete novo._novo;
+  const novo = clone(h); delete novo._novo; if (!novo.danos) novo.danos = t.danos;
   const i = S.draft.perigos.findIndex(x => x.id === novo.id);
   if (i >= 0) S.draft.perigos[i] = novo; else S.draft.perigos.push(novo);
   S.editHz = null; S.hzErr = ""; marcar(); numerarRiscos(S.draft); renderStep(); renderRail(); renderAside(); toast("Perigo salvo.");
@@ -1081,11 +1034,9 @@ function docHTML(a, cfg, fotos, opt={}){
   const cruz = DOMINIOS.map(d => { const r = resultadoDominio(a,d.id), dd = a.copsoq.dominios[d.id]||{};
     const subs = [...r.altas, ...r.inter].map(x => `<span class="${x.f==="ris"?"alta":""}">${esc(x.s.nome)} ${num2(x.m)}${x.f==="ris"?" (alta)":""}</span>`).join("<br>");
     return `<tr><td class="b">${esc(d.nome)}</td><td class="c">${r.auto?`${num2(r.nota)}<br>`:""}${r.faixa?esc(FAIXAS[r.faixa]):"—"}${subs?`<div class="small" style="text-align:left;margin-top:3px">${subs}</div>`:""}</td><td>${escBr(dd.obs||"")}</td><td class="c">${esc(dd.concl||"—")}</td></tr>`; }).join("");
-  const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo];
-    return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b> — ${esc(t?t.nome:"")}<div class="small">${escBr(h.danos||"")}</div></td>
-      <td>${escBr(h.fonte||"")}${h.exposicao?`<div class="small"><b>Exposição:</b> ${escBr(h.exposicao)}${h.tipoExp?` (${esc(h.tipoExp)})`:""}</div>`:h.tipoExp?`<div class="small"><b>Exposição:</b> ${esc(h.tipoExp)}</div>`:""}${h.controles?`<div class="small"><b>POAD / EPC:</b> ${escBr(h.controles)}${h.poadEficaz?` — eficaz? ${esc(h.poadEficaz)}`:""}</div>`:""}${h.checkItem?`<div class="small"><b>Vinculado ao item crítico ${h.checkItem} do checklist.</b></div>`:""}${h.descumprNR?`<div class="small"><b>Descumprimento de requisito de NR:</b> ${esc(h.requisitoNR||"")}</div>`:""}</td>
-      <td class="c"><span class="est">${esc(h.estado||"—")}</span>${h.estado==="E2"&&h.dataRevisao?`<div class="small">revisão até ${fmtData(h.dataRevisao)}</div>`:""}</td>
-      <td>${escBr(h.medida||"—")}${h.hierarquia?`<div class="small">${esc(h.hierarquia)}</div>`:""}${h.respSug||h.prazoSug?`<div class="small">${esc(h.respSug||"")}${h.prazoSug?` · até ${fmtData(h.prazoSug)}`:""}</div>`:""}</td></tr>`; }).join("");
+  const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo], its = itensDoPerigo(a, h);
+    return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b> — ${esc(t?t.nome:"")}</td>
+      <td>${escBr(h.fonte||"")}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
   const areasNR = AREAS_NR17.map(([id,nome]) => { const n = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.area===id).length;
     return `<tr><td>${esc(nome)}</td><td class="c">${n || "—"}</td></tr>`; }).join("");
   const fotosT = []; for (let i=0;i<fotos.length;i+=2){ fotosT.push(`<tr>${[fotos[i],fotos[i+1]].map((f,k) => f?`<td><div class="cap">${i+k+1} – ${esc(f.titulo||"")}</div><img src="${f.src}" alt=""></td>`:"<td></td>").join("")}</tr>`); }
@@ -1105,9 +1056,9 @@ function docHTML(a, cfg, fotos, opt={}){
   <p class="small"><b>Subescalas acima de 3,66 no setor:</b> ${altasSetor.length ? altasSetor.map(x => `${esc(x.s.nome)} (${num2(x.m)})`).join("; ") : "nenhuma"}.</p>`:`<p class="small">Resultado por domínio informado pelo analista, sem notas de setor vinculadas a esta AEP.</p>`}
   <table class="t"><thead><tr><th style="width:17%">Domínio COPSOQ</th><th style="width:20%">Resultado</th><th>Observação em campo</th><th style="width:19%">Conclusão</th></tr></thead><tbody>${cruz}</tbody></table>
   <h2>Inventário de perigos</h2>
-  <p class="small">Perigos identificados e respectivas fontes geradoras, com os possíveis danos em descrição, sem CID. A graduação do risco (probabilidade, severidade e nível) é feita na planilha de controle do GRO da unidade, a partir deste registro.</p>
-  <table class="t"><thead><tr><th style="width:24%">Perigo / possíveis danos</th><th>Fonte geradora / exposição / medidas existentes</th><th class="c" style="width:52px">Estado</th><th style="width:21%">Medida proposta</th></tr></thead><tbody>
-  ${hz || `<tr><td colspan="4" class="c">Nenhum perigo lançado — ver observações complementares.</td></tr>`}</tbody></table>
+  <p class="small">Perigos identificados e respectivas fontes geradoras. A caracterização da exposição, os possíveis danos e a graduação do risco (probabilidade, severidade e nível) são registrados na planilha de controle do GRO da unidade, a partir deste registro.</p>
+  <table class="t"><thead><tr><th style="width:34%">Perigo / fator de risco</th><th>Fonte geradora</th></tr></thead><tbody>
+  ${hz || `<tr><td colspan="2" class="c">Nenhum perigo lançado — ver observações complementares.</td></tr>`}</tbody></table>
   <h3>Perigos por área de condições de trabalho</h3>
   <table class="t"><thead><tr><th>Área de condições de trabalho (NR-17, 17.1.1.1)</th><th class="c" style="width:90px">Perigos</th></tr></thead><tbody>${areasNR}</tbody></table>
   <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
@@ -1174,7 +1125,7 @@ function linhasPGR(){
     const t = TAXMAP[h.codigo]; if (!t) return;
     // Colunas de graduação (Categoria Risco, Probabilidade, Severidade, Nível, Categoria, Ações) saem em
     // branco: são preenchidas à mão na planilha de controle.
-    out.push([a.meta?.eg||"", (a.meta?.cargo||"").trim(), `${a.numero} / ${h.idRisco||"R??"}`, "Ergonomico", t.nome, h.fonte||"", "NA", "NA", h.danos||"", h.tipoExp||"", h.tecnica||"",
+    out.push([a.meta?.eg||"", (a.meta?.cargo||"").trim(), `${a.numero} / ${h.idRisco||"R??"}`, "Ergonomico", t.nome, h.fonte||"", "NA", "NA", t.danos||h.danos||"", h.tipoExp||"", h.tecnica||"",
       "NA","NA","NA","NA","NA", "", h.controles||"", h.poadEficaz||"", "NA","NA", "", "", "", "", ""]);
   }));
   return out;
@@ -1233,8 +1184,6 @@ function onHzChange(b, el){
     }
     renderStep(); const s = $("#f-hzcod"); if (s) s.focus(); return;
   }
-  if (b === "editHz.descumprNR"){ const d = $("#hz-div"); if (d) d.innerHTML = vHzDiv(); }
-  if (b === "editHz.estado"){ const e = $("#hz-e2"); if (e) e.innerHTML = vHzE2(); const tx = $("#hz-estado-txt"); if (tx){ const x = ESTADOS.find(z => z[0] === h.estado); tx.textContent = x ? x[2] : "NA (não aplicável) e E1 (prioridade de AEP) não geram linha no inventário."; } }
   if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""; } return; }
 }
 function onAreaChange(b, el){
@@ -1344,9 +1293,8 @@ document.addEventListener("click", async e => {
     case "hzDoCopsoq": {
       const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), tx = TAXMAP[s.tax]; if (!tx) break;
       const med = snap?.medias?.[s.id], f = faixaDe(med) || "int";
-      abrirHz({ _novo:true, codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos, origem: "Campo + rastreamento", tecnica: "AEP e COPSOQ II",
-        fonte: `Sinal de triagem COPSOQ na subescala “${s.nome}” (média ${num2(med)}, ${FAIXAS[f]}, setor ${snap?.nome||"—"}). Fonte geradora a confirmar e redigir em campo: o resultado indica onde olhar, não caracteriza o posto.`,
-        controles: "" });
+      abrirHz({ _novo:true, codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos,
+        fonte: `Sinal de triagem COPSOQ na subescala “${s.nome}” (média ${num2(med)}, ${FAIXAS[f]}, setor ${snap?.nome||"—"}). Fonte geradora a confirmar e redigir em campo: o resultado indica onde olhar, não caracteriza o posto.` });
       S.hzCat = ""; aposHz();
       toast("Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
     }
