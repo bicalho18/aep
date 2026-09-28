@@ -896,9 +896,12 @@ function st6(){
     ${vFotos()}</div>`;
 }
 function opcoesTax(){ const cat = S.hzCat, t = norm(S.hzFiltro); return TAX.filter(x => (!cat || prefixo(x.codigo) === cat) && (!t || norm(x.codigo+" "+x.nome+" "+x.sub).includes(t))); }
+/* A fonte começa pelo texto padrão da planilha (TAXONOMIA); o que vem depois é o complemento escrito na AEP */
+const fontePadrao = f => TAX.find(x => String(f||"").trim().startsWith(x.fonte));
+const complementoFonte = f => { const t = fontePadrao(f); return (t ? String(f).trim().slice(t.fonte.length) : String(f||"")).trim(); };
 function fonteRepetida(h){
-  const k = norm(h.fonte).slice(0,120); if (k.length < 20) return null;
-  const outra = Object.values(S.aeps).find(a => a.id !== S.draft.id && norm(a.meta?.cargo) !== norm(S.draft.meta.cargo) && (a.perigos||[]).some(x => norm(x.fonte).slice(0,120) === k));
+  const k = norm(complementoFonte(h.fonte)).slice(0,120); if (k.length < 20) return null;
+  const outra = Object.values(S.aeps).find(a => a.id !== S.draft.id && norm(a.meta?.cargo) !== norm(S.draft.meta.cargo) && (a.perigos||[]).some(x => norm(complementoFonte(x.fonte)).slice(0,120) === k));
   return outra ? `${outra.numero} (${outra.meta?.cargo})` : null;
 }
 function vHzEditor(){
@@ -917,9 +920,9 @@ function vHzEditor(){
             <option value="">— Selecione (${ops.length} opção/ões) —</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("")}</select>
           <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}${t.prov ? " · <b>incluído do PCRE: textos provisórios, confirmar</b>" : ""}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span></label>
       </div>
-      ${t ? `<div class="note"><b>Fórmula modular:</b> ${esc(t.fonte)}<br><b>Campos locais a coletar:</b> ${esc(t.campos)} <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">Usar a fórmula como ponto de partida</button></div>` : ""}
-      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:3,ph:"Condição concreta observada + contexto da atividade + origem da evidência, específica deste cargo."})}
-      <div id="hz-rep">${rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""}</div>
+      ${t ? `<div class="note"><b>Campos locais a coletar:</b> ${esc(t.campos)}${!String(h.fonte||"").trim().startsWith(t.fonte) ? ` <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">Recolocar o texto da planilha no início</button>` : ""}</div>` : ""}
+      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da planilha de controle (mesma redação da aba TAXONOMIA). Complemente depois dele com o que é específico deste cargo."})}
+      <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
       <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
     </div></div>`;
@@ -1272,10 +1275,14 @@ function onHzChange(b, el){
     if (t){
       const antigo = TAX.find(x => x.danos === h.danos);
       if (!h.danos || antigo) h.danos = t.danos;
+      const f = String(h.fonte||"").trim(), velho = fontePadrao(f);
+      if (!f) h.fonte = t.fonte;
+      else if (velho) h.fonte = t.fonte + f.slice(velho.fonte.length);
+      else h.fonte = t.fonte + " " + f;
     }
     renderStep(); const s = $("#f-hzcod"); if (s) s.focus(); return;
   }
-  if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Fonte idêntica em AEP de outro cargo — ${esc(rep)}. Frase repetida entre cargos não identifica fonte, repete rótulo: revise.</div>` : ""; } return; }
+  if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""; } return; }
 }
 function onAreaChange(b, el){
   const ar = S.editArea, live = el.dataset.areaLive;
@@ -1376,7 +1383,7 @@ document.addEventListener("click", async e => {
     case "rmEscSim": a.escuta = a.escuta.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
     case "hzDoItem": {
       const n = Number(d.n), cod = (CK_PERIGOS[n]||[])[0] || "", tx = TAXMAP[cod], obs = a.checklist[n-1]?.obs;
-      abrirHz({ _novo:true, checkItem: n, codigo: cod, danos: tx ? tx.danos : "", fonte: obs || "" });
+      abrirHz({ _novo:true, checkItem: n, codigo: cod, danos: tx ? tx.danos : "", fonte: [tx ? tx.fonte : "", obs || ""].filter(Boolean).join(" ") });
       S.hzCat = ""; aposHz();
       if ((CK_PERIGOS[n]||[]).length > 1) toast(`O item ${n} aciona ${CK_PERIGOS[n].join(", ")}. Confira se o perigo sugerido é o certo.`);
       break;
@@ -1385,7 +1392,7 @@ document.addEventListener("click", async e => {
       const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), tx = TAXMAP[s.tax]; if (!tx) break;
       const med = snap?.medias?.[s.id], f = faixaDe(med) || "int";
       abrirHz({ _novo:true, codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos,
-        fonte: `Sinal de triagem COPSOQ na subescala “${s.nome}” (média ${num2(med)}, ${FAIXAS[f]}, setor ${snap?.nome||"—"}). Fonte geradora a confirmar e redigir em campo: o resultado indica onde olhar, não caracteriza o posto.` });
+        fonte: tx.fonte });
       S.hzCat = ""; aposHz();
       toast("Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
     }
@@ -1395,7 +1402,7 @@ document.addEventListener("click", async e => {
     case "rmHzSim": a.perigos = a.perigos.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
     case "salvarHz": salvarHz(); break;
     case "cancelarHz": S.editHz = null; S.hzErr = ""; renderStep(); break;
-    case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; S.editHz.fonte = tx.fonte; const ta = document.getElementById("f-editHz.fonte"); if (ta){ ta.value = tx.fonte; ta.focus(); } toast("Fórmula copiada: troque os termos genéricos pela condição real deste cargo."); break; }
+    case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; const f = String(S.editHz.fonte||"").trim(), velho = fontePadrao(f); S.editHz.fonte = tx.fonte + (velho ? f.slice(velho.fonte.length) : (f ? " " + f : "")); renderStep(); toast("Texto da planilha recolocado no início. Complemente depois dele."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
     case "txtSub": case "txtFecho": {
       const dd = a.copsoq.dominios[d.dom], dm = DOMINIOS.find(x => x.id === d.dom), atual = (dd.obs||"").trim();
