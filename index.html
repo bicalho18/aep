@@ -332,8 +332,21 @@ const CHECKLIST = [
  "Alto nível de ruído, calor, vibração ou algum outro fator da Higiene Ocupacional bastante evidente.",
  "Outros."
 ];
-/* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA) */
-const CK_PERIGOS = Object.fromEntries(CHECKLIST.map((_,i) => [i+1, TAX.filter(t => (t.itens||[]).includes(i+1)).map(t => t.codigo)]));
+/* Bloco condicional: posto de trabalho informatizado / administrativo (itens 15 a 19).
+   Só é respondido quando a pergunta de abertura é "Sim". */
+const CK_N_BASE = CHECKLIST.length;
+const CK_ADM_PERGUNTA = "Existe atividade em posto de trabalho informatizado / administrativo?";
+const CHECKLIST_ADM = [
+ "Posto de trabalho improvisado, com dificuldade nítida de se usar o teclado, torcendo o pescoço para enxergar o monitor de vídeo ou com dificuldade de leitura de documento fonte ou não podendo encostar-se no espaldar da cadeira ou sem espaço adequado para as pernas.",
+ "Configuração do computador ultrapassada em relação à demanda atual de serviço do executante.",
+ "Aplicativos apresentando problema importante de performance.",
+ "Cadeira degradada ou inadequada para postos de trabalho informatizados.",
+ "Condição ambiental bastante inadequada: calor excessivo, frio excessivo, vibração, iluminação bastante inadequada, alto nível de ruído."
+];
+CHECKLIST.push(...CHECKLIST_ADM);
+const CK_ADM_PERIGOS = { 15:["EQ-04","EQ-01","BIO-01"], 16:["EQ-04"], 17:["EQ-06"], 18:["EQ-01"], 19:["AMB-01","AMB-02","AMB-03","AMB-04"] };
+/* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA; itens 15–19 pela tabela acima) */
+const CK_PERIGOS = Object.fromEntries(CHECKLIST.map((_,i) => [i+1, [...TAX.filter(t => (t.itens||[]).includes(i+1)).map(t => t.codigo), ...(CK_ADM_PERIGOS[i+1]||[])]]));
 
 /* COPSOQ — 23 subescalas dos 6 domínios acionáveis, com a ponte para o perigo */
 const SUBS = SUBS_RAW;
@@ -410,10 +423,12 @@ function setSaveState(txt){ $("#savestate").textContent = txt; }
    RESUMO DOS PERIGOS (só contagem — a graduação do risco é feita na planilha de controle)
    ========================================================================= */
 /* Vínculo item crítico ↔ perigo: pelo item informado ao lançar (checkItem) ou pela ponte da taxonomia (coluna "itens") */
-const perigoLigaItem = (h, n) => Number(h.checkItem) === n || (TAXMAP[h.codigo]?.itens || []).includes(n);
+const ckAtivo = (a, n) => n <= CK_N_BASE || a.checklistAdm === "sim";
+const ckLista = a => (a.checklist||[]).map((c,i) => ({ c, n: i+1, i })).filter(x => x.c && ckAtivo(a, x.n));
+const perigoLigaItem = (h, n) => Number(h.checkItem) === n || (CK_PERIGOS[n] || []).includes(h.codigo);
 const perigoDoItem = (a, n) => (a.perigos||[]).find(h => perigoLigaItem(h, n));
-const itensDoPerigo = (a, h) => (a.checklist||[]).map((c,i) => ({ c, n: i+1 })).filter(x => x.c && x.c.r === "sim" && perigoLigaItem(h, x.n)).map(x => x.n);
-const temDesqualificacao = aep => (aep.checklist||[]).some(c => c && c.r === "sim");
+const itensDoPerigo = (a, h) => ckLista(a).filter(x => x.c.r === "sim" && perigoLigaItem(h, x.n)).map(x => x.n);
+const temDesqualificacao = aep => ckLista(aep).some(x => x.c.r === "sim");
 
 /* =========================================================================
    COPSOQ POR SETOR
@@ -516,6 +531,7 @@ function completar(a){
   if (!r.meta.setorCopsoq) r.meta.setorCopsoq = setorPeloDepara(r.meta.setor, r.meta.area);
   r.escuta = r.escuta || []; r.perigos = r.perigos || []; r.fotos = r.fotos || [];
   r.checklist = CHECKLIST.map((_,i) => Object.assign({ r:"", obs:"" }, (r.checklist||[])[i]||{}));
+  r.checklistAdm = r.checklistAdm || "";
   r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
   DOMINIOS.forEach(d => { const dd = r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); if (CONCL_ANTIGAS[dd.concl]) dd.concl = CONCL_ANTIGAS[dd.concl]; });
   r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
@@ -582,13 +598,14 @@ function pendencias(a){
   if (!m.data) p[1].push("Informar a data da avaliação");
   if (!m.analista?.trim()) p[1].push("Informar o responsável técnico");
   if (!a.trabalho?.sumaria?.trim()) p[1].push("Escrever a descrição sumária da atividade");
-  const semResp = (a.checklist||[]).filter(c => !c.r).length; if (semResp) p[2].push(`${semResp} item(ns) do checklist sem resposta`);
+  if (!a.checklistAdm) p[2].push("Responder se existe atividade em posto informatizado / administrativo");
+  const semResp = ckLista(a).filter(x => !x.c.r).length; if (semResp) p[2].push(`${semResp} item(ns) do checklist sem resposta`);
   DOMINIOS.forEach(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq?.dominios?.[d.id]||{};
     if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`);
     if (/\[[^\]]*\]/.test(dd.obs||"")) p[3].push(`${d.nome}: complete os trechos entre colchetes da observação`);
     if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && (dd.obs||"").trim() === d.padrao) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
-  (a.checklist||[]).forEach((c,i) => { if (c.r === "sim" && !perigoDoItem(a, i+1)) p[4].push(`Item ${i+1} do checklist marcado Sim sem perigo vinculado`); });
+  ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
   if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
@@ -659,7 +676,7 @@ function linhasHome(lista){
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
       <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
-      <td class="num">${(a.checklist||[]).filter(c => c && c.r === "sim").length || "—"}</td></tr>`;
+      <td class="num">${ckLista(a).filter(x => x.c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
 }
 /* Atualiza só a tabela e a contagem, sem redesenhar os filtros (não perde o foco da busca) */
@@ -775,7 +792,7 @@ function renderRail(){
     return `<li><button type="button" data-step="${n}" ${S.step===n?'aria-current="step"':""}><span class="n">${n}</span><span class="lbl">${esc(t)}</span><span class="dot ${dot}" title="${pend?pend+" pendência(s)":"Completo"}"></span></button></li>`; }).join("")}</ol>`;
 }
 function renderAside(){
-  const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = (a.checklist||[]).filter(c => c.r==="sim").length;
+  const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = ckLista(a).filter(x => x.c.r==="sim").length;
   const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
   el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
       <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
@@ -815,17 +832,22 @@ function st1(){
 }
 function st4(){
   const a = S.draft;
-  const rows = CHECKLIST.map((txt,i) => { const c = a.checklist[i], n = i+1, vinc = perigoDoItem(a, n), cands = CK_PERIGOS[n];
+  const linha = i => { const txt = CHECKLIST[i], c = a.checklist[i], n = i+1, vinc = perigoDoItem(a, n), cands = CK_PERIGOS[n];
     const opt = (v,rot,cls="") => `<input type="radio" id="ck${n}${v}" name="ck${n}" value="${v}" data-b="checklist.${i}.r" data-rr="1" class="${cls}" ${c.r===v?"checked":""}><label for="ck${n}${v}">${rot}</label>`;
     return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
       <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}
         ${c.r==="sim" ? `${fld(`checklist.${i}.obs`,"O que foi observado",{area:1,rows:2})}
           ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
           ${n===13 ? `<p class="hint">Ruído, calor e vibração como exposição ocupacional são agentes da NR-9; na AEP entra o conforto ambiental da NR-17 (AMB).</p>`:""}` : ""}
-      </div><div class="seg" role="radiogroup" aria-label="Resultado do item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; }).join("");
-  const sim = a.checklist.filter(c => c.r==="sim").length;
+      </div><div class="seg" role="radiogroup" aria-label="Resultado do item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; };
+  const idx = Array.from({ length: CHECKLIST.length }, (_,i) => i);
+  const optAdm = (v,rot) => `<input type="radio" id="ckadm${v}" name="ckadm" value="${v}" data-b="checklistAdm" data-rr="1" ${a.checklistAdm===v?"checked":""}><label for="ckadm${v}">${rot}</label>`;
+  const rows = idx.slice(0, CK_N_BASE).map(linha).join("") +
+    `<div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div class="stack tight"><p><b>${esc(CK_ADM_PERGUNTA)}</b></p><p class="tiny faint">Se Sim, abrem os itens 15 a 19, específicos do posto informatizado.</p></div><div class="seg" role="radiogroup" aria-label="Posto informatizado / administrativo">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>` +
+    (a.checklistAdm === "sim" ? idx.slice(CK_N_BASE).map(linha).join("") : "");
+  const ativos = ckLista(a), sim = ativos.filter(x => x.c.r==="sim").length;
   return stepHead(2,"Checklist NR-17 — desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: deve ser registrado como perigo na etapa 4.") +
-  `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim — ${sim} item(ns).` : (a.checklist.every(c=>c.r) ? "Não." : "Responda todos os itens.")}</div>`;
+  `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim — ${sim} item(ns).` : (a.checklistAdm && ativos.every(x => x.c.r) ? "Não." : "Responda todos os itens.")}</div>`;
 }
 function st5(){
   const a = S.draft, snap = copsoqDaAEP(a);
@@ -860,7 +882,7 @@ function st5(){
   return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${blocos}</div>`;
 }
 function st6(){
-  const a = S.draft, faltam = a.checklist.map((c,i)=>({c,n:i+1})).filter(({c,n}) => c.r==="sim" && !perigoDoItem(a, n));
+  const a = S.draft, faltam = ckLista(a).filter(({c,n}) => c.r==="sim" && !perigoDoItem(a, n));
   const cards = a.perigos.map(h => { const t = TAXMAP[h.codigo], conf = S.confirm === "hz-"+h.id;
     const its = itensDoPerigo(a, h);
     return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> ${its.map(n => `<span class="chip ris">item crítico ${n}</span>`).join(" ")}</div>
@@ -1092,8 +1114,12 @@ function docHTML(a, cfg, fotos, opt={}){
       <tr><td class="k">Empresa</td><td>${esc(cfg.empresa||"—")}${cfg.cnpj?` · CNPJ ${esc(cfg.cnpj)}`:""}</td><td class="k">Data</td><td>${fmtData(m.data)}</td></tr>
       <tr><td class="k">Setor</td><td>${esc((m.setor||"—").trim())}${m.area?` · ${esc(m.area)}`:""}</td><td class="k">Cargo/Função</td><td>${esc((m.cargo||"—").trim())}</td></tr>
       <tr><td class="k">Unidade</td><td>${esc(cfg.unidade||"—")}</td><td class="k">Analista</td><td>${esc(m.analista||"—")}${m.registroAnalista?` – ${esc(m.registroAnalista)}`:""}</td></tr></table>`;
-  const ck = CHECKLIST.map((t,i) => { const c = a.checklist[i]||{}, r = c.r==="sim"?'<span class="sim">Sim</span>':c.r==="nao"?'<span class="nao">Não</span>':c.r==="na"?"N.A.":"—";
-    return `<tr><td class="c">${i+1}</td><td>${esc(t)}${c.r==="sim"&&c.obs?`<div class="small"><b>Observado:</b> ${escBr(c.obs)}</div>`:""}</td><td class="c">${r}</td></tr>`; }).join("");
+  const ckLinha = i => { const t = CHECKLIST[i], c = a.checklist[i]||{}, r = c.r==="sim"?'<span class="sim">Sim</span>':c.r==="nao"?'<span class="nao">Não</span>':c.r==="na"?"N.A.":"—";
+    return `<tr><td class="c">${i+1}</td><td>${esc(t)}${c.r==="sim"&&c.obs?`<div class="small"><b>Observado:</b> ${escBr(c.obs)}</div>`:""}</td><td class="c">${r}</td></tr>`; };
+  const ckI = Array.from({ length: CHECKLIST.length }, (_,i) => i);
+  const ck = ckI.slice(0, CK_N_BASE).map(ckLinha).join("") +
+    `<tr><td class="c">—</td><td class="b">${esc(CK_ADM_PERGUNTA)}</td><td class="c">${a.checklistAdm==="sim"?"Sim":a.checklistAdm==="nao"?"Não":"—"}</td></tr>` +
+    (a.checklistAdm === "sim" ? ckI.slice(CK_N_BASE).map(ckLinha).join("") : "");
   const desq = temDesqualificacao(a), snap = copsoqDaAEP(a);
   const altasSetor = snap ? SUBS.map(x => ({ s:x, m: snap.medias?.[x.id] })).filter(x => faixaDe(x.m) === "ris").sort((p,q) => q.m - p.m) : [];
   const cruz = DOMINIOS.map(d => { const r = resultadoDominio(a,d.id), dd = a.copsoq.dominios[d.id]||{};
