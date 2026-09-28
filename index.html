@@ -201,6 +201,10 @@ table.list tr:last-child td{border-bottom:0}
 .ck .i{font-family:var(--f-mono);font-weight:600;color:var(--ink-3);padding-top:2px}
 .ck p{font-size:13px}
 @media (max-width:760px){.ck{grid-template-columns:30px minmax(0,1fr)}.ck .seg{grid-column:2}}
+.fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-strong);border-radius:999px;padding:5px 12px;cursor:pointer;background:var(--surface);font-size:13px;color:var(--ink-2)}
+.fchip input{accent-color:var(--accent);margin:0}
+.fchip:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.fchip b{font-weight:600;color:var(--ink-3)}
 .seg{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius);overflow:hidden;height:max-content}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label{padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink-2);border-right:1px solid var(--rule-strong);background:var(--surface)}
@@ -529,7 +533,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  busca:"", fStatus:"", fSetor:"", exportAberto:false, expEscopo:"concluidas", expGHE:"",
+  busca:"", fStatus:[], fSetor:"", exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
 function proximoNumero(){ return Math.max(0, ...Object.values(S.aeps).map(idNum).filter(n => n < 1000)) + 1; }
@@ -690,7 +694,7 @@ function render(){
 function listaFiltrada(){
   const t = norm(S.busca);
   return Object.values(S.aeps)
-    .filter(a => !S.fStatus || (a.status||"nao_iniciada") === S.fStatus)
+    .filter(a => !S.fStatus.length || S.fStatus.includes(a.status||"nao_iniciada"))
     .filter(a => !S.fSetor || (a.meta?.setor||"").trim() === S.fSetor)
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t))
     .sort((a,b) => idNum(a) - idNum(b));
@@ -729,8 +733,8 @@ function vHome(){
   <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
-    <label class="f"><span>Situação</span><select id="f-status" data-filtro="fStatus"><option value="">Todas</option>${Object.entries(STATUS).map(([k,v]) => `<option value="${k}" ${S.fStatus===k?"selected":""}>${v}</option>`).join("")}</select></label>
-    <label class="f"><span>Setor</span><select id="f-setor" data-filtro="fSetor"><option value="">Todos</option>${setores.map(s => `<option ${S.fSetor===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+    <label class="f span2"><span>Setor</span><select id="f-setor" data-filtro="fSetor"><option value="">Todos</option>${setores.map(s => `<option ${S.fSetor===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
+    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">— marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <p class="small muted" style="margin-bottom:8px" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
   <div class="panel">
@@ -1332,6 +1336,7 @@ function onAreaChange(b, el){
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
+  if (el.dataset.fst){ if (!isChange) return; const k = el.dataset.fst; S.fStatus = el.checked ? [...new Set([...S.fStatus, k])] : S.fStatus.filter(x => x !== k); atualizarHome(); return; }
   if (el.dataset.filtro){
     if (el.tagName === "SELECT" && !isChange) return;
     if (el.tagName !== "SELECT" && isChange) return;
