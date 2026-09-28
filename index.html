@@ -383,6 +383,7 @@ const TXT_RECOMENDACOES = [
   "Manter os mecanismos de consulta e comunicação com os trabalhadores para identificação de eventuais mudanças ou novas situações que possam alterar as condições avaliadas.",
   "Realizar nova avaliação quando ocorrerem mudanças nos processos, equipamentos, ambiente, condições, procedimentos ou organização do trabalho, quando forem identificadas inadequações ou perda de eficácia das medidas existentes, ou nas demais hipóteses previstas no gerenciamento de riscos ocupacionais."
 ].join("\n");
+const TXT_JUST_AET_NAO = "A Avaliação Ergonômica Preliminar (AEP) identificou com clareza os fatores de risco ergonômicos e as respectivas medidas preventivas/corretivas, as quais foram integradas ao Plano de Ação. No momento, não há necessidade de aprofundamento técnico via AET, visto que nenhum dos gatilhos do item 17.3.2 da NR-17 foi atendido. O desempenho das medidas adotadas será monitorado e, caso seja observada ineficácia ou insuficiência das ações (gatilho b), a AET será acionada.";
 const TXT_NOTA_AET = "Se as medidas de prevenção implementadas forem consideradas ineficazes ou a situação for muito complexa, esta AEP serve como gatilho para a realização de uma AET — Análise Ergonômica do Trabalho, nos termos do item 17.3.2 da NR-17.";
 const GATILHOS = [
   ["a","Observada a necessidade de uma avaliação mais aprofundada da situação"],
@@ -425,9 +426,25 @@ function setSaveState(txt){ $("#savestate").textContent = txt; }
 /* Vínculo item crítico ↔ perigo: pelo item informado ao lançar (checkItem) ou pela ponte da taxonomia (coluna "itens") */
 const ckAtivo = (a, n) => n <= CK_N_BASE || a.checklistAdm === "sim";
 const ckLista = a => (a.checklist||[]).map((c,i) => ({ c, n: i+1, i })).filter(x => x.c && ckAtivo(a, x.n));
-const perigoLigaItem = (h, n) => Number(h.checkItem) === n || (CK_PERIGOS[n] || []).includes(h.codigo);
-const perigoDoItem = (a, n) => (a.perigos||[]).find(h => perigoLigaItem(h, n));
-const itensDoPerigo = (a, h) => ckLista(a).filter(x => x.c.r === "sim" && perigoLigaItem(h, x.n)).map(x => x.n);
+/* Vínculo item crítico ↔ perigo:
+   1) escolha manual no checklist (campo "Perigo que responde a este item"), quando houver;
+   2) senão, automático: o perigo é um dos que o item aciona na taxonomia da planilha;
+   3) itens sem perigo na taxonomia (12, 13, 14): vale o perigo lançado a partir do próprio item. */
+function perigoLigaItem(a, h, n){
+  const c = (a.checklist||[])[n-1] || {};
+  if (c.hz && (a.perigos||[]).some(x => x.id === c.hz)) return c.hz === h.id;
+  const lista = CK_PERIGOS[n] || [];
+  return lista.length ? lista.includes(h.codigo) : Number(h.checkItem) === n;
+}
+const perigoDoItem = (a, n) => (a.perigos||[]).find(h => perigoLigaItem(a, h, n));
+const itensDoPerigo = (a, h) => ckLista(a).filter(x => x.c.r === "sim" && perigoLigaItem(a, h, x.n)).map(x => x.n);
+/* Mesma linha repetida: mesmo perigo com a mesma fonte geradora */
+const chaveHz = h => h.codigo + "|" + norm(h.fonte);
+function perigosRepetidos(a){
+  const vistos = {}, out = [];
+  (a.perigos||[]).forEach(h => { const k = chaveHz(h); if (vistos[k]) out.push([vistos[k], h]); else vistos[k] = h; });
+  return out;
+}
 const temDesqualificacao = aep => ckLista(aep).some(x => x.c.r === "sim");
 
 /* =========================================================================
@@ -606,10 +623,13 @@ function pendencias(a){
     if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && (dd.obs||"").trim() === d.padrao) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
+  perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
   if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
   if (!a.aet?.justificativa?.trim()) p[5].push("Justificar a decisão sobre AET");
+  if (a.aet?.decisao === "sim" && (a.aet.justificativa||"").trim() === TXT_JUST_AET_NAO) p[5].push("A justificativa é o texto padrão de AET não acionada, mas a decisão é Sim");
+  if (a.aet?.decisao === "nao" && (a.aet.gatilhos||[]).length) p[5].push("AET não acionada, mas há gatilho do item 17.3.2 marcado");
   if (a.aet?.decisao === "sim" && !(a.aet.gatilhos||[]).length) p[5].push("Indicar o gatilho da AET (17.3.2)");
   if (!a.conclusao?.parecer?.trim()) p[5].push("Escrever as observações complementares");
   return p;
@@ -837,7 +857,9 @@ function st4(){
     return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
       <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}
         ${c.r==="sim" ? `${fld(`checklist.${i}.obs`,"O que foi observado",{area:1,rows:2})}
-          ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
+          ${a.perigos.length ? `<label class="f"><span>Perigo que responde a este item</span><select data-b="checklist.${i}.hz" data-rr="1"><option value="">Automático${(() => { const au = (a.perigos||[]).find(h => (cands.length ? cands.includes(h.codigo) : Number(h.checkItem) === n)); return au ? ` — ${esc(au.idRisco||"")} ${esc(au.codigo)}` : " — nenhum perigo da lista lançado"; })()}</option>${a.perigos.map(h => `<option value="${esc(h.id)}" ${c.hz===h.id?"selected":""}>${esc(h.idRisco||"")} ${esc(h.codigo)} — ${esc(TAXMAP[h.codigo]?.nome||"")}</option>`).join("")}</select>
+            <span class="hint">No automático, vale o perigo lançado que está na lista “Aciona” deste item. Escolha outro só se ele responder de fato a este item.</span></label>` : ""}
+          ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.idRisco||"")} ${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
           ${n===13 ? `<p class="hint">Ruído, calor e vibração como exposição ocupacional são agentes da NR-9; na AEP entra o conforto ambiental da NR-17 (AMB).</p>`:""}` : ""}
       </div><div class="seg" role="radiogroup" aria-label="Resultado do item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; };
   const idx = Array.from({ length: CHECKLIST.length }, (_,i) => i);
@@ -951,7 +973,8 @@ function st8(){
     <div class="panel-b stack">
       <fieldset style="border:0;padding:0;margin:0" class="stack tight"><legend class="small" style="font-weight:600;color:var(--ink-2);margin-bottom:6px">Gatilhos da NR-17, item 17.3.2</legend>
         ${GATILHOS.map(([k,t]) => `<label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-gat="${k}" ${(a.aet.gatilhos||[]).includes(k)?"checked":""} style="margin-top:3px"><span><b>${k})</b> ${esc(t)}</span></label>`).join("")}</fieldset>
-      ${fld("aet.justificativa","Justificativa da decisão (gatilhos a–d)",{area:1,rows:3,req:1})}
+      ${fld("aet.justificativa","Justificativa da decisão (gatilhos a–d)",{area:1,rows:4,req:1})}
+      ${a.aet.decisao !== "sim" ? `<div><button class="btn ghost small" type="button" data-act="justAetPadrao" style="padding:0">Usar texto padrão (AET não acionada)</button></div>` : ""}
     </div></div>
    <div class="panel"><div class="panel-b stack">
       ${fld("conclusao.parecer","Observações complementares",{area:1,rows:5,req:1,ph:"Base da avaliação, condições observadas e condicionantes da conclusão"})}
@@ -969,7 +992,11 @@ function salvarHz(){
   const h = S.editHz, t = TAXMAP[h.codigo]; const erro = m => { S.hzErr = m; renderStep(); };
   if (!t) return erro("Selecione o perigo na taxonomia.");
   if (!h.fonte?.trim()) return erro("Descreva a fonte geradora específica desta situação.");
+  const igual = S.draft.perigos.find(x => x.id !== h.id && chaveHz(x) === chaveHz(h));
+  if (igual) return erro(`Já existe a linha ${igual.idRisco||""} com o mesmo perigo (${h.codigo}) e a mesma fonte. Edite a linha existente, ou complemente a fonte com o que torna esta situação diferente.`);
   const novo = clone(h); delete novo._novo; if (!novo.danos) novo.danos = t.danos;
+  const orig = Number(novo.checkItem), listaOrig = CK_PERIGOS[orig] || [];
+  if (orig && listaOrig.length && !listaOrig.includes(novo.codigo)) setTimeout(() => toast(`${novo.codigo} não está entre os perigos do item ${orig} (${listaOrig.join(", ")}): o item continua sem vínculo. Se ele responde ao item, vincule no checklist.`), 50);
   const i = S.draft.perigos.findIndex(x => x.id === novo.id);
   if (i >= 0) S.draft.perigos[i] = novo; else S.draft.perigos.push(novo);
   S.editHz = null; S.hzErr = ""; marcar(); numerarRiscos(S.draft); renderStep(); renderRail(); renderAside(); toast("Perigo salvo.");
@@ -1413,6 +1440,11 @@ document.addEventListener("click", async e => {
       marcar(); renderStep(); renderRail(); renderAside();
       const ta = $("#f-obs-" + d.dom); if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
       break;
+    }
+    case "justAetPadrao": {
+      const atual = (a.aet.justificativa||"").trim();
+      if (atual && atual !== TXT_JUST_AET_NAO){ toast("Apague o texto atual antes de usar o texto padrão."); break; }
+      a.aet.justificativa = TXT_JUST_AET_NAO; marcar(); renderStep(); renderRail(); renderAside(); break;
     }
     case "usarSug": { const r = resultadoDominio(a, d.dom); a.copsoq.dominios[d.dom].concl = conclusaoSugerida(r); marcar(); renderStep(); renderRail(); renderAside(); break; }
     case "atualizarSnap": { const set = S.areas[a.copsoq.snapshot?.setorId] || setorPorNome(a.meta.setorCopsoq); a.copsoq.snapshot = snapDe(set); marcar(); renderBanner(); renderStep(); renderRail(); renderAside(); toast("Notas do setor atualizadas nesta AEP."); break; }
