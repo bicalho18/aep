@@ -621,6 +621,11 @@ function pendencias(a){
     if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`);
     if (/\[[^\]]*\]/.test(dd.obs||"")) p[3].push(`${d.nome}: complete os trechos entre colchetes da observação`);
     if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && (dd.obs||"").trim() === d.padrao) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
+    const dec = dd.dec || {}, lanc = new Set((a.perigos||[]).map(h => h.codigo));
+    Object.entries(dec).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (!s || !s.tax || s.natureza === "efeito" || s.natureza === "protetor") return;
+      if (v !== "nao" && !lanc.has(s.tax)) p[4].push(`${s.nome}: a condição existe (etapa 3) — lançar o perigo ${s.tax}`);
+      if (v === "nao" && lanc.has(s.tax) && !Object.entries(dec).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax) && !DOMINIOS.some(dm => dm.id !== d.id && Object.entries(a.copsoq?.dominios?.[dm.id]?.dec || {}).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax)))
+        p[3].push(`${s.nome}: marcada como “Não observado”, mas o perigo ${s.tax} está lançado na etapa 4`); });
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
   perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
@@ -894,7 +899,7 @@ function st5(){
         <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="7" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
         <div class="stack tight" style="gap:6px">
           <span class="tiny muted">Sugestões de texto — clique para acrescentar à observação:</span>
-          ${[...r.altas, ...r.inter].map(x => `<div class="row" style="gap:6px"><span class="chip ${x.f}">${esc(x.s.nome)} ${num2(x.m)}</span>${(x.s.natureza === "efeito" || x.s.natureza === "protetor" ? [{ id:"nao", rot:"Registrar leitura" }] : VAR_SUB).map(v => `<button class="btn small" type="button" data-act="txtSub" data-dom="${d.id}" data-sub="${x.s.id}" data-v="${v.id}">${esc(v.rot)}</button>`).join("")}</div>`).join("")}
+          ${[...r.altas, ...r.inter].map(x => `<div class="row" style="gap:6px"><span class="chip ${x.f}">${esc(x.s.nome)} ${num2(x.m)}</span>${(x.s.natureza === "efeito" || x.s.natureza === "protetor" ? [{ id:"nao", rot:"Registrar leitura" }] : VAR_SUB).map(v => `<button class="btn small${(dd.dec||{})[x.s.id]===v.id?" primary":""}" type="button" data-act="txtSub" data-dom="${d.id}" data-sub="${x.s.id}" data-v="${v.id}" aria-pressed="${(dd.dec||{})[x.s.id]===v.id}">${esc(v.rot)}</button>`).join("")}</div>`).join("")}
           <div class="row" style="gap:6px"><span class="tiny muted">Geral:</span>${!(r.altas.length || r.inter.length) ? `<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="padrao">Texto padrão (sem achado relevante)</button>` : ""}<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="semhz">Fechar: nenhum perigo adicional</button><button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="hz">Fechar: perigos identificados</button></div>
           <span class="hint">Monte a observação com uma frase por subescala, conforme o que o posto mostrou, e feche com a linha de perigos. Complete os trechos entre colchetes. A conclusão abaixo é escolhida por você.</span></div>
         <label class="f"><span>Conclusão do cruzamento <em>*</em></span><select data-b="copsoq.dominios.${d.id}.concl" data-rr="1"><option value="">Escolha…</option>${CONCLUSOES.map(c => `<option ${dd.concl===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
@@ -1433,7 +1438,7 @@ document.addEventListener("click", async e => {
     case "txtSub": case "txtFecho": {
       const dd = a.copsoq.dominios[d.dom], dm = DOMINIOS.find(x => x.id === d.dom), atual = (dd.obs||"").trim();
       let novo;
-      if (d.act === "txtSub"){ const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), m = snap?.medias?.[s.id]; novo = fraseSub(a, s, m, faixaDe(m), d.v); }
+      if (d.act === "txtSub"){ const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), m = snap?.medias?.[s.id]; novo = fraseSub(a, s, m, faixaDe(m), d.v); dd.dec = Object.assign({}, dd.dec, { [s.id]: d.v }); }
       else novo = fraseFecho(a, d.dom, d.v);
       if (d.v === "padrao" && atual && atual !== dm.padrao){ toast("Apague o texto atual antes de usar o texto padrão."); break; }
       dd.obs = (!atual || atual === dm.padrao) ? novo : atual + "\n" + novo;
