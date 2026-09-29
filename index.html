@@ -1264,8 +1264,10 @@ function docHTML(a, cfg, fotos, opt={}){
   const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo], its = itensDoPerigo(a, h);
     return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b> — ${esc(t?t.nome:"")}</td>
       <td>${escBr(h.fonte||"")}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
-  const areasNR = AREAS_NR17.map(([id,nome]) => { const n = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.area===id).length;
-    return `<tr><td>${esc(nome)}</td><td class="c">${n || "—"}</td></tr>`; }).join("");
+  /* Resumo por categoria da TAXONOMIA (coluna B da planilha), na ordem da aba */
+  const catsTax = [...new Set(TAX.map(t => t.cat))];
+  const porCat = catsTax.map(cat => { const hs = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.cat === cat);
+    return `<tr><td>${esc(cat)}</td><td class="c">${hs.length ? `${hs.length} <span class="small">(${[...new Set(hs.map(h => h.codigo))].map(esc).join(", ")})</span>` : "—"}</td></tr>`; }).join("");
   const fotosT = []; for (let i=0;i<fotos.length;i+=2){ fotosT.push(`<tr>${[fotos[i],fotos[i+1]].map((f,k) => f?`<td><div class="cap">${i+k+1} – ${esc(f.titulo||"")}</div><img src="${f.src}" alt=""></td>`:"<td></td>").join("")}</tr>`); }
   const recs = String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
   const dec = {nao:"Não — AEP suficiente",sim:"Sim — AET acionada",analise:"Em análise"}[a.aet?.decisao] || "—";
@@ -1288,8 +1290,8 @@ function docHTML(a, cfg, fotos, opt={}){
   ${hz || `<tr><td colspan="2"><b>Nenhum perigo identificado.</b> ${escBr(a.semPerigoJust||"")}</td></tr>`}</tbody></table>
   ${(() => { const nl = PERIGOS_ADM_ESPERADOS.filter(c => a.checklistAdm === "sim" && !(a.perigos||[]).some(h => h.codigo === c) && String(a.naoLancados?.[c]||"").trim());
     return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b> — ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
-  <h3>Perigos por área de condições de trabalho</h3>
-  <table class="t"><thead><tr><th>Área de condições de trabalho (NR-17, 17.1.1.1)</th><th class="c" style="width:90px">Perigos</th></tr></thead><tbody>${areasNR}</tbody></table>
+  <h3>Perigos por categoria</h3>
+  <table class="t"><thead><tr><th>Categoria (aba TAXONOMIA)</th><th class="c" style="width:150px">Perigos</th></tr></thead><tbody>${porCat}</tbody></table>
   <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
   <div class="bar">${esc(a.conclusao?.interpretacao || "—")}</div>
   <h2>Decisão sobre AET (NR-17, 17.3.2)</h2>
@@ -1304,17 +1306,17 @@ function docHTML(a, cfg, fotos, opt={}){
 <title>${esc(a.numero)} — ${esc((m.cargo||"AEP").trim())}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap">
 <style>${DOC_CSS}</style></head><body>
-${opt.preview?"":`<div class="tools"><button onclick="window.print()">Imprimir / salvar em PDF</button><span>No diálogo de impressão, escolha “Salvar como PDF”. O cabeçalho se repete em cada página.</span></div>`}
-<div class="folha"><table class="page"><thead><tr><td>${cab}</td></tr></thead><tbody><tr><td>${corpo}</td></tr></tbody></table></div>
+${opt.preview?"":`<div class="tools"><button onclick="window.print()">Imprimir / salvar em PDF</button><span>No diálogo de impressão, escolha “Salvar como PDF”. O logotipo e o título se repetem em cada página; os dados da AEP saem só na primeira.</span></div>`}
+<div class="folha"><table class="page"><thead><tr><td>${cab.slice(0, cab.indexOf('<table class="meta">'))}</td></tr></thead><tbody><tr><td>${cab.slice(cab.indexOf('<table class="meta">'))}${corpo}</td></tr></tbody></table></div>
 </body></html>`;
 }
 function vDoc(){
   const a = S.draft;
   return `<div class="aeptitle"><button class="btn ghost" type="button" data-act="voltarAEP">← Voltar à AEP</button>
     <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> Documento</h1>
-    <span style="margin-left:auto" class="row">${S.downloads ? `<button class="btn primary" type="button" data-act="baixar" id="btnBaixar">Baixar documento</button>` : ""}</span></div>
+    <span style="margin-left:auto" class="row"><button class="btn primary" type="button" data-act="gerarPDF" id="btnPDF">Salvar em PDF</button>${S.downloads ? `<button class="btn" type="button" data-act="baixar" id="btnBaixar">Baixar documento (HTML)</button>` : ""}</span></div>
   <div class="stack">
-    <div class="note">${S.downloads ? `<b>Para imprimir ou gerar o PDF:</b> baixe o documento, abra o arquivo no navegador e use o botão <b>Imprimir / salvar em PDF</b> no topo. O cabeçalho se repete em cada página e as fotos vão dentro do arquivo.` : `<b>O download não está disponível nesta visualização.</b> Abra o sistema pelo link no claude.ai para baixar o documento.`}
+    <div class="note">${S.downloads ? `<b>Salvar em PDF:</b> abre o diálogo de impressão já com o documento; em <b>Destino</b>, escolha <b>Salvar como PDF</b>. O logotipo e o título se repetem em cada página; os dados da AEP saem só na primeira.` : `<b>O download não está disponível nesta visualização.</b> Abra o sistema pelo link no claude.ai para baixar o documento.`}
     ${a.status !== "concluida" ? `<br><b>Esta AEP ainda não foi concluída</b> — ${totalPend(pendencias(a))} pendência(s).` : ""}</div>
     <div class="docprev"><iframe id="prev" title="Prévia do documento da AEP"></iframe></div>
   </div>`;
@@ -1324,6 +1326,32 @@ async function montarPrevia(){
   const lista = S.draft.fotos||[], urls = await urlsFotos(lista.map(x => x.assetId));
   const fotos = lista.map((x,i) => ({ src: urls[i], titulo: x.titulo })).filter(x => x.src);
   f.srcdoc = docHTML(S.draft, S.config, fotos, { preview: true, logo: new URL("logo.png", location.href).href });
+}
+/* PDF: imprime o documento num quadro escondido; o nome sugerido do arquivo é “AEP nn - cargo” */
+async function gerarPDF(){
+  const btn = $("#btnPDF"); if (!btn || btn.disabled) return; btn.disabled = true; btn.textContent = "Preparando…";
+  const tituloApp = document.title, nome = nomeArquivo(`${S.draft.numero} - ${S.draft.meta.cargo || "AEP"}`);
+  let fr = null;
+  try {
+    const fotos = [];
+    for (const f of S.draft.fotos||[]) fotos.push({ src: await paraDataURL(f.assetId), titulo: f.titulo });
+    const html = docHTML(S.draft, S.config, fotos.filter(f => f.src), { preview: true, logo: (typeof logoDataURL === "function" ? await logoDataURL() : "") || undefined })
+      .replace(/<title>[^<]*<\/title>/, `<title>${esc(nome)}</title>`);
+    fr = document.createElement("iframe"); fr.setAttribute("aria-hidden", "true"); fr.tabIndex = -1;
+    fr.style.cssText = "position:fixed;right:0;bottom:0;width:210mm;height:10px;border:0;opacity:0;pointer-events:none";
+    document.body.appendChild(fr);
+    await new Promise(ok => { fr.onload = ok; fr.srcdoc = html; });
+    const doc = fr.contentDocument;
+    await Promise.all(Array.from(doc.images).map(i => i.complete ? 0 : new Promise(ok => { i.onload = i.onerror = ok; })));
+    try { await doc.fonts.ready; } catch(_){}
+    document.title = nome;
+    fr.contentWindow.focus(); fr.contentWindow.print();
+  } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
+  finally {
+    document.title = tituloApp;
+    setTimeout(() => { if (fr) fr.remove(); }, 1000);
+    btn.disabled = false; btn.textContent = "Salvar em PDF";
+  }
 }
 const nomeArquivo = s => String(s).replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,120);
 async function baixarDoc(){
@@ -1337,7 +1365,7 @@ async function baixarDoc(){
     toast("Documento baixado. Abra o arquivo para imprimir ou salvar em PDF.");
   } catch(e){
     if (!e || e.code !== "declined") toast(e && e.code === "rate_limited" ? "Aguarde um instante e tente de novo." : "Não foi possível baixar o documento.");
-  } finally { if (btn){ btn.disabled = false; btn.textContent = "Baixar documento"; } }
+  } finally { if (btn){ btn.disabled = false; btn.textContent = "Baixar documento (HTML)"; } }
 }
 
 /* =========================================================================
@@ -1524,6 +1552,7 @@ document.addEventListener("click", async e => {
     case "verDoc": await salvarAEP(); S.view = "doc"; S.confirm = null; render(); window.scrollTo(0,0); break;
     case "voltarAEP": S.view = "aep"; render(); window.scrollTo(0,0); break;
     case "baixar": baixarDoc(); break;
+    case "gerarPDF": gerarPDF(); break;
     case "concluir": {
       if (totalPend(pendencias(a))) return;
       a.status = "concluida"; a.concluidoEm = new Date().toISOString(); S.dirty = true; await salvarAEP();
