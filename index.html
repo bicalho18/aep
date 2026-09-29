@@ -350,6 +350,11 @@ const CHECKLIST_ADM = [
 CHECKLIST.push(...CHECKLIST_ADM);
 const CK_ADM_PERIGOS = { 15:["EQ-04","EQ-01","BIO-01"], 16:["EQ-04"], 17:["EQ-06"], 18:["EQ-01"], 19:["AMB-01","AMB-02","AMB-03","AMB-04"] };
 /* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA; itens 15–19 pela tabela acima) */
+/* Política de lançamento (capítulo 14.2.7). Perigo de EXIGÊNCIA: lança quando a exigência existe no trabalho real
+   com duração relevante, mesmo controlada. Perigo de DEFICIÊNCIA: só lança quando a condição inadequada é constatada. */
+const PERIGOS_DEFICIENCIA = new Set(["OT-02","OT-03","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-13","BIO-05","BIO-06","EQ-01","EQ-02","EQ-03","EQ-04","EQ-05","EQ-06","AMB-01","AMB-02"]);
+const PERIGOS_ADM_ESPERADOS = ["BIO-01","BIO-02"];
+const TXT_SEM_PERIGO = "Foram avaliadas as condições de trabalho, a organização da atividade, o mobiliário e os equipamentos, as posturas, os movimentos, as exigências cognitivas e as condições ambientais. Na situação avaliada, não foram identificadas exigências da atividade com duração relevante nem condições inadequadas com potencial de causar lesões ou agravos à saúde que demandassem identificação como perigo no inventário.";
 const CK_PERIGOS = Object.fromEntries(CHECKLIST.map((_,i) => [i+1, [...TAX.filter(t => (t.itens||[]).includes(i+1)).map(t => t.codigo), ...(CK_ADM_PERIGOS[i+1]||[])]]));
 
 /* COPSOQ — 23 subescalas dos 6 domínios acionáveis, com a ponte para o perigo */
@@ -442,6 +447,18 @@ function perigoLigaItem(a, h, n){
 }
 const perigoDoItem = (a, n) => (a.perigos||[]).find(h => perigoLigaItem(a, h, n));
 const itensDoPerigo = (a, h) => ckLista(a).filter(x => x.c.r === "sim" && perigoLigaItem(a, h, x.n)).map(x => x.n);
+/* Lançamento na planilha de controle: marcação manual; vale enquanto a AEP não for concluída de novo depois dela */
+const dataLocal = iso => iso ? new Date(iso).toLocaleDateString("pt-BR") : "—";
+const lancadaOk = a => a.status === "concluida" && !!a.planilha?.em && (!a.concluidoEm || a.concluidoEm <= a.planilha.em);
+const lancadaVelha = a => !!a.planilha?.em && !lancadaOk(a);
+/* Perigos de exigência esperados em posto administrativo e ainda não lançados */
+const esperadosFaltando = a => a.checklistAdm === "sim" ? PERIGOS_ADM_ESPERADOS.filter(c => !(a.perigos||[]).some(h => h.codigo === c)) : [];
+/* Perigo de deficiência lançado com todos os itens do checklist ligados a ele conformes (nenhum marcado Sim) */
+function deficienciaSemItem(a){
+  return (a.perigos||[]).filter(h => PERIGOS_DEFICIENCIA.has(h.codigo)).map(h => {
+    const lig = ckLista(a).filter(x => x.c.r && x.c.r !== "na" && perigoLigaItem(a, h, x.n));
+    return lig.length && !lig.some(x => x.c.r === "sim") ? { h, itens: lig.map(x => x.n) } : null; }).filter(Boolean);
+}
 /* Mesma linha repetida: mesmo perigo com a mesma fonte geradora */
 const chaveHz = h => h.codigo + "|" + norm(h.fonte);
 function perigosRepetidos(a){
@@ -552,6 +569,7 @@ function completar(a){
   if (!r.trabalho.sumaria.trim() && r.trabalho.prescrito.trim()) r.trabalho.sumaria = r.trabalho.prescrito.trim();
   if (!r.meta.setorCopsoq) r.meta.setorCopsoq = setorPeloDepara(r.meta.setor, r.meta.area);
   r.escuta = r.escuta || []; r.perigos = r.perigos || []; r.fotos = r.fotos || [];
+  r.naoLancados = r.naoLancados || {}; r.semPerigoJust = r.semPerigoJust || "";
   /* Fontes padrão revistas em 28/09/2026 (sem o trecho de ausência de controle): atualiza o início das fontes antigas */
   r.perigos.forEach(h => { const v = FONTES_ANTIGAS[h.codigo], t = TAXMAP[h.codigo]; if (v && t && String(h.fonte||"").startsWith(v)) h.fonte = t.fonte + String(h.fonte).slice(v.length); });
   r.checklist = CHECKLIST.map((_,i) => Object.assign({ r:"", obs:"" }, (r.checklist||[])[i]||{}));
@@ -559,7 +577,18 @@ function completar(a){
   r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
   DOMINIOS.forEach(d => { const dd = r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); if (CONCL_ANTIGAS[dd.concl]) dd.concl = CONCL_ANTIGAS[dd.concl]; });
   r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
-  r.conclusao = Object.assign({ interpretacao:"", parecer:"", recomendacoes: TXT_RECOMENDACOES, oportunidades:"Não há." }, r.conclusao||{});
+  r.conclusao = Object.assign({ interpretacao:"", parecer:"", recomendacoes: TXT_RECOMENDACOES, oportunidades:"" }, r.conclusao||{});
+  /* 29/09/2026: "Oportunidades de melhoria" passou a fazer parte de "Recomendações e oportunidades de melhoria".
+     O texto antigo é acrescentado ao campo único uma vez só; o original fica guardado em conclusao.oportunidades. */
+  if (!r.conclusao.unificado){
+    const op = String(r.conclusao.oportunidades||"").split(/\n+/).map(x => x.trim()).filter(x => x && !/^não há\.?$/i.test(x));
+    if (op.length){
+      const linhas = op.map(x => /^oportunidade/i.test(x) ? x : "Oportunidade de melhoria: " + x);
+      const rec = String(r.conclusao.recomendacoes||"").trim();
+      r.conclusao.recomendacoes = (rec ? rec + "\n" : "") + linhas.join("\n");
+    }
+    r.conclusao.unificado = true;
+  }
   return r;
 }
 /* Setor do COPSOQ pelo DE-PARA da planilha (Setor | Área) */
@@ -635,6 +664,8 @@ function pendencias(a){
         p[3].push(`${s.nome}: marcada como “Não observado”, mas o perigo ${s.tax} está lançado na etapa 4`); });
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
+  esperadosFaltando(a).forEach(c => { if (!String(a.naoLancados?.[c]||"").trim()) p[4].push(`Posto administrativo: lançar ${c} (${TAXMAP[c]?.nome||""}) ou justificar por que essa exigência não é relevante neste cargo`); });
+  if (!(a.perigos||[]).length && !String(a.semPerigoJust||"").trim()) p[4].push("Nenhum perigo lançado: escrever a justificativa");
   perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
@@ -749,12 +780,56 @@ function vExportPanel(){
     <div class="panel-b stack tight">
       <p class="small muted">Gera um Excel com as mesmas 26 colunas da aba EXPORTA PGR. As colunas A e B (GHE e cargo) são auxiliares, para achar o bloco: cole da coluna C até a Z. O Id. Risco sai como “AEP nn / Rnn” — renumere na colagem seguindo o bloco do GHE.</p>
       <div class="grid g3">
-        <label class="f"><span>Quais AEPs</span><select data-exp="expEscopo"><option value="concluidas" ${S.expEscopo==="concluidas"?"selected":""}>Só as concluídas</option><option value="todas" ${S.expEscopo==="todas"?"selected":""}>Todas com perigos lançados</option></select></label>
+        <label class="f"><span>Quais AEPs</span><select data-exp="expEscopo"><option value="concluidas" ${S.expEscopo==="concluidas"?"selected":""}>Só as concluídas</option><option value="pendentes" ${S.expEscopo==="pendentes"?"selected":""}>Concluídas ainda não lançadas na planilha</option><option value="todas" ${S.expEscopo==="todas"?"selected":""}>Todas com perigos lançados</option></select></label>
         <label class="f"><span>GHE</span><select data-exp="expGHE"><option value="">Todos os GHEs</option>${ghes.map(g => `<option ${S.expGHE===g?"selected":""}>${esc(g)}</option>`).join("")}</select></label>
         <div class="f"><span class="small" style="font-weight:600;color:var(--ink-2)">${n} linha${n===1?"":"s"} para exportar</span><button class="btn primary" type="button" data-act="exportarPGR" id="btnExp" ${n && S.downloads ? "" : "disabled"}>Baixar Excel</button></div>
       </div>
+      ${S.expEscopo === "pendentes" && aepsExport().length ? (S.confirm === "marcarExp"
+        ? `<span class="confirm">Marcar ${aepsExport().length} AEP(s) como lançadas na planilha hoje? Faça isso só depois de colar as linhas no RISCOS_AEP. <button class="btn small primary" type="button" data-act="marcarExpSim">Marcar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
+        : `<div><button class="btn small" type="button" data-act="marcarExp">Marcar estas ${aepsExport().length} AEP(s) como lançadas na planilha</button></div>`) : ""}
       ${!S.downloads ? `<p class="hint">O download não está disponível nesta visualização.</p>` : ""}
     </div></div>`;
+}
+
+/* ---------------- Conferência dos perigos (todas as AEPs) ---------------- */
+function conferenciaPerigos(){
+  const semPadrao = [], defic = [], rep = [], semLanc = [], velhas = [], comPend = [], grupos = {};
+  Object.values(S.aeps).forEach(a0 => { const a = completar(a0);
+    (a.perigos||[]).forEach(h => { const t = TAXMAP[h.codigo]; if (!t) return;
+      if (!String(h.fonte||"").trim().startsWith(t.fonte)) semPadrao.push({ a, h }); });
+    deficienciaSemItem(a).forEach(x => defic.push({ a, h: x.h, itens: x.itens }));
+    perigosRepetidos(a).forEach(([x, y]) => rep.push({ a, x, y }));
+    if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) comPend.push({ a, txt: Object.values(pd).flat()[0] + (n > 1 ? ` (+${n-1})` : "") }); }
+    if (a.status === "concluida" && !lancadaOk(a)) (lancadaVelha(a) ? velhas : semLanc).push({ a });
+    else if (lancadaVelha(a)) velhas.push({ a });
+    if ((a.status||"nao_iniciada") !== "nao_iniciada" && (a.perigos||[]).length){ const k = norm(a.meta?.cargo); if (k) (grupos[k] = grupos[k] || []).push(a); } });
+  const cargos = Object.values(grupos).filter(g => g.length > 1 && new Set(g.map(a => [...new Set(a.perigos.map(h => h.codigo))].sort().join(","))).size > 1)
+    .map(g => ({ a: g[0], g: g.sort((p, q) => idNum(p) - idNum(q)) }));
+  const ord = l => l.sort((p, q) => idNum(p.a) - idNum(q.a));
+  return { semPadrao: ord(semPadrao), defic: ord(defic), rep: ord(rep), semLanc: ord(semLanc), velhas: ord(velhas), comPend: ord(comPend), cargos: ord(cargos) };
+}
+function vConferencia(){
+  const c = conferenciaPerigos(), lin = (a, txt) => `<div class="row between" style="gap:8px"><span class="small"><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo||"")} — ${txt}</span><button class="btn small" type="button" data-open="${esc(a.id)}">Abrir</button></div>`;
+  const lista = (l, f) => l.slice(0, 40).map(f).join("") + (l.length > 40 ? `<p class="tiny muted">+ ${l.length - 40} outro(s)</p>` : "");
+  const conf = S.confirm === "fontes", nAeps = new Set(c.semPadrao.map(x => x.a.id)).size;
+  return `<div class="panel"><div class="panel-h"><b>Conferência dos perigos</b><span class="tiny muted">todas as AEPs</span></div><div class="panel-b stack">
+    <div class="stack tight"><b class="small">Fonte sem o texto padrão da planilha: ${c.semPadrao.length}</b>
+      ${c.semPadrao.length ? `<p class="tiny muted">O início da fonte deve ser o texto da aba TAXONOMIA. A correção coloca o texto padrão no início e mantém o que foi escrito como complemento. AEP concluída volta para “Em revisão”.</p>
+      ${conf ? `<span class="confirm">Corrigir ${c.semPadrao.length} fonte(s) em ${nAeps} AEP(s)? <button class="btn small primary" type="button" data-act="corrigirFontesSim">Corrigir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<div><button class="btn small primary" type="button" data-act="corrigirFontes">Colocar o texto padrão em todas</button></div>`}
+      ${lista(c.semPadrao, x => lin(x.a, `${esc(x.h.idRisco||"")} ${esc(x.h.codigo)}`))}` : `<p class="tiny muted">Todas as fontes começam pelo texto da planilha.</p>`}</div>
+    <div class="stack tight"><b class="small">Perigo de deficiência lançado com o checklist conforme: ${c.defic.length}</b>
+      ${c.defic.length ? `<p class="tiny muted">Perigo de deficiência (iluminação, conforto térmico, mobiliário, equipamento, organização) só se lança quando a condição inadequada foi constatada. Aqui, todos os itens do checklist ligados a ele estão “Não”: marque o item que evidencia a condição ou retire o perigo.</p>${lista(c.defic, x => lin(x.a, `${esc(x.h.idRisco||"")} ${esc(x.h.codigo)} · itens ${x.itens.join(", ")} = Não`))}` : `<p class="tiny muted">Nenhum.</p>`}</div>
+    <div class="stack tight"><b class="small">Mesmo cargo com perigos diferentes: ${c.cargos.length}</b>
+      ${c.cargos.length ? `<p class="tiny muted">Pode ser legítimo (setor ou posto diferente), mas a diferença precisa estar explicada na descrição ou nas fontes geradoras.</p>${lista(c.cargos, x => `<div class="stack tight" style="gap:2px"><span class="small"><b>${esc(x.a.meta?.cargo||"")}</b></span>${x.g.map(a => `<div class="row between" style="gap:8px"><span class="small"><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.setor||"")} — ${[...new Set(a.perigos.map(h => h.codigo))].sort().map(esc).join(", ")}</span><button class="btn small" type="button" data-open="${esc(a.id)}">Abrir</button></div>`).join("")}</div>`)}` : `<p class="tiny muted">Nenhum.</p>`}</div>
+    <div class="stack tight"><b class="small">Concluídas com pendência pelas regras atuais: ${c.comPend.length}</b>
+      ${c.comPend.length ? `<p class="tiny muted">Foram concluídas antes de uma regra nova. Abra, resolva a pendência e conclua de novo.</p>${lista(c.comPend, x => lin(x.a, esc(x.txt)))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
+    <div class="stack tight"><b class="small">Concluídas ainda não lançadas na planilha: ${c.semLanc.length}</b>
+      ${c.semLanc.length ? `<p class="tiny muted">Depois de passar os perigos para o RISCOS_AEP, marque a AEP como lançada (botão no topo da AEP ou em Exportar para o PGR).</p>${lista(c.semLanc, x => lin(x.a, "concluída em " + dataLocal(x.a.concluidoEm)))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
+    <div class="stack tight"><b class="small">Alteradas depois do lançamento na planilha: ${c.velhas.length}</b>
+      ${c.velhas.length ? `<p class="tiny muted">A AEP mudou depois que foi lançada: confira o RISCOS_AEP e marque de novo quando estiver igual.</p>${lista(c.velhas, x => lin(x.a, `lançada em ${dataLocal(x.a.planilha.em)} · ${STATUS[x.a.status||"nao_iniciada"]}`))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
+    <div class="stack tight"><b class="small">Linhas repetidas (mesmo perigo e mesma fonte): ${c.rep.length}</b>
+      ${c.rep.length ? lista(c.rep, x => lin(x.a, `${esc(x.x.idRisco||"")} e ${esc(x.y.idRisco||"")} ${esc(x.x.codigo)}`)) : `<p class="tiny muted">Nenhuma.</p>`}</div>
+  </div></div>`;
 }
 
 /* ---------------- Painel de andamento ---------------- */
@@ -792,6 +867,7 @@ function vPainel(){
     <div class="stack">
       <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
         <div class="stats" style="margin:0"><div class="stat"><b>${hzConcl.length}</b><span>perigos</span></div><div class="stat"><b>${itensCrit}</b><span>ligados a item crítico</span></div></div></div></div>
+      ${vConferencia()}
       <div class="panel"><div class="panel-h"><b>Alertas</b></div><div class="panel-b stack tight">
         ${alertas.length ? alertas.map(({a,al}) => `<div class="row between"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
       </div></div>
@@ -806,6 +882,9 @@ function renderTitulo(){
   el.innerHTML = `<button class="btn ghost" type="button" data-go="home">← AEPs</button>
     <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> ${esc(a.meta.cargo || "Nova AEP")}</h1>
     <span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>
+    ${lancadaOk(a) ? `<span class="chip fav" title="Marcação manual">Lançada na planilha em ${dataLocal(a.planilha.em)}</span><button class="btn ghost small" type="button" data-act="desmarcarPlanilha" style="padding:0 4px">desfazer</button>`
+      : lancadaVelha(a) ? `<span class="chip ris">Lançada na planilha em ${dataLocal(a.planilha.em)}, alterada depois — atualizar a planilha</span>${st === "concluida" ? `<button class="btn small" type="button" data-act="marcarPlanilha">Planilha atualizada</button>` : ""}`
+      : st === "concluida" ? `<button class="btn small" type="button" data-act="marcarPlanilha">Marcar como lançada na planilha</button>` : ""}
     <span style="margin-left:auto" class="row">${conf ? `<span class="confirm">Excluir esta AEP e suas fotos de vez? <button class="btn small danger" type="button" data-act="delAEPsim">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="delAEP">Excluir AEP</button>`}</span>`;
 }
 /* Faixa com as subescalas altas do setor — visível em todas as etapas */
@@ -926,8 +1005,25 @@ function st6(){
   return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo e o início da fonte geradora vêm da planilha de controle (aba TAXONOMIA); a fonte é complementada com a situação deste cargo.") +
   `<div class="stack">${faltam.length ? `<div class="note bad"><b>Itens críticos do checklist sem perigo vinculado:</b> ${faltam.map(({n}) => `<button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Item ${n}</button>`).join(" ")}</div>` : ""}
     ${S.editHz ? vHzEditor() : `<div><button class="btn primary" type="button" data-act="novoHz">+ Adicionar perigo</button></div>`}
-    ${cards || (!S.editHz ? `<div class="panel"><div class="empty">Nenhum perigo lançado. Fator presente e controlado também é registrado — só fica de fora o que não se aplica, com justificativa nas observações.</div></div>` : "")}
+    ${vEsperados(a)}
+    ${cards || (!S.editHz ? vSemPerigo(a) : "")}
     ${vFotos()}</div>`;
+}
+function vEsperados(a){
+  const f = esperadosFaltando(a); if (!f.length) return "";
+  return `<div class="panel"><div class="panel-h"><b>Posto administrativo: perigos de exigência esperados</b><span class="tiny muted">capítulo 14.2.7</span></div><div class="panel-b stack">
+    <p class="small muted">Trabalho sentado ao computador e uso de teclado e mouse na maior parte da jornada são exigências da atividade: lança-se o perigo mesmo com bons controles (o controle reduz o risco na planilha). Se neste cargo a exigência não tem duração relevante, justifique.</p>
+    ${f.map(c => `<div class="stack tight"><div class="row between"><span><span class="code">${esc(c)}</span> ${esc(TAXMAP[c]?.nome||"")}</span><button class="btn small primary" type="button" data-act="hzEsperado" data-cod="${esc(c)}">Lançar ${esc(c)}</button></div>
+      <label class="f"><span>Ou: por que não se lança neste cargo</span><textarea id="f-naoLancados.${esc(c)}" data-b="naoLancados.${esc(c)}" rows="2" placeholder="Ex.: permanece sentado ao computador cerca de 1 h por jornada; o restante é em campo, com alternância livre de postura.">${esc(a.naoLancados?.[c]||"")}</textarea></label></div>`).join("")}
+  </div></div>`;
+}
+function vSemPerigo(a){
+  const v = a.semPerigoJust || "";
+  return `<div class="panel"><div class="panel-h"><b>Nenhum perigo lançado</b></div><div class="panel-b stack">
+    <p class="small muted">AEP sem perigo é aceita quando a avaliação está descrita. Perigo de exigência presente com duração relevante é lançado mesmo controlado; perigo de deficiência só entra se a condição inadequada foi constatada.</p>
+    <label class="f"><span>Justificativa <em>*</em></span><textarea id="f-semPerigoJust" data-b="semPerigoJust" rows="4">${esc(v)}</textarea><span class="hint">Sai no documento, no lugar do inventário.</span></label>
+    ${!v.trim() ? `<div><button class="btn ghost small" type="button" data-act="semPerigoPadrao" style="padding:0">Usar texto padrão</button></div>` : ""}
+  </div></div>`;
 }
 function opcoesTax(){ const cat = S.hzCat; return TAX.filter(x => !cat || prefixo(x.codigo) === cat); }
 /* A fonte começa pelo texto padrão da planilha (TAXONOMIA); o que vem depois é o complemento escrito na AEP */
@@ -990,8 +1086,7 @@ function st8(){
     </div></div>
    <div class="panel"><div class="panel-b stack">
       ${fld("conclusao.parecer","Observações complementares",{area:1,rows:5,req:1,ph:"Base da avaliação, condições observadas e condicionantes da conclusão"})}
-      ${fld("conclusao.recomendacoes","Recomendações",{area:1,rows:7,hint:"Uma recomendação por linha."})}
-      ${fld("conclusao.oportunidades","Oportunidades de melhoria (condição de exigência não crítica)",{area:1,rows:3})}
+      ${fld("conclusao.recomendacoes","Recomendações e oportunidades de melhoria",{area:1,rows:8,hint:"Uma por linha. Para uma melhoria em condição não crítica, comece a linha com “Oportunidade de melhoria:”."})}
    </div></div></div>`;
 }
 
@@ -1190,7 +1285,9 @@ function docHTML(a, cfg, fotos, opt={}){
   <h2>Inventário de perigos</h2>
   <p class="small">Perigos identificados e respectivas fontes geradoras. A caracterização da exposição, os possíveis danos e a graduação do risco (probabilidade, severidade e nível) são registrados na planilha de controle do GRO da unidade, a partir deste registro.</p>
   <table class="t"><thead><tr><th style="width:34%">Perigo / fator de risco</th><th>Fonte geradora</th></tr></thead><tbody>
-  ${hz || `<tr><td colspan="2" class="c">Nenhum perigo lançado — ver observações complementares.</td></tr>`}</tbody></table>
+  ${hz || `<tr><td colspan="2"><b>Nenhum perigo identificado.</b> ${escBr(a.semPerigoJust||"")}</td></tr>`}</tbody></table>
+  ${(() => { const nl = PERIGOS_ADM_ESPERADOS.filter(c => a.checklistAdm === "sim" && !(a.perigos||[]).some(h => h.codigo === c) && String(a.naoLancados?.[c]||"").trim());
+    return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b> — ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
   <h3>Perigos por área de condições de trabalho</h3>
   <table class="t"><thead><tr><th>Área de condições de trabalho (NR-17, 17.1.1.1)</th><th class="c" style="width:90px">Perigos</th></tr></thead><tbody>${areasNR}</tbody></table>
   <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
@@ -1200,8 +1297,7 @@ function docHTML(a, cfg, fotos, opt={}){
   ${gat.length?`<tr><th>Gatilhos</th><td>${gat.map(g=>`${g[0]}) ${esc(g[1])}`).join("<br>")}</td></tr>`:""}
   <tr><th>Justificativa</th><td>${escBr(a.aet?.justificativa||"—")}</td></tr></table>
   <h2>Observações complementares</h2><p>${escBr(a.conclusao?.parecer||"—")}</p>
-  <h2>Recomendações</h2>${recs.length?`<ul>${recs.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:"<p>—</p>"}
-  <h2>Oportunidades de melhoria (condição de exigência não crítica)</h2><p>${escBr(a.conclusao?.oportunidades||"Não há.")}</p>
+  <h2>Recomendações e oportunidades de melhoria</h2>${recs.length?`<ul>${recs.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:"<p>—</p>"}
   <div class="nota">${esc(TXT_NOTA_AET)}</div>
   <div class="ass"><div>${esc(m.analista||"Responsável técnico")}${m.registroAnalista?`<br>${esc(m.registroAnalista)}`:""}</div></div>`;
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1247,11 +1343,14 @@ async function baixarDoc(){
 /* =========================================================================
    EXPORTAÇÃO PARA O PGR (mesmas 26 colunas da aba EXPORTA PGR)
    ========================================================================= */
-function linhasPGR(){
-  const L = Object.values(S.aeps)
-    .filter(a => S.expEscopo === "todas" || a.status === "concluida")
+function aepsExport(){
+  return Object.values(S.aeps)
+    .filter(a => S.expEscopo === "todas" || (a.status === "concluida" && (S.expEscopo !== "pendentes" || !lancadaOk(a))))
     .filter(a => !S.expGHE || String(a.meta?.eg||"") === S.expGHE)
     .sort((x,y) => String(x.meta?.eg||"").localeCompare(String(y.meta?.eg||"")) || idNum(x) - idNum(y));
+}
+function linhasPGR(){
+  const L = aepsExport();
   const out = [];
   L.forEach(a => (a.perigos||[]).forEach(h => {
     const t = TAXMAP[h.codigo]; if (!t) return;
@@ -1403,6 +1502,19 @@ document.addEventListener("click", async e => {
     case "exportarPGR": exportarPGR(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
     case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
+    case "corrigirFontes": S.confirm = "fontes"; render(); break;
+    case "corrigirFontesSim": {
+      const alvo = {}; conferenciaPerigos().semPadrao.forEach(x => { alvo[x.a.id] = true; });
+      let n = 0, erro = 0;
+      for (const id of Object.keys(alvo)){
+        const a2 = completar(S.aeps[id]);
+        a2.perigos.forEach(h => { const t = TAXMAP[h.codigo]; if (t && !String(h.fonte||"").trim().startsWith(t.fonte)) { const txt = String(h.fonte||"").trim(); h.fonte = t.fonte + (txt ? " " + txt : ""); n++; } });
+        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoEm = null; }
+        a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
+        if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); } catch(_) { erro++; } }
+      }
+      S.confirm = null; render(); toast(erro ? `Corrigidas ${n} fonte(s); ${erro} AEP(s) não salvaram — tente de novo.` : `Texto padrão colocado em ${n} fonte(s).`); break;
+    }
     case "delAEPsim": {
       const id = a.id; clearTimeout(S.saveTimer); S.dirty = false;
       if (S.assets) for (const f of a.fotos||[]) { try { await S.assets.delete(f.assetId); } catch(_){} }
@@ -1436,6 +1548,18 @@ document.addEventListener("click", async e => {
       toast("Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
     }
     case "novoHz": abrirHz({ _novo:true }); renderStep(); break;
+    case "hzEsperado": { const tx = TAXMAP[d.cod]; if (!tx) break; abrirHz({ _novo:true, codigo: tx.codigo, danos: tx.danos, fonte: tx.fonte }); S.hzCat = ""; aposHz(); break; }
+    case "semPerigoPadrao": { if (String(a.semPerigoJust||"").trim()) { toast("Apague o texto atual antes de usar o texto padrão."); break; } a.semPerigoJust = TXT_SEM_PERIGO; marcar(); renderStep(); renderRail(); renderAside(); break; }
+    case "marcarPlanilha": { if (a.status !== "concluida") break; a.planilha = { em: new Date().toISOString() }; S.dirty = true; await salvarAEP(); renderTitulo(); toast("AEP marcada como lançada na planilha."); break; }
+    case "desmarcarPlanilha": { a.planilha = null; S.dirty = true; await salvarAEP(); renderTitulo(); break; }
+    case "marcarExp": S.confirm = "marcarExp"; { const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); } break;
+    case "marcarExpSim": {
+      const alvo = aepsExport(), em = new Date().toISOString(); let erro = 0;
+      for (const a0 of alvo){ const a2 = completar(S.aeps[a0.id]); a2.planilha = { em }; S.aeps[a2.id] = a2;
+        if (S.db) { try { await S.db.doc("aeps/" + a2.id).set(a2); } catch(_) { erro++; } } }
+      S.confirm = null; { const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); }
+      toast(erro ? `${alvo.length - erro} marcada(s); ${erro} não salvaram — tente de novo.` : `${alvo.length} AEP(s) marcada(s) como lançadas na planilha.`); break;
+    }
     case "edHz": { const h = a.perigos.find(x => x.id === d.id); if (h) { abrirHz(clone(h)); renderStep(); window.scrollTo({top:0}); } break; }
     case "rmHz": S.confirm = "hz-" + d.id; renderStep(); break;
     case "rmHzSim": a.perigos = a.perigos.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
@@ -1580,34 +1704,47 @@ const downloadsShim = {
 };
 window.claude = { use: async n => ({ db: dbShim, assets: assetsShim, downloads: downloadsShim })[n] || null };
 
-/* ---------- Fotos: o bucket é privado; cada <img data-foto="id"> recebe um link temporário ---------- */
-const FOTO_URL = new Map();
+/* ---------- Fotos: o bucket é privado; cada <img data-foto="id"> recebe um link temporário ----------
+   O link vale 12 h. Ele é renovado sozinho depois de 10 h (aba aberta por muito tempo)
+   e também quando uma imagem falha ao carregar. */
+const FOTO_VALIDADE = 12 * 3600, FOTO_RENOVA_MS = 10 * 3600 * 1000;
+const FOTO_URL = new Map();                       // id -> { u: link, t: quando foi gerado }
+const fotoLink = id => { const x = FOTO_URL.get(id); if (!x) return ""; if (Date.now() - x.t > FOTO_RENOVA_MS) { FOTO_URL.delete(id); return ""; } return x.u; };
 let fotoPend = new Set(), fotoTimer = null;
 async function buscarFotos(){
   const ids = [...fotoPend]; fotoPend = new Set();
   for (let i = 0; i < ids.length; i += 100){
     const lote = ids.slice(i, i + 100);
-    const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(lote.map(x => x + ".jpg"), 12 * 3600);
+    const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(lote.map(x => x + ".jpg"), FOTO_VALIDADE);
     if (error) { console.error(error); continue; }
-    (data || []).forEach(r => { if (r.signedUrl) FOTO_URL.set(String(r.path).replace(/\.jpg$/, ""), r.signedUrl); });
+    const agora = Date.now();
+    (data || []).forEach(r => { if (r.signedUrl) FOTO_URL.set(String(r.path).replace(/\.jpg$/, ""), { u: r.signedUrl, t: agora }); });
   }
   aplicarFotos();
 }
 function aplicarFotos(){
   let falta = false;
   document.querySelectorAll("img[data-foto]").forEach(img => {
-    const id = img.dataset.foto, u = FOTO_URL.get(id);
+    const id = img.dataset.foto, u = fotoLink(id);
     if (u) { if (img.getAttribute("src") !== u) img.src = u; }
     else if (id) { fotoPend.add(id); falta = true; }
   });
   if (falta) { clearTimeout(fotoTimer); fotoTimer = setTimeout(buscarFotos, 40); }
 }
 async function urlsFotos(ids){
-  const falta = ids.filter(i => !FOTO_URL.has(i));
+  const falta = ids.filter(i => !fotoLink(i));
   if (falta.length) { falta.forEach(i => fotoPend.add(i)); await buscarFotos(); }
-  return ids.map(i => FOTO_URL.get(i) || "");
+  return ids.map(i => fotoLink(i));
 }
 new MutationObserver(aplicarFotos).observe(document.body, { childList: true, subtree: true });
+/* imagem que não carregou (link vencido): descarta o link e pede outro, uma vez por link */
+document.addEventListener("error", ev => {
+  const img = ev.target; if (!img || img.tagName !== "IMG" || !img.dataset || !img.dataset.foto) return;
+  const id = img.dataset.foto, x = FOTO_URL.get(id);
+  if (x && img.getAttribute("src") === x.u && img.dataset.tentou !== x.u) { img.dataset.tentou = x.u; FOTO_URL.delete(id); aplicarFotos(); }
+}, true);
+/* aba voltou a ficar visível depois de muito tempo: renova os links vencidos */
+document.addEventListener("visibilitychange", () => { if (!document.hidden) aplicarFotos(); });
 
 const blobParaDataURL = b => new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = no; fr.readAsDataURL(b); });
 async function paraDataURL(assetId){
