@@ -578,15 +578,43 @@ const variantesDe = s => { const k = SUB_TXT[s.id]; if (!k) return [];
 const decisaoExigePerigo = (s, v) => !!s.tax && v !== "nao" && (PERIGOS_DEFICIENCIA.has(s.tax) ? (v === "melh" || v === "conf") : true);
 const FAIXA_TXT = { ris:"acima de 3,66", int:"faixa intermédia", fav:"faixa favorável" };
 const TXT_INERENTE = " Por se tratar de exigência própria da função, a avaliação verificou se o trabalhador dispõe de autonomia, pausas e apoio suficientes diante da demanda, e esses recursos estão presentes.";
+/* "Não observado" / "Percepção não confirmada": o que a subescala avalia (pelas perguntas do COPSOQ), o que se verificou em campo e o apoio existente */
+const SUB_NAO = {
+  "exigencias-cognitivas": { mede:"o quanto o trabalho exige atenção constante, memória e decisões difíceis", verif:"não se identificou demanda de atenção ou de decisão além do que a função normalmente comporta, e o trabalhador organiza a sequência das tarefas com apoio de procedimentos e da liderança" },
+  "exigencias-emocionais": { mede:"o quanto o trabalho exige emocionalmente do trabalhador", verif:"não se identificaram situações de carga emocional relevante neste cargo, como contato frequente com sofrimento, conflitos ou agressividade de terceiros", apoio:"Quando necessário, os trabalhadores contam com o Programa Equilibrium e com o apoio da liderança." },
+  "exigencias-quantitativas": { mede:"se a carga de trabalho se acumula, se falta tempo para concluir as tarefas e se há necessidade de horas extras", verif:"o volume de trabalho mostrou-se compatível com o tempo e o efetivo disponíveis, sem acúmulo relevante de tarefas nem horas extras habituais" },
+  "ritmo-de-trabalho": { mede:"a necessidade de trabalhar muito rapidamente", verif:"o ritmo observado é regulado pela programação da atividade, com possibilidade de pausas e sem pressão de tempo relevante" },
+  "trabalho-x-familia": { mede:"o quanto o trabalho consome energia e tempo a ponto de afetar a vida pessoal e familiar", verif:"a jornada segue o regime do cargo, definido em acordo coletivo, com escala conhecida com antecedência, e não se identificaram prorrogações habituais nem contato fora do expediente" },
+  "conflitos-de-papeis": { mede:"se o trabalhador recebe orientações contraditórias ou realiza tarefas que considera desnecessárias", verif:"as atribuições estão definidas na descrição de cargo e na ordem de serviço, a linha de comando é conhecida e não se relataram orientações conflitantes" },
+  "comportamentos-ofensivos": { mede:"a exposição a insultos, assédio, ameaças ou violência no trabalho", verif:"não se identificaram nem foram relatadas situações desse tipo", apoio:"A empresa mantém canal de denúncia anônimo, com apuração dos relatos." },
+  "inseguranca-laboral": { mede:"a preocupação do trabalhador em ficar desempregado", verif:"não se identificaram práticas organizacionais que gerem essa preocupação, e as mudanças da empresa são divulgadas pela comunicação interna" },
+  "influencia-no-trabalho": { mede:"o quanto o trabalhador influencia o próprio trabalho — quantidade, tipo de tarefa e com quem trabalha", verif:"o trabalhador organiza a sequência das tarefas dentro dos procedimentos, participa do DDS e pode interromper a atividade diante de risco, pelo direito de recusa, sem restrição relevante de autonomia nos aspectos que dependem da gestão" },
+  "possibilidade-de-desenvolvimento": { mede:"se o trabalho permite ter iniciativa, aprender e usar as próprias habilidades", verif:"a atividade exige iniciativa e aplicação do conhecimento técnico, com oportunidades de aprendizado na função" },
+  "apoio-social-de-colegas": { mede:"a ajuda e o apoio recebidos dos colegas", verif:"o trabalho acontece em equipe, com cooperação e troca de informações no dia a dia" },
+  "apoio-social-de-superiores": { mede:"a ajuda, o apoio e o retorno recebidos da chefia imediata", verif:"a liderança está presente na área, conduz o DDS e é acessível para apoiar o trabalhador" },
+  "previsibilidade": { mede:"se o trabalhador é informado com antecedência sobre decisões e mudanças e recebe a informação de que precisa", verif:"as informações circulam antes do início das atividades pelo DDS, e as mudanças da empresa são divulgadas pela comunicação interna" },
+  "qualidade-da-lideranca": { mede:"a percepção sobre a chefia no planejamento do trabalho, no desenvolvimento da equipe e na resolução de conflitos", verif:"a liderança conduz o planejamento do dia e está presente na área, sem relato de dificuldades relevantes nessa relação" },
+  "recompensas": { mede:"se o trabalho é reconhecido e se o tratamento dado ao trabalhador é justo", verif:"não se relataram situações de falta de reconhecimento, e há PLR com regras divulgadas" },
+  "transparencia-do-papel-laboral": { mede:"a clareza sobre objetivos, responsabilidades e o que se espera do trabalhador", verif:"as atribuições estão definidas na descrição de cargo e na ordem de serviço, e os trabalhadores demonstraram saber o que se espera deles" },
+  "comunidade-social": { mede:"o ambiente de trabalho, a cooperação e o sentimento de pertencer a uma equipe", verif:"o convívio observado é de cooperação e de bom relacionamento" },
+  "confianca-horizontal": { mede:"a confiança entre colegas e o compartilhamento de informações", verif:"a comunicação entre colegas é aberta, com troca de informações no dia a dia e na passagem de turno" },
+  "confianca-vertical": { mede:"a confiança entre trabalhadores e gestão e a qualidade da informação transmitida", verif:"a gestão divulga informações pela comunicação interna e realiza pesquisa de clima com devolutiva às equipes, sem relato de desconfiança relevante" },
+  "justica-e-respeito": { mede:"se os conflitos são resolvidos de forma justa, se as sugestões são consideradas e se o trabalho é distribuído com equidade", verif:"não se relataram situações de tratamento desigual, e há canal de denúncia anônimo com apuração dos relatos" }
+};
+const fraseNao = id => { const n = SUB_NAO[id]; return n ? `a subescala avalia ${n.mede}. Na observação da atividade e nas conversas com os trabalhadores, ${n.verif}.${n.apoio ? " " + n.apoio : ""}` : ""; };
+/* Nota perto do limite da faixa: a leitura é ponderada no próprio cabeçalho */
+const faixaTexto = (m, f) => { const v = Number(m);
+  if (f === "int" && v < 2.6) return "faixa intermédia, próxima do limite favorável";
+  if (f === "int" && v > 3.4) return "faixa intermédia, próxima do limite de risco";
+  if (f === "ris" && v < 3.9) return "pouco acima de 3,66";
+  return FAIXA_TXT[f] || "faixa favorável"; };
 function fraseSub(a, s, m, f, v){
-  const k = SUB_TXT[s.id], tx = TAXMAP[s.tax], cab = `${s.nome} (${num2(m)}, ${FAIXA_TXT[f] || "faixa favorável"})`;
+  const k = SUB_TXT[s.id], tx = TAXMAP[s.tax], cab = `${s.nome} (${num2(m)}, ${faixaTexto(m, f)})`;
   if (s.natureza === "efeito") return `${cab}: indicador de efeito, que reflete como os trabalhadores avaliam o trabalho de forma geral (perspectivas, condições físicas, uso das capacidades). É lido junto com as demais subescalas do domínio e não caracteriza perigo por si. Na observação, [descrever o que se viu — por exemplo, condições do posto e comentários dos trabalhadores].`;
   if (s.natureza === "protetor") return `${cab}: fator de proteção em faixa menos favorável. O resultado foi lido junto com o que se observou em campo, verificando monotonia (OT-04), controle sobre o trabalho (OT-06) e reconhecimento (OT-10): [descrever o que se encontrou].`;
   if (!k) return `${cab}: [descrever o que foi observado].`;
   const exig = k.tipo === "exig", inerente = exig && tx?.inerente ? TXT_INERENTE : "";
-  if (v === "nao") return exig
-    ? `${cab}: o resultado do setor aponta ${k.o}, mas isso não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa condição não apareceu de forma relevante.`
-    : `${cab}: o resultado do setor indica percepção de ${k.o}, o que não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa dificuldade não foi identificada.`;
+  if (v === "nao") return `${cab}: ${fraseNao(s.id)}`;
   if (v === "ine" && k.ine) return `${cab}: ${k.ine}`;
   if (v === "ctrl") return exig
     ? `${cab}: a atividade envolve ${k.o}. ${k.ctrl} Na avaliação, essas medidas mostraram-se eficazes para manter a exigência sob controle.${inerente}`
@@ -615,9 +643,10 @@ const SUB_O_V1 = {"exigencias-cognitivas": "demanda elevada de atenção, memór
 function trechosAntigos(){
   const out = [];
   Object.entries(SUB_O_V1).forEach(([id, o1]) => { const k = SUB_TXT[id]; if (!k) return; const exig = k.tipo === "exig";
-    out.push([`: na observação da atividade deste cargo e no diálogo com os trabalhadores não se evidenciou a condição sinalizada (${o1}).`,
-      exig ? `: o resultado do setor aponta ${k.o}, mas isso não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa condição não apareceu de forma relevante.`
-           : `: o resultado do setor indica percepção de ${k.o}, o que não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa dificuldade não foi identificada.`]);
+    const nao = `: ${fraseNao(id)}`;
+    out.push([`: na observação da atividade deste cargo e no diálogo com os trabalhadores não se evidenciou a condição sinalizada (${o1}).`, nao]);
+    out.push([exig ? `: o resultado do setor aponta ${k.o}, mas isso não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa condição não apareceu de forma relevante.`
+                   : `: o resultado do setor indica percepção de ${k.o}, o que não se confirmou para este cargo: na observação da atividade e nas conversas com os trabalhadores, essa dificuldade não foi identificada.`, nao]);
     out.push([`: a exigência está presente (${o1}), mas as medidas existentes estão implantadas e se mostraram eficazes para mantê-la sob controle: `,
       exig ? `: a atividade envolve ${k.o}, e as medidas existentes mostraram-se eficazes para mantê-la sob controle: ` : `: o resultado indica que parte da equipe percebe ${k.o}; na avaliação, as práticas existentes mostraram-se eficazes: `]);
     out.push([`: a exigência está presente (${o1}) e há medidas implantadas, mas apenas parcialmente eficazes. Oportunidade de melhoria: `,
