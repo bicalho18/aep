@@ -1006,7 +1006,7 @@ function vPainel(){
     <div class="panel"><div class="panel-h"><b>Fila sugerida</b><span class="tiny muted">mais subescalas altas no setor primeiro</span></div>
       <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Setor COPSOQ</th><th>Subescalas altas</th></tr></thead><tbody>
       ${fila.map(({a,al,ine}) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo)}<div class="tiny faint">${STATUS[a.status||"nao_iniciada"]}</div></td><td class="small">${esc(a.meta?.setorCopsoq||"—")}</td>
-        <td class="small">${al.length ? al.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : "—"}${ine ? `<div class="tiny faint">${ine} de exigência inerente (E1 — prioridade de AEP)</div>` : ""}</td></tr>`).join("")}
+        <td class="small">${al.length ? al.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : "—"}${ine ? `<div class="tiny faint">${ine} de exigência inerente à atividade</div>` : ""}</td></tr>`).join("")}
       </tbody></table></div></div>
     <div class="stack">
       <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
@@ -1102,8 +1102,9 @@ function st4(){
   const rows = idx.slice(0, CK_N_BASE).map(linha).join("") +
     `<div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div class="stack tight"><p><b>${esc(CK_ADM_PERGUNTA)}</b></p><p class="tiny faint">Se Sim, abrem os itens 15 a 19, específicos do posto informatizado.</p></div><div class="seg" role="radiogroup" aria-label="Posto informatizado / administrativo">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>` +
     (a.checklistAdm === "sim" ? idx.slice(CK_N_BASE).map(linha).join("") : "");
-  const ativos = ckLista(a), sim = ativos.filter(x => x.c.r==="sim").length;
+  const ativos = ckLista(a), sim = ativos.filter(x => x.c.r==="sim").length, semResp = ativos.filter(x => !x.c.r).length;
   return stepHead(2,"Checklist NR-17 — desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: deve ser registrado como perigo na etapa 4.") +
+  (semResp ? `<div style="margin-bottom:10px"><button class="btn small" type="button" data-act="ckRestoNao">Marcar os ${semResp} item(ns) sem resposta como Não</button> <span class="tiny muted">Use depois de marcar os críticos. Não mexe nos itens já respondidos nem na pergunta do posto administrativo.</span></div>` : "") +
   `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim — ${sim} item(ns).` : (a.checklistAdm && ativos.every(x => x.c.r) ? "Não." : "Responda todos os itens.")}</div>`;
 }
 function st5(){
@@ -1111,8 +1112,8 @@ function st5(){
   if (!a.copsoq.snapshot && snap) { a.copsoq.snapshot = snap; S.dirty = true; clearTimeout(S.saveTimer); S.saveTimer = setTimeout(salvarAEP, 700); }
   const atual = snap ? S.areas[snap.setorId] : null;
   const desatual = atual && a.copsoq.snapshot && atual.atualizadoEm && atual.atualizadoEm !== a.copsoq.snapshot.atualizadoEm;
-  const decl = snap ? `<div class="note ${Number(snap.n) < 15 ? "warn" : ""}"><b>Rastreamento coletivo:</b> setor ${esc(snap.nome)} · ${esc(snap.n||"?")} respondente(s)${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""}. Indicador de contexto coletivo do setor: todas as AEPs do setor partem do mesmo resultado, e ele não caracteriza o cargo isoladamente.
-      ${Number(snap.n) < 15 ? "<br><b>Amostra pequena:</b> pelo PCRE, com menos de 15 respondentes o resultado é indício, não caracterização — conduza a identificação principalmente por observação e diálogo." : ""}
+  const decl = snap ? `<div class="note"><b>Rastreamento coletivo:</b> setor ${esc(snap.nome)} · ${esc(snap.n||"?")} respondente(s)${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""}. Indicador de contexto coletivo do setor: todas as AEPs do setor partem do mesmo resultado, e ele não caracteriza o cargo isoladamente.
+      <br>Resultados divulgados apenas para grupos com, no mínimo, 5 respondentes, por confidencialidade.
       ${desatual ? `<br><button class="btn small" type="button" data-act="atualizarSnap" style="margin-top:6px">Atualizar com as notas atuais do setor</button>` : ""}</div>`
     : `<div class="note warn">Esta AEP não tem setor COPSOQ ligado (etapa 1). Informe o resultado de cada domínio manualmente.</div>`;
   const blocos = DOMINIOS.map(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq.dominios[d.id], sug = conclusaoSugerida(r);
@@ -1121,7 +1122,7 @@ function st5(){
         ${x.s.natureza==="efeito" ? `<span class="hint">Indicador de efeito — não vira perigo; prioriza a leitura das demais subescalas.</span>`
         : x.s.natureza==="protetor" ? `<span class="hint">Protetor — se desfavorável, investigar OT-04, OT-06 ou OT-10.</span>`
         : tx ? (ja ? `<span class="tiny" style="color:var(--ok-ink)">perigo <span class="code">${tx.codigo}</span> já lançado</span>` : `<button class="btn small" type="button" data-act="hzDoCopsoq" data-sub="${x.s.id}">Lançar perigo <span class="code">${tx.codigo}</span></button>`) : ""}
-        ${tx?.inerente && x.f==="ris" ? `<span class="hint" style="flex-basis:100%">Exigência inerente à atividade: acima de 3,66 prioriza a AEP (E1) e não gera linha provisória. Só vira risco se o campo mostrar que autonomia, pausas e suporte são insuficientes para a demanda.</span>` : ""}</div>`; };
+        ${tx?.inerente && x.f==="ris" ? `<span class="hint" style="flex-basis:100%">Exigência inerente à atividade: o resultado alto orienta a avaliação do cargo. O risco só é elevado se o campo mostrar que autonomia, pausas e suporte são insuficientes para a demanda.</span>` : ""}</div>`; };
     return `<div class="dom"><div class="dom-h"><h3>${esc(d.nome)}</h3>
       ${r.auto ? `<span class="row" style="gap:6px"><span class="small muted">nota do domínio ${num2(r.nota)}</span>${chipFaixa(r.faixa)}</span>` : `<select data-b="copsoq.dominios.${d.id}.manual" data-rr="1" style="width:auto" aria-label="Resultado de ${esc(d.nome)}"><option value="">Resultado…</option>${Object.entries(FAIXAS).map(([k,v]) => `<option value="${k}" ${dd.manual===k?"selected":""}>${v}</option>`).join("")}</select>`}</div>
       <div class="dom-b">
@@ -1135,7 +1136,7 @@ function st5(){
           <span class="hint">Monte a observação com uma frase por subescala, conforme o que o posto mostrou, e feche com a linha de perigos. Complete os trechos entre colchetes. A conclusão abaixo é escolhida por você.</span></div>
         <label class="f"><span>Conclusão do cruzamento <em>*</em></span><select data-b="copsoq.dominios.${d.id}.concl" data-rr="1"><option value="">Escolha…</option>${CONCLUSOES.map(c => `<option ${dd.concl===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
           ${!dd.concl && sug ? `<span class="hint">Sugestão: “${esc(sug)}”. <button class="btn ghost small" type="button" data-act="usarSug" data-dom="${d.id}" style="padding:0">Aplicar</button></span>` : ""}
-          ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, a conclusão é “Necessita melhorias” e o perigo entra na AEP; se o campo não permitir confirmar nem afastar, “Evidências insuficientes” — prevalece a observação em campo.</span>` : ""}</label>
+          ${r.altas.length && !dd.concl ? `<span class="hint">Há subescala alta: se o campo confirmar, a conclusão é “Necessita melhorias” e o perigo entra na AEP; se o campo divergir do COPSOQ, registre a divergência na observação e verifique-a com a escuta dos trabalhadores; quando não for possível confirmar nem afastar, “Evidências insuficientes”.</span>` : ""}</label>
       </div></div>`; }).join("");
   const antiga = temRedacaoAntiga(a) ? `<div class="note warn"><b>Observações escritas no modelo anterior de texto.</b> A redação nova diferencia exigência de percepção e cita as práticas da empresa. A atualização troca só as frases-modelo e mantém o que você completou. <button class="btn small" type="button" data-act="atualizarRedacao" style="margin-left:6px">Atualizar a redação</button></div>` : "";
   return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${antiga}${blocos}</div>`;
@@ -1428,7 +1429,7 @@ function docHTML(a, cfg, fotos, opt={}){
   <tr><td colspan="2" class="b" style="text-align:right">Foram identificados itens de desqualificação ergonômica?</td><td class="c">${desq?'<span class="sim">Sim</span>':'<span class="nao">Não</span>'}</td></tr></tbody></table>
   <h2>Integração: cruzamento COPSOQ II × observação em campo</h2>
   <p>Os indicadores de percepção coletiva (COPSOQ II, versão média) são confrontados com as evidências físicas e organizacionais observadas. O instrumento é triagem: orienta onde olhar, e a caracterização do risco é feita pela AEP.</p>
-  ${snap?`<p class="small"><b>Nível de agregação:</b> setor ${esc(snap.nome)}${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""} · ${esc(snap.n||"?")} respondente(s). Indicador de contexto coletivo do setor; não caracteriza o cargo isoladamente.${Number(snap.n)<15?" Com menos de 15 respondentes, o resultado é tratado como indício, não caracterização.":""}</p>
+  ${snap?`<p class="small"><b>Nível de agregação:</b> setor ${esc(snap.nome)}${snap.onda?` · ${esc(snap.onda)}`:""}${snap.dataCorte?` · export de ${fmtData(snap.dataCorte)}`:""} · ${esc(snap.n||"?")} respondente(s). Indicador de contexto coletivo do setor; não caracteriza o cargo isoladamente. Resultados divulgados apenas para grupos com, no mínimo, 5 respondentes, por confidencialidade.</p>
   <p class="small"><b>Subescalas acima de 3,66 no setor:</b> ${altasSetor.length ? altasSetor.map(x => `${esc(x.s.nome)} (${num2(x.m)})`).join("; ") : "nenhuma"}.</p>`:`<p class="small">Resultado por domínio informado pelo analista, sem notas de setor vinculadas a esta AEP.</p>`}
   <table class="t"><thead><tr><th style="width:17%">Domínio COPSOQ</th><th style="width:20%">Resultado</th><th>Observação em campo</th><th style="width:19%">Conclusão</th></tr></thead><tbody>${cruz}</tbody></table>
   <h2>Inventário de perigos</h2>
@@ -1724,6 +1725,7 @@ document.addEventListener("click", async e => {
       toast("Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
     }
     case "novoHz": abrirHz({ _novo:true }); renderStep(); break;
+    case "ckRestoNao": { const n = ckLista(a).filter(x => !x.c.r).length; if (!n) break; ckLista(a).forEach(x => { if (!x.c.r) x.c.r = "nao"; }); marcar(); renderStep(); renderRail(); renderAside(); toast(`${n} item(ns) marcados como Não.`); break; }
     case "hzEsperado": { const tx = TAXMAP[d.cod]; if (!tx) break; abrirHz({ _novo:true, codigo: tx.codigo, danos: tx.danos, fonte: tx.fonte }); S.hzCat = ""; aposHz(); break; }
     case "semPerigoPadrao": { if (String(a.semPerigoJust||"").trim()) { toast("Apague o texto atual antes de usar o texto padrão."); break; } a.semPerigoJust = TXT_SEM_PERIGO; marcar(); renderStep(); renderRail(); renderAside(); break; }
     case "marcarPlanilha": { if (a.status !== "concluida") break; a.planilha = { em: new Date().toISOString() }; S.dirty = true; await salvarAEP(); renderTitulo(); toast("AEP marcada como lançada na planilha."); break; }
