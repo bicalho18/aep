@@ -467,20 +467,50 @@ const lancadaVelha = a => !!a.planilha?.em && !lancadaOk(a);
 const setorDaAEP = a => { const sn = copsoqDaAEP(a); return sn ? S.areas[sn.setorId] || null : null; };
 const etapa3Vazia = a => DOMINIOS.every(d => !String(a.copsoq?.dominios?.[d.id]?.obs||"").trim());
 const etapa3Completa = a => DOMINIOS.every(d => { const dd = a.copsoq?.dominios?.[d.id] || {}; return String(dd.obs||"").trim() && dd.concl && !/\[[^\]]*\]/.test(dd.obs); });
+const limparTravessao = t => TRECHOS_TRAVESSAO.reduce((o, [v, nv]) => o.split(v).join(nv), String(t||""));
+/* Perigos que a etapa 3 exige: decisão que pede perigo e subescala acima de 3,66. Só acrescenta; nunca retira. */
+function lancarPerigosCopsoq(a){
+  const lanc = new Set((a.perigos||[]).map(h => h.codigo)); let n = 0;
+  const lancar = (codigo, sid) => { const tx = TAXMAP[codigo]; if (!tx || lanc.has(tx.codigo)) return; a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte }); lanc.add(tx.codigo); n++; };
+  DOMINIOS.forEach(d => Object.entries(a.copsoq.dominios[d.id].dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (s && decisaoExigePerigo(s, v)) lancar(s.tax, sid); }));
+  altasComPerigo(a).forEach(s => lancar(s.tax, s.id));
+  numerarRiscos(a);
+  return n;
+}
 function aplicarModelo(a, area){
   const m = area?.modelo; if (!m) return 0; let n = 0;
   DOMINIOS.forEach(d => { const md = m.dominios?.[d.id]; if (!md) return; const dd = a.copsoq.dominios[d.id];
-    if (!String(dd.obs||"").trim() && md.obs) { dd.obs = TRECHOS_TRAVESSAO.reduce((o, [v, nv]) => o.split(v).join(nv), md.obs); n++; }
+    if (!String(dd.obs||"").trim() && md.obs) { dd.obs = limparTravessao(md.obs); n++; }
     if (!dd.concl && md.concl) dd.concl = md.concl;
     dd.dec = Object.assign({}, md.dec || {}, dd.dec || {}); });
-  const lanc = new Set((a.perigos||[]).map(h => h.codigo));
-  DOMINIOS.forEach(d => Object.entries(a.copsoq.dominios[d.id].dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid], tx = s && TAXMAP[s.tax];
-    if (tx && decisaoExigePerigo(s, v) && !lanc.has(tx.codigo)) { a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte }); lanc.add(tx.codigo); } }));
-  altasComPerigo(a).forEach(s => { const tx = TAXMAP[s.tax]; if (tx && !lanc.has(tx.codigo)) { a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos, fonte: tx.fonte }); lanc.add(tx.codigo); } });
-  numerarRiscos(a);
+  lancarPerigosCopsoq(a);
   a.copsoq.modelo = { setor: area.nome, em: m.em, origem: m.origem || "" };
   return n;
 }
+/* Etapa 3 igual ao modelo do setor? (texto, conclusão e decisões de cada domínio) */
+const decTxt = o => JSON.stringify(Object.entries(o||{}).filter(([, v]) => v).sort());
+function difereDoModelo(a){
+  const m = setorDaAEP(a)?.modelo; if (!m) return false;
+  return DOMINIOS.some(d => { const md = m.dominios?.[d.id]; if (!md) return false; const dd = a.copsoq?.dominios?.[d.id] || {};
+    return String(dd.obs||"").trim() !== limparTravessao(md.obs).trim() || (dd.concl||"") !== (md.concl||"") || decTxt(dd.dec) !== decTxt(md.dec); });
+}
+/* Troca a etapa 3 inteira pela do modelo. O texto anterior fica guardado na própria AEP (copsoq.antesDoModelo) e pode ser recuperado. */
+function substituirPeloModelo(a, area){
+  const m = area?.modelo; if (!m) return { mudou: false, perigos: 0 };
+  if (!a.copsoq.antesDoModelo && DOMINIOS.some(d => String(a.copsoq.dominios[d.id]?.obs||"").trim()))
+    a.copsoq.antesDoModelo = { em: new Date().toISOString(), dominios: JSON.parse(JSON.stringify(a.copsoq.dominios)) };
+  if (!a.copsoq.antesDoModelo?.snapshot && a.copsoq.antesDoModelo) a.copsoq.antesDoModelo.snapshot = a.copsoq.snapshot ? clone(a.copsoq.snapshot) : null;
+  a.copsoq.snapshot = snapDe(area); /* o texto do modelo cita as notas atuais do setor */
+  DOMINIOS.forEach(d => { const md = m.dominios?.[d.id]; if (!md) return; const dd = a.copsoq.dominios[d.id];
+    dd.obs = limparTravessao(md.obs); dd.concl = md.concl || ""; dd.dec = Object.assign({}, md.dec || {}); });
+  const perigos = lancarPerigosCopsoq(a);
+  a.copsoq.modelo = { setor: area.nome, em: m.em, origem: m.origem || "" };
+  return { mudou: true, perigos };
+}
+/* Perigo vindo do COPSOQ que a leitura atual não pede mais (fica para o analista decidir) */
+const perigosCopsoqSobrando = a => (a.perigos||[]).filter(h => h.origemCopsoq && SUBMAP[h.origemCopsoq] &&
+  !altasComPerigo(a).some(s => s.tax === h.codigo) &&
+  !DOMINIOS.some(d => Object.entries(a.copsoq?.dominios?.[d.id]?.dec || {}).some(([sid, v]) => SUBMAP[sid]?.tax === h.codigo && decisaoExigePerigo(SUBMAP[sid], v))));
 /* Etapa 2: item marcado Sim lança sozinho uma linha de perigo, ligada ao item (uma linha por item).
    Fonte = texto padrão do perigo + o que foi observado. A linha acompanha a observação enquanto não for editada à mão. */
 const baseFonteItem = n => { const cod = (CK_PERIGOS[n]||[])[0], tx = TAXMAP[cod]; return tx ? ((FONTES_ALTERNATIVAS[cod]||[])[0] || tx.fonte) : ""; };
@@ -1017,13 +1047,18 @@ function conferenciaPerigos(){
   const cargos = Object.values(grupos).filter(g => g.length > 1 && new Set(g.map(a => [...new Set(a.perigos.map(h => h.codigo))].sort().join(","))).size > 1)
     .map(g => ({ a: g[0], g: g.sort((p, q) => idNum(p) - idNum(q)) }));
   const ord = l => l.sort((p, q) => idNum(p.a) - idNum(q.a));
-  return { semPadrao: ord(semPadrao), defic: ord(defic), rep: ord(rep), semLanc: ord(semLanc), velhas: ord(velhas), comPend: ord(comPend), redAnt: ord(redAnt), cargos: ord(cargos) };
+  const difModelo = Object.values(S.aeps).filter(a => difereDoModelo(completar(a))).map(a => ({ a }));
+  return { difModelo: ord(difModelo), semPadrao: ord(semPadrao), defic: ord(defic), rep: ord(rep), semLanc: ord(semLanc), velhas: ord(velhas), comPend: ord(comPend), redAnt: ord(redAnt), cargos: ord(cargos) };
 }
 function vConferencia(){
   const c = conferenciaPerigos(), lin = (a, txt) => `<div class="row between" style="gap:8px"><span class="small"><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo||"")} — ${txt}</span><button class="btn small" type="button" data-open="${esc(a.id)}">Abrir</button></div>`;
   const lista = (l, f) => l.slice(0, 40).map(f).join("") + (l.length > 40 ? `<p class="tiny muted">+ ${l.length - 40} outro(s)</p>` : "");
   const conf = S.confirm === "fontes", nAeps = new Set(c.semPadrao.map(x => x.a.id)).size;
   return `<div class="panel"><div class="panel-h"><b>Conferência dos perigos</b><span class="tiny muted">todas as AEPs</span></div><div class="panel-b stack">
+    <div class="stack tight"><b class="small">Etapa 3 diferente do modelo do setor: ${c.difModelo.length}</b>
+      ${c.difModelo.length ? `<p class="tiny muted">A aplicação troca a etapa 3 inteira (texto, conclusão e decisões) pela do modelo do setor e lança os perigos que ela exige. Antes de gravar, o sistema baixa uma cópia de segurança das AEPs alteradas, e o texto anterior fica guardado em cada AEP (etapa 3, “Voltar ao texto anterior”). AEP concluída volta para “Em revisão”: confira, conclua de novo e emita a nova versão do documento.</p>
+      ${S.confirm === "modeloTodas" ? `<span class="confirm">Aplicar o modelo do setor em ${c.difModelo.length} AEP(s)? <button class="btn small primary" type="button" data-act="modeloTodasSim">Aplicar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<div><button class="btn small primary" type="button" data-act="modeloTodas">Aplicar o modelo em todas</button></div>`}
+      ${lista(c.difModelo, x => lin(x.a, `${esc(setorDaAEP(x.a)?.nome||"")} · ${STATUS[x.a.status||"nao_iniciada"]}`))}` : `<p class="tiny muted">Todas as AEPs com setor modelado seguem o modelo.</p>`}</div>
     <div class="stack tight"><b class="small">Fonte sem o texto padrão da planilha: ${c.semPadrao.length}</b>
       ${c.semPadrao.length ? `<p class="tiny muted">O início da fonte deve ser o texto da aba TAXONOMIA. A correção coloca o texto padrão no início e mantém o que foi escrito como complemento. AEP concluída volta para “Em revisão”.</p>
       ${conf ? `<span class="confirm">Corrigir ${c.semPadrao.length} fonte(s) em ${nAeps} AEP(s)? <button class="btn small primary" type="button" data-act="corrigirFontesSim">Corrigir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<div><button class="btn small primary" type="button" data-act="corrigirFontes">Colocar o texto padrão em todas</button></div>`}
@@ -1220,7 +1255,9 @@ function st5(){
         ${S.confirm === "modelo" ? `<span class="confirm">Substituir o modelo do setor pela leitura desta AEP? As AEPs já preenchidas não mudam. <button class="btn small primary" type="button" data-act="salvarModeloSim">Substituir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Atualizar o modelo com esta AEP</button>`}</div></div>`
     : `<div class="note"><b>O setor ${esc(snap.nome)} ainda não tem modelo.</b> Preencha esta etapa numa AEP típica do setor, sem particularidades do cargo, e salve como modelo: as próximas AEPs do setor já abrem com a leitura pronta e com os perigos que ela exige.
         <div style="margin-top:6px"><button class="btn small primary" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Salvar esta etapa como modelo do setor</button>${etapa3Completa(a) ? "" : ` <span class="tiny muted">Disponível quando os 6 domínios tiverem observação e conclusão, sem colchetes.</span>`}</div></div>`;
-  return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${painelModelo}${antiga}${blocos}</div>`;
+  const anterior = a.copsoq.antesDoModelo ? `<div class="note"><b>Etapa 3 substituída pelo modelo do setor em ${dataLocal(a.copsoq.antesDoModelo.em)}.</b> O texto que esta AEP tinha antes está guardado.
+        ${S.confirm === "voltarAnterior" ? `<span class="confirm">Voltar ao texto anterior nos 6 domínios? Os perigos lançados continuam. <button class="btn small primary" type="button" data-act="voltarAnteriorSim">Voltar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="voltarAnterior">Voltar ao texto anterior</button>`}</div>` : "";
+  return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${painelModelo}${anterior}${antiga}${blocos}</div>`;
 }
 function st6(){
   const a = S.draft, faltam = ckLista(a).filter(({c,n}) => c.r==="sim" && !perigoDoItem(a, n));
@@ -1893,6 +1930,26 @@ document.addEventListener("click", async e => {
     case "usarFonteAlt": { const tx = TAXMAP[S.editHz?.codigo], alt = (FONTES_ALTERNATIVAS[S.editHz?.codigo]||[])[0]; if (!tx || !alt) break; const f = String(S.editHz.fonte||"").trim(), velho = fontePadrao(f); S.editHz.fonte = alt + (velho ? f.slice(velho.fonte.length) : (f ? " " + f : "")); renderStep(); toast("Texto genérico colocado no início. Complemente com a condição deste cargo."); break; }
     case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; const f = String(S.editHz.fonte||"").trim(), velho = fontePadrao(f); S.editHz.fonte = tx.fonte + (velho ? f.slice(velho.fonte.length) : (f ? " " + f : "")); renderStep(); toast("Texto da planilha recolocado no início. Complemente depois dele."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
+    case "modeloTodas": S.confirm = "modeloTodas"; render(); break;
+    case "modeloTodasSim": {
+      const alvo = conferenciaPerigos().difModelo.map(x => x.a.id); if (!alvo.length) { S.confirm = null; render(); break; }
+      try { const blob = new Blob([JSON.stringify({ geradoEm: new Date().toISOString(), motivo: "antes de aplicar o modelo do setor", aeps: Object.fromEntries(alvo.map(id => [id, S.aeps[id]])) })], { type: "application/json" });
+        const el = document.createElement("a"); el.href = URL.createObjectURL(blob); el.download = `copia-antes-do-modelo-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.json`; document.body.appendChild(el); el.click(); el.remove(); } catch(_) {}
+      let n = 0, erro = 0, revis = 0, novos = 0; const sobra = [];
+      for (const id of alvo){ const a2 = completar(JSON.parse(JSON.stringify(S.aeps[id]))), ar = setorDaAEP(a2); const r = substituirPeloModelo(a2, ar); if (!r.mudou) continue; n++; novos += r.perigos;
+        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoEm = null; revis++; }
+        if (perigosCopsoqSobrando(a2).length) sobra.push(a2.numero);
+        a2.atualizadoEm = new Date().toISOString();
+        if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); S.aeps[id] = a2; } catch(_) { erro++; } } else S.aeps[id] = a2; }
+      S.confirm = null; render();
+      toast(erro ? `Modelo aplicado em ${n - erro} AEP(s); ${erro} não salvaram; clique de novo para tentar.` : `Modelo aplicado em ${n} AEP(s)${revis ? `; ${revis} concluída(s) voltaram para revisão` : ""}${novos ? `; ${novos} perigo(s) lançado(s)` : ""}.${sobra.length ? ` Confira na etapa 3 os perigos do COPSOQ que o modelo não pede: ${sobra.slice(0, 8).join(", ")}${sobra.length > 8 ? "…" : ""}.` : ""}`);
+      break;
+    }
+    case "voltarAnterior": S.confirm = "voltarAnterior"; renderStep(); break;
+    case "voltarAnteriorSim": { const ant = a.copsoq.antesDoModelo; if (!ant) break;
+      DOMINIOS.forEach(dm => { if (ant.dominios?.[dm.id]) a.copsoq.dominios[dm.id] = JSON.parse(JSON.stringify(ant.dominios[dm.id])); });
+      if (ant.snapshot) a.copsoq.snapshot = ant.snapshot;
+      delete a.copsoq.antesDoModelo; S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); toast("Texto anterior recolocado. Os perigos lançados continuam: confira a etapa 4."); break; }
     case "redacaoTodas": S.confirm = "redacao"; render(); break;
     case "redacaoTodasSim": {
       const alvo = conferenciaPerigos().redAnt.map(x => x.a.id); let n = 0, erro = 0;
