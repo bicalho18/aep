@@ -1143,9 +1143,13 @@ function renderBanner(){
   const snap = copsoqDaAEP(S.draft);
   if (!snap){ el.innerHTML = S.draft.meta.setorCopsoq ? `<div class="note warn" style="margin-bottom:16px">Setor COPSOQ “${esc(S.draft.meta.setorCopsoq)}” sem notas cadastradas.</div>` : ""; return; }
   const altas = SUBS.map(s => ({ s, m: snap.medias?.[s.id] })).filter(x => faixaDe(x.m) === "ris").sort((a,b) => b.m - a.m);
-  el.innerHTML = altas.length
-    ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas em alta no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes, acima de 3,66): ${altas.map(x => `<b>${esc(x.s.nome)} ${num2(x.m)}</b>${x.s.tax ? ` → <span class="code">${esc(x.s.tax)}</span>${TAXMAP[x.s.tax]?.inerente ? " (exigência inerente)" : ""}` : ""}`).join("; ")}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button></div>`
-    : `<div class="note ok" style="margin-bottom:16px">Setor ${esc(snap.nome)}: nenhuma subescala acima de 3,66.</div>`;
+  const lanc = new Set((S.draft.perigos||[]).map(h => h.codigo)), faltam = altas.filter(x => x.s.tax && !lanc.has(x.s.tax));
+  const itens = altas.map(x => `<b>${esc(x.s.nome)} ${num2(x.m)}</b>${x.s.tax ? ` → <span class="code">${esc(x.s.tax)}</span>${lanc.has(x.s.tax) ? " lançado" : ""}${TAXMAP[x.s.tax]?.inerente ? " (exigência inerente)" : ""}` : ""}`).join("; ");
+  el.innerHTML = !altas.length
+    ? `<div class="note ok" style="margin-bottom:16px">Setor ${esc(snap.nome)}: nenhuma subescala acima de 3,66.</div>`
+    : faltam.length
+    ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes) com perigo ainda não lançado nesta AEP: ${itens}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button></div>`
+    : `<div class="note" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes): ${itens}. Perigos já lançados nesta AEP; a graduação é feita na planilha.</div>`;
 }
 function renderRail(){
   const el = $("#rail"); if (!el) return; const p = pendencias(S.draft);
@@ -1153,7 +1157,7 @@ function renderRail(){
     return `<li><button type="button" data-step="${n}" ${S.step===n?'aria-current="step"':""}><span class="n">${n}</span><span class="lbl">${esc(t)}</span><span class="dot ${dot}" title="${pend?pend+" pendência(s)":"Completo"}"></span></button></li>`; }).join("")}</ol>`;
 }
 function renderAside(){
-  const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = ckLista(a).filter(x => x.c.r==="sim").length;
+  renderBanner(); const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = ckLista(a).filter(x => x.c.r==="sim").length;
   const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
   el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
       <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
@@ -1249,10 +1253,13 @@ function st5(){
       </div></div>`; }).join("");
   const antiga = temRedacaoAntiga(a) ? `<div class="note warn"><b>Observações escritas no modelo anterior de texto.</b> A redação nova diferencia exigência de percepção e cita as práticas da empresa. A atualização troca só as frases-modelo e mantém o que você completou. <button class="btn small" type="button" data-act="atualizarRedacao" style="margin-left:6px">Atualizar a redação</button></div>` : "";
   const notasMudaram = modelo && areaM.atualizadoEm && modelo.notasEm && areaM.atualizadoEm !== modelo.notasEm;
-  const painelModelo = !snap ? "" : modelo
-    ? `<div class="note ${notasMudaram ? "warn" : ""}"><b>Modelo do setor ${esc(areaM.nome)}:</b> salvo em ${dataLocal(modelo.em)}${modelo.origem ? ` a partir da ${esc(modelo.origem)}${modelo.cargo ? ` (${esc(modelo.cargo)})` : ""}` : ""}.${a.copsoq.modelo ? " Esta AEP partiu do modelo: ajuste só o que for específico do cargo." : ""}${notasMudaram ? "<br><b>As notas do setor mudaram depois do modelo.</b> Revise uma AEP do setor e atualize o modelo." : ""}
-        <div class="row" style="gap:6px;margin-top:6px"><button class="btn small" type="button" data-act="aplicarModelo">Aplicar modelo nos domínios vazios</button>
-        ${S.confirm === "modelo" ? `<span class="confirm">Substituir o modelo do setor pela leitura desta AEP? As AEPs já preenchidas não mudam. <button class="btn small primary" type="button" data-act="salvarModeloSim">Substituir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Atualizar o modelo com esta AEP</button>`}</div></div>`
+  const igualModelo = modelo && !difereDoModelo(a), temVazio = modelo && DOMINIOS.some(d => !String(a.copsoq.dominios[d.id]?.obs||"").trim());
+  const painelModelo = !snap ? "" : modelo && igualModelo && !notasMudaram
+    ? `<p class="tiny muted" style="margin:0">Etapa 3 conforme o modelo do setor ${esc(areaM.nome)} (${dataLocal(modelo.em)}). Se este cargo tiver alguma particularidade, ajuste o texto do domínio.</p>`
+    : modelo
+    ? `<div class="note ${notasMudaram ? "warn" : ""}"><b>Modelo do setor ${esc(areaM.nome)}:</b> salvo em ${dataLocal(modelo.em)}.${notasMudaram ? " <b>As notas do setor mudaram depois do modelo.</b> Revise uma AEP do setor e atualize o modelo." : " Esta AEP tem diferenças em relação ao modelo do setor."}
+        <div class="row" style="gap:6px;margin-top:6px">${temVazio ? `<button class="btn small" type="button" data-act="aplicarModelo">Preencher os domínios vazios com o modelo</button>` : ""}
+        ${S.confirm === "modelo" ? `<span class="confirm">Usar a etapa 3 desta AEP como modelo do setor ${esc(areaM.nome)}? As AEPs já preenchidas não mudam. <button class="btn small primary" type="button" data-act="salvarModeloSim">Usar como modelo</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Usar esta AEP como modelo do setor</button>`}</div></div>`
     : `<div class="note"><b>O setor ${esc(snap.nome)} ainda não tem modelo.</b> Preencha esta etapa numa AEP típica do setor, sem particularidades do cargo, e salve como modelo: as próximas AEPs do setor já abrem com a leitura pronta e com os perigos que ela exige.
         <div style="margin-top:6px"><button class="btn small primary" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Salvar esta etapa como modelo do setor</button>${etapa3Completa(a) ? "" : ` <span class="tiny muted">Disponível quando os 6 domínios tiverem observação e conclusão, sem colchetes.</span>`}</div></div>`;
   const anterior = a.copsoq.antesDoModelo ? `<div class="note"><b>Etapa 3 substituída pelo modelo do setor em ${dataLocal(a.copsoq.antesDoModelo.em)}.</b> O texto que esta AEP tinha antes está guardado.
