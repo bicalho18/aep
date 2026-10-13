@@ -297,7 +297,7 @@ const ORIGENS = ["Observação em campo","Campo + rastreamento","Rastreamento co
 const ESTADOS = [
   ["E3","Caracterizada em campo","AEP concluída, com observação da atividade real e escuta dos trabalhadores. Fonte geradora real do cargo."],
   ["E0","Presente e controlada","Fator aplicável e presente, rastreamento em faixa favorável, sem achado relevante em campo. Permanece registrado no inventário como fator presente e controlado."],
-  ["E2","Provisória","Subescala acima de 3,66 sem AEP concluída. Exige data de revisão — sem ela o registro é inválido."]
+  ["E2","Provisória","Subescala acima de 3,66 sem AEP concluída. Exige data de revisão; sem ela o registro é inválido."]
 ];
 const INTERPRETACOES = [
   "Não há itens de desqualificação ou condições críticas",
@@ -370,7 +370,7 @@ const DOM_PADRAO_V1 = {
   CO:"Durante a avaliação, não foram identificadas, nas atividades e condições de trabalho observadas, evidências de comportamentos ofensivos relacionados a insultos ou provocações verbais, assédio sexual indesejado, ameaças de violência ou violência física. Também não foram relatadas pelos trabalhadores ocorrências relacionadas a esses fatores."
 };
 const DOMINIOS = DOM_ORDEM.map(id => ({ id, nome: DOM_NOMES[id], padrao: ({
-  EL:"As exigências do trabalho — atenção e decisão, carga emocional, volume e ritmo — foram confrontadas com a atividade observada. Não se evidenciou sobrecarga relevante no momento da avaliação: as exigências presentes são administradas pelos próprios trabalhadores, com o apoio de procedimentos, dos intervalos previstos na jornada, da liderança e do Programa Equilibrium.",
+  EL:"As exigências do trabalho (atenção e decisão, carga emocional, volume e ritmo) foram confrontadas com a atividade observada. Não se evidenciou sobrecarga relevante no momento da avaliação: as exigências presentes são administradas pelos próprios trabalhadores, com o apoio de procedimentos, dos intervalos previstos na jornada, da liderança e do Programa Equilibrium.",
   IT:"Na avaliação em campo, observou-se a relação entre as demandas do trabalho e a vida dos trabalhadores, incluindo jornada, escalas, perspectivas no emprego e satisfação com o trabalho. A jornada segue o regime do cargo, definido em acordo coletivo, e não se identificaram situações que comprometessem de forma relevante essa interface.",
   OT:"Na avaliação em campo, a atividade mostrou-se planejada e organizada, com procedimentos e ordens de serviço definidos, alinhamento da equipe no DDS e espaço para o trabalhador organizar a sequência das tarefas. Não se identificaram situações que comprometessem de forma relevante a organização e o conteúdo do trabalho.",
   RS:"Na avaliação em campo, observaram-se as relações entre os trabalhadores e com a liderança: comunicação, cooperação, apoio e clareza de papéis. A liderança conduz o DDS e está acessível na área, as atribuições estão definidas na descrição de cargo e na ordem de serviço, e não se identificaram situações que comprometessem de forma relevante essas relações.",
@@ -394,7 +394,7 @@ const CONCL_ANTIGAS = {
 
 /* Textos fixos do documento */
 const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
-const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade — trabalho real —, por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais — indicador de onde olhar, não caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
+const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
 const TXT_RECOMENDACOES = [
   "Manter as condições ergonômicas observadas e as medidas de prevenção existentes, assegurando sua continuidade e eficácia.",
   "Manter o acompanhamento das condições de trabalho e da eficácia das medidas existentes, incluindo inspeções, observações e participação dos trabalhadores, conforme aplicável.",
@@ -404,7 +404,7 @@ const TXT_RECOMENDACOES = [
 /* AET não acionada: dois textos padrão — sem ações (medidas existentes suficientes) e com ações no Plano de Ação */
 const TXT_JUST_AET_NAO_SEM = "A Avaliação Ergonômica Preliminar (AEP) identificou os fatores de risco ergonômicos da atividade e as medidas de prevenção existentes, que se mostraram suficientes no momento da avaliação. Não há necessidade de aprofundamento técnico por meio de AET, visto que nenhum dos gatilhos do item 17.3.2 da NR-17 foi atendido. As condições de trabalho e a eficácia das medidas serão acompanhadas e, caso seja observada inadequação ou insuficiência das medidas (gatilho b), a AET será acionada.";
 const TXT_JUST_AET_NAO = "A Avaliação Ergonômica Preliminar (AEP) identificou com clareza os fatores de risco ergonômicos e as respectivas medidas preventivas/corretivas, as quais foram integradas ao Plano de Ação. No momento, não há necessidade de aprofundamento técnico via AET, visto que nenhum dos gatilhos do item 17.3.2 da NR-17 foi atendido. O desempenho das medidas adotadas será monitorado e, caso seja observada ineficácia ou insuficiência das ações (gatilho b), a AET será acionada.";
-const TXT_NOTA_AET = "Se as medidas de prevenção implementadas forem consideradas ineficazes ou a situação for muito complexa, esta AEP serve como gatilho para a realização de uma AET — Análise Ergonômica do Trabalho, nos termos do item 17.3.2 da NR-17.";
+const TXT_NOTA_AET = "Se as medidas de prevenção implementadas forem consideradas ineficazes ou a situação for muito complexa, esta AEP serve como gatilho para a realização de uma AET (Análise Ergonômica do Trabalho), nos termos do item 17.3.2 da NR-17.";
 const GATILHOS = [
   ["a","Observada a necessidade de uma avaliação mais aprofundada da situação"],
   ["b","Identificadas inadequações ou insuficiência das ações adotadas"],
@@ -470,7 +470,7 @@ const etapa3Completa = a => DOMINIOS.every(d => { const dd = a.copsoq?.dominios?
 function aplicarModelo(a, area){
   const m = area?.modelo; if (!m) return 0; let n = 0;
   DOMINIOS.forEach(d => { const md = m.dominios?.[d.id]; if (!md) return; const dd = a.copsoq.dominios[d.id];
-    if (!String(dd.obs||"").trim() && md.obs) { dd.obs = md.obs; n++; }
+    if (!String(dd.obs||"").trim() && md.obs) { dd.obs = TRECHOS_TRAVESSAO.reduce((o, [v, nv]) => o.split(v).join(nv), md.obs); n++; }
     if (!dd.concl && md.concl) dd.concl = md.concl;
     dd.dec = Object.assign({}, md.dec || {}, dd.dec || {}); });
   const lanc = new Set((a.perigos||[]).map(h => h.codigo));
@@ -570,14 +570,14 @@ const SUB_TXT = {
     ctrl:"Os trabalhadores contam com o Programa Equilibrium, de apoio psicológico, e com liderança acessível no dia a dia; o direito de recusa permite interromper a tarefa diante de situação de risco.",
     melh:"divulgar o Programa Equilibrium nas equipes, estruturar o acolhimento após eventos críticos" },
   "exigencias-quantitativas": { tipo:"exig", o:"volume de trabalho elevado em alguns momentos em relação ao tempo disponível",
-    ctrl:"A carga é organizada pela programação da área e alinhada no DDS; a jornada segue [o regime do cargo — horário administrativo ou turno de revezamento], com horas extras e banco de horas regidos por acordo coletivo.",
+    ctrl:"A carga é organizada pela programação da área e alinhada no DDS; a jornada segue [o regime do cargo: horário administrativo ou turno de revezamento], com horas extras e banco de horas regidos por acordo coletivo.",
     melh:"revisar metas e prazos, ajustar o efetivo nos picos, planejar a cobertura de férias e afastamentos" },
   "ritmo-de-trabalho": { tipo:"exig", o:"ritmo de trabalho acelerado em alguns momentos da jornada",
     ctrl:"O ritmo é regulado pela programação da operação e pelos intervalos previstos na jornada; diante de risco, o trabalhador pode desacelerar ou interromper a tarefa, pelo direito de recusa.",
     melh:"formalizar pausas de recuperação, rodízio de tarefas, rever o ritmo na etapa gargalo" },
   "trabalho-x-familia": { tipo:"exig", o:"interferência do trabalho na vida pessoal e familiar",
     ctrl:"A jornada segue [o regime do cargo], definido em acordo coletivo, com escala conhecida com antecedência e banco de horas; o contato fora do expediente não faz parte da rotina.",
-    ine:"parte dessa percepção decorre do próprio regime de trabalho do cargo — [turno de revezamento 2x2, diurno e noturno] —, necessário à operação contínua. O regime é definido em acordo coletivo, a escala é conhecida com antecedência e as folgas são respeitadas; não se identificaram prorrogações habituais nem contato fora do expediente que acentuem essa interferência.",
+    ine:"parte dessa percepção decorre do próprio regime de trabalho do cargo ([turno de revezamento 2x2, diurno e noturno]), necessário à operação contínua. O regime é definido em acordo coletivo, a escala é conhecida com antecedência e as folgas são respeitadas; não se identificaram prorrogações habituais nem contato fora do expediente que acentuem essa interferência.",
     melh:"dar previsibilidade às escalas, controlar horas extras, limitar o contato fora do expediente" },
   "conflitos-de-papeis": { tipo:"exig", o:"orientações contraditórias ou tarefas percebidas como desnecessárias",
     ctrl:"As atribuições estão definidas na descrição de cargo e na ordem de serviço, os procedimentos orientam a execução de cada tarefa e a linha de comando é conhecida pela equipe.",
@@ -591,7 +591,7 @@ const SUB_TXT = {
     melh:"comunicar mudanças com antecedência, dar retorno às dúvidas das equipes" },
   "influencia-no-trabalho": { tipo:"rec", o:"pouca influência sobre o próprio trabalho",
     ctrl:"O trabalhador participa da organização do dia a dia pelo DDS, ajusta a sequência das tarefas dentro dos procedimentos e pode interromper a atividade diante de risco, pelo direito de recusa.",
-    ine:"o resultado é puxado por aspectos que, numa operação com equipes definidas por escala e qualificação, não dependem do trabalhador — como escolher com quem trabalha ou a quantidade de trabalho programada. Os aspectos que podem ser geridos foram verificados em campo: o trabalhador organiza a sequência das tarefas dentro dos procedimentos, participa do DDS e pode interromper a atividade diante de risco, pelo direito de recusa.",
+    ine:"o resultado é puxado por aspectos que, numa operação com equipes definidas por escala e qualificação, não dependem do trabalhador, como escolher com quem trabalha ou a quantidade de trabalho programada. Os aspectos que podem ser geridos foram verificados em campo: o trabalhador organiza a sequência das tarefas dentro dos procedimentos, participa do DDS e pode interromper a atividade diante de risco, pelo direito de recusa.",
     melh:"envolver os trabalhadores na revisão de procedimentos, ampliar a alçada de decisão no dia a dia" },
   "possibilidade-de-desenvolvimento": { tipo:"rec", o:"poucas oportunidades de aprender e de usar as próprias habilidades",
     ctrl:"A atividade exige iniciativa e aplicação do conhecimento técnico, e a função conta com [treinamentos da matriz de capacitação e reciclagens].",
@@ -609,7 +609,7 @@ const SUB_TXT = {
     ctrl:"A liderança conduz o DDS e o planejamento do dia e está presente na área; a pesquisa de clima, com devolutiva às equipes, acompanha essa percepção.",
     melh:"desenvolvimento de liderança, feedback estruturado, devolutiva dos resultados do COPSOQ" },
   "recompensas": { tipo:"rec", o:"pouco reconhecimento pelo trabalho realizado",
-    ctrl:"Há PLR com regras divulgadas e pesquisa de clima com devolutiva; no dia a dia, [descrever como o reconhecimento acontece — por exemplo, retorno da liderança sobre o trabalho].",
+    ctrl:"Há PLR com regras divulgadas e pesquisa de clima com devolutiva; no dia a dia, [descrever como o reconhecimento acontece, por exemplo, retorno da liderança sobre o trabalho].",
     melh:"critérios transparentes de reconhecimento, feedback estruturado" },
   "transparencia-do-papel-laboral": { tipo:"rec", o:"pouca clareza sobre atribuições e objetivos",
     ctrl:"As atribuições estão definidas na descrição de cargo e na ordem de serviço, os procedimentos detalham a execução das tarefas e os trabalhadores demonstraram saber o que se espera deles.",
@@ -653,7 +653,7 @@ const SUB_NAO = {
   "conflitos-de-papeis": { mede:"se o trabalhador recebe orientações contraditórias ou realiza tarefas que considera desnecessárias", verif:"as atribuições estão definidas na descrição de cargo e na ordem de serviço, a linha de comando é conhecida e não se relataram orientações conflitantes" },
   "comportamentos-ofensivos": { mede:"a exposição a insultos, assédio, ameaças ou violência no trabalho", verif:"não se identificaram nem foram relatadas situações desse tipo", apoio:"A empresa mantém canal de denúncia anônimo, com apuração dos relatos." },
   "inseguranca-laboral": { mede:"a preocupação do trabalhador em ficar desempregado", verif:"não se identificaram práticas organizacionais que gerem essa preocupação, e as mudanças da empresa são divulgadas pela comunicação interna" },
-  "influencia-no-trabalho": { mede:"o quanto o trabalhador influencia o próprio trabalho — quantidade, tipo de tarefa e com quem trabalha", verif:"o trabalhador organiza a sequência das tarefas dentro dos procedimentos, participa do DDS e pode interromper a atividade diante de risco, pelo direito de recusa, sem restrição relevante de autonomia nos aspectos que dependem da gestão" },
+  "influencia-no-trabalho": { mede:"o quanto o trabalhador influencia o próprio trabalho: quantidade, tipo de tarefa e com quem trabalha", verif:"o trabalhador organiza a sequência das tarefas dentro dos procedimentos, participa do DDS e pode interromper a atividade diante de risco, pelo direito de recusa, sem restrição relevante de autonomia nos aspectos que dependem da gestão" },
   "possibilidade-de-desenvolvimento": { mede:"se o trabalho permite ter iniciativa, aprender e usar as próprias habilidades", verif:"a atividade exige iniciativa e aplicação do conhecimento técnico, com oportunidades de aprendizado na função" },
   "apoio-social-de-colegas": { mede:"a ajuda e o apoio recebidos dos colegas", verif:"o trabalho acontece em equipe, com cooperação e troca de informações no dia a dia" },
   "apoio-social-de-superiores": { mede:"a ajuda, o apoio e o retorno recebidos da chefia imediata", verif:"a liderança está presente na área, conduz o DDS e é acessível para apoiar o trabalhador" },
@@ -675,7 +675,7 @@ const faixaTexto = (m, f) => { const v = Number(m);
   return FAIXA_TXT[f] || "faixa favorável"; };
 function fraseSub(a, s, m, f, v){
   const k = SUB_TXT[s.id], tx = TAXMAP[s.tax], cab = `${s.nome} (${num2(m)}, ${faixaTexto(m, f)})`;
-  if (s.natureza === "efeito") return `${cab}: indicador de efeito, que reflete como os trabalhadores avaliam o trabalho de forma geral (perspectivas, condições físicas, uso das capacidades). É lido junto com as demais subescalas do domínio e não caracteriza perigo por si. Na observação, [descrever o que se viu — por exemplo, condições do posto e comentários dos trabalhadores].`;
+  if (s.natureza === "efeito") return `${cab}: indicador de efeito, que reflete como os trabalhadores avaliam o trabalho de forma geral (perspectivas, condições físicas, uso das capacidades). É lido junto com as demais subescalas do domínio e não caracteriza perigo por si. Na observação, [descrever o que se viu, por exemplo: condições do posto e comentários dos trabalhadores].`;
   if (s.natureza === "protetor") return `${cab}: fator de proteção em faixa menos favorável. O resultado foi lido junto com o que se observou em campo, verificando monotonia (OT-04), controle sobre o trabalho (OT-06) e reconhecimento (OT-10): [descrever o que se encontrou].`;
   if (!k) return `${cab}: [descrever o que foi observado].`;
   const exig = k.tipo === "exig", inerente = exig && tx?.inerente ? TXT_INERENTE : "";
@@ -685,11 +685,11 @@ function fraseSub(a, s, m, f, v){
     ? `${cab}: a atividade envolve ${k.o}. ${k.ctrl} Na avaliação, essas medidas mostraram-se eficazes para manter a exigência sob controle.${inerente}`
     : `${cab}: o resultado indica que parte da equipe percebe ${k.o}. ${k.ctrl} Na avaliação, essas práticas mostraram-se eficazes.`;
   if (v === "melh") return exig
-    ? `${cab}: a atividade envolve ${k.o}, e as medidas implantadas atendem apenas em parte à demanda observada. Oportunidade de melhoria: [descrever — por exemplo, ${k.melh}].`
-    : `${cab}: o resultado indica percepção de ${k.o}, e a observação confirmou que as práticas existentes atendem apenas em parte. Oportunidade de melhoria: [descrever — por exemplo, ${k.melh}].`;
+    ? `${cab}: a atividade envolve ${k.o}, e as medidas implantadas atendem apenas em parte à demanda observada. Oportunidade de melhoria: [descrever, por exemplo: ${k.melh}].`
+    : `${cab}: o resultado indica percepção de ${k.o}, e a observação confirmou que as práticas existentes atendem apenas em parte. Oportunidade de melhoria: [descrever, por exemplo: ${k.melh}].`;
   return exig
-    ? `${cab}: a atividade envolve ${k.o}, sem controle ou suporte suficiente para a demanda observada: [descrever a condição — tarefa, frequência, relato dos trabalhadores].${tx ? ` Perigo correspondente na taxonomia: ${tx.codigo}.` : ""}`
-    : `${cab}: a observação confirmou ${k.o}, sem prática suficiente para supri-la: [descrever a condição — situação, frequência, relato dos trabalhadores].${tx ? ` Perigo correspondente na taxonomia: ${tx.codigo}.` : ""}`;
+    ? `${cab}: a atividade envolve ${k.o}, sem controle ou suporte suficiente para a demanda observada: [descrever a condição: tarefa, frequência, relato dos trabalhadores].${tx ? ` Perigo correspondente na taxonomia: ${tx.codigo}.` : ""}`
+    : `${cab}: a observação confirmou ${k.o}, sem prática suficiente para supri-la: [descrever a condição: situação, frequência, relato dos trabalhadores].${tx ? ` Perigo correspondente na taxonomia: ${tx.codigo}.` : ""}`;
 }
 function perigosDoDominio(a, domId){
   return Array.from(new Set((a.perigos||[]).filter(h => SUBS.some(s => s.dom === domId && (h.origemCopsoq === s.id || s.tax === h.codigo))).map(h => h.codigo)));
@@ -704,6 +704,8 @@ function fraseFecho(a, domId, v){
   return `Perigos identificados: ${c.length ? c.join(", ") : "[códigos]"}.`;
 }
 /* Redação anterior (até 29/09/2026): usada para atualizar observações já escritas, preservando o que o analista completou */
+/* Redação sem travessão (13/10/2026): trechos antigos gravados nas AEPs e a forma nova */
+const TRECHOS_TRAVESSAO = [["[descrever o que se viu — por exemplo, condições", "[descrever o que se viu, por exemplo: condições"], ["As exigências do trabalho — atenção e decisão, carga emocional, volume e ritmo — apresentaram", "As exigências do trabalho (atenção e decisão, carga emocional, volume e ritmo) apresentaram"], ["Os indicadores da interface trabalho-indivíduo — segurança no emprego, conciliação com a vida pessoal e satisfação com o trabalho — apresentaram", "Os indicadores da interface trabalho-indivíduo, que incluem segurança no emprego, conciliação com a vida pessoal e satisfação com o trabalho, apresentaram"], ["Os indicadores de valores no local de trabalho — confiança, justiça e senso de comunidade — apresentaram", "Os indicadores de valores no local de trabalho, como confiança, justiça e senso de comunidade, apresentaram"], ["As exigências do trabalho — atenção e decisão, carga emocional, volume e ritmo — foram confrontadas", "As exigências do trabalho (atenção e decisão, carga emocional, volume e ritmo) foram confrontadas"], ["regime de trabalho do cargo — [turno de revezamento 2x2, diurno e noturno] —, necessário", "regime de trabalho do cargo ([turno de revezamento 2x2, diurno e noturno]), necessário"], ["não dependem do trabalhador — como escolher com quem", "não dependem do trabalhador, como escolher com quem"], ["[o regime do cargo — horário administrativo ou turno de revezamento]", "[o regime do cargo: horário administrativo ou turno de revezamento]"], ["[descrever como o reconhecimento acontece — por exemplo, retorno", "[descrever como o reconhecimento acontece, por exemplo, retorno"], ["o próprio trabalho — quantidade, tipo de tarefa e com quem trabalha", "o próprio trabalho: quantidade, tipo de tarefa e com quem trabalha"], ["[descrever — por exemplo, ", "[descrever, por exemplo: "], ["[descrever a condição — tarefa, frequência", "[descrever a condição: tarefa, frequência"], ["[descrever a condição — situação, frequência", "[descrever a condição: situação, frequência"]];
 const SUB_O_V1 = {"exigencias-cognitivas": "demanda elevada de atenção, memória e tomada de decisão", "exigencias-emocionais": "contato com situações de alta carga emocional, como sofrimento, agressividade ou risco de terceiros", "exigencias-quantitativas": "volume de trabalho elevado em relação ao tempo e ao efetivo disponíveis", "ritmo-de-trabalho": "ritmo intenso ou imposto pelo processo, com pouca margem para pausas voluntárias", "inseguranca-laboral": "percepção de instabilidade no emprego ou de mudanças sem comunicação", "trabalho-x-familia": "interferência do trabalho na vida pessoal e familiar por jornada, escalas ou contato fora do expediente", "influencia-no-trabalho": "baixa influência do trabalhador sobre método, ritmo ou sequência da tarefa", "possibilidade-de-desenvolvimento": "poucas oportunidades de aprendizado e de desenvolvimento na função", "apoio-social-de-colegas": "pouco apoio e cooperação entre colegas", "apoio-social-de-superiores": "pouco apoio da liderança imediata", "conflitos-de-papeis": "exigências contraditórias ou ordens conflitantes", "previsibilidade": "pouca informação antecipada sobre mudanças e decisões", "qualidade-da-lideranca": "percepção negativa sobre a qualidade da liderança no planejamento, no apoio e no desenvolvimento da equipe", "recompensas": "percepção de pouco reconhecimento pelo trabalho realizado", "transparencia-do-papel-laboral": "pouca clareza sobre atribuições, objetivos e responsabilidades", "comunidade-social": "pouco senso de comunidade e bom convívio no ambiente de trabalho", "confianca-horizontal": "baixa confiança entre colegas", "confianca-vertical": "baixa confiança entre trabalhadores e gestão", "justica-e-respeito": "percepção de tratamento desigual ou falta de respeito", "comportamentos-ofensivos": "relatos de comportamentos ofensivos, como insultos, ameaças, assédio ou violência"};
 function trechosAntigos(){
   const out = [];
@@ -722,6 +724,7 @@ function trechosAntigos(){
   out.push([" Por ser exigência inerente à atividade, o que se verificou foi a suficiência dos recursos de regulação (autonomia, pausas, suporte) diante da demanda.", TXT_INERENTE]);
   out.push([": indicador de efeito, lido em conjunto com as demais subescalas do domínio; não caracteriza perigo isoladamente. ", ": indicador de efeito, que reflete como os trabalhadores avaliam o trabalho de forma geral (perspectivas, condições físicas, uso das capacidades). É lido junto com as demais subescalas do domínio e não caracteriza perigo por si. "]);
   out.push([": fator protetor em faixa desfavorável. Na observação, investigaram-se monotonia (OT-04), controle sobre o trabalho (OT-06) e reconhecimento (OT-10): ", ": fator de proteção em faixa menos favorável. O resultado foi lido junto com o que se observou em campo, verificando monotonia (OT-04), controle sobre o trabalho (OT-06) e reconhecimento (OT-10): "]);
+  TRECHOS_TRAVESSAO.forEach(p => out.push(p));
   return out;
 }
 const TRECHOS_ANTIGOS = trechosAntigos();
@@ -860,7 +863,7 @@ function pendencias(a){
   DOMINIOS.forEach(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq?.dominios?.[d.id]||{};
     if (!r.faixa) p[3].push(`${d.nome}: sem resultado`); if (!dd.obs?.trim()) p[3].push(`${d.nome}: sem observação em campo`); if (!dd.concl) p[3].push(`${d.nome}: sem conclusão`);
     if (/\[[^\]]*\]/.test(dd.obs||"")) p[3].push(`${d.nome}: complete os trechos entre colchetes da observação`);
-    if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && [d.padrao, DOM_PADRAO_V1[d.id]].includes((dd.obs||"").trim())) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
+    if ([2,3,4].some(i => dd.concl === CONCLUSOES[i]) && [d.padrao, DOM_PADRAO_V1[d.id], TRECHOS_TRAVESSAO.reduce((o, [v, nv]) => o.split(nv).join(v), d.padrao)].includes((dd.obs||"").trim())) p[3].push(`${d.nome}: a observação diz “sem achado relevante”, mas a conclusão é ${dd.concl.split(" –")[0]}`);
     const dec = dd.dec || {}, lanc = new Set((a.perigos||[]).map(h => h.codigo));
     Object.entries(dec).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (!s || !s.tax || s.natureza === "efeito" || s.natureza === "protetor") return;
       if (decisaoExigePerigo(s, v) && !lanc.has(s.tax)) p[4].push(`${s.nome}: ${v === "melh" || v === "conf" ? "a deficiência foi confirmada" : "a exigência está presente"} (etapa 3) — lançar o perigo ${s.tax}`);
@@ -1331,7 +1334,7 @@ function st8(){
      <label class="f"><span>Interpretação da AEP <em>*</em></span><select data-b="conclusao.interpretacao" data-rr="1"><option value="" ${a.conclusao.interpretacao?"":"selected"}>Escolha…</option>${INTERPRETACOES.map(x => `<option ${a.conclusao.interpretacao===x?"selected":""}>${esc(x)}</option>`).join("")}</select>
        <span class="hint">Escolha manual do analista.</span></label>
    </div></div>
-   <div class="panel"><div class="panel-h"><b>AET acionada?</b><div class="seg" role="radiogroup" aria-label="Decisão sobre AET">${opt("nao","Não — AEP suficiente")}${opt("sim","Sim — AET acionada")}${opt("analise","Em análise")}</div></div>
+   <div class="panel"><div class="panel-h"><b>AET acionada?</b><div class="seg" role="radiogroup" aria-label="Decisão sobre AET">${opt("nao","Não, AEP suficiente")}${opt("sim","Sim, AET acionada")}${opt("analise","Em análise")}</div></div>
     <div class="panel-b stack">
       <fieldset style="border:0;padding:0;margin:0" class="stack tight"><legend class="small" style="font-weight:600;color:var(--ink-2);margin-bottom:6px">Gatilhos da NR-17, item 17.3.2</legend>
         ${GATILHOS.map(([k,t]) => `<label class="row small" style="gap:8px;align-items:flex-start;cursor:pointer"><input type="checkbox" data-gat="${k}" ${(a.aet.gatilhos||[]).includes(k)?"checked":""} style="margin-top:3px"><span><b>${k})</b> ${esc(t)}</span></label>`).join("")}</fieldset>
@@ -1520,7 +1523,7 @@ function docHTML(a, cfg, fotos, opt={}){
     const subs = [...r.altas, ...r.inter].map(x => `<span class="${x.f==="ris"?"alta":""}">${esc(x.s.nome)} ${num2(x.m)}${x.f==="ris"?" (alta)":""}</span>`).join("<br>");
     return `<tr><td class="b">${esc(d.nome)}</td><td class="c">${r.auto?`${num2(r.nota)}<br>`:""}${r.faixa?esc(FAIXAS[r.faixa]):"—"}${subs?`<div class="small" style="text-align:left;margin-top:3px">${subs}</div>`:""}</td><td>${escBr(dd.obs||"")}</td><td class="c">${esc(dd.concl||"—")}</td></tr>`; }).join("");
   const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo], its = itensDoPerigo(a, h);
-    return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b> — ${esc(t?t.nome:"")}</td>
+    return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b>: ${esc(t?t.nome:"")}</td>
       <td>${escBr(h.fonte||"")}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
   /* Resumo por categoria da TAXONOMIA (coluna B da planilha), na ordem da aba */
   const catsTax = [...new Set(TAX.map(t => t.cat))];
@@ -1528,7 +1531,7 @@ function docHTML(a, cfg, fotos, opt={}){
     return `<tr><td>${esc(cat)}</td><td class="c">${hs.length ? `${hs.length} <span class="small">(${[...new Set(hs.map(h => h.codigo))].map(esc).join(", ")})</span>` : "—"}</td></tr>`; }).join("");
   const fotosT = []; for (let i=0;i<fotos.length;i+=2){ fotosT.push(`<tr>${[fotos[i],fotos[i+1]].map((f,k) => f?`<td><div class="cap">${i+k+1} – ${esc(f.titulo||"")}</div><img src="${f.src}" alt=""></td>`:"<td></td>").join("")}</tr>`); }
   const recs = String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  const dec = {nao:"Não — AEP suficiente",sim:"Sim — AET acionada",analise:"Em análise"}[a.aet?.decisao] || "—";
+  const dec = {nao:"Não, AEP suficiente",sim:"Sim, AET acionada",analise:"Em análise"}[a.aet?.decisao] || "—";
   const gat = (a.aet?.gatilhos||[]).map(k => GATILHOS.find(g=>g[0]===k)).filter(Boolean);
   const corpo = `
   <h2>Objetivo e metodologia</h2><p>${esc(TXT_OBJETIVO)}</p><p>${esc(TXT_METODOLOGIA)}</p>
@@ -1548,7 +1551,7 @@ function docHTML(a, cfg, fotos, opt={}){
   <table class="t"><thead><tr><th style="width:34%">Perigo / fator de risco</th><th>Fonte geradora</th></tr></thead><tbody>
   ${hz || `<tr><td colspan="2"><b>Nenhum perigo identificado.</b> ${escBr(a.semPerigoJust||"")}</td></tr>`}</tbody></table>
   ${(() => { const nl = PERIGOS_ADM_ESPERADOS.filter(c => a.checklistAdm === "sim" && !(a.perigos||[]).some(h => h.codigo === c) && String(a.naoLancados?.[c]||"").trim());
-    return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b> — ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
+    return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b>: ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
   <h3>Perigos por categoria</h3>
   <table class="t"><thead><tr><th>Categoria (aba TAXONOMIA)</th><th class="c" style="width:150px">Perigos</th></tr></thead><tbody>${porCat}</tbody></table>
   <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
