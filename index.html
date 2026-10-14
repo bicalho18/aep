@@ -261,6 +261,7 @@ table.list tr:last-child td{border-bottom:0}
     <nav class="nav" aria-label="Seções">
       <button type="button" data-go="home" id="nav-home">AEPs</button>
       <button type="button" data-go="painel" id="nav-painel">Painel</button>
+      <button type="button" data-go="gerencia" id="nav-gerencia">Gerências</button>
       <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
       <button type="button" data-go="config" id="nav-config">Unidade</button>
     </nav>
@@ -997,8 +998,8 @@ function irEtapa(n){ S.step = n; S.editHz = null; S.confirm = null; renderRail()
    RENDERIZAÇÃO GERAL
    ========================================================================= */
 function render(){
-  const ativo = S.view === "aep" || S.view === "doc" || S.view === "gerencia" ? "home" : S.view;
-  ["home","painel","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
+  const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view;
+  ["home","painel","gerencia","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
   const app = $("#app");
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
@@ -1044,7 +1045,7 @@ function atualizarHome(){
   const tb = $("#tbody-aeps"), ct = $("#contagem");
   if (!tb || !ct) { render(); return; }
   const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
-  atualizarSel(lista); const pg = document.querySelector('[data-act="painelGer"]'); if (pg) pg.textContent = `Painel da gerência (${lista.length})`;
+  atualizarSel(lista); 
   const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
 }
 function vHome(){
@@ -1065,7 +1066,7 @@ function vHome(){
     <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">— marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
-    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Painel da gerência (${lista.length})</button></span></div>
+    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Painel da gerência</button></span></div>
   <div class="panel">
     ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
@@ -1744,126 +1745,190 @@ async function gerarPDF(){
   }
 }
 /* =========================================================================
-   PAINEL DA GERÊNCIA: resumo das AEPs do filtro da página inicial (tela e PDF)
+   PAINEL DA GERÊNCIA: dashboard por setor/gerência (tela e PDF)
    Achados vêm só das AEPs concluídas ou em revisão. Sem notas do COPSOQ.
    ========================================================================= */
 const GER_CSS = `
-.ger{--g-ink:var(--ink,#232323);--g-ink2:var(--ink-2,#4F4F4F);--g-ink3:var(--ink-3,#767676);--g-rule:var(--rule,#E0DFDD);--g-surf:var(--surface,#fff);--g-surf2:var(--surface-2,#F8F8F7);--g-bar:var(--brand,#EA5B26);--g-track:var(--rule,#EDECEA);
+.ger{--g-ink:var(--ink,#232323);--g-ink2:var(--ink-2,#4F4F4F);--g-ink3:var(--ink-3,#767676);--g-rule:var(--rule,#E0DFDD);--g-surf:var(--surface,#fff);--g-surf2:var(--surface-2,#F8F8F7);
+  --g-c1:#9E3612;--g-c2:#D9622E;--g-c3:#EE9A6C;--g-track:var(--rule,#E7E5E2);--g-bar:#D9622E;--g-soft:var(--accent-soft,#FDF2EC);
   font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--g-ink);font-size:13px;line-height:1.45}
 .ger *{box-sizing:border-box}
-.ger .g-head{display:flex;align-items:center;gap:16px;border-bottom:3px solid var(--g-bar);padding-bottom:10px;margin-bottom:14px}
-.ger .g-head img{height:34px;width:auto;background:#fff;padding:2px 4px;border-radius:4px}
-.ger h1{font-size:20px;margin:0}
-.ger .g-esc{margin:2px 0 0;color:var(--g-ink2);font-size:12.5px}
-.ger h2{font-size:15px;margin:22px 0 4px}
-.ger .g-sub{margin:0 0 10px;color:var(--g-ink3);font-size:12px}
-.ger .g-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.ger .g-kpi{border:1px solid var(--g-rule);border-radius:6px;padding:10px 12px;background:var(--g-surf)}
-.ger .g-kpi b{display:block;font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
-.ger .g-kpi span{font-size:12px;color:var(--g-ink2)}
-.ger .g-prog{height:8px;border-radius:4px;background:var(--g-track);overflow:hidden;margin-top:6px}
-.ger .g-prog i{display:block;height:100%;background:var(--g-bar);border-radius:4px}
-.ger .g-item{border:1px solid var(--g-rule);border-radius:6px;padding:10px 12px;margin-bottom:8px;break-inside:avoid;background:var(--g-surf)}
-.ger .g-item-h{display:flex;gap:10px;justify-content:space-between;align-items:baseline}
-.ger .g-n{white-space:nowrap;font-weight:600;font-size:12px;color:var(--g-ink2)}
-.ger .g-item ul{margin:6px 0 0;padding-left:18px}
-.ger .g-item li{margin:2px 0;color:var(--g-ink2)}
-.ger .g-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.ger .g-bars{display:grid;gap:5px;break-inside:avoid}
-.ger .g-bar{display:grid;grid-template-columns:minmax(0,1fr) 120px 28px;gap:8px;align-items:center;font-size:12px}
+.ger .g-card{background:var(--g-surf);border:1px solid var(--g-rule);border-radius:10px;padding:16px 18px;break-inside:avoid}
+.ger .g-grid{display:grid;gap:14px;margin-bottom:14px}
+.ger .g-hero{display:flex;align-items:center;gap:18px;padding:18px 22px;border-radius:12px;background:linear-gradient(100deg,#3B3B3B 0%,#232323 100%);color:#fff;margin-bottom:14px;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-hero img{height:38px;background:#fff;padding:4px 7px;border-radius:6px}
+.ger .g-hero .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#F4A57E;font-weight:600}
+.ger .g-hero h1{margin:2px 0 0;font-size:24px;line-height:1.15;color:#fff}
+.ger .g-hero p{margin:4px 0 0;color:#D6D6D6;font-size:12.5px}
+.ger .g-hero .dt{margin-left:auto;text-align:right;font-size:12px;color:#D6D6D6}
+.ger .g-hero .dt b{display:block;color:#fff;font-size:14px}
+.ger .g-kpis{grid-template-columns:1.35fr repeat(4,1fr)}
+.ger .g-kpi{display:flex;flex-direction:column;justify-content:center}
+.ger .g-kpi .lb{font-size:11.5px;color:var(--g-ink2);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.ger .g-kpi .vl{font-size:34px;font-weight:700;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums}
+.ger .g-kpi .sb{font-size:12px;color:var(--g-ink3);margin-top:2px}
+.ger .g-ring{display:flex;align-items:center;gap:14px}
+.ger .g-ring svg{flex:none}
+.ger .g-sec{font-size:15px;font-weight:700;margin:0 0 2px}
+.ger .g-sub{margin:0 0 12px;color:var(--g-ink3);font-size:12px}
+.ger .g-stack{display:flex;height:26px;border-radius:6px;overflow:hidden;background:var(--g-track);gap:2px}
+.ger .g-stack i{display:block;height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-leg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:12.5px}
+.ger .g-leg span{display:inline-flex;align-items:center;gap:6px}
+.ger .g-leg i{width:12px;height:12px;border-radius:3px;display:inline-block;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-leg b{font-variant-numeric:tabular-nums}
+.ger .g-steps{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.ger .g-steps li{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.ger .g-steps .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--g-c2);color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-acts{grid-template-columns:1fr 1fr}
+.ger .g-act{border-left:4px solid var(--g-c2);display:flex;flex-direction:column;gap:8px}
+.ger .g-act-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ger .g-act-h b{font-size:14px;line-height:1.3}
+.ger .g-pill{flex:none;background:var(--g-soft);color:var(--accent,#9E3612);border-radius:999px;padding:2px 10px;font-weight:700;font-size:12px;white-space:nowrap}
+.ger .g-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--g-ink3);font-weight:700;margin-bottom:2px}
+.ger .g-quote{margin:0;color:var(--g-ink2);font-size:12.5px}
+.ger .g-chips{display:flex;flex-wrap:wrap;gap:4px}
+.ger .g-chip{border:1px solid var(--g-rule);border-radius:999px;padding:1px 8px;font-size:11.5px;color:var(--g-ink2);background:var(--g-surf2)}
+.ger .g-todo{margin:0;padding-left:18px;font-size:12.5px}
+.ger .g-two{grid-template-columns:1.4fr 1fr}
+.ger .g-bars{display:grid;gap:8px;break-inside:avoid}
+.ger .g-bar{display:grid;grid-template-columns:minmax(0,1fr) 34%;gap:10px;align-items:center;font-size:12.5px}
 .ger .g-bar .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ger .g-bar .tr{height:10px;background:var(--g-track);border-radius:4px;overflow:hidden}
-.ger .g-bar .tr i{display:block;height:100%;background:var(--g-bar);border-radius:4px}
-.ger .g-bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-.ger .code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px}
-.ger table.g-t{width:100%;border-collapse:collapse;font-size:12px}
-.ger .g-t th,.ger .g-t td{border-bottom:1px solid var(--g-rule);padding:5px 6px;text-align:left;vertical-align:top}
-.ger .g-t th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--g-ink3);background:var(--g-surf2)}
-.ger .g-t td.n{text-align:right;font-variant-numeric:tabular-nums}
-.ger .g-t thead{display:table-header-group}
+.ger .g-bar .tr{display:flex;align-items:center;gap:8px}
+.ger .g-bar .tr i{display:block;height:12px;background:var(--g-bar);border-radius:0 4px 4px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-bar .tr b{font-variant-numeric:tabular-nums;font-size:12.5px}
+.ger .code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;color:var(--g-c1);font-weight:600}
+.ger table.g-t{width:100%;border-collapse:collapse;font-size:12.5px}
+.ger .g-t th,.ger .g-t td{border-bottom:1px solid var(--g-rule);padding:7px 8px;text-align:left;vertical-align:middle}
+.ger .g-t th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--g-ink3);font-weight:700}
+.ger .g-t td.n,.ger .g-t th.n{text-align:right;font-variant-numeric:tabular-nums}
 .ger .g-t tr{break-inside:avoid}
-.ger .g-vazio{color:var(--g-ink3);font-style:italic;margin:4px 0}
-.ger .g-nota{margin-top:22px;border-top:1px solid var(--g-rule);padding-top:8px;font-size:11px;color:var(--g-ink3)}
-@media print{.ger .g-cols{grid-template-columns:1fr;gap:0}.ger .g-kpis{grid-template-columns:repeat(6,1fr);gap:6px}.ger .g-kpi{padding:8px}.ger .g-kpi b{font-size:20px}.ger .g-kpi span{font-size:11px}.ger .g-bar{grid-template-columns:minmax(0,1fr) 200px 28px}.ger h2{break-after:avoid}}
-@media (max-width:720px){.ger .g-cols{grid-template-columns:1fr}.ger .g-bar{grid-template-columns:minmax(0,1fr) 70px 24px}}
+.ger .g-mini{display:flex;align-items:center;gap:8px}
+.ger .g-mini .s{flex:1;display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--g-track);min-width:60px;gap:1px}
+.ger .g-mini .s i{display:block;height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ger .g-mini b{font-variant-numeric:tabular-nums;font-size:12px;min-width:34px;text-align:right}
+.ger .g-zero{color:var(--g-ink3)}
+.ger .g-vazio{color:var(--g-ink3);font-style:italic;margin:0}
+.ger details.g-card summary{cursor:pointer;font-weight:700;font-size:15px}
+.ger .g-pend{margin:10px 0 0;font-size:12px;color:var(--g-ink2);line-height:1.7}
+.ger .g-nota{margin-top:6px;font-size:11px;color:var(--g-ink3)}
+.ger .g-scroll{overflow-x:auto}
+.ger .g-mini-st{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;padding-top:12px;border-top:1px solid var(--g-rule)}
+.ger .g-mini-st b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.ger .g-mini-st span{font-size:11.5px;color:var(--g-ink3)}
+@media screen and (max-width:900px){.ger .g-kpis{grid-template-columns:1fr 1fr}.ger .g-kpis > :first-child{grid-column:1/-1}.ger .g-kpi .vl{font-size:28px}.ger .g-acts,.ger .g-two{grid-template-columns:1fr}.ger .g-hero{flex-wrap:wrap}.ger .g-hero .dt{margin-left:0;text-align:left}}
+@media print{.ger .g-sec,.ger .g-sub{break-after:avoid}.ger .g-kpi .lb{font-size:10px}.ger .g-ring svg{width:70px;height:70px}.ger{font-size:11.5px}.ger .g-card{padding:11px 13px}.ger .g-grid{gap:9px;margin-bottom:9px}.ger .g-kpi .vl{font-size:26px}.ger .g-hero{padding:13px 16px}.ger .g-hero h1{font-size:20px}.ger .g-act{gap:5px}}
 `;
 const ckTexto = n => n <= CK_N_BASE ? CHECKLIST[n-1] : CHECKLIST_ADM[n - CK_N_BASE - 1];
-const curto = (t, max) => { t = String(t||"").trim(); const i = t.indexOf(":"); if (i > 20 && i < max) t = t.slice(0, i); if (t.length <= max) return t.replace(/[.\s]+$/, ""); return t.slice(0, t.lastIndexOf(" ", max)).replace(/[,;.\s]+$/, "") + "…"; };
+const curto = (t, max, inteiro) => { t = String(t||"").trim(); const i = t.indexOf(":"); if (!inteiro && i > 20 && i < max) t = t.slice(0, i); if (t.length <= max) return t.replace(/[.\s]+$/, ""); return t.slice(0, t.lastIndexOf(" ", max)).replace(/[,;.\s]+$/, "") + "…"; };
 const REC_PADRAO = new Set(TXT_RECOMENDACOES.split("\n").map(norm));
-function dadosGerencia(ids){
-  const todas = ids.map(id => S.aeps[id]).filter(Boolean).map(completar).sort((a, b) => idNum(a) - idNum(b));
-  const st = k => todas.filter(a => (a.status||"nao_iniciada") === k).length;
+const recEspecifica = x => x && !REC_PADRAO.has(norm(x)) && !/^Corrigir a condição apontada no item/.test(x) && !/^Implementar as ações definidas no Plano de Ação/.test(x);
+const maiusc = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+const setorNome = a => (a.meta?.setor || "").trim() || "Sem setor";
+const gerencias = () => Array.from(new Set(Object.values(S.aeps).map(setorNome))).sort((a, b) => a.localeCompare(b, "pt-BR"));
+const ST_COR = { concluida: "var(--g-c1)", revisao: "var(--g-c2)", andamento: "var(--g-c3)", nao_iniciada: "var(--g-track)" };
+const ST_ORD = ["concluida", "revisao", "andamento", "nao_iniciada"];
+function dadosGerencia(setor){
+  const todas = Object.values(S.aeps).filter(a => !setor || setorNome(a) === setor).map(completar).sort((a, b) => idNum(a) - idNum(b));
+  const st = { concluida: 0, revisao: 0, andamento: 0, nao_iniciada: 0 }; todas.forEach(a => st[a.status || "nao_iniciada"]++);
   const val = todas.filter(a => a.status === "concluida" || a.status === "revisao");
-  const itens = {}, hz = {}, cat = {}, recs = {}, aet = [];
+  const itens = {}, hz = {}, cat = {}, recs = {}, aet = [], areas = {};
+  todas.forEach(a => { const k = (a.meta?.area || "").trim() || "Sem área"; const r = areas[k] = areas[k] || { nome: k, st: { concluida: 0, revisao: 0, andamento: 0, nao_iniciada: 0 }, tot: 0, ck: 0, hz: 0, cargosCk: 0 }; r.tot++; r.st[a.status || "nao_iniciada"]++; });
   val.forEach(a => {
-    ckLista(a).filter(x => x.c.r === "sim").forEach(({c, n}) => { (itens[n] = itens[n] || []).push({ a, obs: String(c.obs||"").trim() }); });
+    const sims = ckLista(a).filter(x => x.c.r === "sim"), ar = areas[(a.meta?.area || "").trim() || "Sem área"];
+    ar.ck += sims.length; ar.hz += (a.perigos||[]).length; if (sims.length) ar.cargosCk++;
+    sims.forEach(({c, n}) => { (itens[n] = itens[n] || []).push({ a, obs: String(c.obs||"").trim() }); });
     new Set((a.perigos||[]).map(h => h.codigo)).forEach(cd => { hz[cd] = (hz[cd]||0) + 1; });
     (a.perigos||[]).forEach(h => { const k = String(h.codigo||"").split("-")[0]; cat[k] = (cat[k]||0) + 1; });
-    new Set(String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(x => x && !REC_PADRAO.has(norm(x)) && !/^Corrigir a condição apontada no item/.test(x) && !/^Implementar as ações definidas no Plano de Ação/.test(x)))
-      .forEach(x => { const k = norm(x); (recs[k] = recs[k] || { t: x, n: 0 }).n++; });
+    new Set(String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(recEspecifica)).forEach(x => { const k = norm(x); (recs[k] = recs[k] || { t: x, n: 0, ids: new Set() }).n++; recs[k].ids.add(a.id); });
     if (a.aet?.decisao === "sim" || a.aet?.decisao === "analise") aet.push(a);
   });
-  return { todas, val, st: { concl: st("concluida"), rev: st("revisao"), and: st("andamento"), nao: st("nao_iniciada") },
-    itens: Object.entries(itens).map(([n, l]) => ({ n: Number(n), l })).sort((x, y) => y.l.length - x.l.length || x.n - y.n),
+  const recsL = Object.values(recs).sort((x, y) => y.n - x.n);
+  const acoes = Object.entries(itens).map(([n, l]) => { n = Number(n); const ids = new Set(l.map(x => x.a.id));
+      return { n, l, obs: [...new Set(l.map(x => x.obs).filter(Boolean))].slice(0, 2), caminhos: recsL.filter(r => [...r.ids].some(id => ids.has(id))).slice(0, 3).map(r => r.t) }; })
+    .sort((x, y) => y.l.length - x.l.length || x.n - y.n);
+  return { todas, val, st, acoes, recs: recsL.slice(0, 8), aet,
     hz: Object.entries(hz).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])),
-    cat: Object.entries(CATEG).map(([k, nome]) => [nome, cat[k]||0]).filter(x => x[1]),
-    recs: Object.values(recs).sort((x, y) => y.n - x.n).slice(0, 12), aet };
+    cat: Object.entries(CATEG).map(([k, nome]) => [nome, cat[k]||0]),
+    areas: Object.values(areas).sort((x, y) => y.tot - x.tot || x.nome.localeCompare(y.nome)),
+    cargosCk: new Set(Object.values(itens).flatMap(l => l.map(x => x.a.id))).size };
 }
-function gerHTML(ids, opt = {}){
-  const D = dadosGerencia(ids), f = S.gerFiltro || {}, tot = D.todas.length, nVal = D.val.length;
-  const escopo = [f.setor ? esc(f.setor) : "Todas as gerências", f.status?.length ? "situação: " + f.status.map(k => STATUS[k]).join(", ") : "", f.busca ? `busca “${esc(f.busca)}”` : ""].filter(Boolean).join(" · ");
-  const barras = (l, max) => `<div class="g-bars">${l.map(([rot, v, tit]) => `<div class="g-bar" title="${esc(tit || "")}"><span class="t">${rot}</span><span class="tr"><i style="width:${max ? Math.max(3, v / max * 100) : 0}%"></i></span><span class="v">${v}</span></div>`).join("")}</div>`;
-  const totItens = D.itens.reduce((s, x) => s + x.l.length, 0), cargosItens = new Set(D.itens.flatMap(x => x.l.map(y => y.a.id))).size, totHz = D.val.reduce((s, a) => s + (a.perigos||[]).length, 0);
-  const pct = tot ? Math.round(D.st.concl / tot * 100) : 0;
-  const itensHTML = D.itens.length ? D.itens.map(({ n, l }) => `<div class="g-item"><div class="g-item-h"><span><b>Item ${n}.</b> ${esc(curto(ckTexto(n), 150))}</span><span class="g-n">${l.length} cargo${l.length > 1 ? "s" : ""}</span></div>
-      <ul>${l.slice(0, 10).map(({ a, obs }) => `<li><b>${esc(a.numero)} · ${esc(a.meta?.cargo || "")}</b>${obs ? `: ${esc(curto(obs, 200))}` : ""}</li>`).join("")}${l.length > 10 ? `<li>e mais ${l.length - 10} cargo(s)</li>` : ""}</ul></div>`).join("")
-    : `<p class="g-vazio">Nenhum item crítico registrado nas AEPs concluídas deste escopo.</p>`;
-  const hzTop = D.hz.slice(0, 12), maxHz = hzTop.length ? hzTop[0][1] : 0, maxCat = Math.max(0, ...D.cat.map(x => x[1]));
-  const cargos = D.todas.map(a => ({ a, ck: ckLista(a).filter(x => x.c.r === "sim").length, hz: (a.perigos||[]).length, ok: a.status === "concluida" || a.status === "revisao" }))
-    .sort((x, y) => (y.ok - x.ok) || (y.ck - x.ck) || idNum(x.a) - idNum(y.a));
+function gerHTML(setor, opt = {}){
+  const D = dadosGerencia(setor), tot = D.todas.length, nVal = D.val.length, pct = tot ? Math.round(nVal / tot * 100) : 0;
+  const totHz = D.val.reduce((s, a) => s + (a.perigos||[]).length, 0);
+  const rot = { concluida: "Concluídas", revisao: "Em revisão", andamento: "Em andamento", nao_iniciada: "Não iniciadas" };
+  const pctTxt = v => tot ? `${Math.round(v / tot * 100)}%` : "0%";
+  const ring = (() => { const r = 34, c = 2 * Math.PI * r, f = tot ? nVal / tot : 0;
+    return `<svg width="88" height="88" viewBox="0 0 88 88" role="img" aria-label="${pct}% dos cargos avaliados"><circle cx="44" cy="44" r="${r}" fill="none" stroke="var(--g-track)" stroke-width="10"/>${f ? `<circle cx="44" cy="44" r="${r}" fill="none" stroke="var(--g-c1)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 44 44)" style="-webkit-print-color-adjust:exact;print-color-adjust:exact"/>` : ""}<text x="44" y="50" text-anchor="middle" font-size="18" font-weight="700" fill="currentColor">${pct}%</text></svg>`; })();
+  const barras = (l, max, vazio) => l.length ? `<div class="g-bars">${l.map(([r, v, tit]) => `<div class="g-bar" title="${esc(tit||"")}"><span class="t">${r}</span><span class="tr"><i style="width:${max && v ? Math.max(4, v / max * 100) : 0}%"></i><b>${v}</b></span></div>`).join("")}</div>` : `<p class="g-vazio">${vazio}</p>`;
+  const passos = [];
+  if (D.acoes.length) passos.push(`Tratar os <b>${D.acoes.length} ponto(s) crítico(s)</b> encontrados em <b>${D.cargosCk} cargo(s)</b>, priorizando os que se repetem em mais cargos.`);
+  if (D.aet.length) passos.push(`Acompanhar a <b>AET</b> de ${D.aet.length} cargo(s): ${D.aet.map(a => esc(a.meta?.cargo||a.numero)).join(", ")}.`);
+  if (D.st.andamento + D.st.nao_iniciada) passos.push(`Liberar a equipe para a avaliação dos <b>${D.st.andamento + D.st.nao_iniciada} cargo(s)</b> que ainda faltam (${D.st.andamento} em andamento, ${D.st.nao_iniciada} não iniciado(s)).`);
+  if (D.recs.length) passos.push(`Incluir no planejamento da área as recomendações que mais se repetem (abaixo), começando por “${esc(curto(D.recs[0].t.replace(/^Oportunidade de melhoria:\s*/i, ""), 90, true))}”.`);
+  if (!passos.length) passos.push("Nenhuma ação pendente registrada nas AEPs concluídas deste escopo.");
+  const hzTop = D.hz.slice(0, 8), maxHz = hzTop.length ? hzTop[0][1] : 0, maxCat = Math.max(0, ...D.cat.map(x => x[1]));
+  const acao = x => `<div class="g-card g-act"><div class="g-act-h"><b>${esc(curto(ckTexto(x.n), 95))}</b><span class="g-pill">${x.l.length} cargo${x.l.length > 1 ? "s" : ""}</span></div>
+      ${x.obs.length ? `<div><div class="g-lbl">O que foi visto</div>${x.obs.map(o => `<p class="g-quote">${esc(curto(o, 150, true))}</p>`).join("")}</div>` : ""}
+      <div><div class="g-lbl">Onde</div><div class="g-chips">${x.l.slice(0, 5).map(y => `<span class="g-chip">${esc(y.a.meta?.cargo||y.a.numero)}</span>`).join("")}${x.l.length > 5 ? `<span class="g-chip">+${x.l.length - 5}</span>` : ""}</div></div>
+      <div><div class="g-lbl">O que a gerência pode fazer</div>${x.caminhos.length ? `<ul class="g-todo">${x.caminhos.map(c => `<li>${esc(curto(maiusc(c.replace(/^Oportunidade de melhoria:\s*/i, "")), 220, true))}</li>`).join("")}</ul>` : `<p class="g-quote">Executar a ação definida no Plano de Ação para este item nas AEPs dos cargos indicados.</p>`}</div></div>`;
+  const mini = r => `<div class="g-mini"><span class="s">${ST_ORD.map(k => r.st[k] ? `<i style="width:${r.st[k] / r.tot * 100}%;background:${ST_COR[k]}"></i>` : "").join("")}</span><b>${Math.round((r.st.concluida + r.st.revisao) / r.tot * 100)}%</b></div>`;
+  const pend = D.todas.filter(a => !(a.status === "concluida" || a.status === "revisao"));
+  const ultima = D.val.map(a => a.concluidoEm ? new Date(a.concluidoEm) : null).filter(Boolean).sort((x, y) => y - x)[0];
   return `<div class="ger">
-  <header class="g-head">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><h1>Painel de ergonomia da gerência</h1><p class="g-esc">${escopo} · ${esc(S.config?.unidade || "Mina de Serra Azul")} · emitido em ${new Date().toLocaleDateString("pt-BR")}</p></div></header>
-  <section class="g-kpis">
-    <div class="g-kpi"><b>${tot}</b><span>cargos no escopo</span></div>
-    <div class="g-kpi"><b>${D.st.concl}</b><span>AEPs concluídas (${pct}%)</span><div class="g-prog"><i style="width:${pct}%"></i></div></div>
-    <div class="g-kpi"><b>${D.st.and + D.st.rev}</b><span>em andamento ou revisão</span></div>
-    <div class="g-kpi"><b>${D.st.nao}</b><span>não iniciadas</span></div>
-    <div class="g-kpi"><b>${totItens}</b><span>itens críticos em ${cargosItens} cargo(s)</span></div>
-    <div class="g-kpi"><b>${totHz}</b><span>perigos registrados</span></div>
-  </section>
-  ${nVal < tot ? `<p class="g-sub" style="margin-top:8px">Os achados abaixo consideram as ${nVal} AEP(s) concluídas ou em revisão. As demais entram apenas na contagem de andamento.</p>` : ""}
-  <h2>Pontos críticos a resolver</h2>
-  <p class="g-sub">Itens do checklist NR-17 marcados “Sim” (desqualificação ergonômica), com o que foi observado em cada cargo.</p>
-  ${itensHTML}
-  <div class="g-cols">
-    <div><h2>Perigos mais frequentes</h2><p class="g-sub">Número de cargos com o perigo registrado.</p>${hzTop.length ? barras(hzTop.map(([cd, v]) => [`<span class="code">${esc(cd)}</span> ${esc(TAXMAP[cd]?.nome || "")}`, v, TAXMAP[cd]?.nome]), maxHz) : `<p class="g-vazio">Nenhum perigo registrado.</p>`}</div>
-    <div><h2>Perigos por categoria</h2><p class="g-sub">Total de linhas de perigo por grupo.</p>${D.cat.length ? barras(D.cat.map(([nome, v]) => [esc(nome), v, nome]), maxCat) : `<p class="g-vazio">Nenhum perigo registrado.</p>`}</div>
+  <div class="g-hero">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><div class="k">Painel de ergonomia</div><h1>${esc(setor || "Todas as gerências")}</h1><p>${esc(S.config?.unidade || "Mina de Serra Azul")} · Avaliações Ergonômicas Preliminares (NR-17)</p></div><div class="dt">Atualizado em<b>${new Date().toLocaleDateString("pt-BR")}</b></div></div>
+  <div class="g-grid g-kpis">
+    <div class="g-card g-kpi"><div class="g-ring">${ring}<div><div class="lb">Cargos avaliados</div><div class="vl">${nVal}<span style="font-size:16px;color:var(--g-ink3);font-weight:600"> de ${tot}</span></div><div class="sb">${D.st.concluida} concluída(s)${D.st.revisao ? `, ${D.st.revisao} em revisão` : ""}</div></div></div></div>
+    <div class="g-card g-kpi"><div class="lb">Em andamento</div><div class="vl">${D.st.andamento}</div><div class="sb">${pctTxt(D.st.andamento)} dos cargos</div></div>
+    <div class="g-card g-kpi"><div class="lb">Não iniciados</div><div class="vl">${D.st.nao_iniciada}</div><div class="sb">${pctTxt(D.st.nao_iniciada)} dos cargos</div></div>
+    <div class="g-card g-kpi"><div class="lb">Perigos levantados</div><div class="vl">${totHz}</div><div class="sb">${D.hz.length} tipo(s) diferente(s)</div></div>
+    <div class="g-card g-kpi"><div class="lb">Cargos com ponto crítico</div><div class="vl">${D.cargosCk}</div><div class="sb">${D.acoes.reduce((s, x) => s + x.l.length, 0)} ocorrência(s) no checklist</div></div>
   </div>
-  <h2>Recomendações mais frequentes</h2>
-  <p class="g-sub">Recomendações e oportunidades de melhoria registradas nas AEPs, além das linhas de gestão comuns a todas.</p>
-  ${D.recs.length ? `<table class="g-t"><thead><tr><th>Recomendação</th><th style="width:70px;text-align:right">Cargos</th></tr></thead><tbody>${D.recs.map(r => `<tr><td>${esc(r.t)}</td><td class="n">${r.n}</td></tr>`).join("")}</tbody></table>` : `<p class="g-vazio">Nenhuma recomendação específica registrada.</p>`}
-  ${D.aet.length ? `<h2>AET acionada ou em análise</h2><table class="g-t"><thead><tr><th>AEP</th><th>Cargo</th><th>Decisão</th></tr></thead><tbody>${D.aet.map(a => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${a.aet.decisao === "sim" ? "AET acionada" : "Em análise"}</td></tr>`).join("")}</tbody></table>` : ""}
-  <h2>Cargos avaliados</h2>
-  ${cargos.some(x => x.ok) ? `<table class="g-t"><thead><tr><th>AEP</th><th>Cargo</th><th>Área</th><th>Situação</th><th style="text-align:right">Itens críticos</th><th style="text-align:right">Perigos</th></tr></thead><tbody>
-    ${cargos.filter(x => x.ok).map(({ a, ck, hz }) => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${esc(a.meta?.area||"")}</td><td>${STATUS[a.status]}</td><td class="n">${ck}</td><td class="n">${hz}</td></tr>`).join("")}</tbody></table>` : `<p class="g-vazio">Nenhuma AEP concluída neste escopo.</p>`}
-  ${cargos.some(x => !x.ok) ? `<h2>Ainda em avaliação</h2><p class="g-sub">${D.st.and} em andamento e ${D.st.nao} não iniciada(s).</p><p style="margin:0;font-size:12px;color:var(--g-ink2)">${cargos.filter(x => !x.ok).map(({ a }) => `${esc(a.numero)} ${esc(a.meta?.cargo||"")}`).join(" · ")}</p>` : ""}
-  <p class="g-nota">Resumo das Avaliações Ergonômicas Preliminares (NR-17) dos cargos do escopo. A graduação do risco e o plano de ação constam do inventário de riscos do PGR. Fatores psicossociais aparecem apenas como perigos registrados; os resultados do questionário são tratados de forma coletiva e confidencial pelo SESMT e não são apresentados por gerência.</p>
+  <div class="g-grid g-two">
+    <div class="g-card"><p class="g-sec">Andamento das avaliações</p><p class="g-sub">Situação das AEPs dos ${tot} cargos da gerência.</p>
+      <div class="g-stack" role="img" aria-label="${ST_ORD.map(k => `${rot[k]}: ${D.st[k]}`).join(", ")}">${ST_ORD.filter(k => D.st[k]).map(k => `<i style="width:${D.st[k] / Math.max(1, tot) * 100}%;background:${ST_COR[k]}" title="${rot[k]}: ${D.st[k]}"></i>`).join("")}</div>
+      <div class="g-leg">${ST_ORD.map(k => `<span><i style="background:${ST_COR[k]}${k === "nao_iniciada" ? ";border:1px solid var(--g-rule)" : ""}"></i>${rot[k]} <b>${D.st[k]}</b></span>`).join("")}</div>
+      <div class="g-mini-st"><div><b>${tot - nVal}</b><span>cargos ainda a avaliar</span></div><div><b>${ultima ? ultima.toLocaleDateString("pt-BR") : "—"}</b><span>última AEP concluída</span></div><div><b>${D.areas.filter(r => r.st.concluida + r.st.revisao === r.tot).length} de ${D.areas.length}</b><span>áreas com todos os cargos avaliados</span></div></div></div>
+    <div class="g-card"><p class="g-sec">Próximos passos</p><p class="g-sub">O que a gerência pode encaminhar agora.</p><ol class="g-steps">${passos.map((p, i) => `<li><span class="n">${i + 1}</span><span>${p}</span></li>`).join("")}</ol></div>
+  </div>
+  ${nVal < tot && nVal ? `<p class="g-sub" style="margin:-4px 0 10px">Os achados abaixo vêm das ${nVal} AEP(s) concluídas ou em revisão.</p>` : ""}
+  <p class="g-sec" style="margin:4px 0 2px">Pontos críticos e o que fazer</p>
+  <p class="g-sub">Itens do checklist NR-17 marcados como críticos, onde aparecem e as recomendações registradas nas AEPs desses cargos.</p>
+  ${D.acoes.length ? `<div class="g-grid g-acts">${D.acoes.slice(0, 6).map(acao).join("")}</div>${D.acoes.length > 6 ? `<p class="g-sub">E mais ${D.acoes.length - 6} item(ns) crítico(s), listados nas AEPs.</p>` : ""}` : `<div class="g-card" style="margin-bottom:14px"><p class="g-vazio">Nenhum item crítico registrado nas AEPs concluídas desta gerência.</p></div>`}
+  <div class="g-grid g-two">
+    <div class="g-card"><p class="g-sec">Perigos levantados</p><p class="g-sub">Número de cargos em que cada perigo foi registrado.</p>${barras(hzTop.map(([cd, v]) => [`<span class="code">${esc(cd)}</span> ${esc(TAXMAP[cd]?.nome || "")}`, v, TAXMAP[cd]?.nome]), maxHz, "Nenhum perigo registrado nas AEPs concluídas.")}</div>
+    <div class="g-card"><p class="g-sec">Por tipo de perigo</p><p class="g-sub">Linhas de perigo por grupo da taxonomia.</p>${barras(D.cat.map(([nome, v]) => [esc(nome), v, nome]), maxCat, "Nenhum perigo registrado.")}</div>
+  </div>
+  <div class="g-card" style="margin-bottom:14px"><p class="g-sec">Situação por área</p><p class="g-sub">Avaliações concluídas e achados em cada área da gerência.</p>
+    <div class="g-scroll"><table class="g-t"><thead><tr><th>Área</th><th class="n">Cargos</th><th style="width:30%">Avaliados</th><th class="n">Com ponto crítico</th><th class="n">Perigos</th></tr></thead><tbody>
+    ${D.areas.map(r => `<tr><td>${esc(r.nome)}</td><td class="n">${r.tot}</td><td>${mini(r)}</td><td class="n${r.cargosCk ? "" : " g-zero"}">${r.cargosCk}</td><td class="n${r.hz ? "" : " g-zero"}">${r.hz}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="g-grid ${D.aet.length ? "g-two" : ""}">
+    <div class="g-card"><p class="g-sec">Recomendações que mais se repetem</p><p class="g-sub">Registradas nas AEPs, fora as linhas de gestão comuns a todas.</p>
+      ${D.recs.length ? `<table class="g-t"><tbody>${D.recs.map(r => `<tr><td>${esc(curto(r.t, 260, true))}</td><td class="n" style="width:70px"><b>${r.n}</b> cargo${r.n > 1 ? "s" : ""}</td></tr>`).join("")}</tbody></table>` : `<p class="g-vazio">Nenhuma recomendação específica registrada ainda.</p>`}</div>
+    ${D.aet.length ? `<div class="g-card"><p class="g-sec">Análise Ergonômica do Trabalho</p><p class="g-sub">Cargos com AET acionada ou em análise.</p><table class="g-t"><tbody>${D.aet.map(a => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${a.aet.decisao === "sim" ? "Acionada" : "Em análise"}</td></tr>`).join("")}</tbody></table></div>` : ""}
+  </div>
+  <details class="g-card" ${opt.print ? "open" : ""}><summary>Cargos da gerência (${tot})</summary>
+    ${D.val.length ? `<table class="g-t" style="margin-top:10px"><thead><tr><th>AEP</th><th>Cargo</th><th>Área</th><th>Situação</th><th class="n">Itens críticos</th><th class="n">Perigos</th></tr></thead><tbody>
+      ${D.val.map(a => ({ a, ck: ckLista(a).filter(x => x.c.r === "sim").length })).sort((x, y) => y.ck - x.ck || idNum(x.a) - idNum(y.a)).map(({ a, ck }) => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${esc(a.meta?.area||"")}</td><td>${STATUS[a.status]}</td><td class="n${ck ? "" : " g-zero"}">${ck}</td><td class="n">${(a.perigos||[]).length}</td></tr>`).join("")}</tbody></table>` : ""}
+    ${pend.length ? `<p class="g-pend"><b>Ainda em avaliação (${pend.length}):</b> ${pend.map(a => `${esc(a.numero)} ${esc(a.meta?.cargo||"")}`).join(" · ")}</p>` : ""}
+  </details>
+  <p class="g-nota">A graduação do risco e o plano de ação completo constam do inventário de riscos do PGR. Fatores psicossociais aparecem apenas como perigos registrados; os resultados do questionário são tratados de forma coletiva e confidencial pelo SESMT e não são apresentados por gerência.</p>
 </div>`;
 }
 function vGerencia(){
-  const ids = (S.gerIds || []).filter(id => S.aeps[id]);
-  return `<div class="aeptitle"><button class="btn ghost" type="button" data-go="home">← AEPs</button><h1>Painel da gerência</h1>
-    <span style="margin-left:auto" class="row"><button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></span></div>
-  <p class="small muted" style="margin:0 0 12px">Montado a partir do filtro da página inicial (${ids.length} AEP(s)). Para outra gerência, volte, troque o filtro de setor e abra o painel de novo.</p>
-  <style>${GER_CSS}</style><div class="panel"><div class="panel-b">${gerHTML(ids, { logo: "logo.png" })}</div></div>`;
+  const lista = gerencias(); if (S.gerSetor == null) S.gerSetor = S.fSetor || "";
+  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px"><h1 style="margin-right:auto">Painel da gerência</h1>
+    <label class="row" style="gap:8px;font-size:13px;font-weight:600;max-width:100%;flex-wrap:wrap">Gerência <select id="f-ger" data-ger="1" style="width:auto;max-width:100%;min-width:0"><option value="">Todas as gerências</option>${lista.map(s => `<option ${S.gerSetor === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
+    <button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></div>
+  <style>${GER_CSS}</style><div id="gerbox">${gerHTML(S.gerSetor, { logo: "logo.png" })}</div>`;
 }
 async function gerarPDFGerencia(){
   const btn = $("#btnPDFger"); if (!btn || btn.disabled) return; btn.disabled = true; btn.textContent = "Preparando…";
   try {
-    const ids = (S.gerIds || []).filter(id => S.aeps[id]), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
-    const nome = nomeArquivo(`Painel de ergonomia - ${S.gerFiltro?.setor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
-    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono&display=swap">
-<style>@page{size:A4;margin:12mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}${GER_CSS}</style></head><body>${gerHTML(ids, { logo })}</body></html>`, nome);
+    const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
+    const nome = nomeArquivo(`Painel de ergonomia - ${S.gerSetor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@600&display=swap">
+<style>@page{size:A4 landscape;margin:9mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}${GER_CSS}</style></head><body>${gerHTML(S.gerSetor, { logo, print: true })}</body></html>`, nome);
   } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
   finally { btn.disabled = false; btn.textContent = "Salvar em PDF"; }
 }
@@ -2012,6 +2077,7 @@ function onAreaChange(b, el){
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
+  if (el.dataset.ger){ if (!isChange) return; S.gerSetor = el.value; const g = $("#gerbox"); if (g) g.innerHTML = gerHTML(S.gerSetor, { logo: "logo.png" }); return; }
   if (el.dataset.sel || el.dataset.selall){ if (!isChange) return;
     if (el.dataset.selall) listaFiltrada().forEach(a => el.checked ? S.sel.add(a.id) : S.sel.delete(a.id));
     else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
@@ -2087,7 +2153,7 @@ document.addEventListener("click", async e => {
     case "nova": criarAEP(); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "painelGer": ir("gerencia", { gerIds: listaFiltrada().map(a => a.id), gerFiltro: { setor: S.fSetor, status: [...S.fStatus], busca: S.busca } }); break;
+    case "painelGer": ir("gerencia", { gerSetor: S.fSetor || "" }); break;
     case "pdfGerencia": gerarPDFGerencia(); break;
     case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
