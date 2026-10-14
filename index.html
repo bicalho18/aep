@@ -395,6 +395,53 @@ const CONCL_ANTIGAS = {
 /* Textos fixos do documento */
 const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
 const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
+/* Modelos de recomendação por tema. "quando": perigos que tornam o tema relevante para a AEP (aparece primeiro e aberto). */
+const REC_MODELOS = [
+  { id:"adm", nome:"Posto informatizado", quando:["BIO-01","BIO-02","BIO-06","EQ-01","EQ-04"], linhas:[
+    "Orientar os trabalhadores sobre o ajuste do posto informatizado: altura da cadeira, apoio lombar, altura e distância do monitor e posição de teclado e mouse.",
+    "Disponibilizar suporte para notebook, com teclado e mouse independentes, quando o notebook for o equipamento principal de trabalho.",
+    "Incentivar a alternância de postura ao longo da jornada, intercalando tarefas que permitam levantar e se deslocar.",
+    "Verificar periodicamente o ajuste e a conservação das cadeiras, com reposição quando houver desgaste."] },
+  { id:"ope", nome:"Operação de equipamentos móveis", quando:["BIO-07","EQ-03","AMB-04"], linhas:[
+    "Manter a inspeção pré-uso do assento, das regulagens e da climatização da cabine, com registro e encaminhamento das falhas à manutenção.",
+    "Orientar os operadores sobre o ajuste do assento e dos comandos no início do turno e na troca de operador.",
+    "Manter a conservação das vias e praças de trabalho para reduzir a vibração transmitida ao operador.",
+    "Considerar critérios ergonômicos (assento com suspensão, regulagens, acesso à cabine e visibilidade) na especificação de compra e na substituição de equipamentos.",
+    "Manter degraus, corrimãos e pontos de apoio do acesso à cabine em condição de uso."] },
+  { id:"man", nome:"Manutenção e oficina", quando:["BIO-03","BIO-04","BIO-05","EQ-05","EQ-02"], linhas:[
+    "Priorizar dispositivos auxiliares de movimentação e içamento (talhas, carrinhos e mesas elevatórias) para peças e componentes pesados.",
+    "Avaliar a altura das bancadas e o uso de apoios ou assentos em serviços prolongados realizados em posição baixa.",
+    "Planejar a janela de manutenção considerando o efetivo e o tempo necessários para a execução do serviço.",
+    "Manter as ferramentas em bom estado e considerar, na reposição, modelos com pega adequada, menor peso ou menor vibração.",
+    "Revezar entre os integrantes da equipe as tarefas com maior exigência de força ou de postura."] },
+  { id:"log", nome:"Almoxarifado e movimentação de materiais", quando:["BIO-04","EQ-02"], linhas:[
+    "Organizar o armazenamento mantendo os itens pesados e de uso frequente entre a altura dos joelhos e a dos ombros.",
+    "Orientar sobre o manuseio de cargas e sobre pedir ajuda ou equipamento para volumes pesados ou volumosos.",
+    "Disponibilizar carrinhos, paleteiras ou outros meios auxiliares adequados ao piso e ao volume transportado."] },
+  { id:"ctl", nome:"Sala de controle e despacho", quando:["EQ-06"], linhas:[
+    "Revisar a disposição das telas e dos rádios para manter as informações principais no campo visual confortável.",
+    "Avaliar com os operadores a priorização dos alarmes do sistema, reduzindo alertas repetidos ou sem ação associada.",
+    "Organizar a substituição do operador nas pausas, de modo a permitir a saída do posto."] },
+  { id:"lab", nome:"Laboratório", quando:[], linhas:[
+    "Avaliar a altura das bancadas e o uso de banquetas com apoio para os pés nas tarefas prolongadas.",
+    "Organizar o revezamento entre as etapas de preparação de amostras para reduzir a repetição de movimentos.",
+    "Avaliar meios auxiliares para o transporte de amostras entre as áreas do laboratório."] },
+  { id:"amb", nome:"Conforto ambiental", quando:["AMB-01","AMB-02","AMB-03","AMB-04"], linhas:[
+    "Avaliar a iluminação do posto e o posicionamento das telas em relação a janelas e luminárias, com uso de persianas quando necessário.",
+    "Manter a manutenção periódica dos sistemas de climatização dos ambientes e das cabines.",
+    "Avaliar medidas para reduzir o ruído de fundo em ambientes que exigem concentração ou comunicação."] },
+  { id:"org", nome:"Organização do trabalho", quando:["OT-01","OT-04","OT-05","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-12"], linhas:[
+    "Acompanhar a distribuição da demanda frente ao efetivo disponível, ajustando as prioridades nos períodos de pico.",
+    "Manter o DDS como espaço de alinhamento das tarefas e de escuta das dificuldades da equipe.",
+    "Comunicar com antecedência as mudanças que afetam a rotina, a escala ou o posto de trabalho.",
+    "Assegurar capacitação prévia sempre que forem introduzidos equipamentos, sistemas ou procedimentos novos.",
+    "Reforçar a divulgação do Programa Equilibrium e do canal de denúncia aos trabalhadores.",
+    "Manter a devolutiva da pesquisa de clima às equipes e acompanhar as ações dela decorrentes."] },
+  { id:"turno", nome:"Turnos e jornada", quando:["OT-02","OT-03","OT-13"], linhas:[
+    "Manter as escalas divulgadas com antecedência e o respeito aos intervalos e folgas previstos no acordo coletivo.",
+    "Orientar os trabalhadores de turno sobre sono, alimentação e hidratação, em especial nas jornadas noturnas.",
+    "Acompanhar a ocorrência de prorrogações de jornada e de convocações fora do horário."] }
+];
 const TXT_RECOMENDACOES = [
   "Manter as condições ergonômicas observadas e as medidas de prevenção existentes, assegurando sua continuidade e eficácia.",
   "Manter o acompanhamento das condições de trabalho e da eficácia das medidas existentes, incluindo inspeções, observações e participação dos trabalhadores, conforme aplicável.",
@@ -778,7 +825,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  busca:"", fStatus:[], fSetor:"", exportAberto:false, expEscopo:"concluidas", expGHE:"",
+  busca:"", fStatus:[], fSetor:"", sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
 function proximoNumero(){ return Math.max(0, ...Object.values(S.aeps).map(idNum).filter(n => n < 1000)) + 1; }
@@ -936,7 +983,7 @@ async function ir(view, extra){
   if (S.view === "copsoq" && S.editArea) await salvarArea();
   if (S.view === "config") await salvarConfig();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -950,11 +997,12 @@ function irEtapa(n){ S.step = n; S.editHz = null; S.confirm = null; renderRail()
    RENDERIZAÇÃO GERAL
    ========================================================================= */
 function render(){
-  const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view;
+  const ativo = S.view === "aep" || S.view === "doc" || S.view === "gerencia" ? "home" : S.view;
   ["home","painel","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
   const app = $("#app");
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
+  else if (S.view === "gerencia") app.innerHTML = vGerencia();
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
   else if (S.view === "copsoq") app.innerHTML = S.editArea ? vArea() : vAreas();
@@ -974,6 +1022,7 @@ function linhasHome(lista){
   return lista.map(a => {
     const st = a.status || "nao_iniciada", altas = altasDe(setorPorNome(a.meta?.setorCopsoq)).length, al = alertaAET(a);
     return `<tr class="click" data-open="${esc(a.id)}" tabindex="0">
+      <td data-selcell style="width:34px;padding:0"><label style="display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer"><input type="checkbox" data-sel="${esc(a.id)}" ${S.sel.has(a.id) ? "checked" : ""} aria-label="Selecionar ${esc(a.numero)}"></label></td>
       <td class="mono">${esc(a.numero)}</td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
@@ -982,12 +1031,20 @@ function linhasHome(lista){
       <td class="num">${ckLista(a).filter(x => x.c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
 }
+/* Seleção de várias AEPs na lista (para salvar um PDF só) */
+const vSelBar = () => S.sel.size ? `<span class="small"><b>${S.sel.size}</b> selecionada(s)</span><button class="btn small primary" type="button" data-act="pdfVarias" id="btnPDFsel">Salvar as selecionadas em PDF</button><button class="btn small ghost" type="button" data-act="limparSel">Limpar seleção</button>` : "";
+function atualizarSel(lista){
+  lista = lista || listaFiltrada();
+  const b = $("#selbar"); if (b) b.innerHTML = vSelBar();
+  const all = $("#selAll"); if (all) { const n = lista.filter(a => S.sel.has(a.id)).length; all.checked = !!lista.length && n === lista.length; all.indeterminate = n > 0 && n < lista.length; }
+}
 /* Atualiza só a tabela e a contagem, sem redesenhar os filtros (não perde o foco da busca) */
 function atualizarHome(){
   if (S.view !== "home") return;
   const tb = $("#tbody-aeps"), ct = $("#contagem");
   if (!tb || !ct) { render(); return; }
   const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
+  atualizarSel(lista); const pg = document.querySelector('[data-act="painelGer"]'); if (pg) pg.textContent = `Painel da gerência (${lista.length})`;
   const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
 }
 function vHome(){
@@ -1007,9 +1064,10 @@ function vHome(){
     <label class="f span2"><span>Setor</span><select id="f-setor" data-filtro="fSetor"><option value="">Todos</option>${setores.map(s => `<option ${S.fSetor===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
     <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">— marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
-  <p class="small muted" style="margin-bottom:8px" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
+  <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
+    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Painel da gerência (${lista.length})</button></span></div>
   <div class="panel">
-    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
+    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
   </div>`;
 }
@@ -1299,30 +1357,38 @@ function vSemPerigo(a){
 }
 /* Etapa 4: complementos de fonte geradora por tipo de atividade. Clique acrescenta ao texto padrão do perigo.
    base "alt" = começa pelo texto genérico (BIO-01/BIO-02 fora do escritório). Colchetes = completar com o que se viu. */
-const TIPOS_ATV = { adm:"Administrativo", ope:"Operação de equipamento", man:"Manutenção", cam:"Campo / apoio técnico" };
+const TIPOS_ATV = { adm:"Administrativo", ctl:"Sala de controle / despacho", ope:"Operação de equipamento", man:"Manutenção", cam:"Campo / apoio técnico", lab:"Laboratório", log:"Almoxarifado / logística" };
 const SUG_FONTE = {
-  "OT-01": [["adm","Acúmulo de demandas em fechamentos de período, relatórios e prazos de [áreas ou clientes internos]."],["ope","Ritmo definido pela programação de produção e pelo ciclo de [carregamento, transporte ou britagem], com metas por turno."],["man","Picos de demanda em paradas programadas e corretivas, com pressão para liberação do equipamento."],["cam","Volume de [amostras, levantamentos ou inspeções] a cumprir dentro da janela operacional."]],
-  "OT-02": [["ope","Regime de turno de revezamento [2x2], com alternância entre jornadas diurnas e noturnas."],["man","Escala de turno com sobreaviso e convocações para corretivas fora do horário."],["adm","Prorrogações de jornada em períodos de fechamento ou de demanda extraordinária."]],
-  "OT-03": [["ope","Pausas condicionadas à dinâmica da operação (fila de carregamento, troca de turno), com saída do posto restrita a [momentos]."],["adm","Permanência contínua no posto informatizado, com pausas não programadas e dependentes da demanda."],["man","Serviços prolongados em [local ou equipamento], com interrupções limitadas pela janela de liberação."]],
-  "OT-04": [["ope","Ciclo de operação repetitivo de [carregamento, transporte ou descarga] ao longo do turno, com pouca variação de tarefas."],["adm","Lançamento e conferência de dados em sistema, com pouca variação de tarefas ao longo da jornada."]],
-  "OT-05": [["adm","Análise e conferência de dados e tomada de decisão em sistemas corporativos, com atenção contínua."],["ope","Atenção contínua ao entorno, à comunicação por rádio e aos indicadores do equipamento durante a operação."],["man","Diagnóstico de falhas e decisão sobre a liberação do equipamento, com leitura de manuais e esquemas."],["cam","Interpretação de dados técnicos e registros de campo que subsidiam decisões da operação."]],
-  "OT-06": [["ope","Sequência e ritmo das atividades definidos pela programação e pelo despacho, com pouca margem de decisão do trabalhador."]],
-  "OT-12": [["adm","Atendimento a empregados e terceiros em situações de conflito, reclamação ou notícia difícil."],["ope","Responsabilidade pela segurança própria e de terceiros na operação de equipamento de grande porte."],["cam","Atuação em atendimento a emergências e ocorrências com vítimas."]],
-  "BIO-01": [["adm","", "padrao"],["ope","Permanência sentada na cabine do equipamento durante a operação, com [trepidação] e restrição de movimentos.","alt"],["man","Serviços com flexão de tronco, agachamento ou braços acima dos ombros em [componente ou equipamento].","alt"],["cam","Permanência em pé e deslocamentos em terreno irregular durante [inspeções, levantamentos ou coletas].","alt"]],
-  "BIO-02": [["adm","", "padrao"],["ope","Acionamento contínuo de comandos (joystick, pedais, alavancas) durante a operação do equipamento.","alt"],["man","Uso repetido de ferramentas manuais para aperto, desmontagem e montagem de componentes.","alt"],["cam","Manuseio repetido de amostras, frascos ou instrumentos durante [preparação ou análise].","alt"]],
-  "BIO-03": [["man","Aplicação de força para soltar parafusos, porcas e componentes travados com ferramentas manuais."],["ope","Abertura e fechamento de portas, tampas ou acionamento de válvulas com resistência."],["cam","Transporte de equipamentos e instrumentos de campo por terreno irregular."]],
-  "BIO-04": [["man","Movimentação manual de peças e componentes de [peso] durante a manutenção."],["adm","Movimentação de caixas e materiais no recebimento e na armazenagem, com pega ao nível do piso."],["cam","Transporte manual de amostras e equipamentos de medição em campo."]],
-  "BIO-05": [["man","Acesso a componentes em espaço restrito, com alcance além da zona de conforto."],["ope","Acesso à cabine por escadas e plataformas e alcance de comandos fora da zona de conforto."]],
-  "BIO-07": [["ope","Operação de [caminhão fora de estrada, escavadeira ou carregadeira] em vias e praças com irregularidade do piso."],["man","Uso de ferramentas vibratórias, como marteletes, lixadeiras e chaves de impacto."]],
-  "EQ-01": [["adm","Cadeira ou mesa sem ajuste compatível com o usuário: [componente e condição]."],["ope","Assento da cabine com regulagens limitadas ou desgastadas: [condição]."]],
-  "EQ-02": [["adm","Disposição de monitores, teclado e documentos que exige rotação de tronco ou de pescoço."],["man","Bancada ou layout da oficina que exige deslocamentos e alcances excessivos."]],
-  "EQ-03": [["ope","Comandos e acessos do equipamento [modelo] posicionados de forma que exigem posturas inadequadas."],["man","Pontos de manutenção do equipamento de difícil acesso, sem dispositivos de apoio."]],
-  "EQ-04": [["adm","Notebook sem suporte, teclado e mouse independentes, com a tela abaixo da linha dos olhos."],["ope","Telas do sistema de despacho ou de controle com [problema observado]."]],
-  "EQ-05": [["man","Ferramenta manual com pega inadequada, peso elevado ou sem dispositivo auxiliar: [ferramenta]."]],
-  "AMB-01": [["adm","Reflexo de [janela ou luminária] na tela do monitor."],["ope","Iluminação insuficiente em [local ou turno noturno] para a tarefa."]],
-  "AMB-02": [["adm","Climatização sem regulagem adequada, com [calor, frio ou corrente de ar] no posto."],["cam","Exposição a calor ou frio em área externa, sem abrigo adequado nos intervalos."]],
-  "AMB-03": [["adm","Ruído de conversas e equipamentos em ambiente compartilhado, que interfere na concentração."],["ope","Ruído de fundo na cabine ou na sala de controle, que interfere na comunicação por rádio."]],
-  "AMB-04": [["ope","Vibração transmitida pela estrutura de [britador ou peneira] ao posto de trabalho."]]
+  "OT-01": [["adm", "Acúmulo de demandas em fechamentos de período, relatórios e prazos de [áreas ou clientes internos]."], ["ctl", "Acompanhamento simultâneo de [número] equipamentos ou frentes de lavra no sistema de despacho, com redistribuição frequente das tarefas."], ["ope", "Ritmo definido pela programação de produção e pelo ciclo de [carregamento, transporte ou britagem], com metas por turno."], ["ope", "Fila de caminhões e metas por turno que reduzem a margem para interrupções durante [carregamento ou transporte]."], ["man", "Picos de demanda em paradas programadas e corretivas, com pressão para liberação do equipamento."], ["man", "Efetivo de manutenção em [turno ou equipe] reduzido frente ao volume de ordens de serviço programadas e corretivas."], ["cam", "Volume de [amostras, levantamentos ou inspeções] a cumprir dentro da janela operacional."], ["lab", "Volume de amostras a preparar e analisar no prazo exigido pela operação, com picos em [situação]."], ["log", "Recebimento, separação e entrega de materiais com prioridade definida pelas paradas e corretivas da manutenção."]],
+  "OT-02": [["adm", "Prorrogações de jornada em períodos de fechamento ou de demanda extraordinária."], ["ctl", "Regime de turno de revezamento [escala] na sala de controle, com jornadas noturnas."], ["ope", "Regime de turno de revezamento [2x2], com alternância entre jornadas diurnas e noturnas."], ["man", "Escala de turno com sobreaviso e convocações para corretivas fora do horário."], ["cam", "Deslocamento até [frente de lavra ou área] que amplia o tempo total da jornada."], ["lab", "Regime de turno [escala] no laboratório para atender à operação contínua."]],
+  "OT-03": [["adm", "Permanência contínua no posto informatizado, com pausas não programadas e dependentes da demanda."], ["ctl", "Saída do posto na sala de controle condicionada à presença de substituto, com pausas dependentes da dinâmica da operação."], ["ope", "Pausas condicionadas à dinâmica da operação (fila de carregamento, troca de turno), com saída do posto restrita a [momentos]."], ["ope", "Refeição e pausas realizadas próximas ao equipamento, condicionadas a [liberação pelo despacho]."], ["man", "Serviços prolongados em [local ou equipamento], com interrupções limitadas pela janela de liberação."], ["lab", "Rotina contínua de preparação de amostras, com pausas dependentes do volume recebido."]],
+  "OT-04": [["adm", "Lançamento e conferência de dados em sistema, com pouca variação de tarefas ao longo da jornada."], ["ope", "Ciclo de operação repetitivo de [carregamento, transporte ou descarga] ao longo do turno, com pouca variação de tarefas."], ["ope", "Transporte em ciclo repetitivo entre [frente de lavra] e [britador ou pilha], com rota e sequência fixas."], ["lab", "Preparação de amostras em sequência repetitiva ([secagem, quarteamento e pesagem]), com pouca variação ao longo do turno."], ["log", "Separação e conferência de itens em ciclo repetitivo, com pouca variação de tarefas."]],
+  "OT-05": [["adm", "Análise e conferência de dados e tomada de decisão em sistemas corporativos, com atenção contínua."], ["ctl", "Monitoramento simultâneo de telas, alarmes e comunicação por rádio, com decisões que afetam a continuidade da operação."], ["ope", "Atenção contínua ao entorno, à comunicação por rádio e aos indicadores do equipamento durante a operação."], ["ope", "Operação próxima a [bordas de bancada, outros equipamentos ou pessoas], com atenção contínua ao entorno."], ["man", "Diagnóstico de falhas e decisão sobre a liberação do equipamento, com leitura de manuais e esquemas."], ["cam", "Interpretação de dados técnicos e registros de campo que subsidiam decisões da operação."], ["cam", "Planejamento e execução de [desmonte ou levantamento], com exigência de atenção a procedimentos e áreas de isolamento."], ["lab", "Execução de procedimentos analíticos com exigência de precisão e conferência de resultados."]],
+  "OT-06": [["adm", "Prazos e prioridades definidos por [área ou sistema], com pouca margem para organizar a sequência do próprio trabalho."], ["ctl", "Decisões operacionais condicionadas a [procedimento ou aprovação], com pouca margem de ajuste pelo operador."], ["ope", "Sequência e ritmo das atividades definidos pela programação e pelo despacho, com pouca margem de decisão do trabalhador."], ["man", "Execução de serviços com sequência e prazo definidos pela janela de liberação do equipamento."]],
+  "OT-12": [["adm", "Atendimento a empregados e terceiros em situações de conflito, reclamação ou notícia difícil."], ["adm", "Relacionamento com a comunidade do entorno em situações de reclamação ou conflito: [situação]."], ["ctl", "Coordenação da resposta a [ocorrências ou emergências] pelo rádio, com responsabilidade sobre equipes em campo."], ["ope", "Responsabilidade pela segurança própria e de terceiros na operação de equipamento de grande porte."], ["cam", "Atuação em atendimento a emergências e ocorrências com vítimas."], ["cam", "Isolamento de área e controle de acesso durante [detonações ou operações de risco], com responsabilidade sobre a segurança de terceiros."]],
+  "BIO-01": [["adm", "", "padrao"], ["ctl", "", "padrao"], ["ope", "Permanência sentada na cabine do equipamento durante a operação, com [trepidação] e restrição de movimentos.", "alt"], ["ope", "Rotação de pescoço e tronco para visualizar [ponto de carregamento, furo ou caçamba] durante a operação.", "alt"], ["man", "Serviços com flexão de tronco, agachamento ou braços acima dos ombros em [componente ou equipamento].", "alt"], ["man", "Trabalho de joelhos ou deitado sob [equipamento] em serviços de [troca de componentes ou lubrificação].", "alt"], ["man", "Permanência em pé prolongada na bancada ou na oficina durante [serviço].", "alt"], ["cam", "Permanência em pé e deslocamentos em terreno irregular durante [inspeções, levantamentos ou coletas].", "alt"], ["lab", "Permanência em pé na bancada durante a preparação de amostras, com flexão de pescoço.", "alt"], ["log", "Flexão de tronco para separar e retirar itens em prateleiras baixas ou no piso.", "alt"]],
+  "BIO-02": [["adm", "", "padrao"], ["ctl", "", "padrao"], ["ope", "Acionamento contínuo de comandos (joystick, pedais, alavancas) durante a operação do equipamento.", "alt"], ["man", "Uso repetido de ferramentas manuais para aperto, desmontagem e montagem de componentes.", "alt"], ["cam", "Manuseio repetido de amostras, frascos ou instrumentos durante [preparação ou análise].", "alt"], ["lab", "Uso repetido de [pipetas, peneiras ou instrumentos] durante a análise.", "alt"], ["log", "Leitura de códigos, digitação e manuseio repetido de itens na conferência de materiais.", "alt"]],
+  "BIO-03": [["ope", "Abertura e fechamento de portas, tampas ou acionamento de válvulas com resistência."], ["ope", "Limpeza e desobstrução de [chutes, peneiras ou transportadores] com ferramentas manuais."], ["man", "Aplicação de força para soltar parafusos, porcas e componentes travados com ferramentas manuais."], ["man", "Uso de alavancas e barras para posicionar componentes pesados durante [montagem ou troca]."], ["man", "Aperto e desaperto de conexões de [mangueiras, pneus ou rodas] de grande porte."], ["cam", "Transporte de equipamentos e instrumentos de campo por terreno irregular."], ["log", "Empurrar e puxar carrinhos ou paleteiras com carga em piso irregular."]],
+  "BIO-04": [["adm", "Movimentação de caixas e materiais no recebimento e na armazenagem, com pega ao nível do piso."], ["man", "Movimentação manual de peças e componentes de [peso] durante a manutenção."], ["man", "Movimentação de componentes sem dispositivo auxiliar de içamento em [local]."], ["cam", "Transporte manual de amostras e equipamentos de medição em campo."], ["cam", "Transporte manual de [materiais de desmonte ou acessórios de perfuração] até a malha de furos."], ["lab", "Transporte manual de sacos ou bandejas de amostras entre [recebimento e preparação]."], ["log", "Carga e descarga manual de volumes de [peso] em veículos e prateleiras."]],
+  "BIO-05": [["adm", "Posto com espaço insuficiente para as pernas sob a mesa ou com alcance excessivo aos materiais."], ["ope", "Acesso à cabine por escadas e plataformas e alcance de comandos fora da zona de conforto."], ["man", "Acesso a componentes em espaço restrito, com alcance além da zona de conforto."], ["man", "Serviços em plataformas, passarelas ou interior de [chutes, silos ou equipamentos], com espaço corporal reduzido."], ["lab", "Bancada ou capela com alcance acima da zona de conforto: [equipamento]."], ["log", "Alcance acima dos ombros ou abaixo dos joelhos para retirar itens nas prateleiras."]],
+  "BIO-07": [["ope", "Operação de [caminhão fora de estrada, escavadeira ou carregadeira] em vias e praças com irregularidade do piso."], ["ope", "Operação de [perfuratriz ou trator de esteiras] com transmissão de vibração ao assento."], ["man", "Uso de ferramentas vibratórias, como marteletes, lixadeiras e chaves de impacto."], ["man", "Uso de [lixadeira, esmerilhadeira ou martelete] em serviços de caldeiraria ou manutenção civil."], ["cam", "Deslocamento em veículo leve por vias não pavimentadas da mina durante [inspeções ou levantamentos]."]],
+  "EQ-01": [["adm", "Cadeira ou mesa sem ajuste compatível com o usuário: [componente e condição]."], ["ctl", "Cadeira da sala de controle sem ajuste adequado para uso contínuo no turno: [condição]."], ["ope", "Assento da cabine com regulagens limitadas ou desgastadas: [condição]."], ["man", "Bancada de oficina com altura inadequada para [serviço]."], ["lab", "Banqueta ou bancada de altura fixa, incompatível com a tarefa sentada ou em pé."], ["log", "Balcão de atendimento ou de conferência sem ajuste de altura."]],
+  "EQ-02": [["adm", "Disposição de monitores, teclado e documentos que exige rotação de tronco ou de pescoço."], ["ctl", "Disposição de telas e rádios na sala de controle que exige rotação de pescoço para acompanhar [sistemas]."], ["man", "Bancada ou layout da oficina que exige deslocamentos e alcances excessivos."], ["lab", "Disposição de equipamentos no laboratório que exige deslocamentos repetidos entre [etapas]."], ["log", "Itens de uso frequente armazenados fora da faixa entre joelhos e ombros."]],
+  "EQ-03": [["ope", "Comandos e acessos do equipamento [modelo] posicionados de forma que exigem posturas inadequadas."], ["ope", "Escadas de acesso à cabine com degraus altos ou corrimãos insuficientes em [equipamento]."], ["ope", "Visibilidade restrita da cabine para [ponto de trabalho], exigindo inclinação do tronco."], ["man", "Pontos de manutenção do equipamento de difícil acesso, sem dispositivos de apoio."], ["man", "Pontos de lubrificação ou inspeção do equipamento [modelo] fora da zona de alcance confortável."]],
+  "EQ-04": [["adm", "Notebook sem suporte, teclado e mouse independentes, com a tela abaixo da linha dos olhos."], ["adm", "Monitor sem regulagem de altura ou posicionado lateralmente ao usuário."], ["ctl", "Quantidade de monitores na sala de controle com telas fora do campo visual confortável."], ["ope", "Telas do sistema de despacho ou de controle com [problema observado]."], ["cam", "Uso de tablet ou notebook em campo, sem apoio adequado para digitação."]],
+  "EQ-05": [["man", "Ferramenta manual com pega inadequada, peso elevado ou sem dispositivo auxiliar: [ferramenta]."], ["man", "Uso de chave de impacto ou torquímetro de grande porte sem apoio ou dispositivo de reação."], ["cam", "Uso de [martelo geológico ou instrumento de medição] com peso ou pega inadequados por longos períodos."], ["lab", "Uso de utensílios de laboratório com pega reduzida: [utensílio]."]],
+  "AMB-01": [["adm", "Reflexo de [janela ou luminária] na tela do monitor."], ["ctl", "Ofuscamento nas telas da sala de controle pela incidência de luz natural em [horário]."], ["ope", "Iluminação insuficiente em [local ou turno noturno] para a tarefa."], ["man", "Iluminação insuficiente no interior de [equipamento ou área] durante os serviços de manutenção."], ["log", "Iluminação insuficiente entre as prateleiras do almoxarifado."]],
+  "AMB-02": [["adm", "Climatização sem regulagem adequada, com [calor, frio ou corrente de ar] no posto."], ["ope", "Climatização da cabine com funcionamento irregular em [equipamento]."], ["man", "Serviços próximos a fontes de calor, como [secadores, fornos ou motores]."], ["cam", "Exposição a calor ou frio em área externa, sem abrigo adequado nos intervalos."], ["lab", "Calor proveniente de estufas e fornos no ambiente de preparação de amostras."], ["log", "Galpão ou almoxarifado sem ventilação adequada nos períodos quentes."]],
+  "AMB-03": [["adm", "Ruído de conversas e equipamentos em ambiente compartilhado, que interfere na concentração."], ["ctl", "Rádios e alarmes sonoros simultâneos na sala de controle."], ["ope", "Ruído de fundo na cabine ou na sala de controle, que interfere na comunicação por rádio."], ["man", "Ruído de fundo na oficina que dificulta a comunicação entre a equipe."], ["lab", "Ruído de [britadores ou pulverizadores] do laboratório que interfere na concentração."]],
+  "AMB-04": [["adm", "Escritório próximo a [área industrial] com vibração perceptível no piso."], ["ctl", "Vibração transmitida ao piso da sala de controle pela operação de [equipamento próximo]."], ["ope", "Vibração transmitida pela estrutura de [britador ou peneira] ao posto de trabalho."], ["lab", "Vibração de [pulverizadores ou peneiradores] transmitida à bancada."]],
+  "OT-07": [["adm", "Demandas recebidas de mais de uma liderança ou área, com prioridades não alinhadas entre si: [situação]."], ["adm", "Atribuições exercidas na prática diferentes da descrição de cargo: [situação]."], ["ope", "Orientações divergentes entre [despacho e liderança de campo] sobre a sequência das tarefas."], ["man", "Solicitações da operação e da manutenção com prioridades divergentes para o mesmo equipamento."]],
+  "OT-08": [["adm", "Uso de [sistema ou ferramenta] implantado recentemente, sem treinamento ou suporte compatível."], ["ctl", "Mudança em [sistema de despacho ou supervisório] sem treinamento dos operadores."], ["ope", "Operação de [equipamento ou modelo] introduzido recentemente, sem treinamento prático concluído."], ["man", "Manutenção de [equipamento ou sistema] novo, sem capacitação ou documentação técnica disponível."]],
+  "OT-09": [["adm", "Relatos de pouco retorno da liderança sobre as dificuldades da atividade: [situação]."], ["ope", "Equipe distribuída em frentes distantes, com contato com a liderança restrito a [rádio ou início de turno]."], ["cam", "Trabalho isolado em [área ou frente], com contato com a liderança e os colegas restrito à comunicação por rádio."]],
+  "OT-10": [["adm", "Relatos de critérios pouco claros para [reconhecimento, promoção ou distribuição de tarefas]."], ["ope", "Relatos de percepção de tratamento desigual entre [turnos, equipes ou próprios e terceiros]."]],
+  "OT-11": [["adm", "Atendimento a público interno ou externo com relato de agressividade verbal: [situação]."], ["cam", "Contato com terceiros ou com a comunidade do entorno em [situação], com relato de hostilidade."]],
+  "OT-13": [["adm", "Contexto de mudança organizacional em [área], com comunicação ainda não estruturada aos empregados."], ["ope", "Escala de turno [escala] que coincide com finais de semana e datas familiares."], ["man", "Convocações para corretivas fora do horário, que interferem na rotina pessoal."]],
+  "BIO-06": [["adm", "Apoio do antebraço ou do punho na borda da mesa durante o uso de teclado e mouse."], ["ope", "Apoio do braço em aresta ou estrutura rígida da cabine durante a operação."], ["man", "Apoio de joelhos ou cotovelos em superfícies rígidas durante serviços sob o equipamento."], ["lab", "Apoio dos antebraços na borda da bancada durante a preparação de amostras."]],
+  "EQ-06": [["adm", "Sistema corporativo com telas e etapas pouco intuitivas para [processo]."], ["ctl", "Sistema de despacho ou supervisório com excesso de alarmes simultâneos, sem priorização por criticidade."], ["ope", "Painel do equipamento com alertas sonoros e visuais frequentes e pouco diferenciados."], ["lab", "Software de equipamento analítico com interface pouco clara: [equipamento]."]]
 };
 function opcoesTax(){ const cat = S.hzCat; return TAX.filter(x => !cat || prefixo(x.codigo) === cat); }
 /* A fonte começa pelo texto padrão da planilha (TAXONOMIA); o que vem depois é o complemento escrito na AEP */
@@ -1349,8 +1415,10 @@ function vHzEditor(){
           <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span></label>
       </div>
       ${t ? `<div class="note"><b>Campos locais a coletar:</b> ${esc(t.campos)}${!String(h.fonte||"").trim().startsWith(t.fonte) ? ` <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">${FONTES_ALTERNATIVAS[t.codigo] ? "Usar o texto de posto administrativo" : "Recolocar o texto da planilha no início"}</button>` : ""}${(FONTES_ALTERNATIVAS[t.codigo]||[]).filter(p => !String(h.fonte||"").trim().startsWith(p)).map(p => ` <button class="btn ghost small" type="button" data-act="usarFonteAlt" style="padding:0 0 0 6px">Usar o texto genérico (outros cargos)</button>`).join("")}</div>` : ""}
-      ${t && SUG_FONTE[t.codigo] ? `<div class="stack tight" style="gap:6px"><span class="tiny muted">Sugestões por tipo de atividade — clique para acrescentar à fonte (complete os colchetes com o que se viu):</span>
-        ${SUG_FONTE[t.codigo].map(([tp, x, base], i) => `<div class="row" style="gap:6px;align-items:flex-start"><span class="chip">${esc(TIPOS_ATV[tp])}</span><button class="btn small" type="button" data-act="sugFonte" data-i="${i}" style="text-align:left;white-space:normal">${esc(x || (base === "padrao" ? "Texto padrão do posto administrativo" : ""))}</button></div>`).join("")}</div>` : ""}
+      ${t && SUG_FONTE[t.codigo] ? (() => { const sg = SUG_FONTE[t.codigo], tipos = Object.keys(TIPOS_ATV).filter(k => sg.some(x => x[0] === k)), tp = tipos.includes(S.sugTipo) ? S.sugTipo : "";
+        return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Sugestões por tipo de atividade. Clique para acrescentar à fonte e complete os colchetes com o que se viu:</span>
+        <div class="row" style="gap:6px;flex-wrap:wrap">${["", ...tipos].map(k => `<button class="btn small${tp === k ? " primary" : ""}" type="button" data-act="sugTipo" data-tp="${k}">${k ? esc(TIPOS_ATV[k]) : "Todos"}</button>`).join("")}</div>
+        ${sg.map(([k, x, base], i) => tp && k !== tp ? "" : `<div class="row" style="gap:6px;align-items:flex-start"><span class="chip">${esc(TIPOS_ATV[k])}</span><button class="btn small" type="button" data-act="sugFonte" data-i="${i}" style="text-align:left;white-space:normal">${esc(x || (base === "padrao" ? "Texto padrão do posto informatizado" : ""))}</button></div>`).join("")}</div>`; })() : ""}
       ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da planilha de controle (mesma redação da aba TAXONOMIA). Complemente depois dele com o que é específico deste cargo."})}
       <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
@@ -1388,10 +1456,26 @@ function st8(){
    <div class="panel"><div class="panel-b stack">
       ${fld("conclusao.parecer","Observações complementares",{area:1,rows:5,req:1,ph:"Base da avaliação, condições observadas e condicionantes da conclusão"})}
       <div><button class="btn small" type="button" data-act="montarRecs">Montar a partir desta AEP</button> <span class="tiny muted">Acrescenta as linhas de gestão, os itens críticos do checklist, as oportunidades de melhoria da etapa 3 e, se houver ação, a linha do Plano de Ação. Não apaga o que já está escrito.</span></div>
+      ${vRecModelos(a)}
       ${fld("conclusao.recomendacoes","Recomendações e oportunidades de melhoria",{area:1,rows:8,hint:"Uma por linha. Para uma melhoria em condição não crítica, comece a linha com “Oportunidade de melhoria:”."})}
    </div></div></div>`;
 }
 
+/* Modelos de recomendação: temas ligados aos perigos da AEP aparecem primeiro e abertos */
+const temasRec = a => { const cod = new Set((a.perigos||[]).map(h => h.codigo));
+  const lig = t => t.quando.some(c => cod.has(c)) || (t.id === "adm" && a.checklistAdm === "sim");
+  return [...REC_MODELOS.filter(lig).map(t => ({ t, lig: true })), ...REC_MODELOS.filter(t => !lig(t)).map(t => ({ t, lig: false }))]; };
+function vRecModelos(a){
+  const tem = new Set(String(a.conclusao.recomendacoes||"").split(/\n+/).map(x => norm(x.trim())));
+  const bloco = ({ t, lig }) => { const faltam = t.linhas.filter(x => !tem.has(norm(x))).length;
+    return `<details ${lig || S.recAberto === t.id ? "open" : ""} data-rec-tema="${t.id}" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px">
+      <summary class="small" style="cursor:pointer"><b>${esc(t.nome)}</b>${lig ? ` <span class="chip">ligado aos perigos desta AEP</span>` : ""}</summary>
+      <div class="stack tight" style="gap:6px;margin-top:6px">${t.linhas.map((x, i) => tem.has(norm(x))
+        ? `<div class="small muted" style="padding-left:2px">✓ ${esc(x)}</div>`
+        : `<button class="btn small" type="button" data-act="recAdd" data-t="${t.id}" data-i="${i}" style="text-align:left;white-space:normal">${esc(x)}</button>`).join("")}
+      ${faltam > 1 ? `<div><button class="btn ghost small" type="button" data-act="recAddTema" data-t="${t.id}" style="padding:0">Acrescentar as ${faltam} deste tema</button></div>` : ""}</div></details>`; };
+  return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Modelos de recomendação por tema. Clique na linha para acrescentar; ajuste o texto se precisar.</span>${temasRec(a).map(bloco).join("")}</div>`;
+}
 /* ---------------- Perigos: ações ---------------- */
 function abrirHz(h){
   S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", checkItem:"", origemCopsoq:"" }, h);
@@ -1659,6 +1743,165 @@ async function gerarPDF(){
     btn.disabled = false; btn.textContent = "Salvar em PDF";
   }
 }
+/* =========================================================================
+   PAINEL DA GERÊNCIA: resumo das AEPs do filtro da página inicial (tela e PDF)
+   Achados vêm só das AEPs concluídas ou em revisão. Sem notas do COPSOQ.
+   ========================================================================= */
+const GER_CSS = `
+.ger{--g-ink:var(--ink,#232323);--g-ink2:var(--ink-2,#4F4F4F);--g-ink3:var(--ink-3,#767676);--g-rule:var(--rule,#E0DFDD);--g-surf:var(--surface,#fff);--g-surf2:var(--surface-2,#F8F8F7);--g-bar:var(--brand,#EA5B26);--g-track:var(--rule,#EDECEA);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--g-ink);font-size:13px;line-height:1.45}
+.ger *{box-sizing:border-box}
+.ger .g-head{display:flex;align-items:center;gap:16px;border-bottom:3px solid var(--g-bar);padding-bottom:10px;margin-bottom:14px}
+.ger .g-head img{height:34px;width:auto;background:#fff;padding:2px 4px;border-radius:4px}
+.ger h1{font-size:20px;margin:0}
+.ger .g-esc{margin:2px 0 0;color:var(--g-ink2);font-size:12.5px}
+.ger h2{font-size:15px;margin:22px 0 4px}
+.ger .g-sub{margin:0 0 10px;color:var(--g-ink3);font-size:12px}
+.ger .g-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.ger .g-kpi{border:1px solid var(--g-rule);border-radius:6px;padding:10px 12px;background:var(--g-surf)}
+.ger .g-kpi b{display:block;font-size:24px;line-height:1.1;font-variant-numeric:tabular-nums}
+.ger .g-kpi span{font-size:12px;color:var(--g-ink2)}
+.ger .g-prog{height:8px;border-radius:4px;background:var(--g-track);overflow:hidden;margin-top:6px}
+.ger .g-prog i{display:block;height:100%;background:var(--g-bar);border-radius:4px}
+.ger .g-item{border:1px solid var(--g-rule);border-radius:6px;padding:10px 12px;margin-bottom:8px;break-inside:avoid;background:var(--g-surf)}
+.ger .g-item-h{display:flex;gap:10px;justify-content:space-between;align-items:baseline}
+.ger .g-n{white-space:nowrap;font-weight:600;font-size:12px;color:var(--g-ink2)}
+.ger .g-item ul{margin:6px 0 0;padding-left:18px}
+.ger .g-item li{margin:2px 0;color:var(--g-ink2)}
+.ger .g-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.ger .g-bars{display:grid;gap:5px;break-inside:avoid}
+.ger .g-bar{display:grid;grid-template-columns:minmax(0,1fr) 120px 28px;gap:8px;align-items:center;font-size:12px}
+.ger .g-bar .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ger .g-bar .tr{height:10px;background:var(--g-track);border-radius:4px;overflow:hidden}
+.ger .g-bar .tr i{display:block;height:100%;background:var(--g-bar);border-radius:4px}
+.ger .g-bar .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.ger .code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px}
+.ger table.g-t{width:100%;border-collapse:collapse;font-size:12px}
+.ger .g-t th,.ger .g-t td{border-bottom:1px solid var(--g-rule);padding:5px 6px;text-align:left;vertical-align:top}
+.ger .g-t th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--g-ink3);background:var(--g-surf2)}
+.ger .g-t td.n{text-align:right;font-variant-numeric:tabular-nums}
+.ger .g-t thead{display:table-header-group}
+.ger .g-t tr{break-inside:avoid}
+.ger .g-vazio{color:var(--g-ink3);font-style:italic;margin:4px 0}
+.ger .g-nota{margin-top:22px;border-top:1px solid var(--g-rule);padding-top:8px;font-size:11px;color:var(--g-ink3)}
+@media print{.ger .g-cols{grid-template-columns:1fr;gap:0}.ger .g-kpis{grid-template-columns:repeat(6,1fr);gap:6px}.ger .g-kpi{padding:8px}.ger .g-kpi b{font-size:20px}.ger .g-kpi span{font-size:11px}.ger .g-bar{grid-template-columns:minmax(0,1fr) 200px 28px}.ger h2{break-after:avoid}}
+@media (max-width:720px){.ger .g-cols{grid-template-columns:1fr}.ger .g-bar{grid-template-columns:minmax(0,1fr) 70px 24px}}
+`;
+const ckTexto = n => n <= CK_N_BASE ? CHECKLIST[n-1] : CHECKLIST_ADM[n - CK_N_BASE - 1];
+const curto = (t, max) => { t = String(t||"").trim(); const i = t.indexOf(":"); if (i > 20 && i < max) t = t.slice(0, i); if (t.length <= max) return t.replace(/[.\s]+$/, ""); return t.slice(0, t.lastIndexOf(" ", max)).replace(/[,;.\s]+$/, "") + "…"; };
+const REC_PADRAO = new Set(TXT_RECOMENDACOES.split("\n").map(norm));
+function dadosGerencia(ids){
+  const todas = ids.map(id => S.aeps[id]).filter(Boolean).map(completar).sort((a, b) => idNum(a) - idNum(b));
+  const st = k => todas.filter(a => (a.status||"nao_iniciada") === k).length;
+  const val = todas.filter(a => a.status === "concluida" || a.status === "revisao");
+  const itens = {}, hz = {}, cat = {}, recs = {}, aet = [];
+  val.forEach(a => {
+    ckLista(a).filter(x => x.c.r === "sim").forEach(({c, n}) => { (itens[n] = itens[n] || []).push({ a, obs: String(c.obs||"").trim() }); });
+    new Set((a.perigos||[]).map(h => h.codigo)).forEach(cd => { hz[cd] = (hz[cd]||0) + 1; });
+    (a.perigos||[]).forEach(h => { const k = String(h.codigo||"").split("-")[0]; cat[k] = (cat[k]||0) + 1; });
+    new Set(String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(x => x && !REC_PADRAO.has(norm(x)) && !/^Corrigir a condição apontada no item/.test(x) && !/^Implementar as ações definidas no Plano de Ação/.test(x)))
+      .forEach(x => { const k = norm(x); (recs[k] = recs[k] || { t: x, n: 0 }).n++; });
+    if (a.aet?.decisao === "sim" || a.aet?.decisao === "analise") aet.push(a);
+  });
+  return { todas, val, st: { concl: st("concluida"), rev: st("revisao"), and: st("andamento"), nao: st("nao_iniciada") },
+    itens: Object.entries(itens).map(([n, l]) => ({ n: Number(n), l })).sort((x, y) => y.l.length - x.l.length || x.n - y.n),
+    hz: Object.entries(hz).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])),
+    cat: Object.entries(CATEG).map(([k, nome]) => [nome, cat[k]||0]).filter(x => x[1]),
+    recs: Object.values(recs).sort((x, y) => y.n - x.n).slice(0, 12), aet };
+}
+function gerHTML(ids, opt = {}){
+  const D = dadosGerencia(ids), f = S.gerFiltro || {}, tot = D.todas.length, nVal = D.val.length;
+  const escopo = [f.setor ? esc(f.setor) : "Todas as gerências", f.status?.length ? "situação: " + f.status.map(k => STATUS[k]).join(", ") : "", f.busca ? `busca “${esc(f.busca)}”` : ""].filter(Boolean).join(" · ");
+  const barras = (l, max) => `<div class="g-bars">${l.map(([rot, v, tit]) => `<div class="g-bar" title="${esc(tit || "")}"><span class="t">${rot}</span><span class="tr"><i style="width:${max ? Math.max(3, v / max * 100) : 0}%"></i></span><span class="v">${v}</span></div>`).join("")}</div>`;
+  const totItens = D.itens.reduce((s, x) => s + x.l.length, 0), cargosItens = new Set(D.itens.flatMap(x => x.l.map(y => y.a.id))).size, totHz = D.val.reduce((s, a) => s + (a.perigos||[]).length, 0);
+  const pct = tot ? Math.round(D.st.concl / tot * 100) : 0;
+  const itensHTML = D.itens.length ? D.itens.map(({ n, l }) => `<div class="g-item"><div class="g-item-h"><span><b>Item ${n}.</b> ${esc(curto(ckTexto(n), 150))}</span><span class="g-n">${l.length} cargo${l.length > 1 ? "s" : ""}</span></div>
+      <ul>${l.slice(0, 10).map(({ a, obs }) => `<li><b>${esc(a.numero)} · ${esc(a.meta?.cargo || "")}</b>${obs ? `: ${esc(curto(obs, 200))}` : ""}</li>`).join("")}${l.length > 10 ? `<li>e mais ${l.length - 10} cargo(s)</li>` : ""}</ul></div>`).join("")
+    : `<p class="g-vazio">Nenhum item crítico registrado nas AEPs concluídas deste escopo.</p>`;
+  const hzTop = D.hz.slice(0, 12), maxHz = hzTop.length ? hzTop[0][1] : 0, maxCat = Math.max(0, ...D.cat.map(x => x[1]));
+  const cargos = D.todas.map(a => ({ a, ck: ckLista(a).filter(x => x.c.r === "sim").length, hz: (a.perigos||[]).length, ok: a.status === "concluida" || a.status === "revisao" }))
+    .sort((x, y) => (y.ok - x.ok) || (y.ck - x.ck) || idNum(x.a) - idNum(y.a));
+  return `<div class="ger">
+  <header class="g-head">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><h1>Painel de ergonomia da gerência</h1><p class="g-esc">${escopo} · ${esc(S.config?.unidade || "Mina de Serra Azul")} · emitido em ${new Date().toLocaleDateString("pt-BR")}</p></div></header>
+  <section class="g-kpis">
+    <div class="g-kpi"><b>${tot}</b><span>cargos no escopo</span></div>
+    <div class="g-kpi"><b>${D.st.concl}</b><span>AEPs concluídas (${pct}%)</span><div class="g-prog"><i style="width:${pct}%"></i></div></div>
+    <div class="g-kpi"><b>${D.st.and + D.st.rev}</b><span>em andamento ou revisão</span></div>
+    <div class="g-kpi"><b>${D.st.nao}</b><span>não iniciadas</span></div>
+    <div class="g-kpi"><b>${totItens}</b><span>itens críticos em ${cargosItens} cargo(s)</span></div>
+    <div class="g-kpi"><b>${totHz}</b><span>perigos registrados</span></div>
+  </section>
+  ${nVal < tot ? `<p class="g-sub" style="margin-top:8px">Os achados abaixo consideram as ${nVal} AEP(s) concluídas ou em revisão. As demais entram apenas na contagem de andamento.</p>` : ""}
+  <h2>Pontos críticos a resolver</h2>
+  <p class="g-sub">Itens do checklist NR-17 marcados “Sim” (desqualificação ergonômica), com o que foi observado em cada cargo.</p>
+  ${itensHTML}
+  <div class="g-cols">
+    <div><h2>Perigos mais frequentes</h2><p class="g-sub">Número de cargos com o perigo registrado.</p>${hzTop.length ? barras(hzTop.map(([cd, v]) => [`<span class="code">${esc(cd)}</span> ${esc(TAXMAP[cd]?.nome || "")}`, v, TAXMAP[cd]?.nome]), maxHz) : `<p class="g-vazio">Nenhum perigo registrado.</p>`}</div>
+    <div><h2>Perigos por categoria</h2><p class="g-sub">Total de linhas de perigo por grupo.</p>${D.cat.length ? barras(D.cat.map(([nome, v]) => [esc(nome), v, nome]), maxCat) : `<p class="g-vazio">Nenhum perigo registrado.</p>`}</div>
+  </div>
+  <h2>Recomendações mais frequentes</h2>
+  <p class="g-sub">Recomendações e oportunidades de melhoria registradas nas AEPs, além das linhas de gestão comuns a todas.</p>
+  ${D.recs.length ? `<table class="g-t"><thead><tr><th>Recomendação</th><th style="width:70px;text-align:right">Cargos</th></tr></thead><tbody>${D.recs.map(r => `<tr><td>${esc(r.t)}</td><td class="n">${r.n}</td></tr>`).join("")}</tbody></table>` : `<p class="g-vazio">Nenhuma recomendação específica registrada.</p>`}
+  ${D.aet.length ? `<h2>AET acionada ou em análise</h2><table class="g-t"><thead><tr><th>AEP</th><th>Cargo</th><th>Decisão</th></tr></thead><tbody>${D.aet.map(a => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${a.aet.decisao === "sim" ? "AET acionada" : "Em análise"}</td></tr>`).join("")}</tbody></table>` : ""}
+  <h2>Cargos avaliados</h2>
+  ${cargos.some(x => x.ok) ? `<table class="g-t"><thead><tr><th>AEP</th><th>Cargo</th><th>Área</th><th>Situação</th><th style="text-align:right">Itens críticos</th><th style="text-align:right">Perigos</th></tr></thead><tbody>
+    ${cargos.filter(x => x.ok).map(({ a, ck, hz }) => `<tr><td style="white-space:nowrap">${esc(a.numero)}</td><td>${esc(a.meta?.cargo||"")}</td><td>${esc(a.meta?.area||"")}</td><td>${STATUS[a.status]}</td><td class="n">${ck}</td><td class="n">${hz}</td></tr>`).join("")}</tbody></table>` : `<p class="g-vazio">Nenhuma AEP concluída neste escopo.</p>`}
+  ${cargos.some(x => !x.ok) ? `<h2>Ainda em avaliação</h2><p class="g-sub">${D.st.and} em andamento e ${D.st.nao} não iniciada(s).</p><p style="margin:0;font-size:12px;color:var(--g-ink2)">${cargos.filter(x => !x.ok).map(({ a }) => `${esc(a.numero)} ${esc(a.meta?.cargo||"")}`).join(" · ")}</p>` : ""}
+  <p class="g-nota">Resumo das Avaliações Ergonômicas Preliminares (NR-17) dos cargos do escopo. A graduação do risco e o plano de ação constam do inventário de riscos do PGR. Fatores psicossociais aparecem apenas como perigos registrados; os resultados do questionário são tratados de forma coletiva e confidencial pelo SESMT e não são apresentados por gerência.</p>
+</div>`;
+}
+function vGerencia(){
+  const ids = (S.gerIds || []).filter(id => S.aeps[id]);
+  return `<div class="aeptitle"><button class="btn ghost" type="button" data-go="home">← AEPs</button><h1>Painel da gerência</h1>
+    <span style="margin-left:auto" class="row"><button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></span></div>
+  <p class="small muted" style="margin:0 0 12px">Montado a partir do filtro da página inicial (${ids.length} AEP(s)). Para outra gerência, volte, troque o filtro de setor e abra o painel de novo.</p>
+  <style>${GER_CSS}</style><div class="panel"><div class="panel-b">${gerHTML(ids, { logo: "logo.png" })}</div></div>`;
+}
+async function gerarPDFGerencia(){
+  const btn = $("#btnPDFger"); if (!btn || btn.disabled) return; btn.disabled = true; btn.textContent = "Preparando…";
+  try {
+    const ids = (S.gerIds || []).filter(id => S.aeps[id]), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
+    const nome = nomeArquivo(`Painel de ergonomia - ${S.gerFiltro?.setor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono&display=swap">
+<style>@page{size:A4;margin:12mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}${GER_CSS}</style></head><body>${gerHTML(ids, { logo })}</body></html>`, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
+  finally { btn.disabled = false; btn.textContent = "Salvar em PDF"; }
+}
+/* Imprime um HTML num quadro escondido, com o nome sugerido do arquivo */
+async function imprimirHTML(html, nome){
+  const tituloApp = document.title; let fr = null;
+  try {
+    fr = document.createElement("iframe"); fr.setAttribute("aria-hidden", "true"); fr.tabIndex = -1;
+    fr.style.cssText = "position:fixed;right:0;bottom:0;width:210mm;height:10px;border:0;opacity:0;pointer-events:none";
+    document.body.appendChild(fr);
+    await new Promise(ok => { fr.onload = ok; fr.srcdoc = html; });
+    const doc = fr.contentDocument;
+    await Promise.all(Array.from(doc.images).map(i => i.complete ? 0 : new Promise(ok => { i.onload = i.onerror = ok; })));
+    try { await doc.fonts.ready; } catch(_){}
+    document.title = nome; fr.contentWindow.focus(); fr.contentWindow.print();
+  } finally { document.title = tituloApp; setTimeout(() => { if (fr) fr.remove(); }, 1000); }
+}
+/* Várias AEPs num PDF só: cada uma começa numa página nova */
+async function gerarPDFVarias(){
+  const btn = $("#btnPDFsel"); if (!btn || btn.disabled) return;
+  const ids = Object.values(S.aeps).filter(a => S.sel.has(a.id)).sort((a, b) => idNum(a) - idNum(b)).map(a => a.id); if (!ids.length) return;
+  btn.disabled = true;
+  try {
+    const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || undefined, folhas = []; let css = "";
+    for (let k = 0; k < ids.length; k++){
+      btn.textContent = `Preparando ${k + 1} de ${ids.length}…`;
+      const a = completar(S.aeps[ids[k]]), fotos = await Promise.all((a.fotos||[]).map(async f => ({ src: await paraDataURL(f.assetId), titulo: f.titulo })));
+      const html = docHTML(a, S.config, fotos.filter(f => f.src), { preview: true, logo });
+      if (!css) css = (html.match(/<style>[\s\S]*?<\/style>/) || [""])[0];
+      const i = html.indexOf('<div class="folha">'), j = html.lastIndexOf("</body>");
+      folhas.push(`<section class="umaaep"${k ? ' style="break-before:page;page-break-before:always"' : ""}>${html.slice(i, j)}</section>`);
+    }
+    const nome = nomeArquivo(`AEPs ${ids.length} selecionadas - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    btn.textContent = "Abrindo a impressão…";
+    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap">${css}</head><body>${folhas.join("")}</body></html>`, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
+  finally { const b = $("#btnPDFsel"); if (b) { b.disabled = false; b.textContent = "Salvar as selecionadas em PDF"; } }
+}
 const nomeArquivo = s => String(s).replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().slice(0,120);
 async function baixarDoc(){
   if (!S.downloads) return;
@@ -1769,6 +2012,11 @@ function onAreaChange(b, el){
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
+  if (el.dataset.sel || el.dataset.selall){ if (!isChange) return;
+    if (el.dataset.selall) listaFiltrada().forEach(a => el.checked ? S.sel.add(a.id) : S.sel.delete(a.id));
+    else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
+    if (el.dataset.selall) { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); }
+    atualizarSel(); return; }
   if (el.dataset.fst){ if (!isChange) return; const k = el.dataset.fst; S.fStatus = el.checked ? [...new Set([...S.fStatus, k])] : S.fStatus.filter(x => x !== k); atualizarHome(); return; }
   if (el.dataset.filtro){
     if (el.tagName === "SELECT" && !isChange) return;
@@ -1830,12 +2078,17 @@ document.addEventListener("click", async e => {
   const t = e.target; if (!t.closest) return;
   const go = t.closest("[data-go]"); if (go){ e.preventDefault(); ir(go.dataset.go); return; }
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
+  if (t.closest("[data-selcell]")) return;
   const op = t.closest("[data-open]"); if (op){ abrirAEP(op.dataset.open); return; }
   const ar = t.closest("tr[data-area]"); if (ar && S.view === "copsoq"){ S.editArea = completarArea(S.areas[ar.dataset.area]); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); window.scrollTo(0,0); return; }
   const btn = t.closest("[data-act]"); if (!btn) return;
   const d = btn.dataset, a = S.draft;
   switch (d.act){
     case "nova": criarAEP(); break;
+    case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
+    case "pdfVarias": gerarPDFVarias(); break;
+    case "painelGer": ir("gerencia", { gerIds: listaFiltrada().map(a => a.id), gerFiltro: { setor: S.fSetor, status: [...S.fStatus], busca: S.busca } }); break;
+    case "pdfGerencia": gerarPDFGerencia(); break;
     case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
@@ -1900,6 +2153,14 @@ document.addEventListener("click", async e => {
     }
     case "aplicarModelo": { const ar = setorDaAEP(a); const n = aplicarModelo(a, ar); marcar(); renderStep(); renderRail(); renderAside();
       toast(n ? `${n} domínio(s) preenchido(s) com o modelo do setor.` : "Nenhum domínio vazio: o modelo só preenche o que está em branco."); break; }
+    case "recAdd": case "recAddTema": {
+      const t = REC_MODELOS.find(x => x.id === d.t); if (!t) break;
+      const atual = String(a.conclusao.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(Boolean), tem = new Set(atual.map(norm));
+      const novas = (d.act === "recAdd" ? [t.linhas[Number(d.i)]] : t.linhas).filter(x => x && !tem.has(norm(x)));
+      if (!novas.length) break;
+      S.recAberto = t.id; a.conclusao.recomendacoes = [...atual, ...novas].join("\n"); marcar(); renderStep(); renderRail(); renderAside();
+      toast(novas.length > 1 ? `${novas.length} linhas acrescentadas.` : "Linha acrescentada."); break;
+    }
     case "montarRecs": {
       const atual = String(a.conclusao.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(Boolean), tem = new Set(atual.map(norm));
       const novas = recsDaAEP(a).filter(x => !tem.has(norm(x)));
@@ -1925,6 +2186,7 @@ document.addEventListener("click", async e => {
     case "rmHzSim": a.perigos = a.perigos.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
     case "salvarHz": salvarHz(); break;
     case "cancelarHz": S.editHz = null; S.hzErr = ""; renderStep(); break;
+    case "sugTipo": S.sugTipo = d.tp || ""; renderStep(); break;
     case "sugFonte": {
       const h = S.editHz, t = TAXMAP[h?.codigo], sg = (SUG_FONTE[h?.codigo]||[])[Number(d.i)]; if (!t || !sg) break;
       const [, x, base] = sg, f = String(h.fonte||"").trim(), comp = complementoFonte(f);
