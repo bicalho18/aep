@@ -102,7 +102,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn.small{padding:5px 10px;font-size:12.5px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 label.f{display:flex;flex-direction:column;gap:5px;min-width:0}
-label.f > span:not(.hint){font-size:12px;font-weight:600;color:var(--ink-2)}
+label.f > span:not(.hint):not(.dica),div.f > span:first-child{font-size:12px;font-weight:600;color:var(--ink-2)}
+div.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+div.f > span em{font-style:normal;color:var(--bad-ink)}
+div.f > .seg{align-self:flex-start;max-width:100%;flex-wrap:wrap}
 label.f > span em{font-style:normal;color:var(--bad-ink)}
 .hint{font-size:11.5px;color:var(--ink-3);line-height:1.45}
 input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:8px 10px;min-width:0}
@@ -251,6 +254,8 @@ table.list tr:last-child td{border-bottom:0}
 .recfixas li{margin:3px 0}
 .conclauto{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:12px 14px;font-size:13.5px;line-height:1.55}
 .conclauto p{margin:0 0 6px}
+.dica{display:block;margin-top:6px;padding:6px 10px;border-left:3px solid var(--accent-line);background:var(--surface-2);border-radius:0 6px 6px 0;font-size:12px;line-height:1.45;color:var(--ink-2);font-weight:400}
+.dica b{color:var(--ink);font-weight:600}
 .fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-strong);border-radius:999px;padding:5px 12px;cursor:pointer;background:var(--surface);font-size:13px;color:var(--ink-2)}
 .fchip input{accent-color:var(--accent);margin:0}
 .fchip:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
@@ -446,6 +451,10 @@ const CONCL_ANTIGAS = {
 /* Textos fixos do documento */
 const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
 const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
+/* Dica de quando lançar cada perigo (critério de 15/10/2026). Aparece só no sistema, abaixo do perigo escolhido. */
+const DICA_LANCAR = {"OT-01": "Lance quando o volume ou o ritmo superam o efetivo de forma recorrente (metas apertadas, picos frequentes, horas extras habituais). Pico eventual, sozinho, não basta.", "OT-02": "Lance com turno ininterrupto, trabalho noturno ou jornada prolongada habitual em que a recuperação entre jornadas fica curta (dobras, folgas reduzidas, convocações).", "OT-03": "Lance quando a tarefa contínua não permite pausa por decisão do trabalhador ou a pausa prevista não é cumprida. Pausa livre e respeitada não gera perigo.", "OT-04": "Lance quando o ciclo é curto e se repete na maior parte da jornada, sem rodízio. Rotina previsível, mas variada, não é monotonia.", "OT-05": "Lance com atenção contínua, várias tarefas ao mesmo tempo ou decisão crítica sob pressão (sala de controle, despacho). Conferir material e registrar no sistema, sozinho, não basta.", "OT-06": "Lance quando método, ritmo ou pausas são impostos sem margem de ajuste (ritmo de máquina, supervisão rígida). Seguir procedimento de segurança não é baixo controle.", "OT-07": "Lance quando há ordens conflitantes de chefias diferentes ou atribuições sem definição clara, confirmadas em relato consistente ou documento.", "OT-08": "Lance quando houve mudança de equipamento, sistema ou procedimento sem treinamento prévio, ou quando o trabalhador atua sem suporte técnico disponível.", "OT-09": "Lance com COPSOQ acima de 3,66 em apoio ou liderança, ou com relato consistente de mais de um trabalhador. Uma conversa isolada não basta.", "OT-10": "Lance com COPSOQ acima de 3,66 em recompensas ou justiça e respeito, ou com relato consistente de critério pouco transparente.", "OT-11": "Lance com COPSOQ acima de 3,66 em comportamentos ofensivos, registro no canal de denúncia ou relato de conduta. Não lance só porque pode acontecer: a política da empresa já cobre todos.", "OT-12": "Lance quando lidar com sofrimento, agressividade ou risco de terceiros faz parte da função (brigada, atendimento a acidentado, portaria com conflito). Contato ocasional com colega insatisfeito não basta.", "OT-13": "Lance com interferência habitual na vida pessoal (sobreaviso, convocação fora do horário) ou mudança organizacional anunciada sem comunicação. COPSOQ acima de 3,66 também sustenta.", "BIO-01": "Lance quando a postura se sustenta sozinha: tronco curvado mais da metade do tempo, agachado ou parado por longos períodos. Se a postura vem do manuseio da carga, descreva na fonte do BIO-04.", "BIO-02": "Lance com movimentos repetidos de mãos e braços na maior parte da jornada (digitação contínua, montagem em série). Uso eventual não basta.", "BIO-03": "Lance com força nítida e recorrente: soltar parafuso travado, puxar paleteira carregada, empurrar carrinho em piso irregular.", "BIO-04": "Lance quando o manuseio de carga é rotina do cargo, mesmo que não visto no dia. Descreva peso típico e frequência; a postura ao pegar a carga entra nesta mesma fonte.", "BIO-05": "Lance quando o posto obriga a esticar o corpo ou trabalhar em espaço apertado de forma habitual (sob equipamento, dentro de caixa, prateleira alta).", "BIO-06": "Lance com apoio prolongado de joelho, antebraço ou mão contra superfície dura ou quina. Toque eventual não basta.", "BIO-07": "Lance com operação habitual de equipamento móvel ou de ferramenta vibratória. Não depende de medição para identificar.", "EQ-01": "Lance só com a inadequação constatada: cadeira sem regulagem, bancada em altura errada para a tarefa. Mobiliário adequado não gera perigo.", "EQ-02": "Lance quando o arranjo do local obriga deslocamentos ou alcances desnecessários de forma recorrente, constatados no local.", "EQ-03": "Lance quando a máquina tem acesso, comando ou ponto de manutenção fora do alcance confortável, constatado em campo.", "EQ-04": "Lance quando o equipamento do posto informatizado não permite ajuste (notebook sem suporte, monitor fixo baixo), constatado no posto.", "EQ-05": "Lance quando a ferramenta tem peso, pega ou vibração inadequados, constatados em uso.", "EQ-06": "Lance com telas confusas, excesso de alarmes ou sinais concorrentes que atrapalham a decisão, observados ou relatados de forma consistente.", "AMB-01": "Lance quando a iluminação atrapalha a tarefa (sombra, ofuscamento, reflexo na tela), constatado no local.", "AMB-02": "Lance quando calor, frio ou corrente de ar incomodam de forma habitual, constatado ou relatado de forma consistente. Exposição ocupacional ao calor é da NR-9.", "AMB-03": "Lance quando o ruído de fundo atrapalha conversa ou concentração. Ruído como agente de exposição é da NR-9.", "AMB-04": "Lance quando a vibração do piso ou da estrutura incomoda no posto. Vibração de equipamento operado é BIO-07."};
+/* Base do perigo: como a condição foi conhecida */
+const BASE_PERIGO = { observado: "Observado em campo", relatado: "Relatado pelo trabalhador", rotina: "Rotina do cargo", copsoq: "Percepção coletiva do setor (COPSOQ)" };
 /* Modelos de recomendação por tema. "quando": perigos que tornam o tema relevante para a AEP (aparece primeiro e aberto). */
 const REC_MODELOS = [
   { id:"adm", curtos:["Ajuste do posto","Suporte para notebook","Alternar postura","Conservação das cadeiras"], nome:"Posto informatizado", quando:["BIO-01","BIO-02","BIO-06","EQ-01","EQ-04"], linhas:[
@@ -569,7 +578,7 @@ const limparTravessao = t => TRECHOS_TRAVESSAO.reduce((o, [v, nv]) => o.split(v)
 /* Perigos que a etapa 3 exige: decisão que pede perigo e subescala acima de 3,66. Só acrescenta; nunca retira. */
 function lancarPerigosCopsoq(a){
   const lanc = new Set((a.perigos||[]).map(h => h.codigo)); let n = 0;
-  const lancar = (codigo, sid) => { const tx = TAXMAP[codigo]; if (!tx || lanc.has(tx.codigo)) return; a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte }); lanc.add(tx.codigo); n++; };
+  const lancar = (codigo, sid) => { const tx = TAXMAP[codigo]; if (!tx || lanc.has(tx.codigo)) return; a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte, base: "copsoq" }); lanc.add(tx.codigo); n++; };
   DOMINIOS.forEach(d => Object.entries(a.copsoq.dominios[d.id].dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (s && decisaoExigePerigo(s, v)) lancar(s.tax, sid); }));
   altasComPerigo(a).forEach(s => { const antes = a.perigos.length; lancar(s.tax, s.id);
     if (a.perigos.length > antes){ const h = a.perigos[a.perigos.length - 1], sn = copsoqDaAEP(a); h.fonte = fonteCopsoqAlta(s, sn?.medias?.[s.id], sn?.nome, TAXMAP[s.tax]); } });
@@ -620,7 +629,7 @@ function ckAuto(a, i, campo, antes){
   const ligado = (c.hz && (a.perigos||[]).some(h => h.id === c.hz)) || (a.perigos||[]).some(h => Number(h.checkItem) === n);
   if (campo === "r"){
     if (c.r === "sim" && !auto && !ligado){
-      const h = { id: uid(), codigo: tx.codigo, danos: tx.danos, fonte: fonteItem(n, c.obs), checkItem: n, autoItem: n };
+      const h = { id: uid(), codigo: tx.codigo, danos: tx.danos, fonte: fonteItem(n, c.obs), checkItem: n, autoItem: n, base: "observado" };
       a.perigos.push(h); c.hz = h.id; numerarRiscos(a);
       return `Perigo ${h.idRisco} ${tx.codigo} lançado para o item ${n}. Descreva o que foi observado e confira na etapa 4.`;
     }
@@ -700,9 +709,16 @@ function conclusaoTexto(a){
 /* Padrão de 15/10/2026, aplicado a todas as AEPs (concluídas, em revisão, em andamento e não iniciadas):
    item 12 do checklist retirado (os itens seguintes sobem uma posição), conclusão escrita pelo sistema,
    linhas fixas das recomendações montadas sozinhas e fonte dos perigos do COPSOQ alto como percepção coletiva. */
-const PADRAO_AEP = 3;
+const PADRAO_AEP = 4;
 function migrarAEP(r){
   if (!r || (r.padrao||0) >= PADRAO_AEP) return r;
+  if ((r.padrao||0) < 3) migrarV3(r);
+  /* v4: base do perigo. Lançado a partir do checklist = observado em campo; vindo do COPSOQ = percepção coletiva. Os demais ficam para informar. */
+  (r.perigos||[]).forEach(h => { if (h.base) return; if (h.origemCopsoq) h.base = "copsoq"; else if (Number(h.autoItem) || Number(h.checkItem)) h.base = "observado"; });
+  r.padrao = PADRAO_AEP;
+  return r;
+}
+function migrarV3(r){
   if (Array.isArray(r.checklist) && r.checklist.length >= 12){
     const tirado = r.checklist.splice(11, 1)[0];
     if (tirado && tirado.r === "sim"){ r.revisarItem12 = String(tirado.obs || "").trim() || "sim";
@@ -721,8 +737,6 @@ function migrarAEP(r){
     if (typeof r.conclusao.recomendacoes === "string"){ const base = new Set(TXT_RECOMENDACOES.split("\n").map(norm));
       r.conclusao.recomendacoes = r.conclusao.recomendacoes.split(/\n+/).map(x => x.trim()).filter(x => x && !linhaAuto(x, base)).join("\n"); }
   }
-  r.padrao = PADRAO_AEP;
-  return r;
 }
 const fonteCopsoqAlta = (s, m, setor, tx) => `Percepção coletiva desfavorável do setor${setor ? " " + setor : ""} no COPSOQ II (${s.nome}: ${num2(m)}, acima de 3,66). ${tx.fonte}`;
 /* Indicadores do setor (Medicina e RH): números agregados, sem identificação */
@@ -1085,6 +1099,7 @@ function pendencias(a){
   (a.perigos||[]).forEach(h => { if (/\[[^\]]*\]/.test(h.fonte||"")) p[4].push(`${h.idRisco||h.codigo}: complete os trechos entre colchetes da fonte geradora`); });
   perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
+  (a.perigos||[]).forEach(h => { if (!h.origemCopsoq && !BASE_PERIGO[h.base]) p[4].push(`${h.idRisco||h.codigo}: informar a base (observado em campo, relatado pelo trabalhador ou rotina do cargo)`); });
   (a.perigos||[]).forEach(h => { if (h.revisar) p[4].push(`${h.idRisco||h.codigo}: vinha do item 12 do checklist, que foi retirado. Confira o perigo e salve-o de novo`); });
   if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
   if (!a.aet?.justificativa?.trim()) p[5].push("Justificar a decisão sobre AET");
@@ -1314,7 +1329,7 @@ async function concluirCampo(){
 function vPadraoBanner(){
   const n = S.padraoPend ? S.padraoPend.size : 0; if (!n || !S.dbOk) return "";
   return `<div class="note warn" style="margin-bottom:14px"><b>${n} AEP(s) gravadas no padrão anterior.</b> Na tela elas já aparecem no padrão novo; falta gravar no banco.
-    O padrão novo retira o item 12 do checklist (os itens seguintes sobem uma posição), escreve a conclusão a partir dos fatos da AEP, monta sozinho as recomendações fixas e redige o perigo do COPSOQ alto como percepção coletiva do setor.
+    O padrão novo retira o item 12 do checklist (os itens seguintes sobem uma posição), escreve a conclusão a partir dos fatos da AEP, monta sozinho as recomendações fixas, redige o perigo do COPSOQ alto como percepção coletiva do setor e registra a base dos perigos vindos do checklist (observado em campo) e do COPSOQ.
     Vale para concluídas, em revisão, em andamento e não iniciadas. A situação de cada AEP não muda, exceto se o item 12 estava marcado Sim: aí ela volta para revisão. Antes de gravar, o sistema baixa uma cópia de segurança.
     <div style="margin-top:8px">${S.confirm === "padrao" ? `<span class="confirm">Gravar o padrão novo em ${n} AEP(s)? <button class="btn small primary" type="button" data-act="padraoTodasSim" id="btnPadrao">Gravar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small primary" type="button" data-act="padraoTodas">Gravar o padrão novo em todas</button>`}</div></div>`;
 }
@@ -1671,8 +1686,11 @@ function vHzEditor(){
         <label class="f spanall"><span>Categoria</span><select id="f-hzcat" data-hz-cat="1"><option value="">Todas as categorias</option>${Object.entries(CATEG).map(([k,v]) => `<option value="${k}" ${S.hzCat===k?"selected":""}>${k} — ${esc(v)}</option>`).join("")}</select></label>
         <label class="f spanall"><span>Perigo / fator de risco padronizado <em>*</em></span><select id="f-hzcod" data-b="editHz.codigo">
             <option value="">— Selecione (${ops.length} opção/ões) —</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("")}</select>
-          <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span></label>
+          <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span>
+          ${t && DICA_LANCAR[t.codigo] ? `<span class="dica" id="hz-dica"><b>Quando lançar:</b> ${esc(DICA_LANCAR[t.codigo])}</span>` : ""}</label>
       </div>
+      ${t ? (h.origemCopsoq ? `<div class="f"><span>Base</span><p class="small" style="margin:4px 0 0">${esc(BASE_PERIGO.copsoq)}</p></div>`
+        : `<div class="f"><span>Base <em>*</em> <span class="faint" style="font-weight:400">como a condição foi conhecida</span></span><div class="seg" role="radiogroup" aria-label="Base do perigo">${["observado","relatado","rotina"].map(k => `<input type="radio" id="hzb-${k}" name="hzbase" value="${k}" data-b="editHz.base" ${h.base === k ? "checked" : ""}><label for="hzb-${k}">${esc(BASE_PERIGO[k])}</label>`).join("")}</div></div>`) : ""}
       ${t ? `<div class="note"><b>Campos locais a coletar:</b> ${esc(t.campos)}${!String(h.fonte||"").trim().startsWith(t.fonte) ? ` <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">${FONTES_ALTERNATIVAS[t.codigo] ? "Usar o texto de posto administrativo" : "Recolocar o texto da planilha no início"}</button>` : ""}${(FONTES_ALTERNATIVAS[t.codigo]||[]).filter(p => !String(h.fonte||"").trim().startsWith(p)).map(p => ` <button class="btn ghost small" type="button" data-act="usarFonteAlt" style="padding:0 0 0 6px">Usar o texto genérico (outros cargos)</button>`).join("")}</div>` : ""}
       ${t && SUG_FONTE[t.codigo] ? (() => { const sg = SUG_FONTE[t.codigo], tipos = Object.keys(TIPOS_ATV).filter(k => sg.some(x => x[0] === k)), tp = tipos.includes(S.sugTipo) ? S.sugTipo : "";
         return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Sugestões por tipo de atividade. Clique para acrescentar à fonte e complete os colchetes com o que se viu:</span>
@@ -1742,13 +1760,14 @@ function vRecModelos(a){
 }
 /* ---------------- Perigos: ações ---------------- */
 function abrirHz(h){
-  S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", checkItem:"", origemCopsoq:"" }, h);
+  S.editHz = Object.assign({ id: uid(), codigo:"", fonte:"", danos:"", exposicao:"", checkItem:"", origemCopsoq:"", base:"" }, h);
   S.hzErr = ""; S.hzFiltro = ""; S.hzCat = h && h.codigo ? prefixo(h.codigo) : "";
 }
 function salvarHz(){
   const h = S.editHz, t = TAXMAP[h.codigo]; const erro = m => { S.hzErr = m; renderStep(); };
   if (!t) return erro("Selecione o perigo na taxonomia.");
   if (!h.fonte?.trim()) return erro("Descreva a fonte geradora específica desta situação.");
+  if (!h.origemCopsoq && !BASE_PERIGO[h.base]) return erro("Indique a base: observado em campo, relatado pelo trabalhador ou rotina do cargo.");
   const igual = S.draft.perigos.find(x => x.id !== h.id && chaveHz(x) === chaveHz(h));
   if (igual) return erro(`Já existe a linha ${igual.idRisco||""} com o mesmo perigo (${h.codigo}) e a mesma fonte. Edite a linha existente, ou complemente a fonte com o que torna esta situação diferente.`);
   const novo = clone(h); delete novo._novo; if (!novo.danos) novo.danos = t.danos;
@@ -1923,7 +1942,7 @@ function docHTML(a, cfg, fotos, opt={}){
     return `<tr><td class="b">${esc(d.nome)}</td><td class="c">${r.auto?`${num2(r.nota)}<br>`:""}${r.faixa?esc(FAIXAS[r.faixa]):"—"}${subs?`<div class="small" style="text-align:left;margin-top:3px">${subs}</div>`:""}</td><td>${escBr(dd.obs||"")}</td><td class="c">${esc(dd.concl||"—")}</td></tr>`; }).join("");
   const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo], its = itensDoPerigo(a, h);
     return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b>: ${esc(t?t.nome:"")}</td>
-      <td>${escBr(h.fonte||"")}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
+      <td>${escBr(h.fonte||"")}${BASE_PERIGO[h.base] ? `<div class="small"><b>Base:</b> ${esc(BASE_PERIGO[h.base])}.</div>` : ""}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
   /* Resumo por categoria da TAXONOMIA (coluna B da planilha), na ordem da aba */
   const catsTax = [...new Set(TAX.map(t => t.cat))];
   const porCat = catsTax.map(cat => { const hs = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.cat === cat);
@@ -2594,7 +2613,7 @@ document.addEventListener("click", async e => {
     case "rmEscSim": a.escuta = a.escuta.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
     case "hzDoItem": {
       const n = Number(d.n), cod = (CK_PERIGOS[n]||[])[0] || "", tx = TAXMAP[cod], obs = a.checklist[n-1]?.obs;
-      abrirHz({ _novo:true, checkItem: n, codigo: cod, danos: tx ? tx.danos : "", fonte: [tx ? ((FONTES_ALTERNATIVAS[cod]||[])[0] || tx.fonte) : "", obs || ""].filter(Boolean).join(" ") });
+      abrirHz({ _novo:true, checkItem: n, base: "observado", codigo: cod, danos: tx ? tx.danos : "", fonte: [tx ? ((FONTES_ALTERNATIVAS[cod]||[])[0] || tx.fonte) : "", obs || ""].filter(Boolean).join(" ") });
       S.hzCat = ""; aposHz();
       if ((CK_PERIGOS[n]||[]).length > 1) toast(`O item ${n} aciona ${CK_PERIGOS[n].join(", ")}. Confira se o perigo sugerido é o certo.`);
       break;
