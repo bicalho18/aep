@@ -246,6 +246,11 @@ table.list tr:last-child td{border-bottom:0}
 .campo .ck p{font-size:14px;line-height:1.45}
 .campo textarea,.campo input{font-size:16px}
 @media (max-width:760px){.cfoot .btn{flex:1}.cfoot>span{flex-basis:100%}}
+.recfixas{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:10px 14px}
+.recfixas ul{margin:6px 0 6px 18px;padding:0;font-size:13px;color:var(--ink-2)}
+.recfixas li{margin:3px 0}
+.conclauto{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:12px 14px;font-size:13.5px;line-height:1.55}
+.conclauto p{margin:0 0 6px}
 .fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-strong);border-radius:999px;padding:5px 12px;cursor:pointer;background:var(--surface);font-size:13px;color:var(--ink-2)}
 .fchip input{accent-color:var(--accent);margin:0}
 .fchip:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
@@ -379,11 +384,10 @@ const CHECKLIST = [
  "Levantar ou depositar com precaução carga mais pesada que 15 kg em frequência maior que 2 vezes por minuto e/ou em distância entre os tornozelos e o centro de massa da carga maior que 50 cm.",
  "Empurrar ou puxar carrinhos ou transpaleteiras manuais com peso maior que 1500 kg, ou maior que 700 kg em aclives, declives ou em condições nitidamente ruins do piso ou do equipamento.",
  "Ritmo intenso de trabalho mantido, tempo apertado, pressão de tempo, operação crítica com alto impacto na qualidade sem o tempo necessário, uso rigoroso de metas de produção, impossibilidade de pausas voluntárias em trabalho com alta demanda mental; ou outro fator de carga mental bem evidente.",
- "A forma de se realizar o trabalho predispõe para a ocorrência de acidentes.",
  "Alto nível de ruído, calor, vibração ou algum outro fator da Higiene Ocupacional bastante evidente.",
  "Outros."
 ];
-/* Bloco condicional: posto de trabalho informatizado / administrativo (itens 15 a 19).
+/* Bloco condicional: posto de trabalho informatizado / administrativo (itens 14 a 18).
    Só é respondido quando a pergunta de abertura é "Sim". */
 const CK_N_BASE = CHECKLIST.length;
 const CK_ADM_PERGUNTA = "Existe atividade em posto de trabalho informatizado / administrativo?";
@@ -395,8 +399,8 @@ const CHECKLIST_ADM = [
  "Condição ambiental bastante inadequada: calor excessivo, frio excessivo, vibração, iluminação bastante inadequada, alto nível de ruído."
 ];
 CHECKLIST.push(...CHECKLIST_ADM);
-const CK_ADM_PERIGOS = { 15:["EQ-04","EQ-01","BIO-01"], 16:["EQ-04"], 17:["EQ-06"], 18:["EQ-01"], 19:["AMB-01","AMB-02","AMB-03","AMB-04"] };
-/* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA; itens 15–19 pela tabela acima) */
+const CK_ADM_PERIGOS = { 14:["EQ-04","EQ-01","BIO-01"], 15:["EQ-04"], 16:["EQ-06"], 17:["EQ-01"], 18:["AMB-01","AMB-02","AMB-03","AMB-04"] };
+/* Perigos que cada item do checklist aciona (coluna N da TAXONOMIA; itens 14 a 18 pela tabela acima) */
 /* Política de lançamento (capítulo 14.2.7). Perigo de EXIGÊNCIA: lança quando a exigência existe no trabalho real
    com duração relevante, mesmo controlada. Perigo de DEFICIÊNCIA: só lança quando a condição inadequada é constatada. */
 const PERIGOS_DEFICIENCIA = new Set(["OT-02","OT-03","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-13","BIO-05","BIO-06","EQ-01","EQ-02","EQ-03","EQ-04","EQ-05","EQ-06","AMB-01","AMB-02"]);
@@ -567,7 +571,8 @@ function lancarPerigosCopsoq(a){
   const lanc = new Set((a.perigos||[]).map(h => h.codigo)); let n = 0;
   const lancar = (codigo, sid) => { const tx = TAXMAP[codigo]; if (!tx || lanc.has(tx.codigo)) return; a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte }); lanc.add(tx.codigo); n++; };
   DOMINIOS.forEach(d => Object.entries(a.copsoq.dominios[d.id].dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (s && decisaoExigePerigo(s, v)) lancar(s.tax, sid); }));
-  altasComPerigo(a).forEach(s => lancar(s.tax, s.id));
+  altasComPerigo(a).forEach(s => { const antes = a.perigos.length; lancar(s.tax, s.id);
+    if (a.perigos.length > antes){ const h = a.perigos[a.perigos.length - 1], sn = copsoqDaAEP(a); h.fonte = fonteCopsoqAlta(s, sn?.medias?.[s.id], sn?.nome, TAXMAP[s.tax]); } });
   numerarRiscos(a);
   return n;
 }
@@ -629,22 +634,99 @@ function ckAuto(a, i, campo, antes){
 /* Há ação a registrar? Item crítico no checklist, deficiência/insuficiência confirmada na etapa 3 ou interpretação com melhorias */
 function temAcao(a){
   if (ckLista(a).some(x => x.c.r === "sim")) return true;
-  if (["Existem condições ergonômicas críticas na atividade","Necessita de melhorias"].includes(a.conclusao?.interpretacao)) return true;
+  if ((a.perigos||[]).some(h => PERIGOS_DEFICIENCIA.has(h.codigo))) return true;
   return DOMINIOS.some(d => Object.values(a.copsoq?.dominios?.[d.id]?.dec || {}).some(v => v === "melh" || v === "conf"));
 }
 /* Recomendações montadas a partir do que a própria AEP registrou */
-function recsDaAEP(a){
+/* Recomendações fixas, montadas sozinhas no documento (padrão de 15/10/2026):
+   as 4 linhas de manutenção sempre; "Corrigir" só para item crítico do checklist; "Implementar" quando há ação. */
+const REC_CORRIGIR = /^Corrigir a condição apontada no item/, REC_IMPLEMENTAR = /^Implementar as ações definidas no Plano de Ação/, REC_COPSOQ_CONF = /^Implementar medidas para a condição confirmada em/;
+function recsAuto(a){
   const out = TXT_RECOMENDACOES.split("\n");
   ckLista(a).filter(x => x.c.r === "sim").forEach(({c,n}) => { const o = String(c.obs||"").trim().replace(/[.\s]+$/, "");
     out.push(`Corrigir a condição apontada no item ${n} do checklist${o ? ` (${o.charAt(0).toLowerCase() + o.slice(1)})` : ""}, conforme a ação definida no Plano de Ação.`); });
-  DOMINIOS.forEach(d => { const obs = a.copsoq?.dominios?.[d.id]?.obs || "";
-    (obs.match(/Oportunidade de melhoria:\s*[^\n]+/g) || []).forEach(t => { const x = t.replace(/^Oportunidade de melhoria:\s*/, "").trim();
-      if (x && !x.includes("[")) out.push("Oportunidade de melhoria: " + x.replace(/\s+$/, "")); }); });
   DOMINIOS.forEach(d => Object.entries(a.copsoq?.dominios?.[d.id]?.dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid];
     if (v === "conf" && s?.tax) out.push(`Implementar medidas para a condição confirmada em ${s.nome.toLowerCase()} (perigo ${s.tax}), conforme o Plano de Ação.`); }));
   if (temAcao(a)) out.push("Implementar as ações definidas no Plano de Ação para os perigos identificados nesta AEP, com acompanhamento da eficácia.");
   return out;
 }
+const linhaAuto = (x, base) => base.has(norm(x)) || REC_CORRIGIR.test(x) || REC_IMPLEMENTAR.test(x) || REC_COPSOQ_CONF.test(x);
+const recsEspecificas = a => { const base = new Set(TXT_RECOMENDACOES.split("\n").map(norm));
+  return String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(x => x && !linhaAuto(x, base)); };
+const recsTodas = a => { const auto = recsAuto(a), vistos = new Set(auto.map(norm)); return [...auto, ...recsEspecificas(a).filter(x => !vistos.has(norm(x)))]; };
+/* Oportunidades de melhoria escritas na etapa 3, para trazer ao campo de recomendações específicas */
+function recsDaAEP(a){
+  const out = [];
+  DOMINIOS.forEach(d => { const obs = a.copsoq?.dominios?.[d.id]?.obs || "";
+    (obs.match(/Oportunidade de melhoria:\s*[^\n]+/g) || []).forEach(t => { const x = t.replace(/^Oportunidade de melhoria:\s*/, "").trim();
+      if (x && !x.includes("[")) out.push("Oportunidade de melhoria: " + x.replace(/\s+$/, "")); }); });
+  return out;
+}
+
+/* Conclusão escrita pelo sistema a partir dos fatos da AEP (substitui a escolha manual da interpretação) */
+const CAT_TXT = { "Biomecânicos": ["biomecânico", "biomecânicos"], "Mobiliários Máquinas Equipamentos e Ferramentas": ["de mobiliário, máquinas ou equipamentos", "de mobiliário, máquinas ou equipamentos"], "Conforto Ambiental": ["de conforto ambiental", "de conforto ambiental"], "Organização do Trabalho": ["de organização do trabalho e psicossocial", "de organização do trabalho e psicossociais"] };
+const juntar = l => l.length <= 1 ? (l[0] || "") : `${l.slice(0, -1).join(", ")} e ${l[l.length - 1]}`;
+const minusc = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : t;
+function classeAEP(a){
+  if (ckLista(a).some(x => x.c.r === "sim")) return "critica";
+  if ((a.perigos||[]).some(h => PERIGOS_DEFICIENCIA.has(h.codigo)) || DOMINIOS.some(d => Object.values(a.copsoq?.dominios?.[d.id]?.dec || {}).some(v => v === "melh" || v === "conf"))) return "melhoria";
+  return "adequada";
+}
+const CLASSE_TXT = { critica: "Condições críticas, com intervenção prioritária.", melhoria: "Condições que requerem melhorias.", adequada: "Condições adequadas, sem necessidade de melhorias além da manutenção dos controles existentes." };
+function conclusaoTexto(a){
+  const P = [], cargo = (a.meta?.cargo || "").trim() || "avaliado", hz = a.perigos || [], n = hz.length;
+  if (n){
+    const porCat = {}; hz.forEach(h => { const c = TAXMAP[h.codigo]?.cat || "Outros"; porCat[c] = (porCat[c]||0) + 1; });
+    const partes = Object.entries(porCat).map(([c, k]) => `${k} ${(CAT_TXT[c] || [c, c])[k > 1 ? 1 : 0]}`);
+    P.push(`A avaliação do cargo ${cargo} identificou ${n} perigo${n > 1 ? "s" : ""} (${juntar(partes)}), que ${n > 1 ? "passam" : "passa"} a integrar o inventário de riscos do PGR. A graduação de cada risco é feita na planilha de controle do GRO, considerando a exposição e as medidas de controle já existentes.`);
+  } else P.push(`A avaliação do cargo ${cargo} não identificou perigos ergonômicos ou psicossociais que demandem registro no inventário de riscos do PGR.`);
+  const crit = ckLista(a).filter(x => x.c.r === "sim");
+  if (crit.length) P.push(`O checklist da NR-17 apontou ${crit.length} condiç${crit.length > 1 ? "ões críticas" : "ão crítica"}: ${juntar(crit.map(x => minusc(ckCurto(x.n))))}. ${crit.length > 1 ? "Essas condições requerem" : "Essa condição requer"} intervenção prioritária, conforme o Plano de Ação.`);
+  else P.push("O checklist da NR-17 não apontou condição crítica de desqualificação ergonômica na situação avaliada.");
+  const defic = [...new Set(hz.filter(h => PERIGOS_DEFICIENCIA.has(h.codigo) && !itensDoPerigo(a, h).length).map(h => minusc(TAXMAP[h.codigo]?.nome || h.codigo)))];
+  if (defic.length) P.push(`Foram constatadas condições a melhorar em ${juntar(defic)}, tratadas nas recomendações desta AEP.`);
+  const snap = copsoqDaAEP(a);
+  if (snap){ const altas = altasComPerigo(a);
+    const todasLanc = altas.every(s => hz.some(h => h.codigo === s.tax)), pl = altas.length > 1;
+    P.push(altas.length ? `No rastreamento psicossocial do setor ${snap.nome} (COPSOQ II), ${altas.length} subescala${pl ? "s ficaram" : " ficou"} na faixa de risco, acima de 3,66 (${juntar(altas.map(s => minusc(s.nome)))}). ${todasLanc ? (pl ? "Esses resultados foram registrados" : "Esse resultado foi registrado") : (pl ? "Esses resultados devem ser registrados" : "Esse resultado deve ser registrado")} como perigo a partir da percepção coletiva do setor.`
+      : `No rastreamento psicossocial do setor ${snap.nome} (COPSOQ II), nenhuma subescala ficou na faixa de risco.`); }
+  const dec = a.aet?.decisao;
+  if (dec === "sim") P.push("Pelos gatilhos do item 17.3.2 da NR-17, foi acionada a Análise Ergonômica do Trabalho (AET) para aprofundar a avaliação.");
+  else if (dec === "nao") P.push("A avaliação preliminar foi suficiente para identificar os perigos e orientar as medidas, sem necessidade de Análise Ergonômica do Trabalho (AET).");
+  else if (dec === "analise") P.push("A necessidade de Análise Ergonômica do Trabalho (AET) está em análise.");
+  return { paragrafos: P, classe: classeAEP(a), sintese: CLASSE_TXT[classeAEP(a)] };
+}
+
+/* Padrão de 15/10/2026, aplicado a todas as AEPs (concluídas, em revisão, em andamento e não iniciadas):
+   item 12 do checklist retirado (os itens seguintes sobem uma posição), conclusão escrita pelo sistema,
+   linhas fixas das recomendações montadas sozinhas e fonte dos perigos do COPSOQ alto como percepção coletiva. */
+const PADRAO_AEP = 3;
+function migrarAEP(r){
+  if (!r || (r.padrao||0) >= PADRAO_AEP) return r;
+  if (Array.isArray(r.checklist) && r.checklist.length >= 12){
+    const tirado = r.checklist.splice(11, 1)[0];
+    if (tirado && tirado.r === "sim"){ r.revisarItem12 = String(tirado.obs || "").trim() || "sim";
+      if (r.status === "concluida"){ r.status = "revisao"; r.concluidoEm = null; } }
+  }
+  (r.perigos||[]).forEach(h => {
+    ["checkItem", "autoItem"].forEach(k => { const v = Number(h[k]); if (!v) return;
+      if (v === 12){ h[k] = ""; h.revisar = "Este perigo vinha do item 12 do checklist (forma de trabalho que predispõe a acidentes), que foi retirado. Confira se ele continua."; }
+      else if (v > 12) h[k] = v - 1; });
+    const sid = h.origemCopsoq, s = SUBMAP[sid], tx = TAXMAP[h.codigo], m = r.copsoq?.snapshot?.medias?.[sid];
+    if (s && tx && faixaDe(m) === "ris" && [tx.fonte, (FONTES_ALTERNATIVAS[h.codigo]||[])[0]].includes(String(h.fonte||"").trim()))
+      h.fonte = fonteCopsoqAlta(s, m, r.copsoq.snapshot.nome, tx);
+  });
+  if (r.conclusao){
+    if (r.conclusao.interpretacao) { r.conclusao.interpretacaoAntiga = r.conclusao.interpretacao; delete r.conclusao.interpretacao; }
+    if (typeof r.conclusao.recomendacoes === "string"){ const base = new Set(TXT_RECOMENDACOES.split("\n").map(norm));
+      r.conclusao.recomendacoes = r.conclusao.recomendacoes.split(/\n+/).map(x => x.trim()).filter(x => x && !linhaAuto(x, base)).join("\n"); }
+  }
+  r.padrao = PADRAO_AEP;
+  return r;
+}
+const fonteCopsoqAlta = (s, m, setor, tx) => `Percepção coletiva desfavorável do setor${setor ? " " + setor : ""} no COPSOQ II (${s.nome}: ${num2(m)}, acima de 3,66). ${tx.fonte}`;
+/* Indicadores do setor (Medicina e RH): números agregados, sem identificação */
+const indSetor = a => { const ar = setorDaAEP(a), ind = ar?.ind || {}; const af = Number(ind.afast)||0, ca = Number(ind.canal)||0; return (af || ca) ? { af, ca, periodo: ind.periodo || "", fonte: ind.fonte || "" } : null; };
 /* Perigos de exigência esperados em posto administrativo e ainda não lançados */
 const esperadosFaltando = a => a.checklistAdm === "sim" ? PERIGOS_ADM_ESPERADOS.filter(c => !(a.perigos||[]).some(h => h.codigo === c)) : [];
 /* Perigo de deficiência lançado com todos os itens do checklist ligados a ele conformes (nenhum marcado Sim) */
@@ -887,7 +969,7 @@ const prefixosFonte = cod => [TAXMAP[cod]?.fonte, ...(FONTES_ALTERNATIVAS[cod]||
 const temPrefixoPadrao = h => prefixosFonte(h.codigo).some(p => String(h.fonte||"").trim().startsWith(p));
 const FONTES_ANTIGAS = {"OT-01": "Execução de tarefas sob volume de demanda e ritmo impostos pelo processo produtivo, com restrição de pausas voluntárias de recuperação.", "OT-04": "Execução de tarefa fragmentada e de ciclo curto, sob método rígido, sem variabilidade ou rodízio de atividades.", "OT-05": "Execução de tarefa com exigência elevada de atenção, memória ou tomada de decisão, sem recursos de regulação (autonomia, pausas, suporte) suficientes para amortecê-la.", "OT-12": "Execução de tarefa que exige lidar com sofrimento, agressividade ou risco de terceiros, sem suporte emocional estruturado disponível.", "BIO-01": "Permanência em postura extrema ou estática prolongada durante a atividade, sem alternância postural ou pausas de recuperação suficientes.", "BIO-02": "Execução de movimentos articulares repetitivos de membros superiores em ciclo curto, sem tempos de recuperação muscular adequados.", "BIO-03": "Aplicação de força manual elevada (empurrar, puxar ou preensão) sem dispositivo auxiliar ou balancim disponível no posto.", "BIO-04": "Manuseio e transporte manual não eventual de cargas, com pega distante do centro de gravidade do corpo e sem disponibilidade de auxílio mecânico no posto.", "BIO-07": "Operação de equipamento ou permanência em estrutura com transmissão de vibração ao corpo, sem sistema de amortecimento eficaz.", "AMB-03": "Permanência em ambiente com ruído de fundo que interfere na comunicação ou concentração, sem controle de fonte.", "AMB-04": "Permanência em posto sujeito a vibração transmitida por piso ou estrutura predial, sem isolamento ou amortecimento."};
 function completar(a){
-  const r = clone(a||{});
+  const r = migrarAEP(clone(a||{}));
   r.status = r.status || "nao_iniciada";
   r.meta = Object.assign({ cargo:"", setor:"", area:"", eg:"", setorCopsoq:"", cargosAbrangidos:"", justAgrup:"", turnos:"", nTrab:"", data:"", analista: S.config.analista||"", registroAnalista: S.config.registroAnalista||"" }, r.meta||{});
   if (!r.meta.analista) r.meta.analista = S.config.analista || "";
@@ -909,7 +991,7 @@ function completar(a){
   r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
   DOMINIOS.forEach(d => { const dd = r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); if (CONCL_ANTIGAS[dd.concl]) dd.concl = CONCL_ANTIGAS[dd.concl]; });
   r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
-  r.conclusao = Object.assign({ interpretacao:"", parecer:"", recomendacoes: TXT_RECOMENDACOES, oportunidades:"" }, r.conclusao||{});
+  r.conclusao = Object.assign({ parecer:"", recomendacoes: "", oportunidades:"" }, r.conclusao||{});
   /* 29/09/2026: "Oportunidades de melhoria" passou a fazer parte de "Recomendações e oportunidades de melhoria".
      O texto antigo é acrescentado ao campo único uma vez só; o original fica guardado em conclusao.oportunidades. */
   if (!r.conclusao.unificado){
@@ -935,8 +1017,8 @@ async function iniciar(){
   try { S.assets = await window.claude.use("assets"); } catch(e){ S.assets = null; }
   try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
   db.collection("aeps").onSnapshot(snap => {
-    const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); });
-    S.aeps = m; S.carregado = true;
+    const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
+    S.aeps = m; S.padraoPend = velhas; S.carregado = true;
     if (S.view === "home") atualizarHome(); else if (S.view === "painel") render();
   }, () => setSaveState("Erro ao ler dados"));
   db.collection("copsoq").onSnapshot(snap => {
@@ -953,7 +1035,7 @@ async function salvarAEP(){
   if (!S.draft || !S.dirty) return;
   numerarRiscos(S.draft);
   S.draft.atualizadoEm = new Date().toISOString();
-  const corpo = clone(S.draft); S.aeps[corpo.id] = corpo;
+  const corpo = clone(S.draft); S.aeps[corpo.id] = corpo; if (S.padraoPend) S.padraoPend.delete(corpo.id);
   if (!S.db){ S.dirty = false; return; }
   setSaveState("Salvando…");
   try { await S.db.doc("aeps/" + corpo.id).set(corpo); S.dirty = false; setSaveState("Salvo"); }
@@ -1003,7 +1085,7 @@ function pendencias(a){
   (a.perigos||[]).forEach(h => { if (/\[[^\]]*\]/.test(h.fonte||"")) p[4].push(`${h.idRisco||h.codigo}: complete os trechos entre colchetes da fonte geradora`); });
   perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
-  if (!a.conclusao?.interpretacao) p[5].push("Escolher a interpretação da AEP");
+  (a.perigos||[]).forEach(h => { if (h.revisar) p[4].push(`${h.idRisco||h.codigo}: vinha do item 12 do checklist, que foi retirado. Confira o perigo e salve-o de novo`); });
   if (!a.aet?.decisao) p[5].push("Registrar a decisão sobre AET");
   if (!a.aet?.justificativa?.trim()) p[5].push("Justificar a decisão sobre AET");
   if (a.aet?.decisao === "sim" && [TXT_JUST_AET_NAO, TXT_JUST_AET_NAO_SEM].includes((a.aet.justificativa||"").trim())) p[5].push("A justificativa é o texto padrão de AET não acionada, mas a decisão é Sim");
@@ -1016,7 +1098,7 @@ const totalPend = p => Object.values(p).reduce((s,l) => s + l.length, 0);
 /* Mesmo alerta da coluna N da aba AEP */
 function alertaAET(a){
   if (a.status !== "concluida") return "";
-  const crit = ["Existem condições ergonômicas críticas na atividade","Necessita de melhorias"].includes(a.conclusao?.interpretacao);
+  const crit = classeAEP(completar(a)) !== "adequada";
   if (crit && !a.aet?.decisao) return "Concluída com achado relevante e sem decisão de AET";
   if (!a.aet?.decisao) return "Decisão de AET não registrada";
   if (a.aet?.decisao === "sim" && !a.aet?.justificativa) return "AET acionada sem justificativa";
@@ -1094,7 +1176,7 @@ function atualizarHome(){
   const tb = $("#tbody-aeps"), ct = $("#contagem");
   if (!tb || !ct) { render(); return; }
   const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
-  atualizarSel(lista); 
+  atualizarSel(lista); { const pb = $("#padraobox"); if (pb) pb.innerHTML = vPadraoBanner(); }
   const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
 }
 /* Seleção de uma ou mais gerências (setor da AEP). O mesmo filtro vale para a lista, a aba Gerências e o detalhamento do Painel. */
@@ -1124,6 +1206,7 @@ function vHome(){
     <div class="row"><button class="btn" type="button" data-act="toggleExport">Exportar para o PGR</button><button class="btn primary" type="button" data-act="nova">+ Nova AEP</button></div>
   </div>
   ${aviso}
+  <div id="padraobox">${vPadraoBanner()}</div>
   <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
@@ -1227,6 +1310,13 @@ async function concluirCampo(){
   const falta = ckLista(a).filter(x => !x.c.r).length;
   toast(falta ? `Coleta registrada. Ficaram ${falta} item(ns) do checklist sem resposta.` : "Coleta registrada. A AEP está pronta para a redação na mesa.");
   S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 });
+}
+function vPadraoBanner(){
+  const n = S.padraoPend ? S.padraoPend.size : 0; if (!n || !S.dbOk) return "";
+  return `<div class="note warn" style="margin-bottom:14px"><b>${n} AEP(s) gravadas no padrão anterior.</b> Na tela elas já aparecem no padrão novo; falta gravar no banco.
+    O padrão novo retira o item 12 do checklist (os itens seguintes sobem uma posição), escreve a conclusão a partir dos fatos da AEP, monta sozinho as recomendações fixas e redige o perigo do COPSOQ alto como percepção coletiva do setor.
+    Vale para concluídas, em revisão, em andamento e não iniciadas. A situação de cada AEP não muda, exceto se o item 12 estava marcado Sim: aí ela volta para revisão. Antes de gravar, o sistema baixa uma cópia de segurança.
+    <div style="margin-top:8px">${S.confirm === "padrao" ? `<span class="confirm">Gravar o padrão novo em ${n} AEP(s)? <button class="btn small primary" type="button" data-act="padraoTodasSim" id="btnPadrao">Gravar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small primary" type="button" data-act="padraoTodas">Gravar o padrão novo em todas</button>`}</div></div>`;
 }
 function vExportPanel(){
   const ghes = Array.from(new Set(Object.values(S.aeps).map(a => a.meta?.eg).filter(Boolean).map(String))).sort();
@@ -1417,7 +1507,7 @@ function vOutrosPerigos(a){
   const l = (a.perigos||[]).filter(h => !itensDoPerigo(a, h).length);
   if (!l.length) return "";
   return `<div class="note" style="margin-top:4px;font-size:12.5px"><b>Outros perigos lançados nesta AEP (${l.length})</b>, sem item crítico marcado: ${l.map(h => `<span class="code" style="white-space:nowrap">${esc(h.codigo)}</span> ${esc(TAXMAP[h.codigo]?.nome || "")}${h.origemCopsoq ? " (COPSOQ)" : ""}`).join("; ")}.
-    <br><span class="muted">Eles seguem para a planilha normalmente. Marque Sim neste item só se houver outra condição crítica que os itens 1 a 13 não cobrem.</span></div>`;
+    <br><span class="muted">Eles seguem para a planilha normalmente. Marque Sim neste item só se houver outra condição crítica que os itens 1 a 12 não cobrem.</span></div>`;
 }
 function st4(){
   const a = S.draft;
@@ -1429,12 +1519,12 @@ function st4(){
           ${a.perigos.length ? `<label class="f"><span>Perigo que responde a este item</span><select data-b="checklist.${i}.hz" data-rr="1"><option value="">Automático${(() => { const au = (a.perigos||[]).find(h => (cands.length ? cands.includes(h.codigo) : Number(h.checkItem) === n)); return au ? ` — ${esc(au.idRisco||"")} ${esc(au.codigo)}` : " — nenhum perigo da lista lançado"; })()}</option>${a.perigos.map(h => `<option value="${esc(h.id)}" ${c.hz===h.id?"selected":""}>${esc(h.idRisco||"")} ${esc(h.codigo)} — ${esc(TAXMAP[h.codigo]?.nome||"")}</option>`).join("")}</select>
             <span class="hint">No automático, vale o perigo lançado que está na lista “Aciona” deste item. Escolha outro só se ele responder de fato a este item.</span></label>` : ""}
           ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.idRisco||"")} ${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
-          ${n===13 ? `<p class="hint">Ruído, calor e vibração como exposição ocupacional são agentes da NR-9; na AEP entra o conforto ambiental da NR-17 (AMB).</p>`:""}` : ""}
+          ${n===12 ? `<p class="hint">Ruído, calor e vibração como exposição ocupacional são agentes da NR-9; na AEP entra o conforto ambiental da NR-17 (AMB).</p>`:""}` : ""}
       </div><div class="seg" role="radiogroup" aria-label="Resultado do item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; };
   const idx = Array.from({ length: CHECKLIST.length }, (_,i) => i);
   const optAdm = (v,rot) => `<input type="radio" id="ckadm${v}" name="ckadm" value="${v}" data-b="checklistAdm" data-rr="1" ${a.checklistAdm===v?"checked":""}><label for="ckadm${v}">${rot}</label>`;
   const rows = idx.slice(0, CK_N_BASE).map(linha).join("") +
-    `<div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div class="stack tight"><p><b>${esc(CK_ADM_PERGUNTA)}</b></p><p class="tiny faint">Se Sim, abrem os itens 15 a 19, específicos do posto informatizado.</p></div><div class="seg" role="radiogroup" aria-label="Posto informatizado / administrativo">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>` +
+    `<div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div class="stack tight"><p><b>${esc(CK_ADM_PERGUNTA)}</b></p><p class="tiny faint">Se Sim, abrem os itens 14 a 18, específicos do posto informatizado.</p></div><div class="seg" role="radiogroup" aria-label="Posto informatizado / administrativo">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>` +
     (a.checklistAdm === "sim" ? idx.slice(CK_N_BASE).map(linha).join("") : "");
   const ativos = ckLista(a), sim = ativos.filter(x => x.c.r==="sim").length, semResp = ativos.filter(x => !x.c.r).length;
   return stepHead(2,"Checklist NR-17 — desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: o perigo correspondente é lançado sozinho (uma linha por item) com o que você descrever em “O que foi observado”. Confira na etapa 4.") +
@@ -1453,6 +1543,9 @@ function st5(){
       <br>Resultados divulgados apenas para grupos com, no mínimo, 5 respondentes, por confidencialidade.
       ${desatual ? `<br><button class="btn small" type="button" data-act="atualizarSnap" style="margin-top:6px">Atualizar com as notas atuais do setor</button>` : ""}</div>`
     : `<div class="note warn">Esta AEP não tem setor COPSOQ ligado (etapa 1). Informe o resultado de cada domínio manualmente.</div>`;
+  const ind = indSetor(a);
+  const notaInd = ind ? `<div class="note warn" style="margin-top:10px"><b>Indicadores do setor:</b> ${ind.af ? `${ind.af} afastamento${ind.af > 1 ? "s" : ""} por saúde mental` : ""}${ind.af && ind.ca ? " e " : ""}${ind.ca ? `${ind.ca} registro${ind.ca > 1 ? "s" : ""} no canal de denúncia` : ""}${ind.periodo ? ` (${esc(ind.periodo)})` : ""}${ind.fonte ? `, fonte: ${esc(ind.fonte)}` : ""}.
+    <br>Nas subescalas da faixa intermediária, esse indicador sustenta o lançamento do perigo quando a exigência ou a condição for confirmada. As acima de 3,66 já geram perigo pela percepção coletiva do setor.</div>` : "";
   const blocos = DOMINIOS.map(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq.dominios[d.id], sug = conclusaoSugerida(r);
     const linha = x => { const tx = TAXMAP[x.s.tax], ja = a.perigos.some(h => h.origemCopsoq === x.s.id);
       return `<div class="row" style="gap:8px;align-items:flex-start"><span class="chip ${x.f}">${x.f==="ris"?"ALTA · ":""}${esc(x.s.nome)} ${num2(x.m)}</span>
@@ -1488,7 +1581,7 @@ function st5(){
         <div style="margin-top:6px"><button class="btn small primary" type="button" data-act="salvarModelo" ${etapa3Completa(a) ? "" : "disabled"}>Salvar esta etapa como modelo do setor</button>${etapa3Completa(a) ? "" : ` <span class="tiny muted">Disponível quando os 6 domínios tiverem observação e conclusão, sem colchetes.</span>`}</div></div>`;
   const anterior = a.copsoq.antesDoModelo ? `<div class="note"><b>Etapa 3 substituída pelo modelo do setor em ${dataLocal(a.copsoq.antesDoModelo.em)}.</b> O texto que esta AEP tinha antes está guardado.
         ${S.confirm === "voltarAnterior" ? `<span class="confirm">Voltar ao texto anterior nos 6 domínios? Os perigos lançados continuam. <button class="btn small primary" type="button" data-act="voltarAnteriorSim">Voltar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="voltarAnterior">Voltar ao texto anterior</button>`}</div>` : "";
-  return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${painelModelo}${anterior}${antiga}${blocos}</div>`;
+  return stepHead(3,"Integração: COPSOQ × observação em campo","COPSOQ prioriza, AEP caracteriza. Nenhum domínio ou subescala é lançado como perigo: o que entra é o perigo da taxonomia ligado pela ponte.") + `<div class="stack">${decl}${notaInd}${painelModelo}${anterior}${antiga}${blocos}</div>`;
 }
 function st6(){
   const a = S.draft, faltam = ckLista(a).filter(({c,n}) => c.r==="sim" && !perigoDoItem(a, n));
@@ -1603,14 +1696,18 @@ function vFotos(){
     <div class="panel-b stack">${S.assets ? `<label class="drop" id="drop" for="fileFotos"><b>Clique para escolher fotos</b> ou arraste para cá<br><span class="tiny faint">JPG ou PNG, comprimidas no envio</span></label><input type="file" id="fileFotos" accept="image/*" multiple hidden>` : `<div class="note warn">O envio de fotos não está disponível nesta visualização.</div>`}
     <div id="upmsg" class="small muted" aria-live="polite"></div>${F.length ? `<div class="photos">${cards}</div>` : ""}</div></div>`;
 }
+function vConclusaoAuto(a){
+  const c = conclusaoTexto(a), cls = { critica: "bad", melhoria: "warn", adequada: "ok" }[c.classe];
+  return `<div class="f"><span>Conclusão da AEP <span class="faint" style="font-weight:400">escrita pelo sistema a partir do checklist, dos perigos e da decisão de AET</span></span>
+    <div class="conclauto">${c.paragrafos.map(p => `<p>${esc(p)}</p>`).join("")}<div class="note ${cls}" style="margin-top:8px"><b>${esc(c.sintese)}</b></div></div></div>`;
+}
 function st8(){
   const a = S.draft;
   const opt = (v,rot) => `<input type="radio" id="aet-${v}" name="aetdec" value="${v}" data-b="aet.decisao" data-rr="1" ${a.aet.decisao===v?"checked":""}><label for="aet-${v}">${rot}</label>`;
   return stepHead(5,"Interpretação, decisão sobre AET e conclusão","A decisão sobre a AET é registrada em toda AEP, inclusive quando negativa: sem o registro, a ausência de AET parece omissão.") +
   `<div class="stack">
    <div class="panel"><div class="panel-b stack">
-     <label class="f"><span>Interpretação da AEP <em>*</em></span><select data-b="conclusao.interpretacao" data-rr="1"><option value="" ${a.conclusao.interpretacao?"":"selected"}>Escolha…</option>${INTERPRETACOES.map(x => `<option ${a.conclusao.interpretacao===x?"selected":""}>${esc(x)}</option>`).join("")}</select>
-       <span class="hint">Escolha manual do analista.</span></label>
+     <div id="conclusaoAuto">${vConclusaoAuto(a)}</div>
    </div></div>
    <div class="panel"><div class="panel-h"><b>AET acionada?</b><div class="seg" role="radiogroup" aria-label="Decisão sobre AET">${opt("nao","Não, AEP suficiente")}${opt("sim","Sim, AET acionada")}${opt("analise","Em análise")}</div></div>
     <div class="panel-b stack">
@@ -1621,9 +1718,10 @@ function st8(){
     </div></div>
    <div class="panel"><div class="panel-b stack">
       ${fld("conclusao.parecer","Observações complementares",{area:1,rows:5,req:1,ph:"Base da avaliação, condições observadas e condicionantes da conclusão"})}
-      <div><button class="btn small" type="button" data-act="montarRecs">Montar a partir desta AEP</button> <span class="tiny muted">Acrescenta as linhas de gestão, os itens críticos do checklist, as oportunidades de melhoria da etapa 3 e, se houver ação, a linha do Plano de Ação. Não apaga o que já está escrito.</span></div>
+      <div class="recfixas"><b class="small">Recomendações fixas, montadas pelo sistema</b><ul>${recsAuto(a).map(x => `<li>${esc(x)}</li>`).join("")}</ul><span class="tiny muted">As 4 primeiras saem em toda AEP. “Corrigir” aparece para cada item crítico do checklist e “Implementar” quando há item crítico ou condição a melhorar.</span></div>
+      ${recsDaAEP(a).some(x => !recsEspecificas(a).map(norm).includes(norm(x))) ? `<div><button class="btn small" type="button" data-act="montarRecs">Trazer as oportunidades de melhoria da etapa 3</button></div>` : ""}
       ${vRecModelos(a)}
-      ${fld("conclusao.recomendacoes","Recomendações e oportunidades de melhoria",{area:1,rows:8,hint:"Uma por linha. Para uma melhoria em condição não crítica, comece a linha com “Oportunidade de melhoria:”."})}
+      ${fld("conclusao.recomendacoes","Recomendações específicas e oportunidades de melhoria",{area:1,rows:6,hint:"Só o que é próprio deste cargo, uma por linha. Para uma melhoria em condição não crítica, comece a linha com “Oportunidade de melhoria:”."})}
    </div></div></div>`;
 }
 
@@ -1704,6 +1802,13 @@ function vArea(){
     <label class="f"><span>Data do export</span><input id="f-arcorte" type="date" data-b="editArea.dataCorte" value="${esc(ar.dataCorte)}"></label>
     <label class="f spanall"><span>Aplicação</span><input id="f-aronda" type="text" data-b="editArea.onda" value="${esc(ar.onda)}" placeholder="Ex.: aplicação de janeiro/2025"></label>
   </div></div>
+  <div class="panel"><div class="panel-h"><b>Indicadores do setor</b><span class="tiny muted">Números agregados pedidos à Medicina e ao RH, sem nomes. Com algum número acima de zero, as AEPs do setor avisam na etapa 3.</span></div>
+    <div class="panel-b grid g4">
+      <label class="f"><span>Afastamentos por saúde mental</span><input id="f-indaf" type="number" min="0" inputmode="numeric" data-b="editArea.ind.afast" value="${esc(ar.ind?.afast ?? "")}"></label>
+      <label class="f"><span>Registros no canal de denúncia</span><input id="f-indca" type="number" min="0" inputmode="numeric" data-b="editArea.ind.canal" value="${esc(ar.ind?.canal ?? "")}"></label>
+      <label class="f"><span>Período</span><input id="f-indpe" type="text" data-b="editArea.ind.periodo" value="${esc(ar.ind?.periodo ?? "")}" placeholder="Ex.: últimos 12 meses"></label>
+      <label class="f"><span>Fonte</span><input id="f-indfo" type="text" data-b="editArea.ind.fonte" value="${esc(ar.ind?.fonte ?? "")}" placeholder="Ex.: Medicina, out/2026"></label>
+    </div></div>
   <div class="panel"><div class="panel-h"><b>Colar da planilha</b><span class="tiny muted">Uma linha por subescala ou domínio: nome e nota, separados por tabulação ou ponto e vírgula</span></div>
     <div class="panel-b stack tight"><textarea id="f-colar" data-colar="1" rows="4" placeholder="Exigências cognitivas	4,50&#10;Ritmo de trabalho	3,25">${esc(S.colar)}</textarea>
     <div class="row"><button class="btn" type="button" data-act="colar">Importar notas</button><span class="small muted" aria-live="polite">${esc(S.colarMsg)}</span></div></div></div>
@@ -1824,7 +1929,7 @@ function docHTML(a, cfg, fotos, opt={}){
   const porCat = catsTax.map(cat => { const hs = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.cat === cat);
     return `<tr><td>${esc(cat)}</td><td class="c">${hs.length ? `${hs.length} <span class="small">(${[...new Set(hs.map(h => h.codigo))].map(esc).join(", ")})</span>` : "—"}</td></tr>`; }).join("");
   const fotosT = []; for (let i=0;i<fotos.length;i+=2){ fotosT.push(`<tr>${[fotos[i],fotos[i+1]].map((f,k) => f?`<td><div class="cap">${i+k+1} – ${esc(f.titulo||"")}</div><img src="${f.src}" alt=""></td>`:"<td></td>").join("")}</tr>`); }
-  const recs = String(a.conclusao?.recomendacoes||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const recs = recsTodas(a);
   const dec = {nao:"Não, AEP suficiente",sim:"Sim, AET acionada",analise:"Em análise"}[a.aet?.decisao] || "—";
   const gat = (a.aet?.gatilhos||[]).map(k => GATILHOS.find(g=>g[0]===k)).filter(Boolean);
   const corpo = `
@@ -1848,8 +1953,8 @@ function docHTML(a, cfg, fotos, opt={}){
     return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b>: ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
   <h3>Perigos por categoria</h3>
   <table class="t"><thead><tr><th>Categoria (aba TAXONOMIA)</th><th class="c" style="width:150px">Perigos</th></tr></thead><tbody>${porCat}</tbody></table>
-  <h2>Interpretação da AEP quanto à existência de questões ergonômicas críticas</h2>
-  <div class="bar">${esc(a.conclusao?.interpretacao || "—")}</div>
+  <h2>Conclusão</h2>
+  ${(() => { const c = conclusaoTexto(a); return c.paragrafos.map(p => `<p>${esc(p)}</p>`).join("") + `<div class="bar">${esc(c.sintese)}</div>`; })()}
   <h2>Decisão sobre AET (NR-17, 17.3.2)</h2>
   <table class="t"><tr><th style="width:26%">AET acionada?</th><td class="b">${esc(dec)}</td></tr>
   ${gat.length?`<tr><th>Gatilhos</th><td>${gat.map(g=>`${g[0]}) ${esc(g[1])}`).join("<br>")}</td></tr>`:""}
@@ -2084,7 +2189,7 @@ function gerHTML(setor, opt = {}){
 </div>`;
 }
 /* ---------- Dashboard executivo da gerência (aba Gerências) ---------- */
-const CK_CURTO = [null, "Postura em desvio extremo", "Tronco curvado ou torcido por longos períodos", "Trabalho em pé prolongado", "Posição sentada inadequada", "Esforço extremo (marreta, alavanca)", "Alta repetitividade sem recuperação", "Força extrema com mãos, braços ou coluna", "Levantamento acima de 25 kg", "Manuseio frequente de cargas acima de 15 kg", "Empurrar ou puxar cargas muito pesadas", "Ritmo intenso e pressão de tempo", "Método de trabalho que favorece acidentes", "Ruído, calor ou vibração evidentes", "Outras condições críticas", "Posto informatizado improvisado", "Computador defasado para a demanda", "Sistemas com falha de desempenho", "Cadeira degradada ou inadequada", "Condição ambiental inadequada no escritório"];
+const CK_CURTO = [null, "Postura em desvio extremo", "Tronco curvado ou torcido por longos períodos", "Trabalho em pé prolongado", "Posição sentada inadequada", "Esforço extremo (marreta, alavanca)", "Alta repetitividade sem recuperação", "Força extrema com mãos, braços ou coluna", "Levantamento acima de 25 kg", "Manuseio frequente de cargas acima de 15 kg", "Empurrar ou puxar cargas muito pesadas", "Ritmo intenso e pressão de tempo", "Ruído, calor ou vibração evidentes", "Outras condições críticas", "Posto informatizado improvisado", "Computador defasado para a demanda", "Sistemas com falha de desempenho", "Cadeira degradada ou inadequada", "Condição ambiental inadequada no escritório"];
 const ckCurto = n => CK_CURTO[n] || curto(ckTexto(n), 60);
 const ICO = {
   check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
@@ -2323,7 +2428,7 @@ async function exportarPGR(){
 /* =========================================================================
    EVENTOS
    ========================================================================= */
-const completarArea = ar => Object.assign({ id: uid(), nome:"", onda:"", dataCorte: hojeISO(), n:"", dominios:{}, medias:{} }, clone(ar||{}));
+const completarArea = ar => { const r = Object.assign({ id: uid(), nome:"", onda:"", dataCorte: hojeISO(), n:"", dominios:{}, medias:{} }, clone(ar||{})); r.ind = Object.assign({ afast:"", canal:"", periodo:"", fonte:"" }, r.ind||{}); return r; };
 const rootOf = b => /^(editHz|editArea|cfgDraft)\./.test(b) ? S : S.draft;
 
 function atualizarSelectTax(){
@@ -2399,7 +2504,7 @@ function campo(e, isChange){
   setPath(rootOf(b), b, v);
   if (mck){ const msg = ckAuto(S.draft, Number(mck[1]), mck[2], antesCk); if (msg) toast(S.view === "campo" ? msg.replace(/ Descreva o que foi observado e confira na etapa 4\./, " Descreva o que foi observado.") : msg); }
   if (b === "checklistAdm" && v === "nao"){ const a = S.draft, fora = (a.perigos||[]).filter(h => h.autoItem > CK_N_BASE && h.fonte === fonteItem(h.autoItem, a.checklist[h.autoItem-1]?.obs));
-    if (fora.length){ a.perigos = a.perigos.filter(h => !fora.includes(h)); fora.forEach(h => { const c = a.checklist[h.autoItem-1]; if (c && c.hz === h.id) c.hz = ""; }); toast(`${fora.length} perigo(s) automático(s) dos itens 15 a 19 retirado(s).`); } }
+    if (fora.length){ a.perigos = a.perigos.filter(h => !fora.includes(h)); fora.forEach(h => { const c = a.checklist[h.autoItem-1]; if (c && c.hz === h.id) c.hz = ""; }); toast(`${fora.length} perigo(s) automático(s) dos itens 14 a 18 retirado(s).`); } }
   if (b.startsWith("editHz.")) { onHzChange(b, el); return; }
   if (b.startsWith("cfgDraft.")) { setSaveState("Alterações não salvas"); clearTimeout(S.cfgTimer); S.cfgTimer = setTimeout(salvarConfig, 700); return; }
   if (b === "meta.setor" || b === "meta.area"){
@@ -2564,6 +2669,19 @@ document.addEventListener("click", async e => {
     case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; const f = String(S.editHz.fonte||"").trim(), velho = fontePadrao(f); S.editHz.fonte = tx.fonte + (velho ? f.slice(velho.fonte.length) : (f ? " " + f : "")); renderStep(); toast("Texto da planilha recolocado no início. Complemente depois dele."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
     case "modeloTodas": S.confirm = "modeloTodas"; render(); break;
+    case "padraoTodas": S.confirm = "padrao"; { const pb = $("#padraobox"); if (pb) pb.innerHTML = vPadraoBanner(); } break;
+    case "padraoTodasSim": {
+      const alvo = [...(S.padraoPend || [])]; if (!alvo.length) { S.confirm = null; render(); break; }
+      try { const blob = new Blob([JSON.stringify({ geradoEm: new Date().toISOString(), motivo: "antes de gravar o padrão de 15/10/2026", aeps: Object.fromEntries(alvo.map(id => [id, (S.brutas||{})[id] || S.aeps[id]])) })], { type: "application/json" });
+        const el = document.createElement("a"); el.href = URL.createObjectURL(blob); el.download = `copia-antes-do-padrao-novo-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.json`; document.body.appendChild(el); el.click(); el.remove(); } catch(_) {}
+      const b = $("#btnPadrao"); if (b) { b.disabled = true; b.textContent = "Gravando…"; }
+      let n = 0, erro = 0, rev = 0;
+      for (const id of alvo){ const x = S.aeps[id]; if (!x) continue; if (x.revisarItem12 && x.status === "revisao") rev++;
+        if (S.db) { try { await S.db.doc("aeps/" + id).set(x); S.padraoPend.delete(id); n++; } catch(_) { erro++; } } else { S.padraoPend.delete(id); n++; } }
+      S.confirm = null; render();
+      toast(erro ? `Padrão gravado em ${n} AEP(s); ${erro} não salvaram. Clique de novo para tentar.` : `Padrão novo gravado em ${n} AEP(s)${rev ? `; ${rev} ${rev > 1 ? "voltaram" : "voltou"} para revisão por causa do item 12` : ""}.`);
+      break;
+    }
     case "modeloTodasSim": {
       const alvo = conferenciaPerigos().difModelo.map(x => x.a.id); if (!alvo.length) { S.confirm = null; render(); break; }
       try { const blob = new Blob([JSON.stringify({ geradoEm: new Date().toISOString(), motivo: "antes de aplicar o modelo do setor", aeps: Object.fromEntries(alvo.map(id => [id, S.aeps[id]])) })], { type: "application/json" });
