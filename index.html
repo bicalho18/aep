@@ -201,6 +201,51 @@ table.list tr:last-child td{border-bottom:0}
 .ck .i{font-family:var(--f-mono);font-weight:600;color:var(--ink-3);padding-top:2px}
 .ck p{font-size:13px}
 @media (max-width:760px){.ck{grid-template-columns:30px minmax(0,1fr)}.ck .seg{grid-column:2}}
+.msel{position:relative;min-width:0}
+.msel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;padding:7px 12px;border:1px solid var(--rule-strong);border-radius:var(--radius);background:var(--surface);color:var(--ink);font-size:14px;font-weight:400;max-width:100%}
+.msel>summary::-webkit-details-marker{display:none}
+.msel>summary span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.msel>summary::after{content:"";flex:none;width:8px;height:8px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);transform:rotate(45deg) translateY(-2px)}
+.msel[open]>summary{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#f-gerdet .msel-pop{left:auto;right:0}
+.msel-pop{position:absolute;z-index:30;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(420px,calc(100vw - 32px));max-height:min(380px,60vh);overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px}
+.msel-top{display:flex;justify-content:space-between;gap:8px;padding:2px 4px 6px;border-bottom:1px solid var(--rule);margin-bottom:4px}
+.msel-pop label{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:400;color:var(--ink)}
+.msel-pop label:hover{background:var(--surface-2)}
+.msel-pop label input{accent-color:var(--accent);margin:0;width:18px;height:18px;flex:none}
+.msel-pop label span{flex:1}
+.msel-pop label b{font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:12px}
+.msel-pop label:has(input:checked){background:var(--accent-soft)}
+.recm{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 12px;background:var(--surface-2)}
+.recm-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:8px}
+.recm-h b{font-size:13px}
+.rchips{display:flex;flex-wrap:wrap;gap:6px}
+.rchip{border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;min-height:34px}
+.rchip.lig{border-color:var(--accent-line);color:var(--ink);font-weight:600}
+.rchip.lig::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:1px}
+.rchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.rchip[aria-pressed="true"]::before{background:var(--accent-ink)}
+.rlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--rule-strong)}
+.rpill{border:1px dashed var(--accent-line);background:var(--surface);color:var(--ink);border-radius:var(--radius);padding:6px 10px;font-size:13px;cursor:pointer;min-height:34px}
+.rpill:hover{background:var(--accent-soft);border-style:solid}
+.rpill.ok{border:1px solid transparent;background:transparent;color:var(--ink-3);cursor:default}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.ccard{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:14px 16px;min-height:96px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ccard:hover,.ccard:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.ccard b{font-size:15px;line-height:1.3}
+.campo{display:flex;flex-direction:column;gap:14px}
+.cstep{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--rule)}
+.cstep h2{font-size:16px;margin:0}
+.cn{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:var(--surface-2);border:1px solid var(--rule-strong);color:var(--ink-2)}
+.cn.ok{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-ink)}
+.cfotos .panel{border:0;box-shadow:none;margin:0 !important}
+.cfotos .panel .panel-h,.cfotos .panel .panel-b{padding-left:0;padding-right:0}
+.cfoot{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:flex-end;padding:12px 16px;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);box-shadow:0 -6px 20px rgba(0,0,0,.08)}
+.cfoot>span{margin-right:auto}
+.seg.big label{padding:11px 16px;font-size:14px;min-width:54px;text-align:center}
+.campo .ck p{font-size:14px;line-height:1.45}
+.campo textarea,.campo input{font-size:16px}
+@media (max-width:760px){.cfoot .btn{flex:1}.cfoot>span{flex-basis:100%}}
 .fchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule-strong);border-radius:999px;padding:5px 12px;cursor:pointer;background:var(--surface);font-size:13px;color:var(--ink-2)}
 .fchip input{accent-color:var(--accent);margin:0}
 .fchip:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
@@ -262,6 +307,7 @@ table.list tr:last-child td{border-bottom:0}
       <button type="button" data-go="home" id="nav-home">AEPs</button>
       <button type="button" data-go="painel" id="nav-painel">Painel</button>
       <button type="button" data-go="gerencia" id="nav-gerencia">Gerências</button>
+      <button type="button" data-go="campo" id="nav-campo">Coleta de campo</button>
       <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
       <button type="button" data-go="config" id="nav-config">Unidade</button>
     </nav>
@@ -398,47 +444,47 @@ const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar ri
 const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
 /* Modelos de recomendação por tema. "quando": perigos que tornam o tema relevante para a AEP (aparece primeiro e aberto). */
 const REC_MODELOS = [
-  { id:"adm", nome:"Posto informatizado", quando:["BIO-01","BIO-02","BIO-06","EQ-01","EQ-04"], linhas:[
+  { id:"adm", curtos:["Ajuste do posto","Suporte para notebook","Alternar postura","Conservação das cadeiras"], nome:"Posto informatizado", quando:["BIO-01","BIO-02","BIO-06","EQ-01","EQ-04"], linhas:[
     "Orientar os trabalhadores sobre o ajuste do posto informatizado: altura da cadeira, apoio lombar, altura e distância do monitor e posição de teclado e mouse.",
     "Disponibilizar suporte para notebook, com teclado e mouse independentes, quando o notebook for o equipamento principal de trabalho.",
     "Incentivar a alternância de postura ao longo da jornada, intercalando tarefas que permitam levantar e se deslocar.",
     "Verificar periodicamente o ajuste e a conservação das cadeiras, com reposição quando houver desgaste."] },
-  { id:"ope", nome:"Operação de equipamentos móveis", quando:["BIO-07","EQ-03","AMB-04"], linhas:[
+  { id:"ope", curtos:["Inspeção pré-uso da cabine","Ajuste do assento e comandos","Conservação das vias","Critério ergonômico na compra","Acesso à cabine"], nome:"Operação de equipamentos móveis", quando:["BIO-07","EQ-03","AMB-04"], linhas:[
     "Manter a inspeção pré-uso do assento, das regulagens e da climatização da cabine, com registro e encaminhamento das falhas à manutenção.",
     "Orientar os operadores sobre o ajuste do assento e dos comandos no início do turno e na troca de operador.",
     "Manter a conservação das vias e praças de trabalho para reduzir a vibração transmitida ao operador.",
     "Considerar critérios ergonômicos (assento com suspensão, regulagens, acesso à cabine e visibilidade) na especificação de compra e na substituição de equipamentos.",
     "Manter degraus, corrimãos e pontos de apoio do acesso à cabine em condição de uso."] },
-  { id:"man", nome:"Manutenção e oficina", quando:["BIO-03","BIO-04","BIO-05","EQ-05","EQ-02"], linhas:[
+  { id:"man", curtos:["Meios de içamento","Altura das bancadas","Planejar janela de manutenção","Ferramentas adequadas","Revezar tarefas pesadas"], nome:"Manutenção e oficina", quando:["BIO-03","BIO-04","BIO-05","EQ-05","EQ-02"], linhas:[
     "Priorizar dispositivos auxiliares de movimentação e içamento (talhas, carrinhos e mesas elevatórias) para peças e componentes pesados.",
     "Avaliar a altura das bancadas e o uso de apoios ou assentos em serviços prolongados realizados em posição baixa.",
     "Planejar a janela de manutenção considerando o efetivo e o tempo necessários para a execução do serviço.",
     "Manter as ferramentas em bom estado e considerar, na reposição, modelos com pega adequada, menor peso ou menor vibração.",
     "Revezar entre os integrantes da equipe as tarefas com maior exigência de força ou de postura."] },
-  { id:"log", nome:"Almoxarifado e movimentação de materiais", quando:["BIO-04","EQ-02"], linhas:[
+  { id:"log", curtos:["Armazenar entre joelho e ombro","Orientar manuseio de cargas","Carrinhos e paleteiras"], nome:"Almoxarifado e movimentação de materiais", quando:["BIO-04","EQ-02"], linhas:[
     "Organizar o armazenamento mantendo os itens pesados e de uso frequente entre a altura dos joelhos e a dos ombros.",
     "Orientar sobre o manuseio de cargas e sobre pedir ajuda ou equipamento para volumes pesados ou volumosos.",
     "Disponibilizar carrinhos, paleteiras ou outros meios auxiliares adequados ao piso e ao volume transportado."] },
-  { id:"ctl", nome:"Sala de controle e despacho", quando:["EQ-06"], linhas:[
+  { id:"ctl", curtos:["Disposição de telas e rádios","Priorizar alarmes","Substituição nas pausas"], nome:"Sala de controle e despacho", quando:["EQ-06"], linhas:[
     "Revisar a disposição das telas e dos rádios para manter as informações principais no campo visual confortável.",
     "Avaliar com os operadores a priorização dos alarmes do sistema, reduzindo alertas repetidos ou sem ação associada.",
     "Organizar a substituição do operador nas pausas, de modo a permitir a saída do posto."] },
-  { id:"lab", nome:"Laboratório", quando:[], linhas:[
+  { id:"lab", curtos:["Bancadas e banquetas","Revezar preparação de amostras","Transporte de amostras"], nome:"Laboratório", quando:[], linhas:[
     "Avaliar a altura das bancadas e o uso de banquetas com apoio para os pés nas tarefas prolongadas.",
     "Organizar o revezamento entre as etapas de preparação de amostras para reduzir a repetição de movimentos.",
     "Avaliar meios auxiliares para o transporte de amostras entre as áreas do laboratório."] },
-  { id:"amb", nome:"Conforto ambiental", quando:["AMB-01","AMB-02","AMB-03","AMB-04"], linhas:[
+  { id:"amb", curtos:["Iluminação e reflexos","Manutenção da climatização","Ruído de fundo"], nome:"Conforto ambiental", quando:["AMB-01","AMB-02","AMB-03","AMB-04"], linhas:[
     "Avaliar a iluminação do posto e o posicionamento das telas em relação a janelas e luminárias, com uso de persianas quando necessário.",
     "Manter a manutenção periódica dos sistemas de climatização dos ambientes e das cabines.",
     "Avaliar medidas para reduzir o ruído de fundo em ambientes que exigem concentração ou comunicação."] },
-  { id:"org", nome:"Organização do trabalho", quando:["OT-01","OT-04","OT-05","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-12"], linhas:[
+  { id:"org", curtos:["Demanda x efetivo","DDS como escuta","Comunicar mudanças","Capacitação prévia","Programa Equilibrium e canal","Devolutiva do clima"], nome:"Organização do trabalho", quando:["OT-01","OT-04","OT-05","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-12"], linhas:[
     "Acompanhar a distribuição da demanda frente ao efetivo disponível, ajustando as prioridades nos períodos de pico.",
     "Manter o DDS como espaço de alinhamento das tarefas e de escuta das dificuldades da equipe.",
     "Comunicar com antecedência as mudanças que afetam a rotina, a escala ou o posto de trabalho.",
     "Assegurar capacitação prévia sempre que forem introduzidos equipamentos, sistemas ou procedimentos novos.",
     "Reforçar a divulgação do Programa Equilibrium e do canal de denúncia aos trabalhadores.",
     "Manter a devolutiva da pesquisa de clima às equipes e acompanhar as ações dela decorrentes."] },
-  { id:"turno", nome:"Turnos e jornada", quando:["OT-02","OT-03","OT-13"], linhas:[
+  { id:"turno", curtos:["Escalas com antecedência","Orientar sono e alimentação","Acompanhar prorrogações"], nome:"Turnos e jornada", quando:["OT-02","OT-03","OT-13"], linhas:[
     "Manter as escalas divulgadas com antecedência e o respeito aos intervalos e folgas previstos no acordo coletivo.",
     "Orientar os trabalhadores de turno sobre sono, alimentação e hidratação, em especial nas jornadas noturnas.",
     "Acompanhar a ocorrência de prorrogações de jornada e de convocações fora do horário."] }
@@ -472,7 +518,7 @@ const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 const escBr = v => esc(v).replace(/\n/g,"<br>");
 const clone = o => JSON.parse(JSON.stringify(o));
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2)).replace(/[^a-zA-Z0-9-]/g,"");
-const hojeISO = () => new Date().toISOString().slice(0,10);
+const hojeISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 const fmtData = iso => { if(!iso) return "—"; const [y,m,d] = String(iso).slice(0,10).split("-"); return d && m && y ? `${d}/${m}/${y}` : esc(iso); };
 const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 const clamp = n => Math.min(5, Math.max(1, Math.round(Number(n) || 1)));
@@ -826,7 +872,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  busca:"", fStatus:[], fSetor:"", sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
+  busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
 function proximoNumero(){ return Math.max(0, ...Object.values(S.aeps).map(idNum).filter(n => n < 1000)) + 1; }
@@ -859,6 +905,7 @@ function completar(a){
     if (alt && t && f.startsWith(alt + " " + t.fonte)) h.fonte = f.slice(alt.length + 1); });
   r.checklist = CHECKLIST.map((_,i) => Object.assign({ r:"", obs:"" }, (r.checklist||[])[i]||{}));
   r.checklistAdm = r.checklistAdm || "";
+  r.campo = Object.assign({ notas:"", coletor:"", em:"" }, r.campo||{});
   r.copsoq = Object.assign({ snapshot:null, dominios:{} }, r.copsoq||{});
   DOMINIOS.forEach(d => { const dd = r.copsoq.dominios[d.id] = Object.assign({ manual:"", obs:"", concl:"" }, r.copsoq.dominios[d.id]||{}); if (CONCL_ANTIGAS[dd.concl]) dd.concl = CONCL_ANTIGAS[dd.concl]; });
   r.aet = Object.assign({ decisao:"", gatilhos:[], justificativa:"" }, r.aet||{});
@@ -983,8 +1030,9 @@ async function ir(view, extra){
   if (S.view === "aep") await salvarAEP();
   if (S.view === "copsoq" && S.editArea) await salvarArea();
   if (S.view === "config") await salvarConfig();
+  if (S.view === "campo") await salvarAEP();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel" || view === "gerencia") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -999,11 +1047,12 @@ function irEtapa(n){ S.step = n; S.editHz = null; S.confirm = null; renderRail()
    ========================================================================= */
 function render(){
   const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view;
-  ["home","painel","gerencia","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
+  ["home","painel","gerencia","campo","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
   const app = $("#app");
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
   else if (S.view === "gerencia") app.innerHTML = vGerencia();
+  else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
   else if (S.view === "copsoq") app.innerHTML = S.editArea ? vArea() : vAreas();
@@ -1015,7 +1064,7 @@ function listaFiltrada(){
   const t = norm(S.busca);
   return Object.values(S.aeps)
     .filter(a => !S.fStatus.length || S.fStatus.includes(a.status||"nao_iniciada"))
-    .filter(a => !S.fSetor || (a.meta?.setor||"").trim() === S.fSetor)
+    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t))
     .sort((a,b) => idNum(a) - idNum(b));
 }
@@ -1027,7 +1076,7 @@ function linhasHome(lista){
       <td class="mono">${esc(a.numero)}</td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
-      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
+      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
       <td class="num">${ckLista(a).filter(x => x.c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
@@ -1048,9 +1097,25 @@ function atualizarHome(){
   atualizarSel(lista); 
   const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
 }
+/* Seleção de uma ou mais gerências (setor da AEP). O mesmo filtro vale para a lista, a aba Gerências e o detalhamento do Painel. */
+const rotuloSetores = (l, todas = "Todas as gerências") => !l.length ? todas : l.length === 1 ? l[0] : l.length === 2 ? `${l[0]} e ${l[1]}` : `${l.length} gerências`;
+function vMultiSetor(id){
+  const lista = gerencias(), cont = {}; Object.values(S.aeps).forEach(a => { const k = setorNome(a); cont[k] = (cont[k]||0) + 1; });
+  S.fSetor = S.fSetor.filter(s => lista.includes(s));
+  return `<details class="msel" id="${id}"><summary><span data-msel-rot>${esc(rotuloSetores(S.fSetor))}</span></summary>
+    <div class="msel-pop" role="group" aria-label="Gerências"><div class="msel-top"><button type="button" class="btn ghost small" data-act="mselTodas">Mostrar todas</button><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+    ${lista.map(s => `<label><input type="checkbox" data-msel="${esc(s)}" ${S.fSetor.includes(s) ? "checked" : ""}><span>${esc(s)}</span><b>${cont[s]||0}</b></label>`).join("")}</div></details>`;
+}
+function aplicarFiltroSetor(){
+  document.querySelectorAll("[data-msel-rot]").forEach(x => x.textContent = rotuloSetores(S.fSetor));
+  document.querySelectorAll("input[data-msel]").forEach(x => x.checked = S.fSetor.includes(x.dataset.msel));
+  if (S.view === "home") atualizarHome();
+  const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
+  const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
+  const c = $("#campocards"); if (c) c.innerHTML = campoCards();
+}
 function vHome(){
   const todas = Object.values(S.aeps);
-  const setores = Array.from(new Set(todas.map(a => (a.meta?.setor||"").trim()).filter(Boolean))).sort();
   const lista = listaFiltrada();
   const aviso = !S.dbOk && S.carregado ? `<div class="note warn" style="margin-bottom:16px"><b>Banco indisponível nesta visualização.</b> Você pode navegar e testar, mas nada será salvo.</div>` : "";
   return `
@@ -1062,8 +1127,8 @@ function vHome(){
   <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
-    <label class="f span2"><span>Setor</span><select id="f-setor" data-filtro="fSetor"><option value="">Todos</option>${setores.map(s => `<option ${S.fSetor===s?"selected":""}>${esc(s)}</option>`).join("")}</select></label>
-    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">— marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
+    <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
+    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Painel da gerência</button></span></div>
@@ -1071,6 +1136,97 @@ function vHome(){
     ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
   </div>`;
+}
+
+/* =========================================================================
+   COLETA DE CAMPO (tablet): tela curta para o auxiliar registrar o que viu.
+   Grava na própria AEP: checklist, fotos e anotações. A redação fica para a mesa.
+   ========================================================================= */
+const lsGet = k => { try { return localStorage.getItem(k) || ""; } catch(_){ return ""; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(_){} };
+function vNotasCampo(a){
+  const c = a?.campo; if (!c || !(c.notas||"").trim()) return "";
+  return `<div class="spanall note" style="white-space:pre-wrap"><b>Anotações da coleta de campo</b>${c.coletor ? ` por ${esc(c.coletor)}` : ""}${c.em ? ` em ${fmtData(c.em.slice(0,10))}` : ""}<br>${esc(c.notas)}</div>`;
+}
+function campoLista(){
+  const t = norm(S.campoBusca || "");
+  return Object.values(S.aeps)
+    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .filter(a => S.campoTodas || (a.status||"nao_iniciada") !== "concluida")
+    .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area}`).includes(t))
+    .sort((a, b) => idNum(a) - idNum(b));
+}
+function campoCards(){
+  const l = campoLista();
+  if (!l.length) return `<div class="empty">${S.carregado ? "Nenhuma AEP neste filtro." : "Carregando…"}</div>`;
+  return l.map(a => { const st = a.status || "nao_iniciada", ck = (a.checklist||[]).filter(c => c && c.r).length, ft = (a.fotos||[]).length;
+    return `<button type="button" class="ccard" data-act="campoAbrir" data-id="${esc(a.id)}">
+      <span class="mono tiny faint">${esc(a.numero)}</span><b>${esc(a.meta?.cargo || "Sem cargo")}</b>
+      <span class="small muted">${esc(setorNome(a))}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</span>
+      <span class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px"><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<span class="chip done">Coletada ${fmtData(a.campo.em.slice(0,10))}</span>` : ""}${ck ? `<span class="tiny faint">${ck} itens respondidos</span>` : ""}${ft ? `<span class="tiny faint">${ft} foto${ft > 1 ? "s" : ""}</span>` : ""}</span></button>`; }).join("");
+}
+function vCampoLista(){
+  return `<div class="pagehead"><div><h1>Coleta de campo</h1><p>Para usar no tablet durante a observação. Escolha o cargo, responda o checklist, tire as fotos e anote o que viu. A redação da AEP fica para a mesa.</p></div></div>
+  <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
+    <label class="f span2"><span>Buscar cargo</span><input type="search" id="f-cbusca" data-cbusca="1" value="${esc(S.campoBusca||"")}" placeholder="Cargo, ID ou área"></label>
+    <div class="f span2"><span>Gerência / setor</span>${vMultiSetor("f-csetor")}</div>
+    <label class="row small spanall" style="gap:8px;cursor:pointer"><input type="checkbox" data-ctodas="1" ${S.campoTodas ? "checked" : ""}> Mostrar também as concluídas</label>
+  </div></div>
+  <div class="cgrid" id="campocards">${campoCards()}</div>`;
+}
+function vCampoShell(){
+  const a = S.draft;
+  return `<div class="aeptitle" style="flex-wrap:wrap"><button class="btn ghost" type="button" data-act="campoVoltar">← Cargos</button>
+    <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> ${esc(a.meta.cargo || "Sem cargo")}</h1>
+    <span class="small muted" style="margin-left:auto">${esc(setorNome(a))}${a.meta.area ? " · " + esc(a.meta.area) : ""}</span></div>
+  <div id="campobody" class="campo"></div>`;
+}
+function renderCampo(){
+  const el = $("#campobody"); if (!el || !S.draft) return; const a = S.draft;
+  const ativos = ckLista(a), semResp = ativos.filter(x => !x.c.r).length, nSim = ativos.filter(x => x.c.r === "sim").length;
+  const linha = i => { const n = i + 1, c = a.checklist[i];
+    const opt = (v, rot, cls = "") => `<input type="radio" id="cc${n}${v}" name="cc${n}" value="${v}" data-b="checklist.${i}.r" data-rr="1" class="${cls}" ${c.r === v ? "checked" : ""}><label for="cc${n}${v}">${rot}</label>`;
+    return `<div class="ck ${c.r === "sim" ? "sim" : ""}"><span class="i">${String(n).padStart(2,"0")}</span>
+      <div class="stack tight"><p>${esc(CHECKLIST[i])}</p>${n === CK_N_BASE ? `<p class="tiny faint">Marque Sim só se houver outra condição crítica que os itens acima não cobrem. Os outros perigos ficam nas anotações.</p>` : ""}
+      ${c.r === "sim" ? `<label class="f"><span>O que foi observado</span><textarea id="f-checklist.${i}.obs" data-b="checklist.${i}.obs" rows="2" placeholder="Onde, quanto tempo, quanto peso, com que frequência">${esc(c.obs)}</textarea></label>` : ""}</div>
+      <div class="seg big" role="radiogroup" aria-label="Item ${n}">${opt("sim","Sim","s-sim")}${opt("nao","Não")}${opt("na","N.A.")}</div></div>`; };
+  const idx = Array.from({ length: CHECKLIST.length }, (_, i) => i);
+  const optAdm = (v, rot) => `<input type="radio" id="ccadm${v}" name="ccadm" value="${v}" data-b="checklistAdm" data-rr="1" ${a.checklistAdm === v ? "checked" : ""}><label for="ccadm${v}">${rot}</label>`;
+  const passo = (n, t, ok) => `<div class="cstep"><span class="cn ${ok ? "ok" : ""}">${ok ? "✓" : n}</span><h2>${t}</h2></div>`;
+  const okDados = !!(a.meta.data && (a.campo.coletor||"").trim()), okCk = !semResp && !!a.checklistAdm, okFt = (a.fotos||[]).length > 0, okNotas = !!(a.campo.notas||"").trim();
+  el.innerHTML = `
+  <section class="panel">${passo(1, "Dados da observação", okDados)}<div class="panel-b grid g4">
+    ${fld("meta.data", "Data", { type: "date", cls: "span2" })}${fld("campo.coletor", "Quem coletou", { cls: "span2", ph: "Seu nome" })}
+    ${fld("meta.turnos", "Turno observado", { cls: "span2", ph: "Ex.: turno A, 07h às 15h" })}${fld("meta.nTrab", "Trabalhadores no cargo", { type: "number", cls: "span2" })}
+  </div></section>
+  <section class="panel">${passo(2, "Anotações da atividade", okNotas)}<div class="panel-b">
+    ${fld("campo.notas", "O que você viu e ouviu", { area: 1, rows: 7, ph: "Tarefas do dia, ferramentas e equipamentos, cargas e distâncias, tempos e pausas, posturas, o que o trabalhador relatou, outros perigos percebidos" })}
+  </div></section>
+  <section class="panel">${passo(3, `Checklist NR-17 <span class="small muted" style="font-weight:400">${nSim ? `${nSim} crítico${nSim > 1 ? "s" : ""}` : ""}${semResp ? `${nSim ? ", " : ""}${semResp} sem resposta` : ""}</span>`, okCk)}<div class="panel-b stack tight">
+    ${semResp ? `<div><button class="btn small" type="button" data-act="ckRestoNao">Marcar os ${semResp} sem resposta como Não</button></div>` : ""}
+    <div class="ckl">${idx.slice(0, CK_N_BASE).map(linha).join("")}
+      <div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div><p><b>${esc(CK_ADM_PERGUNTA)}</b></p></div><div class="seg big" role="radiogroup" aria-label="Posto informatizado">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>
+      ${a.checklistAdm === "sim" ? idx.slice(CK_N_BASE).map(linha).join("") : ""}</div>
+  </div></section>
+  <section class="panel cfotos">${passo(4, "Fotos", okFt)}<div class="panel-b" style="padding-top:0">${vFotos()}</div></section>
+  <div class="cfoot"><span class="small muted">${a.campo.em ? `Coleta registrada em ${fmtData(a.campo.em.slice(0,10))}. Pode continuar editando.` : "Tudo é salvo sozinho enquanto você preenche."}</span>
+    <button class="btn" type="button" data-act="campoEditor">Abrir no editor</button>
+    <button class="btn primary" type="button" data-act="campoConcluir">${a.campo.em ? "Registrar de novo e voltar" : "Concluir coleta"}</button></div>`;
+}
+async function abrirCampo(id){
+  const a = S.aeps[id]; if (!a) return;
+  S.draft = completar(a); S.aepId = id; S.editHz = null; S.dirty = false; S.confirm = null;
+  if (!S.draft.meta.data) { S.draft.meta.data = hojeISO(); }
+  if (!S.draft.campo.coletor) S.draft.campo.coletor = lsGet("aep.coletor");
+  render(); window.scrollTo({ top: 0 });
+}
+async function concluirCampo(){
+  const a = S.draft; if (!a) return;
+  if ((a.campo.coletor||"").trim()) lsSet("aep.coletor", a.campo.coletor.trim());
+  a.campo.em = new Date().toISOString(); marcar(); await salvarAEP();
+  const falta = ckLista(a).filter(x => !x.c.r).length;
+  toast(falta ? `Coleta registrada. Ficaram ${falta} item(ns) do checklist sem resposta.` : "Coleta registrada. A AEP está pronta para a redação na mesa.");
+  S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 });
 }
 function vExportPanel(){
   const ghes = Array.from(new Set(Object.values(S.aeps).map(a => a.meta?.eg).filter(Boolean).map(String))).sort();
@@ -1236,7 +1392,7 @@ const fld = (b, rotulo, o={}) => {
   if (o.area) return `<label${cls}><span>${rotulo}${req}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||4}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${hint}</label>`;
   return `<label${cls}><span>${rotulo}${req}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}" ${o.type==="number"?'min="0" inputmode="numeric"':""}>${hint}</label>`;
 };
-function renderStep(){ const el = $("#stepbody"); if (!el || !S.draft) return; el.innerHTML = [null, st1, st4, st5, st6, st8][S.step]() + stepNav(); }
+function renderStep(){ if (S.view === "campo") { renderCampo(); return; } const el = $("#stepbody"); if (!el || !S.draft) return; el.innerHTML = [null, st1, st4, st5, st6, st8][S.step]() + stepNav(); }
 
 function vSetorCop(){
   const m = S.draft.meta, auto = setorPeloDepara(m.setor, m.area), setores = Object.values(S.areas).map(a => a.nome).sort();
@@ -1252,15 +1408,23 @@ function st1(){
     ${fld("meta.setor","Setor",{req:1,cls:"span2"})}${fld("meta.area","Área",{cls:"span2"})}
     <div class="spanall" id="setorcop">${vSetorCop()}</div>
     ${fld("meta.analista","Responsável técnico",{req:1,cls:"span2"})}${fld("meta.registroAnalista","Qualificação / registro",{cls:"span2"})}
+    ${vNotasCampo(S.draft)}
     ${fld("trabalho.sumaria","Descrição sumária da atividade",{area:1,rows:9,req:1,cls:"spanall"})}
   </div></div>`;
+}
+/* Item 14 (Outros): informa os perigos lançados que não estão ligados a nenhum item crítico. Não marca o item nem conta como desqualificação. */
+function vOutrosPerigos(a){
+  const l = (a.perigos||[]).filter(h => !itensDoPerigo(a, h).length);
+  if (!l.length) return "";
+  return `<div class="note" style="margin-top:4px;font-size:12.5px"><b>Outros perigos lançados nesta AEP (${l.length})</b>, sem item crítico marcado: ${l.map(h => `<span class="code" style="white-space:nowrap">${esc(h.codigo)}</span> ${esc(TAXMAP[h.codigo]?.nome || "")}${h.origemCopsoq ? " (COPSOQ)" : ""}`).join("; ")}.
+    <br><span class="muted">Eles seguem para a planilha normalmente. Marque Sim neste item só se houver outra condição crítica que os itens 1 a 13 não cobrem.</span></div>`;
 }
 function st4(){
   const a = S.draft;
   const linha = i => { const txt = CHECKLIST[i], c = a.checklist[i], n = i+1, vinc = perigoDoItem(a, n), cands = CK_PERIGOS[n];
     const opt = (v,rot,cls="") => `<input type="radio" id="ck${n}${v}" name="ck${n}" value="${v}" data-b="checklist.${i}.r" data-rr="1" class="${cls}" ${c.r===v?"checked":""}><label for="ck${n}${v}">${rot}</label>`;
     return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
-      <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}
+      <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}${n === CK_N_BASE ? vOutrosPerigos(a) : ""}
         ${c.r==="sim" ? `${fld(`checklist.${i}.obs`,"O que foi observado",{area:1,rows:2})}
           ${a.perigos.length ? `<label class="f"><span>Perigo que responde a este item</span><select data-b="checklist.${i}.hz" data-rr="1"><option value="">Automático${(() => { const au = (a.perigos||[]).find(h => (cands.length ? cands.includes(h.codigo) : Number(h.checkItem) === n)); return au ? ` — ${esc(au.idRisco||"")} ${esc(au.codigo)}` : " — nenhum perigo da lista lançado"; })()}</option>${a.perigos.map(h => `<option value="${esc(h.id)}" ${c.hz===h.id?"selected":""}>${esc(h.idRisco||"")} ${esc(h.codigo)} — ${esc(TAXMAP[h.codigo]?.nome||"")}</option>`).join("")}</select>
             <span class="hint">No automático, vale o perigo lançado que está na lista “Aciona” deste item. Escolha outro só se ele responder de fato a este item.</span></label>` : ""}
@@ -1432,11 +1596,11 @@ function vFotos(){
   const F = S.draft.fotos;
   const cards = F.map((f,i) => { const conf = S.confirm === "ft-"+f.id;
     return `<div class="ph"><div class="img"><img data-foto="${esc(f.assetId)}" alt="${esc(f.titulo||"Foto "+(i+1))}" loading="lazy"></div>
-      <div class="cap"><label class="f"><span>Foto ${i+1} — legenda <em>*</em></span><input id="f-ft-${esc(f.id)}" type="text" data-b="fotos.${i}.titulo" value="${esc(f.titulo)}" maxlength="140" placeholder="Ex.: Conferência de parâmetros de furo"></label>
+      <div class="cap"><label class="f"><span>Foto ${i+1}: legenda <em>*</em></span><input id="f-ft-${esc(f.id)}" type="text" data-b="fotos.${i}.titulo" value="${esc(f.titulo)}" maxlength="140" placeholder="Ex.: Conferência de parâmetros de furo"></label>
       <div class="row"><button class="btn small" type="button" data-act="ftGirar" data-id="${esc(f.id)}" data-g="-90" title="Girar para a esquerda" aria-label="Girar a foto ${i+1} para a esquerda">⟲</button><button class="btn small" type="button" data-act="ftGirar" data-id="${esc(f.id)}" data-g="90" title="Girar para a direita" aria-label="Girar a foto ${i+1} para a direita">⟳</button>${i>0?`<button class="btn small" type="button" data-act="ftUp" data-i="${i}" aria-label="Mover para cima">↑</button>`:""}${i<F.length-1?`<button class="btn small" type="button" data-act="ftDown" data-i="${i}" aria-label="Mover para baixo">↓</button>`:""}
         ${conf ? `<span class="confirm">Remover a foto de vez? <button class="btn small danger" type="button" data-act="rmFtSim" data-id="${esc(f.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="rmFt" data-id="${esc(f.id)}" style="margin-left:auto">Remover</button>`}</div></div></div>`; }).join("");
   return `<div class="panel" style="margin-top:8px"><div class="panel-h"><b>Principais ações técnicas da atividade (fotos)</b><span class="tiny muted">Legenda curta em cada foto. No documento saem numeradas, em duas colunas.</span></div>
-    <div class="panel-b stack">${S.assets ? `<label class="drop" id="drop" for="fileFotos"><b>Clique para escolher fotos</b> ou arraste para cá<br><span class="tiny faint">JPG ou PNG — comprimidas no envio</span></label><input type="file" id="fileFotos" accept="image/*" multiple hidden>` : `<div class="note warn">O envio de fotos não está disponível nesta visualização.</div>`}
+    <div class="panel-b stack">${S.assets ? `<label class="drop" id="drop" for="fileFotos"><b>Clique para escolher fotos</b> ou arraste para cá<br><span class="tiny faint">JPG ou PNG, comprimidas no envio</span></label><input type="file" id="fileFotos" accept="image/*" multiple hidden>` : `<div class="note warn">O envio de fotos não está disponível nesta visualização.</div>`}
     <div id="upmsg" class="small muted" aria-live="polite"></div>${F.length ? `<div class="photos">${cards}</div>` : ""}</div></div>`;
 }
 function st8(){
@@ -1469,14 +1633,14 @@ const temasRec = a => { const cod = new Set((a.perigos||[]).map(h => h.codigo));
   return [...REC_MODELOS.filter(lig).map(t => ({ t, lig: true })), ...REC_MODELOS.filter(t => !lig(t)).map(t => ({ t, lig: false }))]; };
 function vRecModelos(a){
   const tem = new Set(String(a.conclusao.recomendacoes||"").split(/\n+/).map(x => norm(x.trim())));
-  const bloco = ({ t, lig }) => { const faltam = t.linhas.filter(x => !tem.has(norm(x))).length;
-    return `<details ${lig || S.recAberto === t.id ? "open" : ""} data-rec-tema="${t.id}" style="border:1px solid var(--line);border-radius:8px;padding:6px 10px">
-      <summary class="small" style="cursor:pointer"><b>${esc(t.nome)}</b>${lig ? ` <span class="chip">ligado aos perigos desta AEP</span>` : ""}</summary>
-      <div class="stack tight" style="gap:6px;margin-top:6px">${t.linhas.map((x, i) => tem.has(norm(x))
-        ? `<div class="small muted" style="padding-left:2px">✓ ${esc(x)}</div>`
-        : `<button class="btn small" type="button" data-act="recAdd" data-t="${t.id}" data-i="${i}" style="text-align:left;white-space:normal">${esc(x)}</button>`).join("")}
-      ${faltam > 1 ? `<div><button class="btn ghost small" type="button" data-act="recAddTema" data-t="${t.id}" style="padding:0">Acrescentar as ${faltam} deste tema</button></div>` : ""}</div></details>`; };
-  return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Modelos de recomendação por tema. Clique na linha para acrescentar; ajuste o texto se precisar.</span>${temasRec(a).map(bloco).join("")}</div>`;
+  const temas = temasRec(a), ab = temas.find(x => x.t.id === S.recAberto);
+  const chips = temas.map(({ t, lig }) => `<button type="button" class="rchip${lig ? " lig" : ""}" data-act="recTema" data-t="${t.id}" aria-pressed="${S.recAberto === t.id}">${esc(t.nome)}</button>`).join("");
+  const corpo = ab ? (() => { const t = ab.t, faltam = t.linhas.filter(x => !tem.has(norm(x))).length;
+    return `<div class="rlist">${t.linhas.map((x, i) => tem.has(norm(x))
+        ? `<span class="rpill ok" title="${esc(x)}">✓ ${esc(t.curtos[i])}</span>`
+        : `<button type="button" class="rpill" data-act="recAdd" data-t="${t.id}" data-i="${i}" title="${esc(x)}">+ ${esc(t.curtos[i])}</button>`).join("")}
+      ${faltam > 1 ? `<button type="button" class="btn ghost small" data-act="recAddTema" data-t="${t.id}">Acrescentar as ${faltam}</button>` : ""}</div>`; })() : "";
+  return `<div class="recm"><div class="recm-h"><b>Modelos prontos</b><span class="tiny muted">Escolha o tema e toque no item para acrescentar. Os destacados combinam com os perigos desta AEP.</span></div><div class="rchips">${chips}</div>${corpo}</div>`;
 }
 /* ---------------- Perigos: ações ---------------- */
 function abrirHz(h){
@@ -1829,8 +1993,11 @@ const setorNome = a => (a.meta?.setor || "").trim() || "Sem setor";
 const gerencias = () => Array.from(new Set(Object.values(S.aeps).map(setorNome))).sort((a, b) => a.localeCompare(b, "pt-BR"));
 const ST_COR = { concluida: "var(--g-c1)", revisao: "var(--g-c2)", andamento: "var(--g-c3)", nao_iniciada: "var(--g-track)" };
 const ST_ORD = ["concluida", "revisao", "andamento", "nao_iniciada"];
+const listaSetores = s => Array.isArray(s) ? s : (s ? [s] : []);
+const tituloGer = s => { const l = listaSetores(s); return !l.length ? "Todas as gerências" : l.length === 1 ? l[0] : `${l.slice(0, -1).join(", ")} e ${l[l.length - 1]}`; };
 function dadosGerencia(setor){
-  const todas = Object.values(S.aeps).filter(a => !setor || setorNome(a) === setor).map(completar).sort((a, b) => idNum(a) - idNum(b));
+  const sl = listaSetores(setor);
+  const todas = Object.values(S.aeps).filter(a => !sl.length || sl.includes(setorNome(a))).map(completar).sort((a, b) => idNum(a) - idNum(b));
   const st = { concluida: 0, revisao: 0, andamento: 0, nao_iniciada: 0 }; todas.forEach(a => st[a.status || "nao_iniciada"]++);
   const val = todas.filter(a => a.status === "concluida" || a.status === "revisao");
   const itens = {}, hz = {}, cat = {}, recs = {}, aet = [], areas = {};
@@ -1877,7 +2044,7 @@ function gerHTML(setor, opt = {}){
   const pend = D.todas.filter(a => !(a.status === "concluida" || a.status === "revisao"));
   const ultima = D.val.map(a => a.concluidoEm ? new Date(a.concluidoEm) : null).filter(Boolean).sort((x, y) => y - x)[0];
   return `<div class="ger">
-  ${opt.print ? `<div class="g-hero">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><div class="k">Painel de ergonomia</div><h1>${esc(setor || "Todas as gerências")}</h1><p>${esc(S.config?.unidade || "Mina de Serra Azul")} · Avaliações Ergonômicas Preliminares (NR-17)</p></div><div class="dt">Atualizado em<b>${new Date().toLocaleDateString("pt-BR")}</b></div></div>` : ""}
+  ${opt.print ? `<div class="g-hero">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><div class="k">Painel de ergonomia</div><h1>${esc(tituloGer(setor))}</h1><p>${esc(S.config?.unidade || "Mina de Serra Azul")} · Avaliações Ergonômicas Preliminares (NR-17)</p></div><div class="dt">Atualizado em<b>${new Date().toLocaleDateString("pt-BR")}</b></div></div>` : ""}
   <div class="g-grid g-kpis">
     <div class="g-card g-kpi"><div class="g-ring">${ring}<div><div class="lb">Cargos avaliados</div><div class="vl">${nVal}<span style="font-size:16px;color:var(--g-ink3);font-weight:600"> de ${tot}</span></div><div class="sb">${D.st.concluida} concluída(s)${D.st.revisao ? `, ${D.st.revisao} em revisão` : ""}</div></div></div></div>
     <div class="g-card g-kpi"><div class="lb">Em andamento</div><div class="vl">${D.st.andamento}</div><div class="sb">${pctTxt(D.st.andamento)} dos cargos</div></div>
@@ -2005,7 +2172,7 @@ function gerExecHTML(setor, opt = {}){
   if (faltam) passos.push(["users", `Liberar ${faltam} cargo${faltam > 1 ? "s" : ""} para avaliação`, `${D.st.andamento} em andamento e ${D.st.nao_iniciada} a iniciar`]);
   if (!passos.length) passos.push(["check", "Área em dia", "Todas as avaliações concluídas e sem ponto crítico em aberto"]);
   return `<div class="gx">
-  <div class="gx-top"><div><h1>${esc(setor || "Todas as gerências")}</h1><p>Ergonomia NR-17 na ${esc(S.config?.unidade || "Mina de Serra Azul")}, atualizado em ${new Date().toLocaleDateString("pt-BR")}</p></div>${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}</div>
+  <div class="gx-top"><div><h1>${esc(tituloGer(setor))}</h1><p>Ergonomia NR-17 na ${esc(S.config?.unidade || "Mina de Serra Azul")}, atualizado em ${new Date().toLocaleDateString("pt-BR")}</p></div>${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}</div>
   <div class="gx-row gx-r1">
     <div class="gx-box"><h2>${ico("check")}Avaliações da área</h2>
       <div class="gx-prog">${ring}<div><div class="big">${nVal} <small>de ${tot}</small></div><div class="cap">cargos com AEP concluída</div></div></div>
@@ -2031,24 +2198,21 @@ function gerExecHTML(setor, opt = {}){
 </div>`;
 }
 function vGerencia(){
-  const lista = gerencias(); if (S.gerSetor == null) S.gerSetor = S.fSetor || "";
-  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px;margin-bottom:18px"><label class="row" style="gap:8px;font-size:13px;font-weight:600;margin-right:auto;max-width:100%;flex-wrap:wrap">Gerência <select id="f-ger" data-ger="1" style="width:auto;max-width:100%;min-width:0">${selGer(lista)}</select></label>
+  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px;margin-bottom:18px"><div class="row" style="gap:8px;font-size:13px;font-weight:600;margin-right:auto;max-width:100%;flex-wrap:wrap">Gerência ${vMultiSetor("f-ger")}</div>
     <button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></div>
-  <style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.gerSetor, { logo: "logo.png" })}</div>`;
+  <style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>`;
 }
-const selGer = lista => `<option value="">Todas as gerências</option>${lista.map(s => `<option ${S.gerSetor === s ? "selected" : ""}>${esc(s)}</option>`).join("")}`;
 /* Detalhamento (aba Painel) */
 function vGerDetalhe(){
-  if (S.gerSetor == null) S.gerSetor = S.fSetor || "";
-  return `<div class="panel"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><b>Detalhamento por gerência</b><span class="row" style="gap:8px;flex-wrap:wrap"><select data-ger="1" aria-label="Gerência" style="width:auto;max-width:100%">${selGer(gerencias())}</select><button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">Salvar em PDF</button></span></div>
-    <div class="panel-b"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.gerSetor, {})}</div></div></div>`;
+  return `<div class="panel"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><b>Detalhamento por gerência</b><span class="row" style="gap:8px;flex-wrap:wrap">${vMultiSetor("f-gerdet")}<button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">Salvar em PDF</button></span></div>
+    <div class="panel-b"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.fSetor, {})}</div></div></div>`;
 }
 async function gerarPDFGerencia(det){
   const btn = $(det ? "#btnPDFgerDet" : "#btnPDFger"); if (!btn || btn.disabled) return; const txt = btn.textContent; btn.disabled = true; btn.textContent = "Preparando…";
   try {
     const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
-    const nome = nomeArquivo(`${det ? "Detalhamento de ergonomia" : "Painel de ergonomia"} - ${S.gerSetor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
-    const corpo = det ? `<style>${GER_CSS}</style>${gerHTML(S.gerSetor, { logo, print: true })}` : `<style>${GX_CSS}</style>${gerExecHTML(S.gerSetor, { logo })}`;
+    const nome = nomeArquivo(`${det ? "Detalhamento de ergonomia" : "Painel de ergonomia"} - ${S.fSetor.length > 2 ? `${S.fSetor.length} gerências` : tituloGer(S.fSetor)} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const corpo = det ? `<style>${GER_CSS}</style>${gerHTML(S.fSetor, { logo, print: true })}` : `<style>${GX_CSS}</style>${gerExecHTML(S.fSetor, { logo })}`;
     await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@600&display=swap">
 <style>@page{size:A4 landscape;margin:9mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${corpo}</body></html>`, nome);
   } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
@@ -2199,7 +2363,9 @@ function onAreaChange(b, el){
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
-  if (el.dataset.ger){ if (!isChange) return; S.gerSetor = el.value; const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.gerSetor, { logo: "logo.png" }); const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.gerSetor, {}); return; }
+  if (el.dataset.cbusca){ if (isChange) return; S.campoBusca = el.value; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
+  if (el.dataset.ctodas){ if (!isChange) return; S.campoTodas = el.checked; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
+  if (el.dataset.msel !== undefined){ if (!isChange) return; const k = el.dataset.msel; S.fSetor = el.checked ? [...new Set([...S.fSetor, k])] : S.fSetor.filter(x => x !== k); aplicarFiltroSetor(); return; }
   if (el.dataset.sel || el.dataset.selall){ if (!isChange) return;
     if (el.dataset.selall) listaFiltrada().forEach(a => el.checked ? S.sel.add(a.id) : S.sel.delete(a.id));
     else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
@@ -2231,7 +2397,7 @@ function campo(e, isChange){
   if (b.startsWith("editArea.")) { setPath(S, b, v); onAreaChange(b, el); return; }
   const mck = /^checklist\.(\d+)\.(r|obs)$/.exec(b), antesCk = mck ? (S.draft.checklist[Number(mck[1])]||{})[mck[2]] : null;
   setPath(rootOf(b), b, v);
-  if (mck){ const msg = ckAuto(S.draft, Number(mck[1]), mck[2], antesCk); if (msg) toast(msg); }
+  if (mck){ const msg = ckAuto(S.draft, Number(mck[1]), mck[2], antesCk); if (msg) toast(S.view === "campo" ? msg.replace(/ Descreva o que foi observado e confira na etapa 4\./, " Descreva o que foi observado.") : msg); }
   if (b === "checklistAdm" && v === "nao"){ const a = S.draft, fora = (a.perigos||[]).filter(h => h.autoItem > CK_N_BASE && h.fonte === fonteItem(h.autoItem, a.checklist[h.autoItem-1]?.obs));
     if (fora.length){ a.perigos = a.perigos.filter(h => !fora.includes(h)); fora.forEach(h => { const c = a.checklist[h.autoItem-1]; if (c && c.hz === h.id) c.hz = ""; }); toast(`${fora.length} perigo(s) automático(s) dos itens 15 a 19 retirado(s).`); } }
   if (b.startsWith("editHz.")) { onHzChange(b, el); return; }
@@ -2251,6 +2417,7 @@ document.addEventListener("input", e => campo(e, false));
 document.addEventListener("change", e => campo(e, true));
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { document.querySelectorAll("details.msel[open]").forEach(dt => { dt.open = false; dt.querySelector("summary")?.focus(); }); return; }
   if (e.key !== "Enter") return;
   const r = e.target.closest && e.target.closest("tr[data-open], tr[data-area]");
   if (r) { e.preventDefault(); r.click(); }
@@ -2264,6 +2431,7 @@ document.addEventListener("drop", e => { const d = e.target.closest && e.target.
 function aposHz(){ S.step = 4; renderRail(); renderStep(); renderAside(); window.scrollTo({top:0}); }
 document.addEventListener("click", async e => {
   const t = e.target; if (!t.closest) return;
+  document.querySelectorAll("details.msel[open]").forEach(dt => { if (!dt.contains(t)) dt.open = false; });
   const go = t.closest("[data-go]"); if (go){ e.preventDefault(); ir(go.dataset.go); return; }
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
   if (t.closest("[data-selcell]")) return;
@@ -2275,7 +2443,13 @@ document.addEventListener("click", async e => {
     case "nova": criarAEP(); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "painelGer": ir("gerencia", { gerSetor: S.fSetor || "" }); break;
+    case "painelGer": ir("gerencia"); break;
+    case "campoAbrir": abrirCampo(d.id); break;
+    case "campoVoltar": await salvarAEP(); S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 }); break;
+    case "campoConcluir": concluirCampo(); break;
+    case "campoEditor": { const id = S.aepId; await salvarAEP(); S.draft = null; await abrirAEP(id); break; }
+    case "mselTodas": S.fSetor = []; aplicarFiltroSetor(); break;
+    case "mselFechar": { const dt = btn.closest("details"); if (dt) dt.open = false; break; }
     case "pdfGerencia": gerarPDFGerencia(); break;
     case "pdfGerDet": gerarPDFGerencia(true); break;
     case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
@@ -2342,6 +2516,7 @@ document.addEventListener("click", async e => {
     }
     case "aplicarModelo": { const ar = setorDaAEP(a); const n = aplicarModelo(a, ar); marcar(); renderStep(); renderRail(); renderAside();
       toast(n ? `${n} domínio(s) preenchido(s) com o modelo do setor.` : "Nenhum domínio vazio: o modelo só preenche o que está em branco."); break; }
+    case "recTema": S.recAberto = S.recAberto === d.t ? "" : d.t; renderStep(); break;
     case "recAdd": case "recAddTema": {
       const t = REC_MODELOS.find(x => x.id === d.t); if (!t) break;
       const atual = String(a.conclusao.recomendacoes||"").split(/\n+/).map(x => x.trim()).filter(Boolean), tem = new Set(atual.map(norm));
