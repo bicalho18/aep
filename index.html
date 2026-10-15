@@ -1180,7 +1180,8 @@ function vPainel(){
       <div class="panel"><div class="panel-h"><b>Alertas</b></div><div class="panel-b stack tight">
         ${alertas.length ? alertas.map(({a,al}) => `<div class="row between"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
       </div></div>
-    </div></div>`;
+    </div></div>
+    <div style="margin-top:16px">${vGerDetalhe()}</div>`;
 }
 
 /* ---------------- Editor ---------------- */
@@ -1876,7 +1877,7 @@ function gerHTML(setor, opt = {}){
   const pend = D.todas.filter(a => !(a.status === "concluida" || a.status === "revisao"));
   const ultima = D.val.map(a => a.concluidoEm ? new Date(a.concluidoEm) : null).filter(Boolean).sort((x, y) => y - x)[0];
   return `<div class="ger">
-  <div class="g-hero">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><div class="k">Painel de ergonomia</div><h1>${esc(setor || "Todas as gerências")}</h1><p>${esc(S.config?.unidade || "Mina de Serra Azul")} · Avaliações Ergonômicas Preliminares (NR-17)</p></div><div class="dt">Atualizado em<b>${new Date().toLocaleDateString("pt-BR")}</b></div></div>
+  ${opt.print ? `<div class="g-hero">${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}<div><div class="k">Painel de ergonomia</div><h1>${esc(setor || "Todas as gerências")}</h1><p>${esc(S.config?.unidade || "Mina de Serra Azul")} · Avaliações Ergonômicas Preliminares (NR-17)</p></div><div class="dt">Atualizado em<b>${new Date().toLocaleDateString("pt-BR")}</b></div></div>` : ""}
   <div class="g-grid g-kpis">
     <div class="g-card g-kpi"><div class="g-ring">${ring}<div><div class="lb">Cargos avaliados</div><div class="vl">${nVal}<span style="font-size:16px;color:var(--g-ink3);font-weight:600"> de ${tot}</span></div><div class="sb">${D.st.concluida} concluída(s)${D.st.revisao ? `, ${D.st.revisao} em revisão` : ""}</div></div></div></div>
     <div class="g-card g-kpi"><div class="lb">Em andamento</div><div class="vl">${D.st.andamento}</div><div class="sb">${pctTxt(D.st.andamento)} dos cargos</div></div>
@@ -1915,22 +1916,143 @@ function gerHTML(setor, opt = {}){
   <p class="g-nota">A graduação do risco e o plano de ação completo constam do inventário de riscos do PGR. Fatores psicossociais aparecem apenas como perigos registrados; os resultados do questionário são tratados de forma coletiva e confidencial pelo SESMT e não são apresentados por gerência.</p>
 </div>`;
 }
+/* ---------- Dashboard executivo da gerência (aba Gerências) ---------- */
+const CK_CURTO = [null, "Postura em desvio extremo", "Tronco curvado ou torcido por longos períodos", "Trabalho em pé prolongado", "Posição sentada inadequada", "Esforço extremo (marreta, alavanca)", "Alta repetitividade sem recuperação", "Força extrema com mãos, braços ou coluna", "Levantamento acima de 25 kg", "Manuseio frequente de cargas acima de 15 kg", "Empurrar ou puxar cargas muito pesadas", "Ritmo intenso e pressão de tempo", "Método de trabalho que favorece acidentes", "Ruído, calor ou vibração evidentes", "Outras condições críticas", "Posto informatizado improvisado", "Computador defasado para a demanda", "Sistemas com falha de desempenho", "Cadeira degradada ou inadequada", "Condição ambiental inadequada no escritório"];
+const ckCurto = n => CK_CURTO[n] || curto(ckTexto(n), 60);
+const ICO = {
+  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  play: '<circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>',
+  hourglass: '<path d="M6 2h12M6 22h12"/><path d="M7 2c0 5 5 6 5 10s-5 5-5 10M17 2c0 5-5 6-5 10s5 5 5 10"/>',
+  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  corpo: '<circle cx="10" cy="4" r="2"/><path d="M10 6.5 8 13l4 2v6"/><path d="M8 13l-3 8"/><path d="M10.5 9.5 16 12"/><rect x="15" y="11" width="6" height="5" rx="1"/>',
+  relogio: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  ferramenta: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  sol: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
+  doc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  alvo: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'
+};
+const ico = (n, cls = "") => `<svg class="gx-i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]}</svg>`;
+const ICO_CAT = { OT: "relogio", BIO: "corpo", EQ: "ferramenta", AMB: "sol" };
+const icoItem = n => ICO_CAT[String((CK_PERIGOS[n]||[])[0] || "BIO").split("-")[0]] || "alert";
+const GX_CSS = `
+.gx{--x-ink:var(--ink,#232323);--x-ink2:var(--ink-2,#4F4F4F);--x-ink3:var(--ink-3,#767676);--x-rule:var(--rule,#E0DFDD);--x-surf:var(--surface,#fff);--x-paper:var(--surface-2,#F8F8F7);
+  --x-o1:#9E3612;--x-o2:#D9622E;--x-o3:#EE9A6C;--x-track:var(--rule,#E7E5E2);--x-soft:var(--accent-soft,#FDF2EC);--x-acc:var(--accent,#C2451A);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--x-ink);font-size:14px;line-height:1.45}
+.gx *{box-sizing:border-box}
+.gx .gx-i{width:22px;height:22px;flex:none}
+.gx-top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:4px solid var(--brand,#EA5B26);padding-bottom:14px;margin-bottom:20px}
+.gx-top h1{margin:0;font-size:30px;line-height:1.1;letter-spacing:-.01em}
+.gx-top p{margin:6px 0 0;color:var(--x-ink3);font-size:13px}
+.gx-top img{height:34px;width:auto;display:block;background:#fff;padding:2px 4px;border-radius:4px}
+.gx-row{display:grid;gap:16px;margin-bottom:16px}
+.gx-r1{grid-template-columns:minmax(300px,1fr) 1.6fr}
+.gx-r2{grid-template-columns:1fr 1fr}
+.gx-box{background:var(--x-surf);border:1px solid var(--x-rule);border-radius:14px;padding:20px 22px;break-inside:avoid}
+.gx-box h2{font-size:16px;margin:0 0 14px;display:flex;align-items:center;gap:8px}
+.gx-box h2 .gx-i{color:var(--x-acc);width:20px;height:20px}
+.gx-prog{display:flex;align-items:center;gap:22px}
+.gx-prog svg.ring{flex:none}
+.gx-prog .big{font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.gx-prog .big small{font-size:18px;color:var(--x-ink3);font-weight:600}
+.gx-prog .cap{margin-top:6px;color:var(--x-ink2)}
+.gx-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--x-track);gap:2px;margin-top:20px}
+.gx-stack i{display:block;height:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-leg{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px;font-size:12.5px;color:var(--x-ink2)}
+.gx-leg span{display:inline-flex;align-items:center;gap:6px}
+.gx-leg i{width:10px;height:10px;border-radius:2px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gx-tile{display:flex;align-items:center;gap:14px;background:var(--x-surf);border:1px solid var(--x-rule);border-radius:14px;padding:16px 18px}
+.gx-tile .ic{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--x-paper);color:var(--x-ink2);flex:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-tile.hot .ic{background:var(--x-soft);color:var(--x-acc);border-color:transparent}
+.gx-tile b{display:block;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.gx-tile span{font-size:13px;color:var(--x-ink2)}
+.gx-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.gx-list li{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center}
+.gx-list .ic{width:36px;height:36px;border-radius:10px;background:var(--x-soft);color:var(--x-acc);display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-list .ic .gx-i{width:20px;height:20px}
+.gx-list .t{font-weight:600;line-height:1.3}
+.gx-list .bar{height:6px;border-radius:3px;background:var(--x-track);margin-top:6px;overflow:hidden}
+.gx-list .bar i{display:block;height:100%;background:var(--x-o2);border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-list .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;line-height:1}
+.gx-list .n small{display:block;font-size:11.5px;font-weight:400;color:var(--x-ink3);margin-top:2px}
+.gx-vazio{display:flex;align-items:center;gap:10px;color:var(--x-ink3);margin:0}
+.gx-vazio .gx-i{color:var(--dot-ok,#2E7D4F)}
+.gx-next{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.gx-step{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--x-paper);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.gx-step .gx-i{color:var(--x-acc);margin-top:1px}
+.gx-step b{display:block;font-size:15px;line-height:1.3}
+.gx-step span{font-size:12.5px;color:var(--x-ink2)}
+.gx-foot{margin:4px 0 0;font-size:11.5px;color:var(--x-ink3)}
+@media screen and (max-width:900px){.gx-r1,.gx-r2{grid-template-columns:1fr}.gx-top{flex-wrap:wrap}.gx-top h1{font-size:24px}}
+@media screen and (max-width:520px){.gx-tiles{grid-template-columns:1fr}.gx-prog{flex-direction:column;align-items:flex-start}}
+@media print{.gx{font-size:12px}.gx-box{padding:10px 14px}.gx-box h2{margin-bottom:8px;font-size:14px}.gx-row{gap:10px;margin-bottom:10px}.gx-top{margin-bottom:10px;padding-bottom:8px}.gx-top h1{font-size:22px}.gx-prog svg.ring{width:96px;height:96px}.gx-prog .big{font-size:34px}.gx-stack{margin-top:10px}.gx-tiles{gap:10px}.gx-tile{padding:10px 14px}.gx-tile b{font-size:24px}.gx-tile .ic{width:38px;height:38px}.gx-list{gap:7px}.gx-list li{grid-template-columns:30px minmax(0,1fr) auto}.gx-list .ic{width:30px;height:30px}.gx-step{padding:9px 12px}.gx-foot{font-size:10px}}
+`;
+function gerExecHTML(setor, opt = {}){
+  const D = dadosGerencia(setor), tot = D.todas.length, nVal = D.val.length, pct = tot ? Math.round(nVal / tot * 100) : 0;
+  const totHz = D.val.reduce((s, a) => s + (a.perigos||[]).length, 0), faltam = D.st.andamento + D.st.nao_iniciada;
+  const ring = (() => { const r = 54, c = 2 * Math.PI * r, f = tot ? nVal / tot : 0;
+    return `<svg class="ring" width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="${pct}% dos cargos avaliados"><circle cx="66" cy="66" r="${r}" fill="none" stroke="var(--x-track)" stroke-width="14"/>${f ? `<circle cx="66" cy="66" r="${r}" fill="none" stroke="var(--x-o1)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${(c * f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 66 66)" style="-webkit-print-color-adjust:exact;print-color-adjust:exact"/>` : ""}<text x="66" y="74" text-anchor="middle" font-size="26" font-weight="700" fill="currentColor">${pct}%</text></svg>`; })();
+  const ROT = { concluida: "Concluídas", revisao: "Em revisão", andamento: "Em andamento", nao_iniciada: "Não iniciadas" }, COR = { concluida: "var(--x-o1)", revisao: "var(--x-o2)", andamento: "var(--x-o3)", nao_iniciada: "var(--x-track)" };
+  const tile = (i, v, t, hot) => `<div class="gx-tile${hot ? " hot" : ""}"><span class="ic">${ico(i)}</span><div><b>${v}</b><span>${t}</span></div></div>`;
+  const top = D.acoes.slice(0, 4), maxA = top.length ? top[0].l.length : 0;
+  const hz = D.hz.slice(0, 5), maxH = hz.length ? hz[0][1] : 0;
+  const linha = (icone, t, v, max, sub) => `<li><span class="ic">${ico(icone)}</span><div><div class="t">${t}</div><div class="bar"><i style="width:${max ? Math.max(6, v / max * 100) : 0}%"></i></div></div><div class="n">${v}<small>${sub}</small></div></li>`;
+  const passos = [];
+  if (D.acoes.length) passos.push(["alvo", `Tratar ${D.acoes.length} ponto${D.acoes.length > 1 ? "s" : ""} crítico${D.acoes.length > 1 ? "s" : ""}`, `em ${D.cargosCk} cargo${D.cargosCk > 1 ? "s" : ""}, pelo Plano de Ação das AEPs`]);
+  if (D.aet.length) passos.push(["doc", `Acompanhar ${D.aet.length} AET`, D.aet.length === 1 ? esc(D.aet[0].meta?.cargo || "") : `${D.aet.length} cargos com análise aprofundada`]);
+  if (faltam) passos.push(["users", `Liberar ${faltam} cargo${faltam > 1 ? "s" : ""} para avaliação`, `${D.st.andamento} em andamento e ${D.st.nao_iniciada} a iniciar`]);
+  if (!passos.length) passos.push(["check", "Área em dia", "Todas as avaliações concluídas e sem ponto crítico em aberto"]);
+  return `<div class="gx">
+  <div class="gx-top"><div><h1>${esc(setor || "Todas as gerências")}</h1><p>Ergonomia NR-17 na ${esc(S.config?.unidade || "Mina de Serra Azul")}, atualizado em ${new Date().toLocaleDateString("pt-BR")}</p></div>${opt.logo ? `<img src="${opt.logo}" alt="ArcelorMittal">` : ""}</div>
+  <div class="gx-row gx-r1">
+    <div class="gx-box"><h2>${ico("check")}Avaliações da área</h2>
+      <div class="gx-prog">${ring}<div><div class="big">${nVal} <small>de ${tot}</small></div><div class="cap">cargos com AEP concluída</div></div></div>
+      <div class="gx-stack" role="img" aria-label="${ST_ORD.map(k => `${ROT[k]}: ${D.st[k]}`).join(", ")}">${ST_ORD.filter(k => D.st[k]).map(k => `<i style="width:${D.st[k] / Math.max(1, tot) * 100}%;background:${COR[k]}"></i>`).join("")}</div>
+      <div class="gx-leg">${ST_ORD.filter(k => D.st[k] || k !== "revisao").map(k => `<span><i style="background:${COR[k]}${k === "nao_iniciada" ? ";outline:1px solid var(--x-rule)" : ""}"></i>${ROT[k]} ${D.st[k]}</span>`).join("")}</div></div>
+    <div class="gx-tiles">
+      ${tile("play", D.st.andamento + D.st.revisao, "em andamento")}
+      ${tile("hourglass", D.st.nao_iniciada, "a iniciar")}
+      ${tile("alert", totHz, "perigos levantados", totHz > 0)}
+      ${tile("flag", D.cargosCk, `cargo${D.cargosCk === 1 ? "" : "s"} com ponto crítico`, D.cargosCk > 0)}
+    </div>
+  </div>
+  <div class="gx-row gx-r2">
+    <div class="gx-box"><h2>${ico("alvo")}Onde agir primeiro</h2>
+      ${top.length ? `<ul class="gx-list">${top.map(x => linha(icoItem(x.n), esc(ckCurto(x.n)), x.l.length, maxA, x.l.length > 1 ? "cargos" : "cargo")).join("")}</ul>`
+        : `<p class="gx-vazio">${ico("check")}Nenhum ponto crítico nas avaliações concluídas.</p>`}</div>
+    <div class="gx-box"><h2>${ico("alert")}Perigos mais presentes</h2>
+      ${hz.length ? `<ul class="gx-list">${hz.map(([cd, v]) => linha(ICO_CAT[cd.split("-")[0]] || "alert", esc(TAXMAP[cd]?.nome || cd), v, maxH, v > 1 ? "cargos" : "cargo")).join("")}</ul>`
+        : `<p class="gx-vazio">${ico("check")}Nenhum perigo registrado nas avaliações concluídas.</p>`}</div>
+  </div>
+  <div class="gx-box" style="margin-bottom:12px"><h2>${ico("flag")}Próximos passos</h2><div class="gx-next">${passos.map(([i, t, s]) => `<div class="gx-step">${ico(i)}<div><b>${t}</b><span>${s}</span></div></div>`).join("")}</div></div>
+  <p class="gx-foot">Resumo das Avaliações Ergonômicas Preliminares concluídas. A graduação do risco e o plano de ação estão no PGR; o detalhamento por cargo e área fica na aba Painel. Resultados do questionário psicossocial não são apresentados por gerência.</p>
+</div>`;
+}
 function vGerencia(){
   const lista = gerencias(); if (S.gerSetor == null) S.gerSetor = S.fSetor || "";
-  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px"><h1 style="margin-right:auto">Painel da gerência</h1>
-    <label class="row" style="gap:8px;font-size:13px;font-weight:600;max-width:100%;flex-wrap:wrap">Gerência <select id="f-ger" data-ger="1" style="width:auto;max-width:100%;min-width:0"><option value="">Todas as gerências</option>${lista.map(s => `<option ${S.gerSetor === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label>
+  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px;margin-bottom:18px"><label class="row" style="gap:8px;font-size:13px;font-weight:600;margin-right:auto;max-width:100%;flex-wrap:wrap">Gerência <select id="f-ger" data-ger="1" style="width:auto;max-width:100%;min-width:0">${selGer(lista)}</select></label>
     <button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></div>
-  <style>${GER_CSS}</style><div id="gerbox">${gerHTML(S.gerSetor, { logo: "logo.png" })}</div>`;
+  <style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.gerSetor, { logo: "logo.png" })}</div>`;
 }
-async function gerarPDFGerencia(){
-  const btn = $("#btnPDFger"); if (!btn || btn.disabled) return; btn.disabled = true; btn.textContent = "Preparando…";
+const selGer = lista => `<option value="">Todas as gerências</option>${lista.map(s => `<option ${S.gerSetor === s ? "selected" : ""}>${esc(s)}</option>`).join("")}`;
+/* Detalhamento (aba Painel) */
+function vGerDetalhe(){
+  if (S.gerSetor == null) S.gerSetor = S.fSetor || "";
+  return `<div class="panel"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><b>Detalhamento por gerência</b><span class="row" style="gap:8px;flex-wrap:wrap"><select data-ger="1" aria-label="Gerência" style="width:auto;max-width:100%">${selGer(gerencias())}</select><button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">Salvar em PDF</button></span></div>
+    <div class="panel-b"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.gerSetor, {})}</div></div></div>`;
+}
+async function gerarPDFGerencia(det){
+  const btn = $(det ? "#btnPDFgerDet" : "#btnPDFger"); if (!btn || btn.disabled) return; const txt = btn.textContent; btn.disabled = true; btn.textContent = "Preparando…";
   try {
     const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
-    const nome = nomeArquivo(`Painel de ergonomia - ${S.gerSetor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const nome = nomeArquivo(`${det ? "Detalhamento de ergonomia" : "Painel de ergonomia"} - ${S.gerSetor || "Todas as gerências"} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const corpo = det ? `<style>${GER_CSS}</style>${gerHTML(S.gerSetor, { logo, print: true })}` : `<style>${GX_CSS}</style>${gerExecHTML(S.gerSetor, { logo })}`;
     await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@600&display=swap">
-<style>@page{size:A4 landscape;margin:9mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}${GER_CSS}</style></head><body>${gerHTML(S.gerSetor, { logo, print: true })}</body></html>`, nome);
+<style>@page{size:A4 landscape;margin:9mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${corpo}</body></html>`, nome);
   } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
-  finally { btn.disabled = false; btn.textContent = "Salvar em PDF"; }
+  finally { btn.disabled = false; btn.textContent = txt; }
 }
 /* Imprime um HTML num quadro escondido, com o nome sugerido do arquivo */
 async function imprimirHTML(html, nome){
@@ -2077,7 +2199,7 @@ function onAreaChange(b, el){
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
-  if (el.dataset.ger){ if (!isChange) return; S.gerSetor = el.value; const g = $("#gerbox"); if (g) g.innerHTML = gerHTML(S.gerSetor, { logo: "logo.png" }); return; }
+  if (el.dataset.ger){ if (!isChange) return; S.gerSetor = el.value; const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.gerSetor, { logo: "logo.png" }); const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.gerSetor, {}); return; }
   if (el.dataset.sel || el.dataset.selall){ if (!isChange) return;
     if (el.dataset.selall) listaFiltrada().forEach(a => el.checked ? S.sel.add(a.id) : S.sel.delete(a.id));
     else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
@@ -2155,6 +2277,7 @@ document.addEventListener("click", async e => {
     case "pdfVarias": gerarPDFVarias(); break;
     case "painelGer": ir("gerencia", { gerSetor: S.fSetor || "" }); break;
     case "pdfGerencia": gerarPDFGerencia(); break;
+    case "pdfGerDet": gerarPDFGerencia(true); break;
     case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
