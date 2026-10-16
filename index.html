@@ -1344,7 +1344,9 @@ function vExportPanel(){
   const n = linhasPGR().length;
   return `<div class="panel" style="margin-bottom:14px"><div class="panel-h"><b>Exportar para o Inventário de Riscos / PGR</b><button class="btn ghost small" type="button" data-act="toggleExport">Fechar</button></div>
     <div class="panel-b stack tight">
-      <p class="small muted">Gera um Excel com as mesmas 26 colunas da aba EXPORTA PGR. As colunas A e B (GHE e cargo) são auxiliares, para achar o bloco: cole da coluna C até a Z. O Id. Risco sai como “AEP nn / Rnn” — renumere na colagem seguindo o bloco do GHE.</p>
+      <div class="note"><b>Ligação com a planilha CONTROLE GERAL AEP 2026.</b> Gera o arquivo que a aba AEP_SISTEMA da planilha lê: todas as AEPs e todos os perigos, com a chave “AEP nn|Rnn”. Salve na pasta configurada na planilha e, nela, use Dados &gt; Atualizar tudo.
+        <div style="margin-top:8px"><button class="btn primary" type="button" data-act="exportarLig" id="btnLig" ${S.downloads ? "" : "disabled"}>Baixar AEP_para_PGR.xlsx</button></div></div>
+      <p class="small muted">Formato antigo, para colar direto no PGR: gera um Excel com as mesmas 26 colunas da aba EXPORTA PGR. As colunas A e B (GHE e cargo) são auxiliares, para achar o bloco: cole da coluna C até a Z. O Id. Risco sai como “AEP nn / Rnn” — renumere na colagem seguindo o bloco do GHE.</p>
       <div class="grid g3">
         <label class="f"><span>Quais AEPs</span><select data-exp="expEscopo"><option value="concluidas" ${S.expEscopo==="concluidas"?"selected":""}>Só as concluídas</option><option value="pendentes" ${S.expEscopo==="pendentes"?"selected":""}>Concluídas ainda não lançadas na planilha</option><option value="todas" ${S.expEscopo==="todas"?"selected":""}>Todas com perigos lançados</option></select></label>
         <label class="f"><span>GHE</span><select data-exp="expGHE"><option value="">Todos os GHEs</option>${ghes.map(g => `<option ${S.expGHE===g?"selected":""}>${esc(g)}</option>`).join("")}</select></label>
@@ -2435,6 +2437,45 @@ function carregarXLSX(){
   });
   return xlsxCarregando;
 }
+/* Arquivo de ligação com a planilha CONTROLE GERAL AEP 2026 (aba AEP_SISTEMA, via Power Query).
+   Uma linha por AEP (chave "AEP nn|") e uma por perigo (chave "AEP nn|Rnn"). Os textos seguem as listas da planilha. */
+const LIG_COLS = ["CHAVE","ID AEP","ID RISCO","CÓDIGO","AGENTE / TIPO","PERIGO / FATOR DE RISCO","FONTE(S) GERADORA(S)","ORIGEM DA EVIDÊNCIA","TÉCNICA UTILIZADA","BASE DO PERIGO","ITEM CRÍTICO DO CHECKLIST","SITUAÇÃO DA AEP","DATA DE CONCLUSÃO","INTERPRETAÇÃO DA AEP","AET ACIONADA?","JUSTIFICATIVA DA AET","CARGO","EG / GHE","ATUALIZADO NO SISTEMA"];
+const LIG_STATUS = { nao_iniciada: "Não iniciada", andamento: "Em andamento", concluida: "Concluída", revisao: "Em revisão" };
+const LIG_INTERP = { critica: "Existem condições ergonômicas críticas na atividade", melhoria: "Necessita de melhorias", adequada: "Não há itens de desqualificação ou condições críticas" };
+const LIG_AET = { nao: "Não — AEP suficiente", sim: "Sim — AET acionada", analise: "Em análise" };
+const LIG_ORIGEM = { observado: "Observação em campo", relatado: "Relato do trabalhador", rotina: "Rotina do cargo", copsoq: "Campo + rastreamento" };
+function linhasLigacao(){
+  const out = [];
+  Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y)).forEach(a => {
+    const st = a.status || "nao_iniciada", fechada = st === "concluida" || st === "revisao", n = String(a.numero||"").trim();
+    const cargo = (a.meta?.cargo||"").trim(), eg = String(a.meta?.eg||""), atu = (a.atualizadoEm||"").slice(0, 10);
+    out.push([`${n}|`, n, "", "", "", "", "", "", "", "", "", LIG_STATUS[st] || "", st === "concluida" && a.concluidoEm ? String(a.concluidoEm).slice(0, 10) : "",
+      fechada ? LIG_INTERP[classeAEP(a)] : "", LIG_AET[a.aet?.decisao] || "", String(a.aet?.justificativa||"").trim(), cargo, eg, atu]);
+    (a.perigos||[]).forEach(h => { const t = TAXMAP[h.codigo]; if (!t || !h.idRisco) return;
+      const base = h.origemCopsoq ? "copsoq" : h.base;
+      out.push([`${n}|${h.idRisco}`, n, h.idRisco, h.codigo, "Ergonomico", t.nome, String(h.fonte||"").trim(), LIG_ORIGEM[base] || "",
+        base === "copsoq" ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)", baseTexto(a, h), itensDoPerigo(a, h).join(", "),
+        LIG_STATUS[st] || "", "", "", "", "", cargo, eg, atu]); });
+  });
+  return out;
+}
+async function exportarLigacao(){
+  if (!S.downloads) return;
+  const btn = $("#btnLig"); if (btn){ btn.disabled = true; btn.textContent = "Gerando…"; }
+  try {
+    const X = await carregarXLSX(), linhas = linhasLigacao();
+    const ws = X.utils.aoa_to_sheet([LIG_COLS, ...linhas]);
+    ws["!cols"] = [16,10,9,8,12,40,60,22,30,40,12,14,12,36,20,40,30,10,14].map(w => ({ wch: w }));
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "SISTEMA");
+    await S.downloads.save({ filename: "AEP_para_PGR.xlsx", data: X.write(wb, { bookType: "xlsx", type: "array" }) });
+    const nP = linhas.filter(l => l[2]).length;
+    toast(`Arquivo gerado: ${Object.keys(S.aeps).length} AEPs e ${nP} perigos. Na planilha, Dados > Atualizar tudo.`);
+  } catch(e){
+    if (e && e.code === "declined") {}
+    else if (e && e.message === "xlsx") toast("Não foi possível carregar o gerador de Excel. Verifique a internet e tente de novo.");
+    else toast("Não foi possível gerar o arquivo.");
+  } finally { const b = $("#btnLig"); if (b){ b.disabled = false; b.textContent = "Baixar AEP_para_PGR.xlsx"; } }
+}
 async function exportarPGR(){
   if (!S.downloads) return;
   const linhas = linhasPGR(); if (!linhas.length) return;
@@ -2590,6 +2631,7 @@ document.addEventListener("click", async e => {
     case "pdfGerDet": gerarPDFGerencia(true); break;
     case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
+    case "exportarLig": exportarLigacao(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
     case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
     case "corrigirFontes": S.confirm = "fontes"; render(); break;
