@@ -1605,6 +1605,9 @@ function st6(){
     return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> ${its.map(n => `<span class="chip ris">item crítico ${n}</span>`).join(" ")}</div>
       <div class="acts">${conf ? `<span class="confirm">Remover? <button class="btn small danger" type="button" data-act="rmHzSim" data-id="${esc(h.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="edHz" data-id="${esc(h.id)}">Editar</button><button class="btn small danger" type="button" data-act="rmHz" data-id="${esc(h.id)}">Remover</button>`}</div>
       <h4>${esc(t ? t.nome : h.codigo)}</h4><p class="small muted">${esc((h.fonte||"").slice(0,220))}${(h.fonte||"").length>220?"…":""}</p>
+      ${h.origemCopsoq ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(BASE_PERIGO.copsoq)}</p>`
+        : BASE_PERIGO[h.base] ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(BASE_PERIGO[h.base])}</p>`
+        : `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="tiny" style="color:var(--bad-ink);font-weight:600">Base:</span>${["observado","relatado","rotina"].map(k => `<button class="btn small" type="button" data-act="hzBase" data-id="${esc(h.id)}" data-v="${k}">${esc(BASE_PERIGO[k])}</button>`).join("")}</div>`}
     </div>`; }).join("");
   return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo e o início da fonte geradora vêm da planilha de controle (aba TAXONOMIA); a fonte é complementada com a situação deste cargo.") +
   `<div class="stack">${faltam.length ? `<div class="note bad"><b>Itens críticos do checklist sem perigo vinculado:</b> ${faltam.map(({n}) => `<button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Item ${n}</button>`).join(" ")}</div>` : ""}
@@ -1613,12 +1616,14 @@ function st6(){
     ${cards || (!S.editHz ? vSemPerigo(a) : "")}
     ${vFotos()}</div>`;
 }
+const TXT_NAO_LANC = { "BIO-01": "Permanece sentado ao computador por períodos curtos, intercalados com as demais atividades do cargo, com alternância livre de postura ao longo da jornada.",
+  "BIO-02": "Os lançamentos no computador ocorrem em períodos curtos, intercalados com as demais atividades do cargo, sem uso contínuo de teclado e mouse na maior parte da jornada." };
 function vEsperados(a){
   const f = esperadosFaltando(a); if (!f.length) return "";
   return `<div class="panel"><div class="panel-h"><b>Posto administrativo: perigos de exigência esperados</b><span class="tiny muted">capítulo 14.2.7</span></div><div class="panel-b stack">
-    <p class="small muted">Trabalho sentado ao computador e uso de teclado e mouse na maior parte da jornada são exigências da atividade: lança-se o perigo mesmo com bons controles (o controle reduz o risco na planilha). Se neste cargo a exigência não tem duração relevante, justifique.</p>
+    <p class="small muted">Como a pergunta do posto informatizado está marcada Sim, o sistema confere estes perigos. Lance quando o cargo passa a maior parte da jornada sentado ao computador. Se o computador é usado só em parte do tempo (lançamentos, registros), não lance: use o texto pronto ou escreva o motivo.</p>
     ${f.map(c => `<div class="stack tight"><div class="row between"><span><span class="code">${esc(c)}</span> ${esc(TAXMAP[c]?.nome||"")}</span><button class="btn small primary" type="button" data-act="hzEsperado" data-cod="${esc(c)}">Lançar ${esc(c)}</button></div>
-      <label class="f"><span>Ou: por que não se lança neste cargo</span><textarea id="f-naoLancados.${esc(c)}" data-b="naoLancados.${esc(c)}" rows="2" placeholder="Ex.: permanece sentado ao computador cerca de 1 h por jornada; o restante é em campo, com alternância livre de postura.">${esc(a.naoLancados?.[c]||"")}</textarea></label></div>`).join("")}
+      <label class="f"><span>Ou: por que não se lança neste cargo</span><textarea id="f-naoLancados.${esc(c)}" data-b="naoLancados.${esc(c)}" rows="2" placeholder="Ex.: permanece sentado ao computador cerca de 1 h por jornada; o restante é em campo, com alternância livre de postura.">${esc(a.naoLancados?.[c]||"")}</textarea></label>${String(a.naoLancados?.[c]||"").trim() ? "" : `<div><button class="btn ghost small" type="button" data-act="naoLancPadrao" data-cod="${esc(c)}" style="padding:0">Usar texto pronto: computador só em parte da jornada</button></div>`}</div>`).join("")}
   </div></div>`;
 }
 function vSemPerigo(a){
@@ -2688,6 +2693,8 @@ document.addEventListener("click", async e => {
     case "usarFormula": { const tx = TAXMAP[S.editHz?.codigo]; if (!tx) break; const f = String(S.editHz.fonte||"").trim(), velho = fontePadrao(f); S.editHz.fonte = tx.fonte + (velho ? f.slice(velho.fonte.length) : (f ? " " + f : "")); renderStep(); toast("Texto da planilha recolocado no início. Complemente depois dele."); break; }
     case "txtPadrao": { const dm = DOMINIOS.find(x => x.id === d.dom); a.copsoq.dominios[d.dom].obs = dm.padrao; marcar(); const ta = $("#f-obs-"+d.dom); if (ta) ta.value = dm.padrao; renderRail(); renderAside(); break; }
     case "modeloTodas": S.confirm = "modeloTodas"; render(); break;
+    case "hzBase": { const h = (a.perigos||[]).find(x => x.id === d.id); if (!h) break; h.base = d.v; marcar(); renderStep(); renderRail(); renderAside(); break; }
+    case "naoLancPadrao": { a.naoLancados = a.naoLancados || {}; a.naoLancados[d.cod] = TXT_NAO_LANC[d.cod] || "O computador é usado só em parte da jornada, intercalado com as demais atividades do cargo."; marcar(); renderStep(); renderRail(); renderAside(); break; }
     case "padraoTodas": S.confirm = "padrao"; { const pb = $("#padraobox"); if (pb) pb.innerHTML = vPadraoBanner(); } break;
     case "padraoTodasSim": {
       const alvo = [...(S.padraoPend || [])]; if (!alvo.length) { S.confirm = null; render(); break; }
