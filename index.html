@@ -581,7 +581,7 @@ function lancarPerigosCopsoq(a){
   const lancar = (codigo, sid) => { const tx = TAXMAP[codigo]; if (!tx || lanc.has(tx.codigo)) return; a.perigos.push({ id: uid(), codigo: tx.codigo, origemCopsoq: sid, danos: tx.danos, fonte: tx.fonte, base: "copsoq" }); lanc.add(tx.codigo); n++; };
   DOMINIOS.forEach(d => Object.entries(a.copsoq.dominios[d.id].dec || {}).forEach(([sid, v]) => { const s = SUBMAP[sid]; if (s && decisaoExigePerigo(s, v)) lancar(s.tax, sid); }));
   altasComPerigo(a).forEach(s => { const antes = a.perigos.length; lancar(s.tax, s.id);
-    if (a.perigos.length > antes){ const h = a.perigos[a.perigos.length - 1], sn = copsoqDaAEP(a); h.fonte = fonteCopsoqAlta(s, sn?.medias?.[s.id], sn?.nome, TAXMAP[s.tax]); } });
+    });
   numerarRiscos(a);
   return n;
 }
@@ -709,12 +709,14 @@ function conclusaoTexto(a){
 /* Padrão de 15/10/2026, aplicado a todas as AEPs (concluídas, em revisão, em andamento e não iniciadas):
    item 12 do checklist retirado (os itens seguintes sobem uma posição), conclusão escrita pelo sistema,
    linhas fixas das recomendações montadas sozinhas e fonte dos perigos do COPSOQ alto como percepção coletiva. */
-const PADRAO_AEP = 4;
+const PADRAO_AEP = 5;
 function migrarAEP(r){
   if (!r || (r.padrao||0) >= PADRAO_AEP) return r;
   if ((r.padrao||0) < 3) migrarV3(r);
   /* v4: base do perigo. Lançado a partir do checklist = observado em campo; vindo do COPSOQ = percepção coletiva. Os demais ficam para informar. */
   (r.perigos||[]).forEach(h => { if (h.base) return; if (h.origemCopsoq) h.base = "copsoq"; else if (Number(h.autoItem) || Number(h.checkItem)) h.base = "observado"; });
+  /* v5: a percepção do COPSOQ sai da fonte (vai para a base) */
+  (r.perigos||[]).forEach(h => { if (PREFIXO_PERCEPCAO.test(String(h.fonte||""))) h.fonte = String(h.fonte).replace(PREFIXO_PERCEPCAO, ""); });
   r.padrao = PADRAO_AEP;
   return r;
 }
@@ -728,9 +730,6 @@ function migrarV3(r){
     ["checkItem", "autoItem"].forEach(k => { const v = Number(h[k]); if (!v) return;
       if (v === 12){ h[k] = ""; h.revisar = "Este perigo vinha do item 12 do checklist (forma de trabalho que predispõe a acidentes), que foi retirado. Confira se ele continua."; }
       else if (v > 12) h[k] = v - 1; });
-    const sid = h.origemCopsoq, s = SUBMAP[sid], tx = TAXMAP[h.codigo], m = r.copsoq?.snapshot?.medias?.[sid];
-    if (s && tx && faixaDe(m) === "ris" && [tx.fonte, (FONTES_ALTERNATIVAS[h.codigo]||[])[0]].includes(String(h.fonte||"").trim()))
-      h.fonte = fonteCopsoqAlta(s, m, r.copsoq.snapshot.nome, tx);
   });
   if (r.conclusao){
     if (r.conclusao.interpretacao) { r.conclusao.interpretacaoAntiga = r.conclusao.interpretacao; delete r.conclusao.interpretacao; }
@@ -738,7 +737,14 @@ function migrarV3(r){
       r.conclusao.recomendacoes = r.conclusao.recomendacoes.split(/\n+/).map(x => x.trim()).filter(x => x && !linhaAuto(x, base)).join("\n"); }
   }
 }
-const fonteCopsoqAlta = (s, m, setor, tx) => `Percepção coletiva desfavorável do setor${setor ? " " + setor : ""} no COPSOQ II (${s.nome}: ${num2(m)}, acima de 3,66). ${tx.fonte}`;
+/* A percepção do COPSOQ é a base (a evidência) do perigo, não a fonte geradora: sai na linha "Base" do documento. */
+const PREFIXO_PERCEPCAO = /^Percepção coletiva desfavorável do setor[^)]*\)\.\s*/;
+function baseTexto(a, h){
+  if (h.origemCopsoq){ const s = SUBMAP[h.origemCopsoq], sn = copsoqDaAEP(a), m = sn?.medias?.[h.origemCopsoq];
+    if (s && faixaDe(m) === "ris") return `Percepção coletiva do setor${sn?.nome ? " " + sn.nome : ""} no COPSOQ II (${s.nome}: ${num2(m)}, acima de 3,66)`;
+    return s ? `Percepção coletiva do setor no COPSOQ II (${s.nome}), confirmada na avaliação` : BASE_PERIGO.copsoq; }
+  return BASE_PERIGO[h.base] || "";
+}
 /* Indicadores do setor (Medicina e RH): números agregados, sem identificação */
 const indSetor = a => { const ar = setorDaAEP(a), ind = ar?.ind || {}; const af = Number(ind.afast)||0, ca = Number(ind.canal)||0; return (af || ca) ? { af, ca, periodo: ind.periodo || "", fonte: ind.fonte || "" } : null; };
 /* Perigos de exigência esperados em posto administrativo e ainda não lançados */
@@ -1605,8 +1611,7 @@ function st6(){
     return `<div class="hz"><div><span class="mono tiny faint">${esc(h.idRisco||"novo")}</span> <span class="code">${esc(h.codigo)}</span> ${its.map(n => `<span class="chip ris">item crítico ${n}</span>`).join(" ")}</div>
       <div class="acts">${conf ? `<span class="confirm">Remover? <button class="btn small danger" type="button" data-act="rmHzSim" data-id="${esc(h.id)}">Remover</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="edHz" data-id="${esc(h.id)}">Editar</button><button class="btn small danger" type="button" data-act="rmHz" data-id="${esc(h.id)}">Remover</button>`}</div>
       <h4>${esc(t ? t.nome : h.codigo)}</h4><p class="small muted">${esc((h.fonte||"").slice(0,220))}${(h.fonte||"").length>220?"…":""}</p>
-      ${h.origemCopsoq ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(BASE_PERIGO.copsoq)}</p>`
-        : BASE_PERIGO[h.base] ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(BASE_PERIGO[h.base])}</p>`
+      ${h.origemCopsoq || BASE_PERIGO[h.base] ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(baseTexto(a, h))}</p>`
         : `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="tiny" style="color:var(--bad-ink);font-weight:600">Base:</span>${["observado","relatado","rotina"].map(k => `<button class="btn small" type="button" data-act="hzBase" data-id="${esc(h.id)}" data-v="${k}">${esc(BASE_PERIGO[k])}</button>`).join("")}</div>`}
     </div>`; }).join("");
   return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo e o início da fonte geradora vêm da planilha de controle (aba TAXONOMIA); a fonte é complementada com a situação deste cargo.") +
@@ -1693,10 +1698,10 @@ function vHzEditor(){
             <option value="">— Selecione (${ops.length} opção/ões) —</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("")}</select>
           <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span>
           ${t ? (() => { const alta = S.draft ? altasComPerigo(S.draft).find(s => s.tax === t.codigo) : null, sn = S.draft ? copsoqDaAEP(S.draft) : null;
-            if (alta) return `<span class="dica" id="hz-dica"><b>Quando lançar:</b> neste setor, ${esc(alta.nome.toLowerCase())} ficou em ${num2(sn?.medias?.[alta.id])}, acima de 3,66. Pelo critério adotado, o perigo entra pela percepção coletiva do setor, mesmo que a condição não apareça na observação. Na fonte, registre a percepção e o que no cargo mais se aproxima dela; o risco é graduado na planilha.</span>`;
+            if (alta) return `<span class="dica" id="hz-dica"><b>Quando lançar:</b> neste setor, ${esc(alta.nome.toLowerCase())} ficou em ${num2(sn?.medias?.[alta.id])}, acima de 3,66. Pelo critério adotado, o perigo entra pela percepção coletiva do setor, que sai no documento como base. Na fonte, descreva só a situação do cargo em que essa exigência aparece, com o que você sabe; o risco é graduado na planilha.</span>`;
             return DICA_LANCAR[t.codigo] ? `<span class="dica" id="hz-dica"><b>Quando lançar:</b> ${esc(DICA_LANCAR[t.codigo])}</span>` : ""; })() : ""}</label>
       </div>
-      ${t ? (h.origemCopsoq ? `<div class="f"><span>Base</span><p class="small" style="margin:4px 0 0">${esc(BASE_PERIGO.copsoq)}</p></div>`
+      ${t ? (h.origemCopsoq ? `<div class="f"><span>Base</span><p class="small" style="margin:4px 0 0">${esc(baseTexto(S.draft, h))}</p></div>`
         : `<div class="f"><span>Base <em>*</em> <span class="faint" style="font-weight:400">como a condição foi conhecida</span></span><div class="seg" role="radiogroup" aria-label="Base do perigo">${["observado","relatado","rotina"].map(k => `<input type="radio" id="hzb-${k}" name="hzbase" value="${k}" data-b="editHz.base" ${h.base === k ? "checked" : ""}><label for="hzb-${k}">${esc(BASE_PERIGO[k])}</label>`).join("")}</div></div>`) : ""}
       ${t ? `<div class="note"><b>Campos locais a coletar:</b> ${esc(t.campos)}${!String(h.fonte||"").trim().startsWith(t.fonte) ? ` <button class="btn ghost small" type="button" data-act="usarFormula" style="padding:0 0 0 6px">${FONTES_ALTERNATIVAS[t.codigo] ? "Usar o texto de posto administrativo" : "Recolocar o texto da planilha no início"}</button>` : ""}${(FONTES_ALTERNATIVAS[t.codigo]||[]).filter(p => !String(h.fonte||"").trim().startsWith(p)).map(p => ` <button class="btn ghost small" type="button" data-act="usarFonteAlt" style="padding:0 0 0 6px">Usar o texto genérico (outros cargos)</button>`).join("")}</div>` : ""}
       ${t && SUG_FONTE[t.codigo] ? (() => { const sg = SUG_FONTE[t.codigo], tipos = Object.keys(TIPOS_ATV).filter(k => sg.some(x => x[0] === k)), tp = tipos.includes(S.sugTipo) ? S.sugTipo : "";
@@ -1949,7 +1954,7 @@ function docHTML(a, cfg, fotos, opt={}){
     return `<tr><td class="b">${esc(d.nome)}</td><td class="c">${r.auto?`${num2(r.nota)}<br>`:""}${r.faixa?esc(FAIXAS[r.faixa]):"—"}${subs?`<div class="small" style="text-align:left;margin-top:3px">${subs}</div>`:""}</td><td>${escBr(dd.obs||"")}</td><td class="c">${esc(dd.concl||"—")}</td></tr>`; }).join("");
   const hz = (a.perigos||[]).map(h => { const t = TAXMAP[h.codigo], its = itensDoPerigo(a, h);
     return `<tr><td><span class="small">${esc(h.idRisco||"")}</span> <b>${esc(h.codigo)}</b>: ${esc(t?t.nome:"")}</td>
-      <td>${escBr(h.fonte||"")}${BASE_PERIGO[h.base] ? `<div class="small"><b>Base:</b> ${esc(BASE_PERIGO[h.base])}.</div>` : ""}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
+      <td>${escBr(h.fonte||"")}${baseTexto(a, h) ? `<div class="small"><b>Base:</b> ${esc(baseTexto(a, h))}.</div>` : ""}${its.length?`<div class="small"><b>Item crítico do checklist: ${its.join(", ")}.</b></div>`:""}</td></tr>`; }).join("");
   /* Resumo por categoria da TAXONOMIA (coluna B da planilha), na ordem da aba */
   const catsTax = [...new Set(TAX.map(t => t.cat))];
   const porCat = catsTax.map(cat => { const hs = (a.perigos||[]).filter(h => TAXMAP[h.codigo]?.cat === cat);
@@ -2629,9 +2634,9 @@ document.addEventListener("click", async e => {
       const s = SUBMAP[d.sub], snap = copsoqDaAEP(a), tx = TAXMAP[s.tax]; if (!tx) break;
       const med = snap?.medias?.[s.id], f = faixaDe(med) || "int";
       abrirHz({ _novo:true, codigo: tx.codigo, origemCopsoq: s.id, danos: tx.danos, base: f === "ris" ? "copsoq" : "",
-        fonte: f === "ris" ? fonteCopsoqAlta(s, med, snap?.nome, tx) : tx.fonte });
+        fonte: tx.fonte });
       S.hzCat = ""; aposHz();
-      toast(f === "ris" ? "Perigo pré-preenchido pela percepção coletiva do setor. Complete a fonte com o que no cargo se aproxima disso e salve." : "Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
+      toast(f === "ris" ? "Perigo pré-preenchido. A percepção do setor sai como base; na fonte, descreva só a situação do cargo e salve." : "Perigo pré-preenchido. Confirme em campo, ajuste a fonte geradora e salve."); break;
     }
     case "novoHz": abrirHz({ _novo:true }); renderStep(); break;
     case "salvarModelo": { const ar = setorDaAEP(a); if (!ar || !etapa3Completa(a)) break; if (ar.modelo && S.confirm !== "modelo") { S.confirm = "modelo"; renderStep(); break; } }
