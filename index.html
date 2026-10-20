@@ -249,6 +249,26 @@ table.list tr:last-child td{border-bottom:0}
 .campo .ck p{font-size:14px;line-height:1.45}
 .campo textarea,.campo input{font-size:16px}
 @media (max-width:760px){.cfoot .btn{flex:1}.cfoot>span{flex-basis:100%}}
+.melfilt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.melfilt select{width:auto;flex:0 0 auto}
+.melfilt input{flex:1 1 220px;width:auto}
+.meltab td{vertical-align:top}
+.meltab select,.meltab input{font:inherit;font-size:13px;padding:5px 7px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);max-width:100%}
+.meltab input[type=text]{width:100%;min-width:120px}
+.meltab tr.mel-atr td{background:var(--bad-bg)}
+.mtipo{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:2px 7px;border-radius:999px;margin-bottom:4px}
+.mtipo.rec{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line)}
+.mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
+select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
+select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
+select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!important;color:var(--ok-ink)!important}
+.melaep{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 14px;background:var(--surface-2)}
+.melaep .mrow{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--rule)}
+.melaep .mrow:first-of-type{border-top:0}
+.melaep .mrow .mt{flex:1;font-size:13px}
+.melstats{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0 14px}
+.melstats div b{display:block;font-size:22px}
+.melstats div span{font-size:12px;color:var(--ink-3)}
 .recfixas{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:10px 14px}
 .recfixas ul{margin:6px 0 6px 18px;padding:0;font-size:13px;color:var(--ink-2)}
 .recfixas li{margin:3px 0}
@@ -317,6 +337,7 @@ table.list tr:last-child td{border-bottom:0}
       <button type="button" data-go="home" id="nav-home">AEPs</button>
       <button type="button" data-go="painel" id="nav-painel">Painel</button>
       <button type="button" data-go="gerencia" id="nav-gerencia">Gerências</button>
+      <button type="button" data-go="melhorias" id="nav-melhorias">Melhorias</button>
       <button type="button" data-go="campo" id="nav-campo">Coleta de campo</button>
       <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
       <button type="button" data-go="config" id="nav-config">Unidade</button>
@@ -672,6 +693,99 @@ function recsDaAEP(a){
   return out;
 }
 
+/* Melhorias: recomendações específicas e oportunidades de melhoria que não viram perigo no PGR.
+   O acompanhamento (prioridade, responsável, prazo, situação) fica em config/melhorias e não altera a AEP. */
+const MEL_SIT = ["Aberta", "Em andamento", "Concluída", "Não se aplica"], MEL_PRIO = ["Alta", "Média", "Baixa"];
+const OPORT_RE = /^Oportunidade de melhoria:\s*/i;
+function hashTxt(t){ let h = 5381; for (const ch of norm(t)) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
+function melhoriasDaAEP(a){
+  const vistos = new Set();
+  return recsEspecificas(a).map(t => { const op = OPORT_RE.test(t), texto = op ? t.replace(OPORT_RE, "").trim() : t, key = `${a.id}|${hashTxt(texto)}`;
+    if (!texto || vistos.has(key)) return null; vistos.add(key);
+    const tr = S.melhorias[key] || {}, sit = tr.sit || "Aberta";
+    return { key, a, op, tipo: op ? "Oportunidade de melhoria" : "Recomendação", texto, prio: tr.prio || (op ? "Baixa" : "Média"), resp: tr.resp || "", prazo: tr.prazo || "", sit,
+      atrasada: !!tr.prazo && tr.prazo < hojeISO() && (sit === "Aberta" || sit === "Em andamento") }; }).filter(Boolean);
+}
+const selMel = (key, campo, lista, val, cls = "") => `<select data-mel="${esc(key)}" data-mc="${campo}" class="${cls}" aria-label="${campo === "prio" ? "Prioridade" : "Situação"}">${lista.map(x => `<option ${x === val ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
+const chipTipo = m => `<span class="mtipo ${m.op ? "op" : "rec"}">${m.op ? "Oportunidade de melhoria" : "Recomendação"}</span>`;
+function vMelItensAEP(a){
+  const l = melhoriasDaAEP(completar(clone(a)));
+  if (!l.length) return "";
+  return `<div class="melaep"><b class="small">Como cada linha será acompanhada</b> <span class="tiny muted">(a prioridade vale para a aba Melhorias e não altera a situação da AEP)</span>
+    ${l.map(m => `<div class="mrow"><div class="mt">${chipTipo(m)}<div>${esc(m.texto)}</div></div><div>${selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</div></div>`).join("")}</div>`;
+}
+function listaMelhorias(){
+  const t = norm(S.melBusca), hoje = hojeISO();
+  return Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y))
+    .filter(a => S.melEsc === "todas" || a.status === "concluida" || a.status === "revisao")
+    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .flatMap(melhoriasDaAEP)
+    .filter(m => !S.melTipo || (S.melTipo === "op") === m.op)
+    .filter(m => !S.melPrio || m.prio === S.melPrio)
+    .filter(m => S.melSit === "todas" || (S.melSit === "abertas" && (m.sit === "Aberta" || m.sit === "Em andamento")) || (S.melSit === "atrasadas" && m.atrasada) || (S.melSit === "concluidas" && (m.sit === "Concluída" || m.sit === "Não se aplica")))
+    .filter(m => !t || norm(`${m.a.numero} ${m.a.meta?.cargo} ${m.a.meta?.setor} ${m.texto} ${m.resp}`).includes(t))
+    .sort((x, y) => MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a));
+}
+function melStatsHTML(){
+  const todas = Object.values(S.aeps).map(completar).filter(a => S.melEsc === "todas" || a.status === "concluida" || a.status === "revisao").filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a))).flatMap(melhoriasDaAEP);
+  const ab = todas.filter(m => m.sit === "Aberta" || m.sit === "Em andamento");
+  return `<div class="melstats"><div><b>${todas.length}</b><span>no total</span></div><div><b>${ab.length}</b><span>em aberto</span></div>
+    <div><b style="color:var(--bad-ink)">${ab.filter(m => m.prio === "Alta").length}</b><span>em aberto com prioridade alta</span></div>
+    <div><b style="color:var(--bad-ink)">${todas.filter(m => m.atrasada).length}</b><span>com prazo vencido</span></div>
+    <div><b>${todas.filter(m => m.sit === "Concluída").length}</b><span>concluídas</span></div>
+    <div><b>${todas.filter(m => !m.op).length} / ${todas.filter(m => m.op).length}</b><span>recomendações / oportunidades</span></div></div>`;
+}
+function linhasMelhorias(l){
+  if (!l.length) return `<tr><td colspan="7" class="muted small" style="padding:18px">Nenhuma melhoria com estes filtros.</td></tr>`;
+  return l.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}">
+    <td class="mono"><button class="btn ghost small" type="button" data-open="${esc(m.a.id)}" style="padding:0">${esc(m.a.numero)}</button></td>
+    <td><b>${esc(m.a.meta?.cargo || "")}</b><div class="tiny faint">${esc((m.a.meta?.setor || "").trim())}</div></td>
+    <td>${chipTipo(m)}<div class="small">${esc(m.texto)}</div></td>
+    <td>${selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</td>
+    <td><input type="text" data-mel="${esc(m.key)}" data-mc="resp" value="${esc(m.resp)}" placeholder="Responsável"></td>
+    <td><input type="date" data-mel="${esc(m.key)}" data-mc="prazo" value="${esc(m.prazo)}">${m.atrasada ? `<div class="tiny" style="color:var(--bad-ink);font-weight:700">Prazo vencido</div>` : ""}</td>
+    <td>${selMel(m.key, "sit", MEL_SIT, m.sit)}</td></tr>`).join("");
+}
+function vMelhorias(){
+  const l = listaMelhorias();
+  const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
+  return `<div class="pagehead"><div><h1>Melhorias</h1><p>Recomendações específicas e oportunidades de melhoria registradas nas AEPs, que não entram no PGR como perigo. Defina a prioridade, o responsável, o prazo e acompanhe a situação. Tudo vai para a planilha no arquivo AEP_para_PGR.xlsx.</p></div></div>
+  <div class="panel"><div class="panel-b">
+    <div class="melfilt">
+      ${vMultiSetor("msel-mel")}
+      <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas as situações")}</select>
+      <select data-melf="melPrio" aria-label="Prioridade">${op("melPrio", "", "Todas as prioridades")}${MEL_PRIO.map(p => op("melPrio", p, "Prioridade " + p.toLowerCase())).join("")}</select>
+      <select data-melf="melTipo" aria-label="Tipo">${op("melTipo", "", "Recomendações e oportunidades")}${op("melTipo", "rec", "Só recomendações")}${op("melTipo", "op", "Só oportunidades de melhoria")}</select>
+      <select data-melf="melEsc" aria-label="AEPs">${op("melEsc", "fechadas", "AEPs concluídas e em revisão")}${op("melEsc", "todas", "Todas as AEPs")}</select>
+      <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar cargo, AEP, texto ou responsável">
+    </div>
+    <p class="tiny muted" style="margin:0">Resumo das gerências selecionadas</p><div id="melstats">${melStatsHTML()}</div>
+    <p class="tiny muted" id="melcont">${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.</p>
+    <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP</th><th>Cargo</th><th>Recomendação ou oportunidade</th><th>Prioridade</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
+    <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>
+  </div></div>`;
+}
+function atualizarMelhorias(){
+  if (S.view !== "melhorias") return;
+  const b = $("#melbody"); if (!b) { render(); return; }
+  if (b.contains(document.activeElement) && document.activeElement.type === "text") return;
+  const l = listaMelhorias(); b.innerHTML = linhasMelhorias(l);
+  const s = $("#melstats"); if (s) s.innerHTML = melStatsHTML();
+  const c = $("#melcont"); if (c) c.textContent = `${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.`;
+}
+function mudarMelhoria(key, campo, v){
+  const cur = S.melhorias[key] || {};
+  S.melhorias = { ...S.melhorias, [key]: { ...cur, [campo]: v, em: new Date().toISOString() } };
+  S.melDirty = true; setSaveState("Alterações não salvas");
+  clearTimeout(S.melTimer); S.melTimer = setTimeout(salvarMelhorias, 600);
+}
+async function salvarMelhorias(){
+  clearTimeout(S.melTimer); if (!S.db) { S.melDirty = false; return; }
+  setSaveState("Salvando…");
+  try { await S.db.doc("config/melhorias").set({ itens: clone(S.melhorias) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  S.melDirty = false;
+}
+
 /* Conclusão escrita pelo sistema a partir dos fatos da AEP (substitui a escolha manual da interpretação) */
 const CAT_TXT = { "Biomecânicos": ["biomecânico", "biomecânicos"], "Mobiliários Máquinas Equipamentos e Ferramentas": ["de mobiliário, máquinas ou equipamentos", "de mobiliário, máquinas ou equipamentos"], "Conforto Ambiental": ["de conforto ambiental", "de conforto ambiental"], "Organização do Trabalho": ["de organização do trabalho e psicossocial", "de organização do trabalho e psicossociais"] };
 const juntar = l => l.length <= 1 ? (l[0] || "") : `${l.slice(0, -1).join(", ")} e ${l[l.length - 1]}`;
@@ -974,6 +1088,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
+  melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1048,6 +1163,8 @@ async function iniciar(){
     else if (S.view === "home") atualizarHome(); else if (S.view === "painel") render();
     if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
   }, () => {});
+  db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {};
+    if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
 }
 async function salvarAEP(){
@@ -1134,8 +1251,9 @@ async function ir(view, extra){
   if (S.view === "copsoq" && S.editArea) await salvarArea();
   if (S.view === "config") await salvarConfig();
   if (S.view === "campo") await salvarAEP();
+  if (S.melDirty) await salvarMelhorias();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -1155,6 +1273,7 @@ function render(){
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
   else if (S.view === "gerencia") app.innerHTML = vGerencia();
+  else if (S.view === "melhorias") app.innerHTML = vMelhorias();
   else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
@@ -1216,6 +1335,7 @@ function aplicarFiltroSetor(){
   const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
   const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
   const c = $("#campocards"); if (c) c.innerHTML = campoCards();
+  if (S.view === "melhorias") atualizarMelhorias();
 }
 function vHome(){
   const todas = Object.values(S.aeps);
@@ -1754,6 +1874,7 @@ function st8(){
       ${recsDaAEP(a).some(x => !recsEspecificas(a).map(norm).includes(norm(x))) ? `<div><button class="btn small" type="button" data-act="montarRecs">Trazer as oportunidades de melhoria da etapa 3</button></div>` : ""}
       ${vRecModelos(a)}
       ${fld("conclusao.recomendacoes","Recomendações específicas e oportunidades de melhoria",{area:1,rows:6,hint:"Só o que é próprio deste cargo, uma por linha. Para uma melhoria em condição não crítica, comece a linha com “Oportunidade de melhoria:”."})}
+      <div id="melaep">${vMelItensAEP(a)}</div>
    </div></div></div>`;
 }
 
@@ -1993,7 +2114,11 @@ function docHTML(a, cfg, fotos, opt={}){
   ${gat.length?`<tr><th>Gatilhos</th><td>${gat.map(g=>`${g[0]}) ${esc(g[1])}`).join("<br>")}</td></tr>`:""}
   <tr><th>Justificativa</th><td>${escBr(a.aet?.justificativa||"—")}</td></tr></table>
   <h2>Observações complementares</h2><p>${escBr(a.conclusao?.parecer||"—")}</p>
-  <h2>Recomendações e oportunidades de melhoria</h2>${recs.length?`<ul>${recs.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:"<p>—</p>"}
+  <h2>Recomendações e oportunidades de melhoria</h2>${(() => { const pr = new Map(melhoriasDaAEP(a).map(m => [norm(m.texto), m.prio]));
+    const tag = t => pr.has(norm(t)) ? ` <b>(prioridade ${pr.get(norm(t)).toLowerCase()})</b>` : "";
+    const rs = recs.filter(r => !OPORT_RE.test(r)), os = recs.filter(r => OPORT_RE.test(r)).map(r => r.replace(OPORT_RE, "").trim());
+    return `<p><b>Recomendações</b></p>${rs.length ? `<ul>${rs.map(r => `<li>${esc(r)}${tag(r)}</li>`).join("")}</ul>` : "<p>—</p>"}`
+      + (os.length ? `<p><b>Oportunidades de melhoria</b></p><ul>${os.map(r => `<li>${esc(r)}${tag(r)}</li>`).join("")}</ul>` : ""); })()}
   <div class="nota">${esc(TXT_NOTA_AET)}</div>
   <div class="ass"><div>${esc(m.analista||"Responsável técnico")}${m.registroAnalista?`<br>${esc(m.registroAnalista)}`:""}</div></div>`;
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -2456,6 +2581,9 @@ function linhasLigacao(){
       out.push([`${n}|${h.idRisco}`, n, h.idRisco, h.codigo, "Ergonomico", t.nome, String(h.fonte||"").trim(), LIG_ORIGEM[base] || "",
         base === "copsoq" ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)", baseTexto(a, h), itensDoPerigo(a, h).join(", "),
         LIG_STATUS[st] || "", "", "", "", "", cargo, eg, atu]); });
+    if (fechada) melhoriasDaAEP(a).forEach(m => { const tr = S.melhorias[m.key] || {};
+      out.push([`${n}|M-${m.key.split("|").pop()}`, n, "", "MELHORIA", m.tipo, m.texto, m.resp, m.prazo ? m.prazo.split("-").reverse().join("/") : "", m.sit, m.prio, "",
+        LIG_STATUS[st] || "", "", "", "", "", cargo, eg, (tr.em || "").slice(0, 10)]); });
   });
   return out;
 }
@@ -2468,8 +2596,8 @@ async function exportarLigacao(){
     ws["!cols"] = [16,10,9,8,12,40,60,22,30,40,12,14,12,36,20,40,30,10,14].map(w => ({ wch: w }));
     const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "SISTEMA");
     await S.downloads.save({ filename: "AEP_para_PGR.xlsx", data: X.write(wb, { bookType: "xlsx", type: "array" }) });
-    const nP = linhas.filter(l => l[2]).length;
-    toast(`Arquivo gerado: ${Object.keys(S.aeps).length} AEPs e ${nP} perigos. Na planilha, Dados > Atualizar tudo.`);
+    const nP = linhas.filter(l => l[2]).length, nM = linhas.filter(l => l[3] === "MELHORIA").length;
+    toast(`Arquivo gerado: ${Object.keys(S.aeps).length} AEPs, ${nP} perigos e ${nM} melhorias. Na planilha, Dados > Atualizar tudo.`);
   } catch(e){
     if (e && e.code === "declined") {}
     else if (e && e.message === "xlsx") toast("Não foi possível carregar o gerador de Excel. Verifique a internet e tente de novo.");
@@ -2558,6 +2686,17 @@ function campo(e, isChange){
   if (el.dataset.hzBusca !== undefined){ S.hzFiltro = el.value; atualizarSelectTax(); return; }
   if (el.dataset.hzCat !== undefined){ if (isChange){ S.hzCat = el.value; atualizarSelectTax(); } return; }
   if (el.dataset.colar !== undefined){ S.colar = el.value; return; }
+  if (el.dataset.mel){
+    const k = el.dataset.mel, c = el.dataset.mc;
+    if (el.type === "text"){ if (isChange) return; mudarMelhoria(k, c, el.value); return; }
+    if (!isChange) return;
+    mudarMelhoria(k, c, el.value);
+    if (c === "prio") el.className = "prio-" + el.value;
+    if (S.view === "melhorias") atualizarMelhorias();
+    return;
+  }
+  if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; atualizarMelhorias(); return; }
+  if (el.dataset.melbusca){ if (isChange) return; S.melBusca = el.value; atualizarMelhorias(); return; }
   if (el.dataset.gat !== undefined){
     if (!isChange) return;
     const g = new Set(S.draft.aet.gatilhos||[]); el.checked ? g.add(el.dataset.gat) : g.delete(el.dataset.gat);
@@ -2584,6 +2723,7 @@ function campo(e, isChange){
     if (auto && auto !== S.draft.meta.setorCopsoq){ S.draft.meta.setorCopsoq = auto; S.draft.copsoq.snapshot = snapDe(setorPorNome(auto)); renderBanner(); }
     const box = $("#setorcop"); if (box && !box.contains(document.activeElement)) box.innerHTML = vSetorCop();
   }
+  if (b === "conclusao.recomendacoes"){ const m = $("#melaep"); if (m) m.innerHTML = vMelItensAEP(S.draft); }
   if (b === "meta.setorCopsoq"){ S.draft.copsoq.snapshot = snapDe(setorPorNome(v)); renderBanner(); }
   marcar();
   if (el.dataset.rr) renderStep();
