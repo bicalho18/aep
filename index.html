@@ -88,6 +88,27 @@ button,input,select,textarea{font:inherit;color:inherit}
 .nav button:hover{background:var(--surface-2);color:var(--ink)}
 .nav button[aria-current="page"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
 .savestate{font-size:12px;color:var(--ink-3);min-width:90px;text-align:right}
+.nav button{display:inline-flex;align-items:center;gap:8px}
+.nav .ni{width:18px;height:18px;flex:none;opacity:.85}
+@media (max-width:1099px){.nav .ni{display:none}}
+@media screen and (min-width:1100px){
+  body{padding-left:236px}
+  .topbar{position:fixed;left:0;top:0;bottom:0;width:236px;border-bottom:0;border-right:1px solid var(--rule);box-shadow:inset 3px 0 0 var(--brand);overflow-y:auto}
+  .topbar-in{flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:12px;min-height:100%;padding:18px 14px 16px 18px;max-width:none}
+  .brand{flex-direction:column;align-items:flex-start;gap:10px;padding:0 4px 14px;border-bottom:1px solid var(--rule)}
+  .brand-txt span{display:block;white-space:normal}
+  .nav{flex-direction:column;flex-wrap:nowrap;margin-left:0;gap:2px}
+  .nav button{width:100%;padding:10px 12px;font-size:14.5px;text-align:left}
+  .nav button[aria-current="page"]{box-shadow:inset 3px 0 0 var(--accent)}
+  .savestate{margin-top:auto;text-align:left;min-width:0}
+  #btn-sair{align-self:flex-start}
+  .brand-logo{border-right:0;padding-right:0}
+}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
+.seg button b{font-variant-numeric:tabular-nums;margin-left:4px;color:var(--ink-3)}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent);font-weight:600}
+.seg button[aria-pressed="true"] b{color:var(--accent)}
 
 .wrap{max-width:1400px;margin:0 auto;padding-inline:16px;padding-block:22px 60px}
 
@@ -359,11 +380,12 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
   <div class="topbar-in">
     <div class="brand"><span class="brand-logo"><img src="logo.png" alt="ArcelorMittal" width="68" height="28"></span><span class="brand-txt"><b>AEP</b><span>Avaliação Ergonômica Preliminar · Mina de Serra Azul</span></span></div>
     <nav class="nav" aria-label="Seções">
-      <button type="button" data-go="home" id="nav-home">AEPs</button>
-      <button type="button" data-go="painel" id="nav-painel">Painel</button>
-      <button type="button" data-go="melhorias" id="nav-melhorias">Melhorias</button>
-      <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
-      <button type="button" data-go="config" id="nav-config">Unidade</button>
+      <button type="button" data-go="home" id="nav-home"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h4"/></svg><span>AEPs</span></button>
+      <button type="button" data-go="painel" id="nav-painel"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Meu painel</span></button>
+      <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button>
+      <button type="button" data-go="melhorias" id="nav-melhorias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span>Melhorias</span></button>
+      <button type="button" data-go="copsoq" id="nav-copsoq"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c.8-.3 1.6-.5 2.5-.5 2.8 0 5 2.2 5 5"/></svg><span>COPSOQ por setor</span></button>
+      <button type="button" data-go="config" id="nav-config"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Unidade</span></button>
     </nav>
     <div class="savestate" id="savestate" aria-live="polite"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
   </div>
@@ -1114,7 +1136,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
+  pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1361,6 +1383,7 @@ function aplicarFiltroSetor(){
   document.querySelectorAll("input[data-msel]").forEach(x => x.checked = S.fSetor.includes(x.dataset.msel));
   if (S.view === "home") atualizarHome();
   const pc = $("#painelcorpo"); if (pc) { pc.innerHTML = painelCorpo(); return; }
+  const gc = $("#gercorpo"); if (gc) { gc.innerHTML = gerCorpo(); return; }
   const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
   const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
   const c = $("#campocards"); if (c) c.innerHTML = campoCards();
@@ -1384,7 +1407,7 @@ function vHome(){
     <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
-    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Ver no Painel</button></span></div>
+    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Ver na aba Gerências</button></span></div>
   <div class="panel">
     ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
@@ -1638,14 +1661,7 @@ function painelCorpo(){
       <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
   </div>
   <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x concluídas por mês</b><span class="tiny muted">plano PLA202609SA20-30 · concluída conta no mês da primeira conclusão</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
-  <div class="grid g2" style="align-items:start">
-    <div class="panel"><div class="panel-h"><b>Plano de ${esc(mesTxt)}</b><span class="tiny muted">${D.doMes.length} AEP(s) previstas</span></div>
-      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th></tr></thead><tbody>
-      ${D.doMes.length ? D.doMes.map(a => linhaAEP(a, stChip(a))).join("") : `<tr><td colspan="3" class="small muted">Nenhuma AEP prevista para este mês.</td></tr>`}</tbody></table></div></div>
-    <div class="panel"><div class="panel-h"><b>Atrasadas</b><span class="tiny muted">mês previsto já passou</span></div>
-      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto / situação</th></tr></thead><tbody>
-      ${D.atrasadas.length ? D.atrasadas.map(a => linhaAEP(a, `<span class="small">${esc(mesRot(mesPlan(a)))}</span> ${stChip(a)}`)).join("") : `<tr><td colspan="3" class="small muted">Nenhuma AEP atrasada.</td></tr>`}</tbody></table></div></div>
-  </div>
+  <div class="panel" id="plistabox">${vListaPainel(L, D)}</div>
   <div class="grid g2" style="align-items:start;margin-top:16px">
     <div class="stack">
       <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
@@ -1656,21 +1672,42 @@ function painelCorpo(){
     </div>
     ${vConferencia()}
   </div>
-  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Resumo para a gerência</b><span class="tiny muted">o mesmo conteúdo do PDF “Resumo para a gerência”</span></summary>
-    <div class="panel-b" style="overflow-x:auto"><style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div></div></details>
-  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Detalhamento por gerência</b><span class="tiny muted">o mesmo conteúdo do PDF “Detalhamento”</span></summary>
-    <div class="panel-b" style="overflow-x:auto"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.fSetor, {})}</div></div></details>`;
+`;
 }
 function vPainel(){
-  return `<div class="pagehead"><div><h1>Painel</h1><p>Andamento das AEPs pela meta do plano PLA202609SA20-30 (SIG). O filtro de gerência vale para todo o painel e para os PDFs.</p></div></div>
-  <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
-    <span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}
-    <span style="flex:1"></span>
-    <button class="btn primary small" type="button" data-act="pdfGerencia" id="btnPDFger">PDF: resumo para a gerência</button>
-    <button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">PDF: detalhamento</button>
-  </div>
+  return `<div class="pagehead"><div><h1>Meu painel</h1><p>Volume de AEPs realizadas e meta do plano PLA202609SA20-30 (SIG). Para mostrar à gerência, use a aba Gerências.</p></div></div>
+  <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}</div>
   <div id="painelcorpo">${painelCorpo()}</div>`;
 }
+/* Lista do painel: previstas, concluídas, em andamento, em revisão, atrasadas ou todas */
+const P_LISTAS = [["previstas","Previstas"],["concluidas","Concluídas"],["andamento","Em andamento"],["revisao","Em revisão"],["atrasadas","Atrasadas"],["todas","Todas"]];
+function listaPainel(L, D, tipo, mes){
+  switch (tipo){
+    case "previstas": return L.filter(a => mes ? mesPlan(a) === mes : !!mesPlan(a));
+    case "concluidas": return L.filter(a => mesReal(a) && (!mes || mesReal(a) === mes));
+    case "andamento": return L.filter(a => a.status === "andamento");
+    case "revisao": return L.filter(a => a.status === "revisao");
+    case "atrasadas": return D.atrasadas;
+    default: return L;
+  }
+}
+function vListaPainel(L, D){
+  const mes = S.pMes === "todo" ? "" : (S.pMes || D.atual), comMes = S.pLista === "previstas" || S.pLista === "concluidas";
+  const l = listaPainel(L, D, S.pLista, comMes ? mes : "").slice().sort((x, y) => (mesPlan(x) || "9").localeCompare(mesPlan(y) || "9") || idNum(x) - idNum(y));
+  const conta = t => listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? mes : "").length;
+  const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : ""; };
+  const tit = { previstas: `Previstas ${mes ? "para " + mesLongo(mes) : "no plano"}`, concluidas: `Concluídas ${mes ? "em " + mesLongo(mes) : "no total"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou)", todas: "Todas as AEPs" }[S.pLista];
+  return `<div class="panel-h" style="flex-wrap:wrap;gap:10px"><b>${esc(tit)}</b><span class="tiny muted">${l.length} AEP(s)</span></div>
+  <div class="panel-b stack tight">
+    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
+      <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
+      ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
+    </div>
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Concluída em</th><th>Situação</th></tr></thead><tbody>
+    ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td><td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
+    </tbody></table></div></div>`;
+}
+const atualizarListaPainel = () => { const b = $("#plistabox"); if (b) { const L = aepsFiltradas(); b.innerHTML = vListaPainel(L, dadosMeta(L)); } };
 /* Mês planejado de uma AEP (etapa 1): fica em config/plano e não altera a situação da AEP */
 function vMesPlano(a){
   const atual = mesPlan(a), padrao = PLANO_PADRAO[String(a.numero||"").trim()] || "";
@@ -2570,13 +2607,34 @@ function gerExecHTML(setor, opt = {}){
         : `<p class="gx-vazio">${ico("check")}Nenhum perigo registrado nas avaliações concluídas.</p>`}</div>
   </div>
   <div class="gx-box" style="margin-bottom:12px"><h2>${ico("flag")}Próximos passos</h2><div class="gx-next">${passos.map(([i, t, s]) => `<div class="gx-step">${ico(i)}<div><b>${t}</b><span>${s}</span></div></div>`).join("")}</div></div>
-  <p class="gx-foot">Resumo das Avaliações Ergonômicas Preliminares concluídas. A graduação do risco e o plano de ação estão no PGR; o detalhamento por cargo e área fica na aba Painel. Resultados do questionário psicossocial não são apresentados por gerência.</p>
+  <p class="gx-foot">Resumo das Avaliações Ergonômicas Preliminares concluídas. A graduação do risco e o plano de ação estão no PGR; o detalhamento por cargo está no documento “detalhamento por cargo”. Resultados do questionário psicossocial não são apresentados por gerência.</p>
 </div>`;
 }
 function vGerencia(){
-  return `<div class="aeptitle" style="flex-wrap:wrap;gap:10px;margin-bottom:18px"><div class="row" style="gap:8px;font-size:13px;font-weight:600;margin-right:auto;max-width:100%;flex-wrap:wrap">Gerência ${vMultiSetor("f-ger")}</div>
-    <button class="btn primary" type="button" data-act="pdfGerencia" id="btnPDFger">Salvar em PDF</button></div>
-  <style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>`;
+  return `<div class="pagehead"><div><h1>Gerências</h1><p>Visão para o gestor: quantas AEPs a área tem, quais são, quantas foram realizadas e o que elas geraram.</p></div></div>
+  <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-ger")}<span style="flex:1"></span>
+    <button class="btn primary small" type="button" data-act="pdfGerencia" id="btnPDFger">PDF: resumo para a gerência</button>
+    <button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">PDF: detalhamento por cargo</button></div>
+  <div id="gercorpo">${gerCorpo()}</div>`;
+}
+const ST_ORDEM = { concluida: 0, revisao: 1, andamento: 2, nao_iniciada: 3 };
+function gerCorpo(){
+  const L = aepsFiltradas().sort((x, y) => (ST_ORDEM[x.status || "nao_iniciada"] - ST_ORDEM[y.status || "nao_iniciada"]) || idNum(x) - idNum(y));
+  const mel = L.filter(a => a.status === "concluida" || a.status === "revisao").map(completar).flatMap(melhoriasDaAEP)
+    .sort((x, y) => MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a));
+  const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : "—"; };
+  return `<style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
+  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>AEPs da área</b><span class="tiny muted">${L.length} cargo(s) · ${L.filter(a => a.status === "concluida").length} concluída(s)</span></div>
+    <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th><th>Concluída em</th><th class="num">Perigos</th><th class="num">Itens críticos</th></tr></thead><tbody>
+    ${L.length ? L.map(a => { const st = a.status || "nao_iniciada", fe = st === "concluida" || st === "revisao";
+      return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.area || "").trim())}</div></td><td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td><td class="small">${dataC(a)}</td><td class="num">${fe ? (a.perigos||[]).length : "—"}</td><td class="num">${fe ? (ckLista(completar(a)).filter(x => x.c.r === "sim").length || "—") : "—"}</td></tr>`; }).join("") : `<tr><td colspan="6" class="small muted">Nenhuma AEP nesta seleção.</td></tr>`}
+    </tbody></table></div></div>
+  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>Recomendações e oportunidades de melhoria</b><span class="tiny muted">das AEPs concluídas · ${mel.filter(m => m.sit === "Aberta" || m.sit === "Em andamento").length} em aberto</span></div>
+    <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>AEP</th><th>Recomendação ou oportunidade</th><th>Prioridade</th><th>Responsável / prazo</th><th>Situação</th></tr></thead><tbody>
+    ${mel.length ? mel.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}"><td class="mono small">${esc(m.a.numero)}<div class="tiny faint" style="font-family:inherit">${esc(m.a.meta?.cargo || "")}</div></td><td>${chipTipo(m)}<div class="small">${esc(m.texto)}</div></td><td><span class="mtipo ${m.prio === "Alta" ? "rec" : m.prio === "Baixa" ? "op" : ""}" style="${m.prio === "Alta" ? "background:var(--bad-bg);color:var(--bad-ink);border:1px solid var(--bad-line)" : m.prio === "Média" ? "background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line)" : ""}">${esc(m.prio)}</span></td><td class="small">${esc(m.resp || "—")}${m.prazo ? `<div class="tiny ${m.atrasada ? "" : "faint"}" style="${m.atrasada ? "color:var(--bad-ink);font-weight:700" : ""}">${fmtData(m.prazo)}${m.atrasada ? " · vencido" : ""}</div>` : ""}</td><td class="small">${esc(m.sit)}</td></tr>`).join("") : `<tr><td colspan="5" class="small muted">Nenhuma recomendação específica registrada nas AEPs concluídas.</td></tr>`}
+    </tbody></table></div></div>
+  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Detalhamento por cargo</b><span class="tiny muted">o mesmo conteúdo do PDF “detalhamento por cargo”</span></summary>
+    <div class="panel-b" style="overflow-x:auto"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.fSetor, {})}</div></div></details>`;
 }
 /* Detalhamento (aba Painel) */
 function vGerDetalhe(){
@@ -2811,6 +2869,7 @@ function campo(e, isChange){
   if (el.dataset.plano !== undefined){ if (!isChange) return;
     const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
+  if (el.dataset.pmes){ if (!isChange) return; S.pMes = el.value; atualizarListaPainel(); return; }
   if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; atualizarMelhorias(); return; }
   if (el.dataset.melbusca){ if (isChange) return; S.melBusca = el.value; atualizarMelhorias(); return; }
   if (el.dataset.gat !== undefined){
@@ -2876,7 +2935,8 @@ document.addEventListener("click", async e => {
     case "nova": criarAEP(); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "painelGer": ir("painel"); break;
+    case "painelGer": ir("gerencia"); break;
+    case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "campoAbrir": abrirCampo(d.id); break;
     case "campoVoltar": await salvarAEP(); S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 }); break;
     case "campoConcluir": concluirCampo(); break;
