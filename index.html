@@ -212,6 +212,7 @@ table.list tr:last-child td{border-bottom:0}
 .msel[open]>summary{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 #f-gerdet .msel-pop{left:auto;right:0}
 .msel-pop{position:absolute;z-index:30;top:calc(100% + 6px);left:0;min-width:100%;width:max-content;max-width:min(420px,calc(100vw - 32px));max-height:min(380px,60vh);overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px}
+@media (max-width:640px){.msel-pop{position:fixed;left:16px!important;right:16px!important;top:auto;width:auto;min-width:0;max-width:none;margin-top:6px}}
 .msel-top{display:flex;justify-content:space-between;gap:8px;padding:2px 4px 6px;border-bottom:1px solid var(--rule);margin-bottom:4px}
 .msel-pop label{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:6px;cursor:pointer;font-size:14px;font-weight:400;color:var(--ink)}
 .msel-pop label:hover{background:var(--surface-2)}
@@ -249,6 +250,30 @@ table.list tr:last-child td{border-bottom:0}
 .campo .ck p{font-size:14px;line-height:1.45}
 .campo textarea,.campo input{font-size:16px}
 @media (max-width:760px){.cfoot .btn{flex:1}.cfoot>span{flex-basis:100%}}
+.metacards .panel-b{display:flex;flex-direction:column;gap:6px}
+.mbig{margin:2px 0;font-size:15px;color:var(--ink-2)}
+.mbig b{font-family:var(--f-cond);font-size:30px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.mbig b.neg,.mtab td.neg{color:var(--bad-ink)}
+.mbig b.pos{color:var(--ok-ink)}
+.mbar{height:8px;background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;overflow:hidden}
+.mbar div{height:100%;background:var(--accent)}
+.glegend{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.glegend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.glegend i.gp,.gmeta .gp{fill:var(--rule-strong);background:var(--rule-strong)}
+.glegend i.gr,.gmeta .gr{fill:var(--accent);background:var(--accent)}
+.gmeta{display:block;max-width:none}
+.gmeta .gcur{fill:var(--accent-soft)}
+.gmeta .gaxis{stroke:var(--rule-strong);stroke-width:1}
+.gmeta .gv{font-size:11px;font-weight:600;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+.gmeta .gl{font-size:11.5px;fill:var(--ink-3)}
+.gmeta .gl.gb{font-weight:700;fill:var(--ink)}
+.mtab{min-width:0!important;margin-top:10px}
+.mtab th,.mtab td{padding:6px 8px!important;font-size:12.5px;white-space:nowrap}
+.mtab th.cur{color:var(--accent)!important}
+details.panel>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+details.panel>summary::-webkit-details-marker{display:none}
+details.panel>summary b::before{content:"▸ ";color:var(--ink-3)}
+details.panel[open]>summary b::before{content:"▾ "}
 .melfilt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .melfilt select{width:auto;flex:0 0 auto}
 .melfilt input{flex:1 1 220px;width:auto}
@@ -336,9 +361,7 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
     <nav class="nav" aria-label="Seções">
       <button type="button" data-go="home" id="nav-home">AEPs</button>
       <button type="button" data-go="painel" id="nav-painel">Painel</button>
-      <button type="button" data-go="gerencia" id="nav-gerencia">Gerências</button>
       <button type="button" data-go="melhorias" id="nav-melhorias">Melhorias</button>
-      <button type="button" data-go="campo" id="nav-campo">Coleta de campo</button>
       <button type="button" data-go="copsoq" id="nav-copsoq">COPSOQ por setor</button>
       <button type="button" data-go="config" id="nav-config">Unidade</button>
     </nav>
@@ -357,6 +380,9 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script>
+/* Planejamento_AEP_2026 (mês previsto de cada AEP), base do plano PLA202609SA20-30 do SIG. Ajustes ficam em config/plano. */
+const PLANO_PADRAO = {"AEP 01":"2027-04","AEP 02":"2027-04","AEP 03":"2027-04","AEP 04":"2027-04","AEP 05":"2027-04","AEP 06":"2027-04","AEP 07":"2027-04","AEP 08":"2027-04","AEP 09":"2027-04","AEP 10":"2027-04","AEP 11":"2027-04","AEP 12":"2027-04","AEP 13":"2027-04","AEP 14":"2027-04","AEP 15":"2027-04","AEP 16":"2027-04","AEP 17":"2027-04","AEP 18":"2027-04","AEP 19":"2027-04","AEP 20":"2027-04","AEP 21":"2027-04","AEP 22":"2027-04","AEP 23":"2027-04","AEP 24":"2027-04","AEP 25":"2027-04","AEP 26":"2027-05","AEP 27":"2027-05","AEP 28":"2027-05","AEP 29":"2027-05","AEP 30":"2027-05","AEP 31":"2027-05","AEP 32":"2027-05","AEP 33":"2027-05","AEP 34":"2027-05","AEP 35":"2027-05","AEP 36":"2027-05","AEP 37":"2027-05","AEP 38":"2027-05","AEP 39":"2027-05","AEP 40":"2027-05","AEP 41":"2027-05","AEP 42":"2027-05","AEP 43":"2027-05","AEP 44":"2027-05","AEP 45":"2027-05","AEP 46":"2027-05","AEP 47":"2027-05","AEP 48":"2027-05","AEP 49":"2027-05","AEP 50":"2027-05","AEP 51":"2027-05","AEP 52":"2027-05","AEP 53":"2027-05","AEP 54":"2027-05","AEP 55":"2027-05","AEP 56":"2027-05","AEP 57":"2027-05","AEP 59":"2027-05","AEP 60":"2027-05","AEP 61":"2027-05","AEP 62":"2027-06","AEP 63":"2027-06","AEP 64":"2027-06","AEP 65":"2027-06","AEP 66":"2027-06","AEP 67":"2027-06","AEP 68":"2027-06","AEP 69":"2027-06","AEP 70":"2027-06","AEP 71":"2027-06","AEP 72":"2027-06","AEP 73":"2027-06","AEP 74":"2027-06","AEP 75":"2027-06","AEP 76":"2027-06","AEP 77":"2027-06","AEP 78":"2027-06","AEP 79":"2027-06","AEP 80":"2027-06","AEP 81":"2027-06","AEP 82":"2027-06","AEP 83":"2027-06","AEP 84":"2027-06","AEP 85":"2027-06","AEP 86":"2027-06","AEP 87":"2027-06","AEP 88":"2027-06","AEP 89":"2027-06","AEP 90":"2027-06","AEP 91":"2027-06","AEP 92":"2027-06","AEP 93":"2027-06","AEP 94":"2027-06","AEP 95":"2027-06","AEP 96":"2027-06","AEP 97":"2027-06","AEP 98":"2027-06","AEP 99":"2027-07","AEP 100":"2027-07","AEP 101":"2027-07","AEP 102":"2027-07","AEP 103":"2027-07","AEP 104":"2027-07","AEP 105":"2027-07","AEP 106":"2027-07","AEP 107":"2027-07","AEP 108":"2027-07","AEP 109":"2027-07","AEP 110":"2027-07","AEP 111":"2027-07","AEP 112":"2026-09","AEP 113":"2027-07","AEP 114":"2027-07","AEP 115":"2027-07","AEP 116":"2027-07","AEP 117":"2027-07","AEP 118":"2027-07","AEP 119":"2027-07","AEP 120":"2027-07","AEP 121":"2027-07","AEP 122":"2027-07","AEP 123":"2027-07","AEP 124":"2027-07","AEP 125":"2027-07","AEP 126":"2027-07","AEP 127":"2027-07","AEP 128":"2027-07","AEP 129":"2027-07","AEP 130":"2027-02","AEP 131":"2027-02","AEP 132":"2027-02","AEP 133":"2027-02","AEP 134":"2027-02","AEP 135":"2027-02","AEP 136":"2027-02","AEP 137":"2027-02","AEP 138":"2027-02","AEP 139":"2027-02","AEP 140":"2027-02","AEP 141":"2027-02","AEP 142":"2027-02","AEP 143":"2027-02","AEP 144":"2027-02","AEP 145":"2027-02","AEP 146":"2027-02","AEP 147":"2027-02","AEP 148":"2027-02","AEP 149":"2027-02","AEP 150":"2027-02","AEP 151":"2027-02","AEP 152":"2027-02","AEP 153":"2027-02","AEP 154":"2027-02","AEP 155":"2027-02","AEP 156":"2027-03","AEP 157":"2027-03","AEP 158":"2027-03","AEP 159":"2027-03","AEP 160":"2027-03","AEP 161":"2027-03","AEP 162":"2027-03","AEP 163":"2027-03","AEP 164":"2027-03","AEP 165":"2026-11","AEP 166":"2026-11","AEP 167":"2026-11","AEP 168":"2026-11","AEP 169":"2026-09","AEP 170":"2026-12","AEP 171":"2026-12","AEP 172":"2026-12","AEP 173":"2026-12","AEP 174":"2027-03","AEP 175":"2026-12","AEP 176":"2026-12","AEP 177":"2026-12","AEP 178":"2026-09","AEP 179":"2026-09","AEP 180":"2026-12","AEP 181":"2027-03","AEP 182":"2026-09","AEP 183":"2026-09","AEP 184":"2026-09","AEP 185":"2027-03","AEP 186":"2027-03","AEP 187":"2027-03","AEP 188":"2026-09","AEP 189":"2026-09","AEP 190":"2026-10","AEP 191":"2026-12","AEP 192":"2026-12","AEP 193":"2026-12","AEP 194":"2026-12","AEP 195":"2026-10","AEP 196":"2026-12","AEP 197":"2026-12","AEP 198":"2026-12","AEP 199":"2026-12","AEP 200":"2026-10","AEP 201":"2026-10","AEP 202":"2026-10","AEP 203":"2026-12","AEP 204":"2026-12","AEP 205":"2026-12","AEP 206":"2027-03","AEP 207":"2027-03","AEP 208":"2026-10","AEP 209":"2026-12","AEP 210":"2027-01","AEP 211":"2027-01","AEP 212":"2027-01","AEP 213":"2027-03","AEP 214":"2027-03","AEP 215":"2027-03","AEP 216":"2027-01","AEP 217":"2027-03","AEP 218":"2027-03","AEP 219":"2027-03","AEP 220":"2027-03","AEP 221":"2027-03","AEP 222":"2027-03","AEP 223":"2027-03","AEP 224":"2027-03","AEP 225":"2027-03","AEP 226":"2027-03","AEP 227":"2027-04","AEP 228":"2027-04","AEP 229":"2027-04","AEP 230":"2027-04","AEP 231":"2027-01","AEP 232":"2027-01","AEP 233":"2027-01","AEP 234":"2027-01","AEP 235":"2027-01","AEP 236":"2027-01","AEP 237":"2027-01","AEP 238":"2027-01","AEP 239":"2027-01","AEP 240":"2027-01","AEP 241":"2027-01","AEP 242":"2027-01","AEP 243":"2027-01","AEP 244":"2027-01","AEP 245":"2027-01","AEP 246":"2027-01","AEP 247":"2027-01","AEP 248":"2027-01","AEP 249":"2027-01","AEP 250":"2027-01","AEP 251":"2026-10","AEP 252":"2026-10","AEP 253":"2027-01","AEP 254":"2026-10","AEP 255":"2027-02","AEP 256":"2027-04","AEP 257":"2027-04","AEP 258":"2027-04","AEP 259":"2027-04","AEP 260":"2026-11","AEP 261":"2026-10","AEP 262":"2026-10","AEP 263":"2026-10","AEP 264":"2026-10","AEP 265":"2026-10","AEP 266":"2026-10","AEP 267":"2026-10","AEP 268":"2026-10","AEP 269":"2026-10","AEP 270":"2026-10","AEP 271":"2026-10","AEP 272":"2026-11","AEP 273":"2026-11","AEP 274":"2026-11","AEP 275":"2026-11","AEP 276":"2026-11","AEP 277":"2026-11","AEP 278":"2026-11","AEP 279":"2026-11","AEP 280":"2026-11","AEP 281":"2026-11","AEP 282":"2026-11","AEP 283":"2026-09","AEP 284":"2026-11","AEP 285":"2027-07","AEP 286":"2027-07","AEP 287":"2027-07","AEP 288":"2027-03","AEP 289":"2027-02","AEP 290":"2026-11","AEP 291":"2026-11","AEP 292":"2027-07","AEP 293":"2027-07","AEP 294":"2027-07","AEP 295":"2027-07","AEP 296":"2027-07","AEP 297":"2027-07","AEP 298":"2026-11"};
+
 const TAX_RAW = [{"codigo": "OT-01", "nome": "Sobrecarga quantitativa e ritmo de trabalho intenso", "cat": "Organização do Trabalho", "sub": "Ritmo e Carga de Trabalho", "area": "org", "ancora": 3, "danos": "Desgaste físico e mental, cansaço acentuado e sofrimento psíquico relacionados à sobrecarga de trabalho", "fonte": "Execução de tarefas sob volume de demanda e ritmo impostos pelo processo produtivo.", "campos": "Local; tarefa; volume/meta; prazo; efetivo; duração/frequência; evidência", "cid": "F32; F33; F41; F43; F43.2; F48.0", "medidas": "4-Adm: dimensionamento de efetivo frente à demanda; revisão de metas e prazos; gestão de frequência. | 3-Eng: automação da etapa gargalo.", "evidencia": "Relatório de horas/PNS do setor; efetivo x demanda; ata com o gestor; reavaliação após implantação.", "subescalas": "Exigências quantitativas; Ritmo de trabalho", "itens": [11], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-02", "nome": "Jornada prolongada, turnos ou trabalho noturno com recuperação insuficiente", "cat": "Organização do Trabalho", "sub": "Jornada de Trabalho", "area": "org", "ancora": 3, "danos": "Fadiga física e mental, alteração do sono e desgaste relacionados à jornada prolongada ou ao trabalho em turnos/noturno", "fonte": "Cumprimento de jornada em regime de turnos ou trabalho noturno, com recuperação interjornada insuficiente para reposição do desgaste.", "campos": "Escala; horas; turnos; extras; intervalos; trabalhadores; registros", "cid": "F51.2; G47.2; F32; F41; I10", "medidas": "4-Adm: escalas e regras formais de jornada; controle de prorrogação; indicadores de absenteísmo.", "evidencia": "Escala vigente; registro de jornada; acordo coletivo (nº e data); indicador de absenteísmo.", "subescalas": "(sem subescala) — escala, registro de jornada e acordo coletivo", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-03", "nome": "Pausas insuficientes para recuperação psicofisiológica", "cat": "Organização do Trabalho", "sub": "Pausas e Recuperação", "area": "org", "ancora": 2, "danos": "Fadiga física e desconforto musculoesquelético por insuficiência de pausas de recuperação", "fonte": "Execução de tarefas de forma contínua, sem concessão formal de pausas de recuperação psicofisiológica compatíveis com a exigência da atividade.", "campos": "Ciclo; pausas previstas/observadas; duração; jornada; tarefa; grupo", "cid": "M65; M65.3; M65.4; M54.5; F48.0", "medidas": "4-Adm: pausas programadas de recuperação; alternância de atividade.", "evidencia": "Procedimento de pausas; registro de cumprimento; observação em campo.", "subescalas": "(sem subescala) — observação do ciclo de trabalho", "itens": [6, 11], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-04", "nome": "Monotonia, repetitividade e baixa variabilidade da tarefa", "cat": "Organização do Trabalho", "sub": "Organização da Tarefa", "area": "org", "ancora": 2, "danos": "Desmotivação, tédio e desgaste psíquico relacionados à monotonia e repetitividade da tarefa", "fonte": "Execução de tarefa fragmentada e de ciclo curto, sob método rígido.", "campos": "Ciclo; repetição; alternância; método; duração; grupo", "cid": "F32; F41; F43.2; F48.0; M65", "medidas": "4-Adm: rodízio e ampliação do conteúdo da tarefa. | 1/2: automação da etapa repetitiva.", "evidencia": "Matriz de rodízio; registro de execução.", "subescalas": "(indireta) Significado do trabalho; Compromisso — nunca lançar só por elas", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-05", "nome": "Demanda cognitiva elevada (atenção, memória, decisão)", "cat": "Organização do Trabalho", "sub": "Exigências Cognitivas", "area": "org", "ancora": 2, "danos": "Fadiga mental e desgaste psíquico relacionados à sobrecarga de atenção, memória e processamento de informações", "fonte": "Execução de tarefa com exigência elevada de atenção, memória ou tomada de decisão.", "campos": "Tarefa; sistemas; alarmes; decisões; tempo;", "cid": "F41; F43; F48.0; F32", "medidas": "3-Eng: racionalização de alarmes e telas. | 4-Adm: redução de tarefas simultâneas; apoio a decisões críticas.", "evidencia": "Registro de revisão de alarmes/telas; observação em campo.", "subescalas": "Exigências cognitivas", "itens": [], "inerente": true, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-06", "nome": "Baixo controle sobre método, ritmo, sequência ou pausas", "cat": "Organização do Trabalho", "sub": "Autonomia e Controle", "area": "org", "ancora": 2, "danos": "Desgaste psíquico e tensão relacionados à baixa autonomia sobre método, ritmo ou pausas", "fonte": "Execução de tarefa sob supervisão rígida, sem autonomia sobre método, ritmo, sequência ou pausas.", "campos": "Tarefa; regra de controle; supervisão; autonomia; evidência; grupo", "cid": "F41; F43; F43.2; M65", "medidas": "4-Adm: alçada formalizada; participação do trabalhador na definição do método.", "evidencia": "Procedimento revisado com participação registrada; alçada formalizada.", "subescalas": "Influência no trabalho", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-07", "nome": "Ambiguidade ou conflito de papéis ocupacionais", "cat": "Organização do Trabalho", "sub": "Papéis e Responsabilidades", "area": "org", "ancora": 2, "danos": "Tensão e desgaste psíquico relacionados à ambiguidade ou conflito de papéis ocupacionais", "fonte": "Execução de função com atribuições mal definidas ou sujeita a ordens conflitantes entre diferentes níveis de chefia.", "campos": "Cargo; ordens; chefias; descrição; evidência; grupo", "cid": "F41; F43.2; F48.0", "medidas": "4-Adm: descrição de cargo padronizada; ordem de serviço assinada; linha única de comando.", "evidencia": "Descrição de cargo vigente; OS assinada pelo trabalhador.", "subescalas": "Conflitos de papeis; Transparência do papel laboral; Previsibilidade", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-08", "nome": "Capacitação insuficiente ou suporte inadequado para a tarefa", "cat": "Organização do Trabalho", "sub": "Desenvolvimento e Capacitação", "area": "org", "ancora": 1, "danos": "Insegurança e desgaste psíquico relacionados à capacitação insuficiente para a função", "fonte": "Execução de tarefa nova ou alterada sem capacitação prévia ou suporte técnico compatível com a mudança introduzida.", "campos": "Mudança; treinamento; suporte; tempo; erros; grupo", "cid": "F43.2; F41; F48.8", "medidas": "4-Adm: treinamento em procedimentos; capacitação prévia a mudança; reciclagem.", "evidencia": "Lista de presença e conteúdo; matriz de capacitação do cargo.", "subescalas": "Possibilidade de desenvolvimento", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-12", "nome": "Demanda emocional elevada (lidar com sofrimento, agressividade ou risco de terceiros)", "cat": "Organização do Trabalho", "sub": "Exigências Emocionais", "area": "org", "ancora": 2, "danos": "Desgaste emocional e sofrimento psíquico relacionados à exposição a situações de alta carga emocional", "fonte": "Execução de tarefa que exige lidar com sofrimento, agressividade ou risco de terceiros.", "campos": "Tarefa; natureza da exigência emocional; frequência; suporte disponível; evidência; grupo", "cid": "F43; F43.1; F48.0; Z73.0", "medidas": "4-Adm: acolhimento e acompanhamento (Equilíbrium); registro de atendimentos; suporte pós-evento crítico.", "evidencia": "Registro de atendimentos do setor; protocolo de acolhimento pós-evento.", "subescalas": "Exigências emocionais", "itens": [], "inerente": true, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-13", "nome": "Interferência do trabalho na vida pessoal/familiar e/ou insegurança quanto à estabilidade no emprego", "cat": "Organização do Trabalho", "sub": "Interface Trabalho-Família e Insegurança Laboral", "area": "org", "ancora": 2, "danos": "Desgaste emocional relacionado à interferência do trabalho na vida pessoal e/ou à percepção de instabilidade no emprego", "fonte": "Rotina de trabalho com interferência relevante na vida pessoal/familiar e/ou contexto de mudança organizacional sem comunicação estruturada.", "campos": "Fonte da interferência ou insegurança; frequência; comunicação existente; evidência; grupo", "cid": "F41; F43.2; F48.0", "medidas": "4-Adm: regras de jornada e de contato fora do expediente; comunicação estruturada de mudanças; acordo coletivo.", "evidencia": "Acordo coletivo (nº e data); comunicado formal de mudança organizacional.", "subescalas": "Insegurança laboral; Trabalho x família", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-09", "nome": "Apoio social insuficiente ou liderança inadequada", "cat": "Organização do Trabalho", "sub": "Relações Sociais e Liderança", "area": "org", "ancora": 3, "danos": "Desgaste emocional e sofrimento psíquico relacionados a apoio social insuficiente ou liderança inadequada", "fonte": "Convivência sob estilo de liderança pouco acessível ou clima de baixo apoio entre colegas, sem canais estruturados de escuta.", "campos": "Conduta; frequência; canal; equipe; evidência; grupo", "cid": "F10; F32; F33; F41; F43; F43.1; F43.2; F48.0", "medidas": "4-Adm: treinamento de liderança (Equilíbrium); treinamento com gestores; canais de escuta da equipe.", "evidencia": "Lista de presença de liderança; atas de DDS; ata de devolutiva ao gestor.", "subescalas": "Apoio social de colegas; Apoio social de superiores; Qualidade da liderança; Comunidade social; Confiança vertical; Confiança horizontal", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-10", "nome": "Baixo reconhecimento, recompensas inadequadas ou justiça organizacional precária", "cat": "Organização do Trabalho", "sub": "Reconhecimento e Justiça Organizacional", "area": "org", "ancora": 2, "danos": "Desgaste emocional relacionado à percepção de injustiça ou falta de reconhecimento no trabalho", "fonte": "Distribuição de tarefas, promoções ou reconhecimento com critérios pouco transparentes ou inconsistentes, sem canal formal de feedback.", "campos": "Critério; decisões; transparência; feedback; evidência; grupo", "cid": "F32; F33; F41; F43.2; F48.0", "medidas": "4-Adm: critérios transparentes de distribuição e reconhecimento; feedback estruturado; código de conduta.", "evidencia": "Critério documentado; registro de ciclo de feedback; cobertura do treinamento de conduta.", "subescalas": "Recompensas; Justiça e respeito", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "OT-11", "nome": "Exposição a violência, assédio moral ou sexual", "cat": "Organização do Trabalho", "sub": "Violência e Assédio", "area": "org", "ancora": 4, "danos": "Sofrimento psíquico e desgaste emocional relacionados à exposição a condutas de violência ou assédio no trabalho", "fonte": "Exposição do grupo de trabalhadores a condutas potencialmente configuradoras de assédio moral ou sexual, sujeitas às barreiras de prevenção e apuração mantidas pela organização.", "campos": "Conduta; tipo; relação; frequência; evidência; grupo; canal", "cid": "F32; F33; F41; F43; F43.1; F43.2; F48.0; R49", "medidas": "4-Adm: canal de denúncia e compliance; rito formal de apuração; treinamento de conduta e direitos humanos.", "evidencia": "Divulgação do canal; registro de apuração; cobertura do treinamento de conduta.", "subescalas": "Comportamentos ofensivos", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-01", "nome": "Posturas extremas, nocivas ou estáticas prolongadas", "cat": "Biomecânicos", "sub": "Posturas", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, pescoço, ombros e membros superiores e/ou inferiores", "fonte": "Manutenção da postura sentada por períodos prolongados em estação de trabalho informatizada durante a jornada.", "campos": "Ângulos/descrição; tempo; frequência; tarefa; posto; grupo; fotos/observação", "cid": "M50; M50.1; M51; M51.1; M54; M54.2; M54.5; M75; M75.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [1, 2, 3], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-02", "nome": "Movimentos articulares repetitivos de membros superiores", "cat": "Biomecânicos", "sub": "Movimentos Repetitivos", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão em punhos, mãos, cotovelos e ombros", "fonte": "Uso contínuo de teclado e mouse para digitação de documentos, planilhas, e-mails e navegação em sistemas.", "campos": "Ciclo; repetição; força; pausas; tempo; região corporal; grupo", "cid": "G56.0; M50; M51; M54; M65; M65.3; M65.4; M70; M75; M77; M79.8", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [6], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-03", "nome": "Aplicação de força elevada, empurrar, puxar ou preensão", "cat": "Biomecânicos", "sub": "Aplicação de Força", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão em coluna, membros superiores e/ou inferiores", "fonte": "Aplicação de força manual elevada (empurrar, puxar ou preensão) na execução da tarefa.", "campos": "Força; resistência; frequência; postura; ferramenta; grupo", "cid": "I83; M16; M17; M50; M51; M54; M75; M77", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [5, 7, 10], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-04", "nome": "Manipulação manual de cargas com potencial de comprometer a segurança", "cat": "Biomecânicos", "sub": "Movimentação Manual de Materiais", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, abdômen e membros superiores e/ou inferiores", "fonte": "Manuseio e transporte manual não eventual de cargas, com pega distante do centro de gravidade do corpo.", "campos": "Peso; pega; altura; distância; frequência; rota; grupo; auxílio", "cid": "I83; K40; K41; K42; K43; K44; K46; M16; M17; M47.8; M50; M51; M54", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [8, 9], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-05", "nome": "Alcance inadequado ou restrição de espaço corporal", "cat": "Biomecânicos", "sub": "Alcance e Espaço de Trabalho", "area": "mov", "ancora": 1, "danos": "Dor e desconforto / lesão em coluna, pescoço e ombros", "fonte": "Execução de tarefa em posto com alcance excessivo ou espaço corporal restrito, exigindo compensação postural.", "campos": "Medidas; direção; frequência; postura; tarefa; grupo", "cid": "M54; M54.2; M75; M79.8", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-06", "nome": "Pressão ou fricção localizada da pele contra superfícies rígidas", "cat": "Biomecânicos", "sub": "Contato Mecânico", "area": "mov", "ancora": 1, "danos": "Desconforto e lesão cutânea localizada (pressão/fricção) em mãos, antebraços ou joelhos", "fonte": "Apoio ou fricção continuada de segmento corporal contra superfície rígida ou aresta viva do posto de trabalho.", "campos": "Parte do corpo; superfície; tempo; frequência; tarefa; grupo", "cid": "L84; L60", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "BIO-07", "nome": "Exposição ocupacional a vibração de corpo inteiro ou mãos-braços", "cat": "Biomecânicos", "sub": "Vibração", "area": "mov", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna e/ou em mãos e braços relacionados à exposição a vibração", "fonte": "Operação de equipamento ou permanência em estrutura com transmissão de vibração ao corpo.", "campos": "Tipo; equipamento; aceleração; tempo; frequência; método; grupo", "cid": "I73.0; I73.8; M16; M17; M50; M50.1; M51; M51.1; M54; M93.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-01", "nome": "Mobiliário sem ajuste ou incompatível com a tarefa", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Mobiliário", "area": "mob", "ancora": 1, "danos": "Dor e desconforto / lesão na coluna, pescoço e membros inferiores relacionados ao mobiliário inadequado", "fonte": "Utilização de mobiliário sem regulagem ou incompatível com a antropometria do posto de trabalho.", "campos": "Alturas; ajustes; tempo; postura; tarefa; grupo; fotos/medidas", "cid": "M50; M51; M54; M54.2; M75; I83", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [4], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-02", "nome": "Arranjo físico que exige deslocamentos, alcances ou posturas inadequados", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Layout", "area": "mob", "ancora": 1, "danos": "Fadiga muscular e desconforto relacionados a deslocamentos e posturas exigidas pelo layout", "fonte": "Arranjo físico do posto que exige deslocamentos, alcances ou posturas inadequadas para execução da tarefa.", "campos": "Distâncias; fluxos; obstáculos; tarefa; frequência; grupo", "cid": "M54; M54.2; M75; I83", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-03", "nome": "Máquina com operação/manutenção ergonomicamente inadequada", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Máquinas", "area": "maq", "ancora": 2, "danos": "Dor e desconforto / lesão na coluna, pescoço e ombros relacionados à operação/manutenção de máquinas", "fonte": "Operação ou manutenção de máquina com pontos de acesso ou controle fora da zona de alcance confortável.", "campos": "Máquina; ponto; postura; acesso; tempo; frequência; grupo", "cid": "M50.1; M51.1; M54.2; M54.5; M75.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-04", "nome": "Equipamento ou posto informatizado inadequado", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Equipamentos", "area": "maq", "ancora": 1, "danos": "Desconforto visual e dor/desconforto cervical relacionados ao uso de equipamento ou posto informatizado inadequado", "fonte": "Utilização de equipamento ou posto informatizado sem possibilidade de ajuste às características do usuário.", "campos": "Altura; distância; ângulo; tempo; tarefa; grupo", "cid": "H55; M54.2; M53.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-05", "nome": "Ferramenta manual inadequada quanto a peso, pega, força ou vibração", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Ferramentas", "area": "maq", "ancora": 2, "danos": "Dor e desconforto / lesão em mãos, punhos e antebraços relacionados ao uso de ferramenta manual inadequada", "fonte": "Utilização de ferramenta manual com peso, empunhadura ou vibração inadequados à tarefa executada.", "campos": "Ferramenta; peso; pega; força; vibração; tempo; grupo", "cid": "G56.0; M65.4; M70; I73.0; M93.1", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "EQ-06", "nome": "Interface complexa, sinais confusos ou alarmes inadequados", "cat": "Mobiliários Máquinas Equipamentos e Ferramentas", "sub": "Interfaces Homem-Máquina", "area": "maq", "ancora": 1, "danos": "Fadiga mental e desgaste psíquico relacionados à complexidade da interface ou sinalização", "fonte": "Operação de interface (software/IHM) com sinalização confusa ou excesso de alarmes concorrentes, sem priorização por criticidade.", "campos": "Sistema; telas; alarmes; tarefa; tempo; grupo; evidência", "cid": "F41; F43; F48.0", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-01", "nome": "Iluminamento inadequado, ofuscamento ou reflexos", "cat": "Conforto Ambiental", "sub": "Iluminação", "area": "conf", "ancora": 1, "danos": "Desconforto e fadiga visual relacionados à iluminação inadequada", "fonte": "Execução de tarefa sob iluminamento insuficiente, excessivo ou sujeito a ofuscamento/reflexo no posto de trabalho.", "campos": "Lux; método; horário; tarefa visual; ofuscamento; grupo", "cid": "H55", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; NHO 11", "prov": false}, {"codigo": "AMB-02", "nome": "Calor, frio ou correntes de ar incompatíveis com a tarefa fora dos parâmetros de conforto", "cat": "Conforto Ambiental", "sub": "Ambiente Térmico", "area": "conf", "ancora": 1, "danos": "Desconforto térmico e fadiga relacionados a calor, frio ou correntes de ar incompatíveis com a tarefa", "fonte": "Permanência em ambiente com temperatura ou correntes de ar fora da faixa de conforto térmico de referência, de forma crônica.", "campos": "Temperatura; umidade; velocidade; tarefa; tempo; vestimenta; grupo", "cid": "L50.2; I73.0; I73.8; T33; T34; T67", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-03", "nome": "Ruído de fundo que interfere no conforto, comunicação ou concentração", "cat": "Conforto Ambiental", "sub": "Ambiente Acústico", "area": "conf", "ancora": 1, "danos": "Desconforto, dificuldade de comunicação e fadiga relacionados ao ruído de fundo", "fonte": "Permanência em ambiente com ruído de fundo que interfere na comunicação ou concentração.", "campos": "Nível; método; tempo; fonte; comunicação; grupo", "cid": "R49; H83.3; I10", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}, {"codigo": "AMB-04", "nome": "Vibração transmitida por piso/estrutura que interfere na tarefa ou conforto", "cat": "Conforto Ambiental", "sub": "Vibração Ambiental", "area": "conf", "ancora": 1, "danos": "Desconforto e exacerbação de dores relacionados à vibração transmitida pelo piso/estrutura", "fonte": "Permanência em posto sujeito a vibração transmitida por piso ou estrutura predial.", "campos": "Medição; método; fonte; tempo; posto; grupo", "cid": "M54; M54.5", "medidas": "4-Adm: medida definida na AEP conforme achado de campo, observada a hierarquia da NR-1.", "evidencia": "Registro antes/depois; evidência de implantação; reavaliação do risco residual.", "subescalas": "(identificação por observação em campo)", "itens": [], "inerente": false, "base": "NR-1; NR-17; LDRT", "prov": false}];
 const SUBS_RAW = [{"id": "exigencias-cognitivas", "nome": "Exigências cognitivas", "dom": "EL", "tax": "OT-05", "natureza": "org"}, {"id": "exigencias-emocionais", "nome": "Exigências emocionais", "dom": "EL", "tax": "OT-12", "natureza": "org"}, {"id": "exigencias-quantitativas", "nome": "Exigências quantitativas", "dom": "EL", "tax": "OT-01", "natureza": "org"}, {"id": "ritmo-de-trabalho", "nome": "Ritmo de trabalho", "dom": "EL", "tax": "OT-01", "natureza": "org"}, {"id": "inseguranca-laboral", "nome": "Insegurança laboral", "dom": "IT", "tax": "OT-13", "natureza": "org"}, {"id": "satisfacao-laboral", "nome": "Satisfação laboral", "dom": "IT", "tax": "", "natureza": "efeito"}, {"id": "trabalho-x-familia", "nome": "Trabalho x família", "dom": "IT", "tax": "OT-13", "natureza": "org"}, {"id": "compromisso-face-ao-local-de-trabalho", "nome": "Compromisso face ao local de trabalho", "dom": "OT", "tax": "", "natureza": "protetor"}, {"id": "influencia-no-trabalho", "nome": "Influência no trabalho", "dom": "OT", "tax": "OT-06", "natureza": "org"}, {"id": "possibilidade-de-desenvolvimento", "nome": "Possibilidade de desenvolvimento", "dom": "OT", "tax": "OT-08", "natureza": "org"}, {"id": "significado-do-trabalho", "nome": "Significado do trabalho", "dom": "OT", "tax": "", "natureza": "protetor"}, {"id": "apoio-social-de-colegas", "nome": "Apoio social de colegas", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "apoio-social-de-superiores", "nome": "Apoio social de superiores", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "conflitos-de-papeis", "nome": "Conflitos de papeis", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "previsibilidade", "nome": "Previsibilidade", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "qualidade-da-lideranca", "nome": "Qualidade da liderança", "dom": "RS", "tax": "OT-09", "natureza": "org"}, {"id": "recompensas", "nome": "Recompensas", "dom": "RS", "tax": "OT-10", "natureza": "org"}, {"id": "transparencia-do-papel-laboral", "nome": "Transparência do papel laboral", "dom": "RS", "tax": "OT-07", "natureza": "org"}, {"id": "comunidade-social", "nome": "Comunidade social", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "confianca-horizontal", "nome": "Confiança horizontal", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "confianca-vertical", "nome": "Confiança vertical", "dom": "VL", "tax": "OT-09", "natureza": "org"}, {"id": "justica-e-respeito", "nome": "Justiça e respeito", "dom": "VL", "tax": "OT-10", "natureza": "org"}, {"id": "comportamentos-ofensivos", "nome": "Comportamentos ofensivos", "dom": "CO", "tax": "OT-11", "natureza": "org"}];
 const DOM_NOMES = {"EL": "Exigências Laborais", "IT": "Interface Trabalho-Indivíduo", "OT": "Organização do Trabalho e Conteúdo", "RS": "Relações Sociais e Liderança", "VL": "Valores no Local de Trabalho", "CO": "Comportamentos Ofensivos"};
@@ -838,7 +864,7 @@ function migrarV3(r){
   if (Array.isArray(r.checklist) && r.checklist.length >= 12){
     const tirado = r.checklist.splice(11, 1)[0];
     if (tirado && tirado.r === "sim"){ r.revisarItem12 = String(tirado.obs || "").trim() || "sim";
-      if (r.status === "concluida"){ r.status = "revisao"; r.concluidoEm = null; } }
+      if (r.status === "concluida"){ r.status = "revisao"; r.concluidoPrimeiro = r.concluidoPrimeiro || r.concluidoEm; r.concluidoEm = null; } }
   }
   (r.perigos||[]).forEach(h => {
     ["checkItem", "autoItem"].forEach(k => { const v = Number(h[k]); if (!v) return;
@@ -1088,7 +1114,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
+  plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1163,6 +1189,7 @@ async function iniciar(){
     else if (S.view === "home") atualizarHome(); else if (S.view === "painel") render();
     if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
   }, () => {});
+  db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; if (S.view === "painel") render(); }, () => {});
   db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {};
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
@@ -1186,7 +1213,7 @@ function marcar(){
   S.dirty = true;
   if (S.draft){
     if (S.draft.status === "nao_iniciada") { S.draft.status = "andamento"; renderTitulo(); }
-    else if (S.draft.status === "concluida") { S.draft.status = "revisao"; S.draft.concluidoEm = null; toast("Alteração numa AEP concluída: ela passou para “Em revisão” até ser concluída de novo."); renderTitulo(); }
+    else if (S.draft.status === "concluida") { S.draft.status = "revisao"; S.draft.concluidoPrimeiro = S.draft.concluidoPrimeiro || S.draft.concluidoEm; S.draft.concluidoEm = null; toast("Alteração numa AEP concluída: ela passou para “Em revisão” até ser concluída de novo."); renderTitulo(); }
   }
   setSaveState("Alterações não salvas");
   clearTimeout(S.saveTimer); S.saveTimer = setTimeout(salvarAEP, 700);
@@ -1252,6 +1279,7 @@ async function ir(view, extra){
   if (S.view === "config") await salvarConfig();
   if (S.view === "campo") await salvarAEP();
   if (S.melDirty) await salvarMelhorias();
+  if (S.planoDirty) await salvarPlano();
   S.view = view; S.confirm = null;
   if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
@@ -1268,7 +1296,7 @@ function irEtapa(n){ S.step = n; S.editHz = null; S.confirm = null; renderRail()
    ========================================================================= */
 function render(){
   const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view;
-  ["home","painel","gerencia","campo","copsoq","config"].forEach(v => $("#nav-"+v).setAttribute("aria-current", ativo === v ? "page" : "false"));
+  document.querySelectorAll(".nav [data-go]").forEach(b => b.setAttribute("aria-current", ativo === b.dataset.go ? "page" : "false"));
   const app = $("#app");
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
@@ -1332,6 +1360,7 @@ function aplicarFiltroSetor(){
   document.querySelectorAll("[data-msel-rot]").forEach(x => x.textContent = rotuloSetores(S.fSetor));
   document.querySelectorAll("input[data-msel]").forEach(x => x.checked = S.fSetor.includes(x.dataset.msel));
   if (S.view === "home") atualizarHome();
+  const pc = $("#painelcorpo"); if (pc) { pc.innerHTML = painelCorpo(); return; }
   const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
   const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
   const c = $("#campocards"); if (c) c.innerHTML = campoCards();
@@ -1355,7 +1384,7 @@ function vHome(){
     <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
-    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Painel da gerência</button></span></div>
+    <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span><button class="btn small" type="button" data-act="painelGer">Ver no Painel</button></span></div>
   <div class="panel">
     ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
@@ -1531,46 +1560,129 @@ function vConferencia(){
 }
 
 /* ---------------- Painel de andamento ---------------- */
-function vPainel(){
-  const L = Object.values(S.aeps), tot = L.length, c = st => L.filter(a => (a.status||"nao_iniciada") === st).length;
-  const concl = c("concluida"), and = c("andamento"), nao = c("nao_iniciada"), rev = c("revisao"), pct = tot ? concl / tot : 0;
-  const ini = S.config.dataInicio ? new Date(S.config.dataInicio + "T00:00") : null, meta = S.config.dataMeta ? new Date(S.config.dataMeta + "T00:00") : null, hoje = new Date();
-  const dias = ini ? Math.max(1, Math.round((hoje - ini) / 864e5)) : null, ritmo = dias ? concl / dias : null, faltam = tot - concl;
-  const previsao = ritmo ? new Date(hoje.getTime() + (faltam / ritmo) * 864e5) : null;
-  const diasMeta = meta ? Math.round((meta - hoje) / 864e5) : null, ritmoNec = diasMeta > 0 ? faltam / diasMeta : null;
-  const fmt = d => d ? d.toLocaleDateString("pt-BR") : "—", mes = v => v != null ? (v*30).toFixed(1).replace(".",",") : "—";
+/* ---------------- Painel: meta do plano PLA202609SA20-30 (SIG) ----------------
+   Planejado = mês previsto de cada AEP (Planejamento_AEP_2026, ajustável em config/plano).
+   Realizado = mês da primeira conclusão (corrigir a AEP depois não tira ela do mês em que foi feita). */
+const MESES_PT = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const MESES_LONGO = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const mesRot = k => k ? `${MESES_PT[Number(k.slice(5,7))-1]}/${k.slice(2,4)}` : "—";
+const mesLongo = k => k ? `${MESES_LONGO[Number(k.slice(5,7))-1]}/${k.slice(0,4)}` : "—";
+const mesPlan = a => { const n = String(a.numero||"").trim(); return (S.plano && S.plano[n]) || PLANO_PADRAO[n] || ""; };
+function mesReal(a){
+  if (a.status !== "concluida" && a.status !== "revisao") return "";
+  const x = a.concluidoPrimeiro || a.concluidoEm; if (!x) return "";
+  const d = new Date(x); if (isNaN(d)) return String(x).slice(0, 7);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+}
+const mesesPlano = () => [...new Set([...Object.values(PLANO_PADRAO), ...Object.values(S.plano||{})])].filter(Boolean).sort();
+const aepsFiltradas = () => Object.values(S.aeps).filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
+function dadosMeta(L){
+  const meses = mesesPlano(), ini = meses[0], fim = meses[meses.length-1], hoje = hojeISO().slice(0,7);
+  const atual = hoje < ini ? ini : hoje > fim ? fim : hoje;
+  const plan = Object.fromEntries(meses.map(m => [m, 0])), real = Object.fromEntries(meses.map(m => [m, 0]));
+  L.forEach(a => { const p = mesPlan(a); if (p in plan) plan[p]++; const r = mesReal(a); if (r) real[r < ini ? ini : r > fim ? fim : r]++; });
+  let pa = 0, ra = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; return { m, p: plan[m], r: real[m], pa, ra }; });
+  const at = acum.find(x => x.m === atual) || { p: 0, r: 0, pa: 0, ra: 0 };
+  const feitas = L.filter(a => mesReal(a)).length, faltam = L.length - feitas, mesesRest = meses.filter(m => m >= atual).length;
+  return { meses, atual, hoje, acum, at, feitas, faltam,
+    indice: at.pa ? at.ra / at.pa : null,
+    necessario: mesesRest ? faltam / mesesRest : null,
+    doMes: L.filter(a => mesPlan(a) === atual).sort((x, y) => (mesReal(x) ? 1 : 0) - (mesReal(y) ? 1 : 0) || idNum(x) - idNum(y)),
+    atrasadas: L.filter(a => mesPlan(a) && mesPlan(a) < atual && !mesReal(a)).sort((x, y) => mesPlan(x).localeCompare(mesPlan(y)) || idNum(x) - idNum(y)),
+    adiantadas: L.filter(a => mesReal(a) && mesPlan(a) > mesReal(a)).length,
+    semPlano: L.filter(a => !mesPlan(a)).length };
+}
+const pctTxt = v => v == null ? "—" : `${(v*100).toFixed(1).replace(".", ",")}%`;
+function graficoMeta(D){
+  const n = D.acum.length, bw = 16, gap = 4, slot = 56, top = 26, h = 150, W = 40 + n * slot, H = top + h + 34;
+  const max = Math.max(1, ...D.acum.map(x => Math.max(x.p, x.r)));
+  const y = v => top + h - (v / max) * h;
+  const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual;
+    const bar = (xx, v, cls) => v ? `<rect x="${xx}" y="${y(v)}" width="${bw}" height="${top + h - y(v)}" rx="3" class="${cls}"><title>${mesLongo(x.m)}: ${cls === "gp" ? "planejadas" : "concluídas"} ${v}</title></rect>
+      <text x="${xx + bw/2}" y="${y(v) - 5}" text-anchor="middle" class="gv">${v}</text>` : "";
+    return `${cur ? `<rect x="${40 + i*slot + 2}" y="${top - 18}" width="${slot - 4}" height="${h + 52}" rx="6" class="gcur"/>` : ""}
+      ${bar(x0, x.p, "gp")}${bar(x0 + bw + gap, x.r, "gr")}
+      <text x="${40 + i*slot + slot/2}" y="${top + h + 18}" text-anchor="middle" class="gl${cur ? " gb" : ""}">${mesRot(x.m)}</text>`; }).join("");
+  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Concluídas</span><span class="tiny muted">Destaque: mês atual</span></div>
+  <div class="tablewrap"><svg class="gmeta" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="AEPs planejadas e concluídas por mês">
+    <line x1="34" x2="${W - 6}" y1="${top + h}" y2="${top + h}" class="gaxis"/>${barras}</svg></div>
+  <div class="tablewrap"><table class="list mtab"><thead><tr><th>Mês</th>${D.acum.map(x => `<th class="num${x.m === D.atual ? " cur" : ""}">${mesRot(x.m)}</th>`).join("")}</tr></thead><tbody>
+    <tr><td>Planejadas</td>${D.acum.map(x => `<td class="num">${x.p}</td>`).join("")}</tr>
+    <tr><td>Concluídas</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.r < x.p ? " neg" : ""}">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
+    <tr><td>Acumulado planejado</td>${D.acum.map(x => `<td class="num">${x.pa}</td>`).join("")}</tr>
+    <tr><td>Acumulado concluído</td>${D.acum.map(x => `<td class="num">${x.m > D.hoje ? "" : x.ra}</td>`).join("")}</tr>
+    <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.hoje && x.pa && x.ra < x.pa ? " neg" : ""}">${x.m > D.hoje || !x.pa ? "" : pctTxt(x.ra / x.pa)}</td>`).join("")}</tr>
+  </tbody></table></div>`;
+}
+const linhaAEP = (a, extra) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td>${extra}</td></tr>`;
+function painelCorpo(){
+  const L = aepsFiltradas(), tot = L.length, c = st => L.filter(a => (a.status||"nao_iniciada") === st).length;
+  const concl = c("concluida"), and = c("andamento"), nao = c("nao_iniciada"), rev = c("revisao");
+  const D = dadosMeta(L), mesTxt = mesLongo(D.atual);
   const LC = L.filter(a => a.status === "concluida"), hzConcl = LC.flatMap(a => a.perigos||[]);
   const itensCrit = LC.reduce((s,a) => s + (a.perigos||[]).filter(h => itensDoPerigo(a,h).length).length, 0);
-  const fila = L.filter(a => (a.status||"nao_iniciada") !== "concluida").map(a => { const set = setorPorNome(a.meta?.setorCopsoq), al = altasDe(set);
-      return { a, al, n: Number(set?.n)||0, ine: al.filter(x => TAXMAP[x.s.tax]?.inerente).length }; })
-    .sort((x,y) => y.al.length - x.al.length || (y.a.status==="andamento") - (x.a.status==="andamento") || y.n - x.n || idNum(x.a) - idNum(y.a)).slice(0,25);
   const alertas = L.map(a => ({ a, al: alertaAET(a) })).filter(x => x.al);
-  return `<div class="pagehead"><div><h1>Painel de andamento</h1><p>Ritmo e previsão pela data de início e pela meta cadastradas em <button class="btn ghost small" type="button" data-go="config" style="padding:0">Unidade</button>.</p></div></div>
-  <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs cadastradas</span></div><div class="stat"><b>${concl}</b><span>Concluídas</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div><div class="stat"><b>${rev}</b><span>Em revisão</span></div></div>
-  <div class="panel" style="margin-bottom:16px"><div class="panel-b stack tight">
-    <div class="row between"><b>${(pct*100).toFixed(1).replace(".",",")}% concluído</b><span class="small muted">${concl} de ${tot}</span></div>
-    <div role="progressbar" aria-valuemin="0" aria-valuemax="${tot}" aria-valuenow="${concl}" aria-label="AEPs concluídas" style="height:10px;background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;overflow:hidden"><div style="height:100%;width:${(pct*100).toFixed(2)}%;background:var(--accent);border-radius:999px"></div></div>
-    <div class="grid g4" style="margin-top:8px">
-      <div><span class="eyebrow">Ritmo atual</span><p class="num"><b>${mes(ritmo)}</b> AEP/mês</p></div>
-      <div><span class="eyebrow">Ritmo necessário</span><p class="num"><b>${mes(ritmoNec)}</b> AEP/mês até a meta</p></div>
-      <div><span class="eyebrow">Previsão no ritmo atual</span><p class="num"><b>${previsao && concl >= 5 ? fmt(previsao) : "—"}</b>${concl < 5 ? '<span class="tiny faint"> (a partir de 5 concluídas)</span>' : ""}</p></div>
-      <div><span class="eyebrow">Meta</span><p class="num"><b>${fmt(meta)}</b>${previsao && meta && concl >= 5 ? (previsao > meta ? ' <span class="chip ris">atrasado</span>' : ' <span class="chip fav">no prazo</span>') : ""}</p></div>
-    </div></div></div>
+  const pm = D.at.p ? Math.min(1, D.at.r / D.at.p) : 0;
+  const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
+  return `
+  <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs ${S.fSetor.length ? "nas gerências selecionadas" : "cadastradas"}</span></div><div class="stat"><b>${concl}</b><span>Concluídas</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div><div class="stat"><b>${rev}</b><span>Em revisão</span></div></div>
+  <div class="grid g4 metacards">
+    <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.r}</b> de ${D.at.p}</p>
+      <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.r}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
+      <span class="tiny muted">${D.at.r >= D.at.p ? "Meta do mês atingida." : `Faltam ${D.at.p - D.at.r} para a meta do mês.`}</span></div></div>
+    <div class="panel"><div class="panel-b"><span class="eyebrow">Atendimento acumulado</span><p class="mbig"><b class="${D.indice != null && D.indice < 1 ? "neg" : "pos"}">${pctTxt(D.indice)}</b></p>
+      <span class="tiny muted">${D.at.ra} concluídas de ${D.at.pa} planejadas até ${esc(mesTxt)}</span></div></div>
+    <div class="panel"><div class="panel-b"><span class="eyebrow">Atrasadas</span><p class="mbig"><b class="${D.atrasadas.length ? "neg" : "pos"}">${D.atrasadas.length}</b></p>
+      <span class="tiny muted">planejadas para meses anteriores e ainda não concluídas${D.adiantadas ? ` · ${D.adiantadas} feita(s) antes do mês previsto` : ""}</span></div></div>
+    <div class="panel"><div class="panel-b"><span class="eyebrow">Para fechar o plano</span><p class="mbig"><b>${D.faltam}</b> AEPs</p>
+      <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
+  </div>
+  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x concluídas por mês</b><span class="tiny muted">plano PLA202609SA20-30 · concluída conta no mês da primeira conclusão</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
   <div class="grid g2" style="align-items:start">
-    <div class="panel"><div class="panel-h"><b>Fila sugerida</b><span class="tiny muted">mais subescalas altas no setor primeiro</span></div>
-      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Setor COPSOQ</th><th>Subescalas altas</th></tr></thead><tbody>
-      ${fila.map(({a,al,ine}) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo)}<div class="tiny faint">${STATUS[a.status||"nao_iniciada"]}</div></td><td class="small">${esc(a.meta?.setorCopsoq||"—")}</td>
-        <td class="small">${al.length ? al.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : "—"}${ine ? `<div class="tiny faint">${ine} de exigência inerente à atividade</div>` : ""}</td></tr>`).join("")}
-      </tbody></table></div></div>
+    <div class="panel"><div class="panel-h"><b>Plano de ${esc(mesTxt)}</b><span class="tiny muted">${D.doMes.length} AEP(s) previstas</span></div>
+      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th></tr></thead><tbody>
+      ${D.doMes.length ? D.doMes.map(a => linhaAEP(a, stChip(a))).join("") : `<tr><td colspan="3" class="small muted">Nenhuma AEP prevista para este mês.</td></tr>`}</tbody></table></div></div>
+    <div class="panel"><div class="panel-h"><b>Atrasadas</b><span class="tiny muted">mês previsto já passou</span></div>
+      <div class="tablewrap"><table class="list" style="min-width:420px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto / situação</th></tr></thead><tbody>
+      ${D.atrasadas.length ? D.atrasadas.map(a => linhaAEP(a, `<span class="small">${esc(mesRot(mesPlan(a)))}</span> ${stChip(a)}`)).join("") : `<tr><td colspan="3" class="small muted">Nenhuma AEP atrasada.</td></tr>`}</tbody></table></div></div>
+  </div>
+  <div class="grid g2" style="align-items:start;margin-top:16px">
     <div class="stack">
       <div class="panel"><div class="panel-h"><b>Perigos registrados nas AEPs concluídas</b><span class="tiny muted">graduação na planilha de controle</span></div><div class="panel-b stack tight">
         <div class="stats" style="margin:0"><div class="stat"><b>${hzConcl.length}</b><span>perigos</span></div><div class="stat"><b>${itensCrit}</b><span>ligados a item crítico</span></div></div></div></div>
-      ${vConferencia()}
       <div class="panel"><div class="panel-h"><b>Alertas</b></div><div class="panel-b stack tight">
-        ${alertas.length ? alertas.map(({a,al}) => `<div class="row between"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
+        ${alertas.length ? alertas.map(({a,al}) => `<div class="row between" style="flex-wrap:wrap;gap:6px"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}" style="white-space:normal;text-align:left;max-width:100%">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhum alerta.</p>'}
       </div></div>
-    </div></div>
-    <div style="margin-top:16px">${vGerDetalhe()}</div>`;
+    </div>
+    ${vConferencia()}
+  </div>
+  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Resumo para a gerência</b><span class="tiny muted">o mesmo conteúdo do PDF “Resumo para a gerência”</span></summary>
+    <div class="panel-b" style="overflow-x:auto"><style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div></div></details>
+  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Detalhamento por gerência</b><span class="tiny muted">o mesmo conteúdo do PDF “Detalhamento”</span></summary>
+    <div class="panel-b" style="overflow-x:auto"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.fSetor, {})}</div></div></details>`;
+}
+function vPainel(){
+  return `<div class="pagehead"><div><h1>Painel</h1><p>Andamento das AEPs pela meta do plano PLA202609SA20-30 (SIG). O filtro de gerência vale para todo o painel e para os PDFs.</p></div></div>
+  <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+    <span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}
+    <span style="flex:1"></span>
+    <button class="btn primary small" type="button" data-act="pdfGerencia" id="btnPDFger">PDF: resumo para a gerência</button>
+    <button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">PDF: detalhamento</button>
+  </div>
+  <div id="painelcorpo">${painelCorpo()}</div>`;
+}
+/* Mês planejado de uma AEP (etapa 1): fica em config/plano e não altera a situação da AEP */
+function vMesPlano(a){
+  const atual = mesPlan(a), padrao = PLANO_PADRAO[String(a.numero||"").trim()] || "";
+  return `<label class="f span2"><span>Mês planejado (plano do SIG)</span><select data-plano="${esc(String(a.numero||"").trim())}">
+    <option value="">Sem mês planejado</option>${mesesPlano().map(m => `<option value="${m}" ${m === atual ? "selected" : ""}>${esc(mesLongo(m))}${m === padrao ? " (planejamento original)" : ""}</option>`).join("")}</select>
+    <span class="hint">Mudar o mês replaneja a AEP no Painel e não altera a situação dela.</span></label>`;
+}
+async function salvarPlano(){
+  clearTimeout(S.planoTimer); if (!S.db) { S.planoDirty = false; return; }
+  setSaveState("Salvando…");
+  try { await S.db.doc("config/plano").set({ mes: clone(S.plano) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  S.planoDirty = false;
 }
 
 /* ---------------- Editor ---------------- */
@@ -1641,6 +1753,7 @@ function st1(){
     ${fld("meta.setor","Setor",{req:1,cls:"span2"})}${fld("meta.area","Área",{cls:"span2"})}
     <div class="spanall" id="setorcop">${vSetorCop()}</div>
     ${fld("meta.analista","Responsável técnico",{req:1,cls:"span2"})}${fld("meta.registroAnalista","Qualificação / registro",{cls:"span2"})}
+    ${vMesPlano(S.draft)}
     ${vNotasCampo(S.draft)}
     ${fld("trabalho.sumaria","Descrição sumária da atividade",{area:1,rows:9,req:1,cls:"spanall"})}
   </div></div>`;
@@ -2695,6 +2808,9 @@ function campo(e, isChange){
     if (S.view === "melhorias") atualizarMelhorias();
     return;
   }
+  if (el.dataset.plano !== undefined){ if (!isChange) return;
+    const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
+    S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
   if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; atualizarMelhorias(); return; }
   if (el.dataset.melbusca){ if (isChange) return; S.melBusca = el.value; atualizarMelhorias(); return; }
   if (el.dataset.gat !== undefined){
@@ -2760,7 +2876,7 @@ document.addEventListener("click", async e => {
     case "nova": criarAEP(); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "painelGer": ir("gerencia"); break;
+    case "painelGer": ir("painel"); break;
     case "campoAbrir": abrirCampo(d.id); break;
     case "campoVoltar": await salvarAEP(); S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 }); break;
     case "campoConcluir": concluirCampo(); break;
@@ -2781,7 +2897,7 @@ document.addEventListener("click", async e => {
       for (const id of Object.keys(alvo)){
         const a2 = completar(S.aeps[id]);
         a2.perigos.forEach(h => { const t = TAXMAP[h.codigo]; if (t && !temPrefixoPadrao(h)) { const txt = String(h.fonte||"").trim(), base = (FONTES_ALTERNATIVAS[h.codigo]||[])[0] || t.fonte; h.fonte = base + (txt ? " " + txt : ""); n++; } });
-        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoEm = null; }
+        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
         a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
         if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); } catch(_) { erro++; } }
       }
@@ -2799,7 +2915,7 @@ document.addEventListener("click", async e => {
     case "gerarPDF": gerarPDF(); break;
     case "concluir": {
       if (totalPend(pendencias(a))) return;
-      a.status = "concluida"; a.concluidoEm = new Date().toISOString(); S.dirty = true; await salvarAEP();
+      a.status = "concluida"; a.concluidoEm = new Date().toISOString(); a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; S.dirty = true; await salvarAEP();
       renderTitulo(); renderAside(); toast("AEP concluída."); break;
     }
     case "addEsc": a.escuta.push({ id: uid(), nome:"", matricula:"", funcao: (a.meta.cargo||"").trim(), turno:"", data: hojeISO(), condutor: a.meta.analista||"", conteudo:"" }); marcar(); renderStep(); renderRail(); renderAside(); break;
@@ -2903,7 +3019,7 @@ document.addEventListener("click", async e => {
         const el = document.createElement("a"); el.href = URL.createObjectURL(blob); el.download = `copia-antes-do-modelo-${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.json`; document.body.appendChild(el); el.click(); el.remove(); } catch(_) {}
       let n = 0, erro = 0, revis = 0, novos = 0; const sobra = [];
       for (const id of alvo){ const a2 = completar(JSON.parse(JSON.stringify(S.aeps[id]))), ar = setorDaAEP(a2); const r = substituirPeloModelo(a2, ar); if (!r.mudou) continue; n++; novos += r.perigos;
-        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoEm = null; revis++; }
+        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; revis++; }
         if (perigosCopsoqSobrando(a2).length) sobra.push(a2.numero);
         a2.atualizadoEm = new Date().toISOString();
         if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); S.aeps[id] = a2; } catch(_) { erro++; } } else S.aeps[id] = a2; }
@@ -2920,7 +3036,7 @@ document.addEventListener("click", async e => {
     case "redacaoTodasSim": {
       const alvo = conferenciaPerigos().redAnt.map(x => x.a.id); let n = 0, erro = 0;
       for (const id of alvo){ const a2 = completar(S.aeps[id]); if (!atualizarRedacao(a2)) continue; n++;
-        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoEm = null; }
+        if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
         a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
         if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); } catch(_) { erro++; } } }
       S.confirm = null; render(); toast(erro ? `Redação atualizada em ${n - erro} AEP(s); ${erro} não salvaram — tente de novo.` : `Redação atualizada em ${n} AEP(s).`); break;
