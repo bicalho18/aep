@@ -295,6 +295,32 @@ details.panel>summary{list-style:none;display:flex;justify-content:space-between
 details.panel>summary::-webkit-details-marker{display:none}
 details.panel>summary b::before{content:"▸ ";color:var(--ink-3)}
 details.panel[open]>summary b::before{content:"▾ "}
+.catchip{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.catchip.c1{background:#E3F4E4;color:#1F6B2B;border-color:#A9D8AE}.catchip.c2{background:#EFF4D2;color:#56620F;border-color:#CCD98A}
+.catchip.c3{background:#FFF1CC;color:#7A5200;border-color:#EBCB7C}.catchip.c4{background:#FFE0C7;color:#8A3B07;border-color:#F2B07E}.catchip.c5{background:#FBD9D5;color:#8E1C1C;border-color:#E9A9A5}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .catchip{filter:brightness(.85) saturate(1.1)}}
+.invtab tr.sel td{background:var(--accent-soft)}
+.invtab tr.invedit>td{background:var(--surface-2);padding:14px}
+.inved{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:18px}
+@media (max-width:900px){.inved{grid-template-columns:1fr}}
+.invcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.invper{border-left:3px solid var(--accent);padding:4px 0 4px 10px}
+.invper p{margin:4px 0}
+.invres{position:sticky;top:12px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface);padding:12px 14px}
+.invres .ir{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--rule);align-items:baseline}
+.invres .ir:first-child{border-top:0}
+.invres .ir span{font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.invres .ir em{grid-column:2;font-size:12px;color:var(--ink-3);font-style:normal}
+.cdoc h1.cdoc-h1{font-size:22px;margin:0 0 10px}.cdoc h2{font-size:17px;margin:24px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--accent)}.cdoc h3{font-size:14.5px;margin:18px 0 6px}
+.cdoc p{margin:6px 0;max-width:110ch;line-height:1.55}
+.cdoc table.ctab{border-collapse:collapse;width:100%;margin:8px 0 14px;font-size:13px}
+.cdoc .ctab th,.cdoc .ctab td{border:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}
+.cdoc .ctab th{background:var(--surface-2);font-weight:600}
+.cdoc .ctab td.c{text-align:center;font-variant-numeric:tabular-nums}
+.cdoc .mx{text-align:center;font-weight:700}
+@media (max-width:900px){.cdoc table.ctab{display:block;overflow-x:auto;max-width:100%}}
+.invtab td:nth-child(2){min-width:120px}
+.cdoc .mx.c1{background:#E3F4E4;color:#1F6B2B}.cdoc .mx.c2{background:#EFF4D2;color:#56620F}.cdoc .mx.c3{background:#FFF1CC;color:#7A5200}.cdoc .mx.c4{background:#FFE0C7;color:#8A3B07}.cdoc .mx.c5{background:#FBD9D5;color:#8E1C1C}
 .melfilt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .melfilt select{width:auto;flex:0 0 auto}
 .melfilt input{flex:1 1 220px;width:auto}
@@ -304,6 +330,30 @@ details.panel[open]>summary b::before{content:"▾ "}
 .meltab tr.mel-atr td{background:var(--bad-bg)}
 .mtipo{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;padding:2px 7px;border-radius:999px;margin-bottom:4px}
 .mtipo.rec{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line)}
+.mtipo.p1{background:var(--bad-bg);color:var(--bad-ink);border:1px solid var(--bad-line)}
+.mtipo.p2{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line)}
+.prio-fixa{display:inline-block;font-size:12.5px;font-weight:700;padding:4px 8px;border-radius:6px;border:1px solid var(--rule);white-space:nowrap}
+.prio-fixa.prio-Alta{background:var(--bad-bg);color:var(--bad-ink);border-color:var(--bad-line)}
+.prio-fixa.prio-Média{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line)}
+.plaviso{color:var(--bad-ink);font-weight:700}
+.meltab input.sig{min-width:90px;width:100px;font-family:var(--mono,monospace)}
+.meltab tr.sel td{background:var(--accent-soft)}
+.meltab tr.pldetrow>td{background:var(--surface-2);padding:12px 14px}
+.pldet{gap:10px 16px}.pldet textarea{width:100%;font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);resize:vertical}
+.pldet .spanall{grid-column:1/-1}
+.invplano{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.catbars{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.catbar{display:grid;grid-template-columns:96px 1fr 34px;align-items:center;gap:8px;font-size:13px}
+.cb-l{color:var(--ink-2)}.cb-n{text-align:right;font-variant-numeric:tabular-nums}
+.cb-t{height:14px;background:var(--surface-2);border-radius:0 4px 4px 0;overflow:hidden;display:block}
+.cb-f{display:block;height:100%;border-radius:0 4px 4px 0;min-width:0}
+.cb-f.c1{background:#7FC487}.cb-f.c2{background:#B9C95E}.cb-f.c3{background:#E3B94E}.cb-f.c4{background:#EC9150}.cb-f.c5{background:#DA6A63}
+.rtiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.rtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px;border:1px solid var(--rule);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.rtile:hover{border-color:var(--accent)}.rtile b{font-size:22px;line-height:1.1}.rtile b.neg{color:var(--bad-ink)}.rtile span{font-size:12px;color:var(--ink-3)}
+@media (max-width:700px){.rtiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pgrnum{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0}.pgrnum b{display:block;font-size:20px}.pgrnum span{font-size:12px;color:var(--ink-3)}
+.pgrtrans{margin-top:6px}.pgrtrans summary{cursor:pointer;color:var(--ink-3)}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -381,11 +431,13 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
     <div class="brand"><span class="brand-logo"><img src="logo.png" alt="ArcelorMittal" width="68" height="28"></span><span class="brand-txt"><b>AEP</b><span>Avaliação Ergonômica Preliminar · Mina de Serra Azul</span></span></div>
     <nav class="nav" aria-label="Seções">
       <button type="button" data-go="home" id="nav-home"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h4"/></svg><span>AEPs</span></button>
+      <button type="button" data-go="inventario" id="nav-inventario"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="7" cy="6" r="1.2"/><circle cx="7" cy="12" r="1.2"/><circle cx="7" cy="18" r="1.2"/></svg><span>Inventário</span></button>
+      <button type="button" data-go="melhorias" id="nav-melhorias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>Plano de ação</span></button>
       <button type="button" data-go="painel" id="nav-painel"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Meu painel</span></button>
       <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button>
-      <button type="button" data-go="melhorias" id="nav-melhorias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg><span>Melhorias</span></button>
       <button type="button" data-go="pendencias" id="nav-pendencias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>Pendências</span></button>
       <button type="button" data-go="copsoq" id="nav-copsoq"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c.8-.3 1.6-.5 2.5-.5 2.8 0 5 2.2 5 5"/></svg><span>COPSOQ por setor</span></button>
+      <button type="button" data-go="criterios" id="nav-criterios"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg><span>Critérios do GRO</span></button>
       <button type="button" data-go="config" id="nav-config"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Unidade</span></button>
     </nav>
     <div class="savestate" id="savestate" aria-live="polite"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
@@ -403,6 +455,11 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
 <div id="toast" class="toast" hidden role="status"></div>
 
 <script>
+/* Documento de critérios do GRO e mapa de polaridade (vindos da planilha CONTROLE GERAL AEP 2026, 23/10/2026) */
+const CRITERIOS_DOC = [["h1","CRITÉRIOS ADOTADOS NO GERENCIAMENTO DE RISCOS (GRO)"],["p","Documento exigido pelo item 2 das Perguntas e Respostas GRO/PGR (MTE, 2026): critérios das gradações de severidade e de probabilidade, níveis de risco, critérios de classificação de riscos e de tomada de decisão. ANEXO DO PROCEDIMENTO: alterar somente com controle de versão."],["p","A Seção 1 descreve o que entra no inventário e como: o registro por domínio do COPSOQ II, vigente em todos os GHE, e o perigo nominado após a AEP do cargo. A Seção 2 descreve como o risco é graduado."],["h2","SEÇÃO 1 - REGISTRO NO INVENTÁRIO: O QUE ENTRA E COMO"],["p","PRINCÍPIO: risco trivial ou tolerável não é risco zero e permanece no inventário, com as medidas que o mantêm nesse nível. O registro por domínio do COPSOQ II vale para todos os GHE desde já; a AEP do cargo confirma, detalha ou indica a revisão desse registro. Perigo de exigência presente no trabalho real, com duração relevante, entra mesmo controlado, no menor nível que a matriz permitir. Perigo de deficiência só entra quando a deficiência é constatada; condição avaliada e adequada fica registrada na AEP como conforme. Sai do inventário apenas o fator não aplicável, com justificativa."],["table",[["Situação","Quando se aplica","O que fazer","Entra no inventário?","Como fica a linha","Fundamento normativo"],["Registro por domínio","Todos os GHE. Uma linha por domínio do COPSOQ II, com o resultado do setor ao qual o GHE pertence.","Lançar conforme o Relatório Técnico FRPT (Seção 6) e a planilha de lançamento do PGR, que guarda a memória de cálculo. O sistema não recalcula essas linhas.","SIM: vigente","Domínio + fonte (subescala crítica e escore) + agravos + medidas + P x S + nível e ação. Revisto no censo seguinte, no máximo a cada 2 anos.","NR-1, 1.5.4.4.5.3, 1.5.4.4.6 e 1.5.7.3.2."],["Perigo de exigência (após a AEP)","AEP concluída. A exigência está presente no trabalho real, com duração relevante. Ex.: postura mantida, repetitividade, demanda cognitiva ou emocional.","Lançar o perigo da Taxonomia com fonte geradora do cargo, Probabilidade por Exigência x Eficácia (2.3 e 2.4) e severidade-âncora (2.8).","SIM: mesmo controlado","Perigo + fonte do cargo + medidas + P x S, no menor nível que a matriz permitir. Encaminhamento conforme o nível (2.2).","NR-1, 1.5.4.4.5.3 e 1.5.7.3.2; NR-17, 17.3.1 e 17.3.8."],["Perigo de deficiência (após a AEP)","AEP concluída. Condição inadequada constatada em campo, no checklist ou em medição. Ex.: mobiliário sem ajuste, iluminação inadequada, pausas insuficientes.","Lançar o perigo com a deficiência constatada, as medidas existentes e a ação no Plano de ação quando o nível exigir.","SIM","Perigo + fonte específica + P x S + medidas + evidência.","NR-17; NR-1, 1.5.4.4.5.1 e 1.5.4.4.5.3."],["Condição avaliada e conforme","AEP concluída. A condição foi verificada e está adequada.","Registrar na AEP o que foi verificado.","NÃO","Sem linha. Consta na AEP como avaliada e conforme e integra o PGR pela AEP.","NR-1, 1.5.7.3.2, alínea h; NR-17, 17.3.5."],["Fator não aplicável (NA)","A condição não existe no cargo. Ex.: trabalho noturno em função exclusivamente diurna.","Registrar a justificativa técnica na AEP, com o que foi verificado.","NÃO","Sem linha. Justificativa registrada na AEP.","Perguntas e Respostas GRO/PGR (MTE, 2026), nº 19."]]],["h3","ATÉ A AEP DO CARGO"],["p","Vale o registro por domínio do Relatório Técnico FRPT, lançado conforme a planilha de lançamento do PGR. O sistema não cria linha provisória."],["p","A ordem das AEPs segue o cronograma. O resultado do COPSOQ II do setor orienta o que verificar em campo no cargo."],["p","Concluída a AEP, ela confirma o enquadramento do domínio no trabalho real. Havendo fonte específica no cargo, o perigo da Taxonomia é lançado na AEP e classificado no Inventário. Se encontrar condição não refletida no enquadramento ou medida ineficaz, a linha do domínio é reavaliada na planilha de lançamento, com data."],["p","Fundamento: NR-1, 1.5.4.4.6, a avaliação de riscos é processo contínuo e é revista nas situações previstas no item."],["h3","EXIGÊNCIA INERENTE À ATIVIDADE (OT-05 e OT-12)"],["p","Exigências cognitivas e Exigências emocionais medem a DEMANDA que a atividade impõe, não a sobrecarga. Demanda elevada é característica esperada de funções de operação, monitoramento, decisão e atendimento, e não constitui, por si, condição adversa."],["p","Por isso, resultado acima de 3,66 nestas duas subescalas orienta a AEP. A caracterização como fator de risco organizacional depende da verificação, em campo, de que os recursos de regulação e o suporte disponíveis são insuficientes para a demanda observada. Presente a exigência, o perigo é lançado como perigo de exigência, no menor nível que a matriz permitir quando as medidas são eficazes."],["p","Fundamento: NR-1, subitem 1.5.4.4.5.3, a avaliação considera as exigências da atividade de trabalho E a eficácia das medidas de prevenção implementadas. Exigência alta com medida eficaz não é risco não controlado. A marcação de quais perigos são de exigência inerente está na TAXONOMIA."],["p","Aplica-se somente a OT-05 e OT-12."],["h3","AMOSTRA MÍNIMA"],["p","Não há número mínimo de respondentes fixado em norma; o critério que prevalece é a preservação da confidencialidade dos respondentes. A unidade divulga resultados somente para grupos com no mínimo 5 respondentes; grupos abaixo desse mínimo são agrupados com setor afim (Perguntas e Respostas GRO/PGR 2026, nº 11)."],["p","O nº de respondentes por setor está na tela COPSOQ por setor. Em setores com poucos respondentes, a AEP dá peso maior à observação das condições de trabalho, à análise da atividade e ao diálogo com os trabalhadores, sem desconsiderar o resultado do censo."],["h3","REGRAS FIXAS"],["p","1. Os 6 domínios do COPSOQ II são registrados no inventário por setor, em cada GHE, conforme o Relatório Técnico FRPT. Na AEP, são os eixos de conclusão do bloco psicossocial. No cargo, o nome da subescala não é usado como nome de perigo."],["p","2. Violência e assédio: o domínio Comportamentos ofensivos permanece no inventário de todos os GHE, com severidade 4, e não admite NA. No cargo, OT-11 é lançado quando a AEP identifica fonte específica."],["p","3. Satisfação laboral é indicador de efeito, não perigo. Nunca gera linha isoladamente."],["p","4. Significado do trabalho e Compromisso são protetores. Se desfavoráveis, investigar OT-04, OT-06 ou OT-10."],["p","5. A compensação entre subescalas vale só no registro por domínio, nas condições do modelo Demanda-Controle-Suporte descritas no Relatório Técnico FRPT: reduz no máximo 1 nível, é revista no censo seguinte e não se aplica a comportamentos ofensivos. No cargo, o efeito das medidas entra pelo eixo Eficácia (2.3.2)."],["p","6. Risco trivial ou tolerável permanece no inventário, com as medidas que o mantêm nesse nível. Sai do inventário apenas o fator não aplicável, com justificativa."],["p","7. Havendo divergência entre o resultado do COPSOQ II e a observação em campo, nenhuma das fontes é descartada: a divergência é registrada na AEP e verificada com a escuta dos trabalhadores. Confirmada, a linha do domínio é reavaliada na planilha de lançamento, com data."],["p","8. Jornada, pausas e monotonia não são rastreados pelo COPSOQ: entram pelo eixo Organização do Trabalho, com origem declarada como campo e análise documental."],["p","9. Resultado desfavorável em subescala de exigência inerente (OT-05, OT-12) entra no registro por domínio e orienta a AEP; o perigo nominado no cargo depende da verificação em campo."],["h2","SEÇÃO 2 - GRADAÇÃO: COMO O RISCO É CLASSIFICADO"],["h3","2.1 Escalas oficiais"],["table",[["PROBABILIDADE","SEVERIDADE","REFERÊNCIA SEVERIDADE ERGONÔMICA"],["1 - Raro","1 - Lesão leve","Desconforto, fadiga, mal-estar ou alteração transitória do bem-estar físico ou psíquico"],["2 - Pouco Provável","2 - Lesão com incômodo / desconforto leve","Dor, desconforto, sofrimento ou alteração funcional temporária, físico ou psíquico"],["3 - Provável","3 - Lesão com restrição de alto potencial","Agravo ou lesão reversível à saúde física ou psíquica."],["4 - Muito Provável","4 - Lesão grave parcial de alto potencial","Agravo ou lesão grave com limitação funcional prolongada ou parcialmente irreversível  à saúde física ou psíquica."],["5 - Praticamente Certo","5 - Lesão grave permanente de alto potencial / Fatalidade","Agravo gravíssimo, incapacidade total e permanente para o trabalho ou desfecho fatal (óbito)"]]],["h3","2.2 Matriz Probabilidade x Severidade"],["gen","MATRIZ"],["p","A grade acima é gerada a partir da mesma regra que o sistema calcula no Inventário (Nível do Risco = Probabilidade x Severidade). Documento de critérios e cálculo são a mesma coisa: qualquer célula desta grade pode ser conferida contra o Inventário."],["h3","2.3 Origem da Probabilidade: Exigência da Atividade × Eficácia das Medidas"],["p","Base normativa: NR-1, subitem 1.5.4.4.5.3: para fatores ergonômicos, incluindo os fatores de riscos psicossociais relacionados ao trabalho, a avaliação da probabilidade deve considerar as exigências da atividade de trabalho e a eficácia das medidas de prevenção implementadas. A NR-1 não fixa escalas, faixas de tempo nem fórmula: tudo o que está nas tabelas desta seção é critério interno desta organização, documentado aqui (ver 2.7)."],["p","Referência técnica oficial: Manual de interpretação e aplicação do Capítulo 1.5 da NR-1 (MTE, 2026), item 11.4.2: considerar as exigências da atividade é verificar o que e o quanto é exigido do trabalhador, considerando a DURAÇÃO da exposição e a INTENSIDADE das exigências (frequência, esforço, gestos, posturas, pressão, entre outros)."],["p","Estrutura: dois eixos, como no subitem 1.5.4.4.5.3. Eixo A (Exigência da atividade (2.3.1), que já combina duração e intensidade numa única escala. Eixo B) Eficácia das medidas (2.3.2). O cruzamento dos dois dá a Probabilidade (2.4)."],["h3","2.3.1 Eixo A - Exigência da atividade (1 a 5)"],["p","Critérios de duração × intensidade da Tabela 2 (Gradações de probabilidade relacionada a fatores de risco ergonômicos) publicada na Revista da Escola Nacional da Inspeção do Trabalho, ano 9, 2025, p. 413 [ARTIGO: título e autores], adaptada pelos autores de Generalitat de Catalunya (2006), Firth et al. (2020) e Occhipinti & Colombini (2016). Nesta unidade a tabela é usada como escala de Exigência, e não diretamente como probabilidade, porque a NR-1 manda cruzar a exigência com a eficácia das medidas (2.3.2)."],["table",[["Exigência","Critério: duração da exposição × intensidade das exigências"],["5 - Extrema","Exigências em nível crítico de intensidade ou situação inaceitável na atividade de trabalho, em qualquer duração."],["4 - Alta","Exposição longa (mais de 4 h) com exigências de média ou alta intensidade; ou exposição média (2 h a 4 h) com exigências de alta intensidade."],["3 - Moderada","Exposição longa (mais de 4 h) com exigências de baixa intensidade; ou exposição média (2 h a 4 h) com exigências de média intensidade; ou exposição curta (menos de 2 h) com exigências de alta intensidade."],["2 - Leve","Exposição média (2 h a 4 h) com exigências de baixa intensidade; ou exposição curta (menos de 2 h) com exigências de média intensidade; ou exposição de 1 h a menos de 2 h com exigências de baixa intensidade."],["1 - Mínima","Exposição curtíssima (menos de 1 h) com exigências de baixa intensidade."]]],["gen","EXIGENCIA"],["p","Duração = tempo efetivo de exposição ao fator na jornada típica (soma dos períodos), obtido por observação, entrevista ou registro, com a fonte anotada na caracterização da exposição. Limites: curtíssima < 1 h; curta < 2 h; média de 2 h a 4 h; longa > 4 h. Exposição que não ocorre todos os dias: usa-se a duração nos dias em que ocorre e registra-se a frequência."],["p","Fatores de organização do trabalho e psicossociais, cuja exposição não se mede em horas por jornada (adaptação interna): curtíssima = ocorrência rara, menos de uma vez por mês; curta = eventual, menos de uma vez por semana; média = semanal ou em alguns dias da semana; longa = diária ou característica estrutural da organização do trabalho."],["h3","2.3.2 Eixo B - Eficácia das medidas de prevenção (1 a 5)"],["p","A Exigência registra a exposição como ela é no trabalho real, já com o efeito das medidas existentes sobre o tempo e a carga. A Eficácia avalia o quanto essas medidas são robustas e garantidas no tempo: posição na hierarquia de prevenção, evidência de implantação e manutenção sem desvios. Assim nenhuma medida é contada duas vezes: o efeito dela aparece na Exigência; a confiabilidade dela, na Eficácia."],["table",[["Nota","Critério"],["1 - Inexistente","Nenhuma medida de prevenção para o fator na situação avaliada."],["2 - Insuficiente","A medida existe, mas sem evidência de implantação na unidade avaliada, ou com desvios e falhas observados no trabalho real (existe só em documento, não é praticada, não é mantida)."],["3 - Parcial","Medida administrativa ou organizacional implantada e com evidência: pausas, rodízio, procedimento, treinamento, autonomia de ritmo. Depende do cumprimento pelas pessoas."],["4 - Eficaz","Medida de engenharia ou arranjo ergonômico implantado, com evidência de uso e manutenção: dispositivo auxiliar, mobiliário regulável, reprojeto do posto. Depende de uso ou ajuste pelo trabalhador."],["5 - Controle integrado","Controle incorporado ao processo, que não depende da ação do trabalhador (mecanização, automação, eliminação ou substituição da etapa), com manutenção verificada."]]],["p","REGRA 1: a nota exige evidência. Medida sem evidência registrada na unidade avaliada pontua no máximo Eficácia = 2, qualquer que seja o tipo. Programa corporativo genérico sem evidência no setor, ou medida implantada em área diversa da avaliada, não reduz risco."],["p","REGRA 2: havendo mais de uma medida para o mesmo perigo, vale a nota da medida de maior nível que tenha evidência. Medida de maior nível com desvio observado cai para 2."],["h3","2.4 Conversão em Probabilidade"],["p","Probabilidade = ARRED( (2 × Exigência + (6 − Eficácia)) ÷ 3 ; 0 ). A grade abaixo é calculada por essa fórmula, célula a célula, e é a mesma aplicada no Inventário do sistema."],["gen","GRADE"],["p","Efeitos da fórmula: a eficácia das medidas reduz a probabilidade mesmo com exigência elevada (Exigência 5 com Eficácia 5 resulta em Probabilidade 4, e não 5); e medidas eficazes, sozinhas, não anulam uma exigência extrema (a mesma combinação não desce abaixo de 4). A fórmula é critério metodológico interno para operacionalizar o subitem 1.5.4.4.5.3, não é fórmula prescrita pela NR-1."],["h3","2.5 Descumprimento de requisito específico de NR"],["p","NR-1, subitem 1.5.4.4.5.1: a gradação da probabilidade deve levar em consideração o cumprimento dos requisitos estabelecidos em NR e na legislação. Manual do MTE (2026), item 11.4: o não atendimento de requisito específico de NR sobre medida de prevenção eleva a probabilidade para a mais alta gradação, pois a medida é de cumprimento obrigatório, exemplo do próprio Manual: assentos em desacordo com o item 17.6.6 da NR-17."],["p","REGRA DA UNIDADE: identificado o descumprimento, Probabilidade = 5, independentemente da grade 2.4. O requisito descumprido é identificado na linha do inventário, a correção entra no Plano de Ação e, atendido e mantido o requisito, o risco é reavaliado."],["p","A elevação ao grau máximo é orientação do Manual do MTE, adotada pela unidade, não é redação literal da NR-1. Aplica-se só a requisito específico de NR sobre medida de prevenção; ausência de medida que a norma não exige nominalmente segue a grade 2.4."],["h3","2.6 Coerência entre exposição e probabilidade"],["p","Verificação obrigatória em todo lançamento: Tipo de Exposição, Duração, Intensidade, Exigência, Eficácia e Probabilidade da mesma linha devem ser coerentes entre si."],["p","Como a duração já compõe a Exigência (2.3.1), exposição habitual e permanente (duração longa, mais de 4 h) produz Exigência mínima 3 e, pela grade 2.4, Probabilidade mínima 2. Probabilidade 1 (Raro) com exposição habitual e permanente só aparece quando o avaliador diverge da grade, o que exige justificativa técnica registrada na memória de cálculo."],["p","REGRA: combinação incoerente é sinalizada para revisão. O lançamento só é aceito com a memória de cálculo corrigida ou com a justificativa da divergência registrada. A duração não é considerada uma segunda vez fora da Exigência."],["h3","2.7 Natureza dos critérios"],["p","Considerar exigências e eficácia decorre do subitem 1.5.4.4.5.3 da NR-1. Considerar duração e intensidade segue o Manual do MTE (item 11.4.2). Os critérios de duração × intensidade da Exigência vêm de publicação técnica da Inspeção do Trabalho (Revista da ENIT, 2025, Tabela 2), adaptada como escala de Exigência."],["p","São CRITÉRIO INTERNO desta organização: o uso da Tabela 2 como escala de Exigência, a equivalência de duração para fatores psicossociais, as definições de intensidade, a escala de Eficácia e a fórmula de conversão em Probabilidade. Definidos por [RESPONSÁVEL TÉCNICO: nome e registro] em [DATA], para dar uniformidade entre avaliadores e reprodutibilidade ao inventário."],["p","O avaliador pode divergir da grade, desde que registre a justificativa técnica na memória de cálculo da linha."],["p","A matriz corporativa Frequência × Bloqueio × Severidade não é adotada: duas matrizes no mesmo processo produziriam incoerência, e esta Seção já contempla a frequência (na Duração da Exigência) e o bloqueio (na Eficácia)."],["p","Alteração desta revisão: as faixas percentuais da jornada (menos de 10%, 10–25%, 26–50%, 51–75%, acima de 75%) foram substituídas pelos critérios de duração × intensidade da Tabela 2 da Revista da ENIT (2025). As faixas percentuais eram critério interno sem referência. A Eficácia passou a ser avaliada pela robustez e garantia das medidas, para que a mesma medida não seja descontada duas vezes. As referências de severidade passaram a ser descritas pela repercussão funcional, sem diagnóstico. Linhas graduadas pelo critério anterior são regraduadas na próxima reavaliação do cargo."],["h3","2.8 Severidade-âncora"],["p","A severidade é propriedade do perigo, não do local: o dano possível de um mesmo fator é o mesmo em qualquer setor. O que varia por local é a probabilidade."],["p","A âncora de cada perigo está na TAXONOMIA (tabela abaixo). Para os perigos de organização do trabalho (OT), a âncora é 2 e, para violência e assédio (OT-11), 4, pela magnitude dos possíveis agravos definidos com os médicos do trabalho; para esses perigos, o nível 1 não é utilizado. Para os demais, a âncora foi calibrada pelos agravos da Portaria MS 1.999/2023 (LDRT)."],["p","Pode ser ELEVADA com justificativa registrada na AEP (nexo estabelecido, CAT emitida, NTEP na atividade ou gravidade documentada em campo). NÃO pode ser reduzida."],["gen","ANCORAS"],["h3","REFERÊNCIAS"],["p","• NR-1 - Disposições Gerais e Gerenciamento de Riscos Ocupacionais, Capítulo 1.5 com redação da Portaria MTE nº 1.419/2024. Subitens citados: 1.5.4.4.5.1, 1.5.4.4.5.3, 1.5.4.4.6 e 1.5.7.3.2."],["p","• MTE. Manual de interpretação e aplicação do Capítulo 1.5 da NR-1 - Gerenciamento de Riscos Ocupacionais (GRO), 2026. Itens 11.4 e 11.4.2. Disponível em gov.br/trabalho-e-emprego (Inspeção do Trabalho › Manuais e publicações › 2026)."],["p","• MTE. Perguntas e Respostas GRO/PGR, 2026: itens 2, 10, 11 e 19."],["p","• [AUTORES]. [Título do artigo]. Revista da Escola Nacional da Inspeção do Trabalho, ano 9, 2025, p. 413 - Tabela 2, Gradações de probabilidade. Fontes da tabela: Generalitat de Catalunya (2006); FIRTH, I. et al. Simplified Occupational Hygiene Risk Management Strategies. AIOH, 2020; OCCHIPINTI, E.; COLOMBINI, D. (2016)."],["p","• NR-17 - Ergonomia. Itens 17.3.1, 17.3.2, 17.3.8 e 17.6.6."],["p","• Lei nº 8.213/1991, art. 60: afastamento superior a 15 dias (marco usado nas referências de severidade)."],["p","• Ministério da Saúde. Portaria GM/MS nº 1.999/2023 - Lista de Doenças Relacionadas ao Trabalho (LDRT)."],["h3","CONTROLE DE VERSÃO"],["table",[["Revisão","Data","Alteração","Responsável"],["[nº]","[data]","2.1: referências de severidade sem diagnóstico. 2.3.1: Exigência pelos critérios de duração × intensidade da Tabela 2 (Revista da ENIT, 2025), no lugar das faixas percentuais. 2.3.2: Eficácia por robustez e garantia das medidas. Incluídos: grade de conversão (2.4), descumprimento de NR (2.5), coerência (2.6), natureza dos critérios (2.7) e referências.","[nome]"],["[nº]","13/10/2026","Seção 1: o quadro de estados (NA, E0 a E3) deu lugar ao registro por domínio do Relatório Técnico FRPT e às regras de entrada após a AEP; amostra mínima de 5 respondentes; regras fixas 1, 2, 5, 6, 7 e 9 revistas. 2.2: nomenclatura da matriz do PGR (trivial, tolerável, moderado, substancial, intolerável), com a célula 10 em risco moderado. 2.8: âncora 2 para os perigos de organização do trabalho e 4 para violência e assédio.","[nome]"]]]];
+const POLARIDADE_DOC = [["h1","MAPA DE POLARIDADE: critério de recodificação dos 76 itens"],["p","Exigido pelo item 2 das Perguntas e Respostas GRO/PGR (MTE, 2026): documento dos critérios de tratamento do instrumento. Regra geral: item de polaridade positiva é recodificado por X' = 6 - X, de modo que MAIOR signifique sempre PIOR. Critério de desempate: quando a polaridade do enunciado isolado conflita com o sentido da subescala, prevalece o sentido da subescala, foi o que se aplicou aos itens 10.2, 15.2 e 27.3, cujo histórico está ao final desta aba."],["p","SITUAÇÃO ATUAL: mapa íntegro. As três divergências identificadas em setembro/2026 foram corrigidas no painel e verificadas no export de 18/09/2026. O histórico da correção está registrado ao final desta aba."],["table",[["Pilar","Subescala","Item","Enunciado","Polaridade","Inverter? (painel)"],["EXIGÊNCIAS LABORAIS","Exigências quantitativas","8.1","A sua carga de trabalho acumula-se por ser mal distribuída?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências quantitativas","8.2","Com que frequência não tem tempo para completar todas as tarefas do seu trabalho?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências quantitativas","8.3","Precisa fazer horas-extra?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Ritmo de trabalho","9.1","Precisa trabalhar muito rapidamente?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências cognitivas","10.1","O seu trabalho exige sua atenção constante?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências cognitivas","10.2","O seu trabalho requer que seja bom a propor novas ideias?","Positiva","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências cognitivas","10.3","O seu trabalho exige que tome decisões difíceis?","Negativa","NÃO"],["EXIGÊNCIAS LABORAIS","Exigências emocionais","11.1","O seu trabalho exige emocionalmente de si?","Negativa","NÃO"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Influência no trabalho","12.1","Tem um elevado grau de influência no seu trabalho?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Influência no trabalho","12.2","Participa na escolha das pessoas com quem trabalha?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Influência no trabalho","12.3","Pode influenciar a quantidade de trabalho que lhe compete a si?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Influência no trabalho","12.4","Tem alguma influência sobre o tipo de tarefas que faz?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Possibilidade de desenvolvimento","13.1","O seu trabalho exige que tenha iniciativa?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Possibilidade de desenvolvimento","13.2","O seu trabalho permite-lhe aprender coisas novas?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Possibilidade de desenvolvimento","13.3","O seu trabalho permite-lhe usar as suas habilidades ou perícias?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Significado do trabalho","14.1","O seu trabalho tem algum significado para você?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Significado do trabalho","14.2","Sente que o seu trabalho é importante?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Significado do trabalho","14.3","Sente-se motivado e envolvido pelo seu trabalho?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Compromisso face ao local de trabalho","15.1","Gosta de falar com os outros sobre seu local de trabalho?","Positiva","SIM"],["ORGANIZAÇÃO DO TRABALHO E CONTEÚDO","Compromisso face ao local de trabalho","15.2","Sente que os problemas do seu local de trabalho são seus também?","Negativa","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Previsibilidade","16.1","No seu local de trabalho, é informado com antecedência sobre decisões importantes, mudanças ou planos para o futuro?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Previsibilidade","16.2","Recebe toda a informação de que necessita para fazer bem o seu trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Recompensas","17.1","O seu trabalho é reconhecido e apreciado pela gerência?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Recompensas","17.2","A gerência do seu local de trabalho respeita-o?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Recompensas","17.3","É tratado de forma justa no seu local de trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Transparência do papel laboral","18.1","O seu trabalho apresenta objetivos claros?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Transparência do papel laboral","18.2","Sabe exatamente quais as suas responsabilidades?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Transparência do papel laboral","18.3","Sabe exatamente o que é esperado de si?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Conflitos de papeis","19.1","Faz coisas no seu trabalho que uns concordam, mas outros não?","Negativa","NÃO"],["RELAÇÕES SOCIAIS E LIDERANÇA","Conflitos de papeis","19.2","Por vezes tem que fazer coisas que deveriam ser feitas de outra maneira?","Negativa","NÃO"],["RELAÇÕES SOCIAIS E LIDERANÇA","Conflitos de papeis","19.3","Por vezes tem que fazer coisas que considera desnecessárias?","Negativa","NÃO"],["RELAÇÕES SOCIAIS E LIDERANÇA","Qualidade da liderança","20.1","Oferece aos indivíduos e ao grupo boas oportunidades de desenvolvimento?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Qualidade da liderança","20.2","Dá prioridade à satisfação no trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Qualidade da liderança","20.3","É bom no planejamento do trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Qualidade da liderança","20.4","É bom a resolver conflitos?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de superiores","21.1","Com que frequência o seu superior imediato fala consigo sobre como está a decorrer o seu trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de superiores","21.2","Com que frequência tem ajuda e apoio do seu superior imediato?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de superiores","21.3","Com que frequência o seu superior imediato fala consigo em relação ao seu desempenho laboral?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de colegas","22.1","Com que frequência tem ajuda e apoio de seus colegas de trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de colegas","22.2","Com que frequência seus colegas estão dispostos a ouvi-lo(a) sobre os seus problemas de trabalho?","Positiva","SIM"],["RELAÇÕES SOCIAIS E LIDERANÇA","Apoio social de colegas","22.3","Com que frequência seus colegas falam consigo acerca do seu desempenho laboral?","Positiva","SIM"],["INTERFACE TRABALHO-INDIVÍDUO","Insegurança laboral","23.1","Sente-se preocupado em ficar desempregado?","Negativa","NÃO"],["INTERFACE TRABALHO-INDIVÍDUO","Satisfação laboral","24.1","As suas perspectivas de trabalho?","Positiva","SIM"],["INTERFACE TRABALHO-INDIVÍDUO","Satisfação laboral","24.2","As condições físicas do seu local de trabalho?","Positiva","SIM"],["INTERFACE TRABALHO-INDIVÍDUO","Satisfação laboral","24.3","A forma como suas capacidades são utilizadas?","Positiva","SIM"],["INTERFACE TRABALHO-INDIVÍDUO","Satisfação laboral","24.4","O seu trabalho de uma forma global?","Positiva","SIM"],["INTERFACE TRABALHO-INDIVÍDUO","Trabalho x família","25.1","Sente que o seu trabalho lhe exige muita energia que acaba por afetar a sua vida privada negativamente?","Negativa","NÃO"],["INTERFACE TRABALHO-INDIVÍDUO","Trabalho x família","25.2","Sente que o seu trabalho lhe exige muito tempo que acaba por afetar a sua vida privada negativamente?","Negativa","NÃO"],["INTERFACE TRABALHO-INDIVÍDUO","Trabalho x família","25.3","A sua família e os seus amigos dizem-lhe que trabalha demais?","Negativa","NÃO"],["VALORES NO LOCAL DE TRABALHO","Confiança vertical","26.1","A gerência confia nos seus funcionários para fazerem o seu trabalho bem?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Confiança vertical","26.2","Confia na informação que lhe é transmitida pela gerência?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Confiança vertical","26.3","A gerência oculta informação aos seus funcionários?","Negativa","NÃO"],["VALORES NO LOCAL DE TRABALHO","Confiança horizontal","27.1","Os funcionários ocultam informações uns dos outros?","Negativa","NÃO"],["VALORES NO LOCAL DE TRABALHO","Confiança horizontal","27.2","Os funcionários ocultam informação à gerência?","Negativa","NÃO"],["VALORES NO LOCAL DE TRABALHO","Confiança horizontal","27.3","Os funcionários confiam uns nos outros de um modo geral?","Negativa","SIM"],["VALORES NO LOCAL DE TRABALHO","Justiça e respeito","28.1","Os conflitos são resolvidos de uma forma justa?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Justiça e respeito","28.2","As sugestões dos funcionários são tratadas de forma séria pela gerência?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Justiça e respeito","28.3","O trabalho é igualmente distribuído pelos funcionários?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Comunidade social","29.1","Existe um bom ambiente de trabalho entre você e os seus colegas?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Comunidade social","29.2","Existe uma boa cooperação entre os colegas de trabalho?","Positiva","SIM"],["VALORES NO LOCAL DE TRABALHO","Comunidade social","29.3","No seu local de trabalho sente-se parte de uma comunidade?","Positiva","SIM"],["PERSONALIDADE","Auto-eficácia","30.1","Sou sempre capaz de resolver problemas, se tentar o suficiente.","Positiva","SIM"],["PERSONALIDADE","Auto-eficácia","30.2","É fácil seguir os meus planos e atingir os meus objetivos.","Positiva","SIM"],["SAÚDE E BEM-ESTAR","Saúde geral","31.1","Em geral, sente que a sua saúde é:","Positiva","SIM"],["SAÚDE E BEM-ESTAR","Stress","32.1","Irritado?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Stress","32.2","Ansioso?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Burnout","33.1","Fisicamente exausto?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Burnout","33.2","Emocionalmente exausto?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Problemas em dormir","34.1","Dificuldade a adormecer?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Problemas em dormir","34.2","Acordou várias vezes durante a noite e depois não conseguia adormecer novamente?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Sintomas depressivos","35.1","Triste?","Negativa","NÃO"],["SAÚDE E BEM-ESTAR","Sintomas depressivos","35.2","Falta de interesse por coisas cotidianas?","Negativa","NÃO"],["COMPORTAMENTOS OFENSIVOS","COMPORTAMENTOS OFENSIVOS","36.1","Tem sido alvo de insultos ou provocações verbais?","Negativa","NÃO"],["COMPORTAMENTOS OFENSIVOS","COMPORTAMENTOS OFENSIVOS","36.2","Tem sido exposto a assédio sexual indesejado?","Negativa","NÃO"],["COMPORTAMENTOS OFENSIVOS","COMPORTAMENTOS OFENSIVOS","36.3","Tem sido exposto a ameaças de violência?","Negativa","NÃO"],["COMPORTAMENTOS OFENSIVOS","COMPORTAMENTOS OFENSIVOS","36.4","Tem sido exposto a violência física?","Negativa","NÃO"]]]];
+/* Classificações já feitas na planilha (RISCOS_AEP), para trazer uma vez para o Inventário */
+const IMPORT_PLANILHA = {"AEP 01|R02":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim","prob":"2 - Pouco Provável","sev":"2 - Lesão com incômodo / desconforto leve"},"AEP 01|R04":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R05":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R06":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R07":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R08":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R09":{"exp":"Eventual","catIni":"Risco tolerável","eficaz":"Sim"},"AEP 01|R10":{"exp":"Intermitente","catIni":"Risco tolerável","eficaz":"Sim"}};
 /* Planejamento_AEP_2026 (mês previsto de cada AEP), base do plano PLA202609SA20-30 do SIG. Ajustes ficam em config/plano. */
 const PLANO_PADRAO = {"AEP 01":"2027-04","AEP 02":"2027-04","AEP 03":"2027-04","AEP 04":"2027-04","AEP 05":"2027-04","AEP 06":"2027-04","AEP 07":"2027-04","AEP 08":"2027-04","AEP 09":"2027-04","AEP 10":"2027-04","AEP 11":"2027-04","AEP 12":"2027-04","AEP 13":"2027-04","AEP 14":"2027-04","AEP 15":"2027-04","AEP 16":"2027-04","AEP 17":"2027-04","AEP 18":"2027-04","AEP 19":"2027-04","AEP 20":"2027-04","AEP 21":"2027-04","AEP 22":"2027-04","AEP 23":"2027-04","AEP 24":"2027-04","AEP 25":"2027-04","AEP 26":"2027-05","AEP 27":"2027-05","AEP 28":"2027-05","AEP 29":"2027-05","AEP 30":"2027-05","AEP 31":"2027-05","AEP 32":"2027-05","AEP 33":"2027-05","AEP 34":"2027-05","AEP 35":"2027-05","AEP 36":"2027-05","AEP 37":"2027-05","AEP 38":"2027-05","AEP 39":"2027-05","AEP 40":"2027-05","AEP 41":"2027-05","AEP 42":"2027-05","AEP 43":"2027-05","AEP 44":"2027-05","AEP 45":"2027-05","AEP 46":"2027-05","AEP 47":"2027-05","AEP 48":"2027-05","AEP 49":"2027-05","AEP 50":"2027-05","AEP 51":"2027-05","AEP 52":"2027-05","AEP 53":"2027-05","AEP 54":"2027-05","AEP 55":"2027-05","AEP 56":"2027-05","AEP 57":"2027-05","AEP 59":"2027-05","AEP 60":"2027-05","AEP 61":"2027-05","AEP 62":"2027-06","AEP 63":"2027-06","AEP 64":"2027-06","AEP 65":"2027-06","AEP 66":"2027-06","AEP 67":"2027-06","AEP 68":"2027-06","AEP 69":"2027-06","AEP 70":"2027-06","AEP 71":"2027-06","AEP 72":"2027-06","AEP 73":"2027-06","AEP 74":"2027-06","AEP 75":"2027-06","AEP 76":"2027-06","AEP 77":"2027-06","AEP 78":"2027-06","AEP 79":"2027-06","AEP 80":"2027-06","AEP 81":"2027-06","AEP 82":"2027-06","AEP 83":"2027-06","AEP 84":"2027-06","AEP 85":"2027-06","AEP 86":"2027-06","AEP 87":"2027-06","AEP 88":"2027-06","AEP 89":"2027-06","AEP 90":"2027-06","AEP 91":"2027-06","AEP 92":"2027-06","AEP 93":"2027-06","AEP 94":"2027-06","AEP 95":"2027-06","AEP 96":"2027-06","AEP 97":"2027-06","AEP 98":"2027-06","AEP 99":"2027-07","AEP 100":"2027-07","AEP 101":"2027-07","AEP 102":"2027-07","AEP 103":"2027-07","AEP 104":"2027-07","AEP 105":"2027-07","AEP 106":"2027-07","AEP 107":"2027-07","AEP 108":"2027-07","AEP 109":"2027-07","AEP 110":"2027-07","AEP 111":"2027-07","AEP 112":"2026-09","AEP 113":"2027-07","AEP 114":"2027-07","AEP 115":"2027-07","AEP 116":"2027-07","AEP 117":"2027-07","AEP 118":"2027-07","AEP 119":"2027-07","AEP 120":"2027-07","AEP 121":"2027-07","AEP 122":"2027-07","AEP 123":"2027-07","AEP 124":"2027-07","AEP 125":"2027-07","AEP 126":"2027-07","AEP 127":"2027-07","AEP 128":"2027-07","AEP 129":"2027-07","AEP 130":"2027-02","AEP 131":"2027-02","AEP 132":"2027-02","AEP 133":"2027-02","AEP 134":"2027-02","AEP 135":"2027-02","AEP 136":"2027-02","AEP 137":"2027-02","AEP 138":"2027-02","AEP 139":"2027-02","AEP 140":"2027-02","AEP 141":"2027-02","AEP 142":"2027-02","AEP 143":"2027-02","AEP 144":"2027-02","AEP 145":"2027-02","AEP 146":"2027-02","AEP 147":"2027-02","AEP 148":"2027-02","AEP 149":"2027-02","AEP 150":"2027-02","AEP 151":"2027-02","AEP 152":"2027-02","AEP 153":"2027-02","AEP 154":"2027-02","AEP 155":"2027-02","AEP 156":"2027-03","AEP 157":"2027-03","AEP 158":"2027-03","AEP 159":"2027-03","AEP 160":"2027-03","AEP 161":"2027-03","AEP 162":"2027-03","AEP 163":"2027-03","AEP 164":"2027-03","AEP 165":"2026-11","AEP 166":"2026-11","AEP 167":"2026-11","AEP 168":"2026-11","AEP 169":"2026-09","AEP 170":"2026-12","AEP 171":"2026-12","AEP 172":"2026-12","AEP 173":"2026-12","AEP 174":"2027-03","AEP 175":"2026-12","AEP 176":"2026-12","AEP 177":"2026-12","AEP 178":"2026-09","AEP 179":"2026-09","AEP 180":"2026-12","AEP 181":"2027-03","AEP 182":"2026-09","AEP 183":"2026-09","AEP 184":"2026-09","AEP 185":"2027-03","AEP 186":"2027-03","AEP 187":"2027-03","AEP 188":"2026-09","AEP 189":"2026-09","AEP 190":"2026-10","AEP 191":"2026-12","AEP 192":"2026-12","AEP 193":"2026-12","AEP 194":"2026-12","AEP 195":"2026-10","AEP 196":"2026-12","AEP 197":"2026-12","AEP 198":"2026-12","AEP 199":"2026-12","AEP 200":"2026-10","AEP 201":"2026-10","AEP 202":"2026-10","AEP 203":"2026-12","AEP 204":"2026-12","AEP 205":"2026-12","AEP 206":"2027-03","AEP 207":"2027-03","AEP 208":"2026-10","AEP 209":"2026-12","AEP 210":"2027-01","AEP 211":"2027-01","AEP 212":"2027-01","AEP 213":"2027-03","AEP 214":"2027-03","AEP 215":"2027-03","AEP 216":"2027-01","AEP 217":"2027-03","AEP 218":"2027-03","AEP 219":"2027-03","AEP 220":"2027-03","AEP 221":"2027-03","AEP 222":"2027-03","AEP 223":"2027-03","AEP 224":"2027-03","AEP 225":"2027-03","AEP 226":"2027-03","AEP 227":"2027-04","AEP 228":"2027-04","AEP 229":"2027-04","AEP 230":"2027-04","AEP 231":"2027-01","AEP 232":"2027-01","AEP 233":"2027-01","AEP 234":"2027-01","AEP 235":"2027-01","AEP 236":"2027-01","AEP 237":"2027-01","AEP 238":"2027-01","AEP 239":"2027-01","AEP 240":"2027-01","AEP 241":"2027-01","AEP 242":"2027-01","AEP 243":"2027-01","AEP 244":"2027-01","AEP 245":"2027-01","AEP 246":"2027-01","AEP 247":"2027-01","AEP 248":"2027-01","AEP 249":"2027-01","AEP 250":"2027-01","AEP 251":"2026-10","AEP 252":"2026-10","AEP 253":"2027-01","AEP 254":"2026-10","AEP 255":"2027-02","AEP 256":"2027-04","AEP 257":"2027-04","AEP 258":"2027-04","AEP 259":"2027-04","AEP 260":"2026-11","AEP 261":"2026-10","AEP 262":"2026-10","AEP 263":"2026-10","AEP 264":"2026-10","AEP 265":"2026-10","AEP 266":"2026-10","AEP 267":"2026-10","AEP 268":"2026-10","AEP 269":"2026-10","AEP 270":"2026-10","AEP 271":"2026-10","AEP 272":"2026-11","AEP 273":"2026-11","AEP 274":"2026-11","AEP 275":"2026-11","AEP 276":"2026-11","AEP 277":"2026-11","AEP 278":"2026-11","AEP 279":"2026-11","AEP 280":"2026-11","AEP 281":"2026-11","AEP 282":"2026-11","AEP 283":"2026-09","AEP 284":"2026-11","AEP 285":"2027-07","AEP 286":"2027-07","AEP 287":"2027-07","AEP 288":"2027-03","AEP 289":"2027-02","AEP 290":"2026-11","AEP 291":"2026-11","AEP 292":"2027-07","AEP 293":"2027-07","AEP 294":"2027-07","AEP 295":"2027-07","AEP 296":"2027-07","AEP 297":"2027-07","AEP 298":"2026-11"};
 
@@ -520,7 +577,7 @@ const CONCL_ANTIGAS = {
 
 /* Textos fixos do documento */
 const TXT_OBJETIVO = "Esta AEP tem por objetivo identificar perigos e avaliar riscos ergonômicos e psicossociais, visando à adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores, de modo a proporcionar conforto, segurança, saúde e desempenho eficiente (NR-17, item 17.1.1).";
-const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada na planilha de controle do GRO da unidade, a partir deste inventário.";
+const TXT_METODOLOGIA = "A metodologia adotada é qualitativa (NR-17, item 17.3.1.1), fundamentada na análise da atividade (trabalho real), por meio de observação in loco, registro fotográfico e diálogo com os trabalhadores durante a observação da atividade. Complementarmente, os resultados coletivos do questionário COPSOQ II (versão média), apurados por setor, foram usados como rastreamento de fatores psicossociais organizacionais, como indicador de onde olhar, e não como caracterização do risco. Esta AEP registra os perigos identificados, suas fontes geradoras, os possíveis danos, a caracterização da exposição e as medidas existentes; a graduação do risco é realizada no inventário de riscos da unidade, a partir deste registro.";
 /* Dica de quando lançar cada perigo (critério de 15/10/2026). Aparece só no sistema, abaixo do perigo escolhido. */
 const DICA_LANCAR = {"OT-01": "Lance quando o volume ou o ritmo superam o efetivo de forma recorrente (metas apertadas, picos frequentes, horas extras habituais). Pico eventual, sozinho, não basta. COPSOQ acima de 3,66 em exigências quantitativas ou ritmo também sustenta.", "OT-02": "Lance com turno ininterrupto, trabalho noturno ou jornada prolongada habitual em que a recuperação entre jornadas fica curta (dobras, folgas reduzidas, convocações).", "OT-03": "Lance quando a tarefa contínua não permite pausa por decisão do trabalhador ou a pausa prevista não é cumprida. Pausa livre e respeitada não gera perigo.", "OT-04": "Lance quando o ciclo é curto e se repete na maior parte da jornada, sem rodízio. Rotina previsível, mas variada, não é monotonia.", "OT-05": "Lance com atenção contínua, várias tarefas ao mesmo tempo ou decisão crítica sob pressão (sala de controle, despacho). Conferir material e registrar no sistema, sozinho, não basta. COPSOQ acima de 3,66 em exigências cognitivas também sustenta.", "OT-06": "Lance quando método, ritmo ou pausas são impostos sem margem de ajuste (ritmo de máquina, supervisão rígida). Seguir procedimento de segurança não é baixo controle.", "OT-07": "Lance quando há ordens conflitantes de chefias diferentes ou atribuições sem definição clara, confirmadas em relato consistente ou documento.", "OT-08": "Lance quando houve mudança de equipamento, sistema ou procedimento sem treinamento prévio, ou quando o trabalhador atua sem suporte técnico disponível.", "OT-09": "Lance com COPSOQ acima de 3,66 em apoio ou liderança, ou com relato consistente de mais de um trabalhador. Uma conversa isolada não basta.", "OT-10": "Lance com COPSOQ acima de 3,66 em recompensas ou justiça e respeito, ou com relato consistente de critério pouco transparente.", "OT-11": "Lance com COPSOQ acima de 3,66 em comportamentos ofensivos, registro no canal de denúncia ou relato de conduta. Não lance só porque pode acontecer: a política da empresa já cobre todos.", "OT-12": "Lance quando lidar com sofrimento, agressividade ou risco de terceiros faz parte da função (brigada, atendimento a acidentado, portaria com conflito). Contato ocasional com colega insatisfeito não basta. COPSOQ acima de 3,66 em exigências emocionais também sustenta.", "OT-13": "Lance com interferência habitual na vida pessoal (sobreaviso, convocação fora do horário) ou mudança organizacional anunciada sem comunicação. COPSOQ acima de 3,66 também sustenta.", "BIO-01": "Lance quando a postura se sustenta sozinha: tronco curvado mais da metade do tempo, agachado ou parado por longos períodos. Se a postura vem do manuseio da carga, descreva na fonte do BIO-04.", "BIO-02": "Lance com movimentos repetidos de mãos e braços na maior parte da jornada (digitação contínua, montagem em série). Uso eventual não basta.", "BIO-03": "Lance com força nítida e recorrente: soltar parafuso travado, puxar paleteira carregada, empurrar carrinho em piso irregular.", "BIO-04": "Lance quando o manuseio de carga é rotina do cargo, mesmo que não visto no dia. Descreva peso típico e frequência; a postura ao pegar a carga entra nesta mesma fonte.", "BIO-05": "Lance quando o posto obriga a esticar o corpo ou trabalhar em espaço apertado de forma habitual (sob equipamento, dentro de caixa, prateleira alta).", "BIO-06": "Lance com apoio prolongado de joelho, antebraço ou mão contra superfície dura ou quina. Toque eventual não basta.", "BIO-07": "Lance com operação habitual de equipamento móvel ou de ferramenta vibratória. Não depende de medição para identificar.", "EQ-01": "Lance só com a inadequação constatada: cadeira sem regulagem, bancada em altura errada para a tarefa. Mobiliário adequado não gera perigo.", "EQ-02": "Lance quando o arranjo do local obriga deslocamentos ou alcances desnecessários de forma recorrente, constatados no local.", "EQ-03": "Lance quando a máquina tem acesso, comando ou ponto de manutenção fora do alcance confortável, constatado em campo.", "EQ-04": "Lance quando o equipamento do posto informatizado não permite ajuste (notebook sem suporte, monitor fixo baixo), constatado no posto.", "EQ-05": "Lance quando a ferramenta tem peso, pega ou vibração inadequados, constatados em uso.", "EQ-06": "Lance com telas confusas, excesso de alarmes ou sinais concorrentes que atrapalham a decisão, observados ou relatados de forma consistente.", "AMB-01": "Lance quando a iluminação atrapalha a tarefa (sombra, ofuscamento, reflexo na tela), constatado no local.", "AMB-02": "Lance quando calor, frio ou corrente de ar incomodam de forma habitual, constatado ou relatado de forma consistente. Exposição ocupacional ao calor é da NR-9.", "AMB-03": "Lance quando o ruído de fundo atrapalha conversa ou concentração. Ruído como agente de exposição é da NR-9.", "AMB-04": "Lance quando a vibração do piso ou da estrutura incomoda no posto. Vibração de equipamento operado é BIO-07."};
 /* Base do perigo: como a condição foi conhecida */
@@ -618,7 +675,7 @@ function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = fals
 function setSaveState(txt){ $("#savestate").textContent = txt; }
 
 /* =========================================================================
-   RESUMO DOS PERIGOS (só contagem — a graduação do risco é feita na planilha de controle)
+   RESUMO DOS PERIGOS (só contagem; a graduação do risco é feita no Inventário)
    ========================================================================= */
 /* Vínculo item crítico ↔ perigo: pelo item informado ao lançar (checkItem) ou pela ponte da taxonomia (coluna "itens") */
 const ckAtivo = (a, n) => n <= CK_N_BASE || a.checklistAdm === "sim";
@@ -742,91 +799,179 @@ function recsDaAEP(a){
   return out;
 }
 
-/* Melhorias: recomendações específicas e oportunidades de melhoria que não viram perigo no PGR.
-   O acompanhamento (prioridade, responsável, prazo, situação) fica em config/melhorias e não altera a AEP. */
+/* ---------------- Plano de ação (um plano só) ----------------
+   Junta as ações dos riscos do Inventário que pedem plano (P1 e P2) e as recomendações e oportunidades de melhoria das AEPs.
+   O acompanhamento fica em config/melhorias e não altera a AEP:
+   "idAEP|Rnn" (1ª ação do perigo), "idAEP|Rnn|2"... (outras ações do mesmo perigo) e "idAEP|hash" (recomendação ou oportunidade). */
 const MEL_SIT = ["Aberta", "Em andamento", "Concluída", "Não se aplica"], MEL_PRIO = ["Alta", "Média", "Baixa"];
+const EFIC_ACAO = ["Em verificação", "Sim", "Não"];
 const OPORT_RE = /^Oportunidade de melhoria:\s*/i;
+const P_CAT = { "Risco moderado": "P2", "Risco substancial": "P1", "Risco intolerável": "P1" };
+const abertaSit = s => s === "Aberta" || s === "Em andamento";
 function hashTxt(t){ let h = 5381; for (const ch of norm(t)) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return (h >>> 0).toString(36); }
+function acompanhamento(key, item){
+  const tr = S.melhorias[key] || {}, sit = tr.sit || "Aberta";
+  return Object.assign(item, { key, resp: tr.resp || "", prazo: tr.prazo || "", sit, sig: String(tr.sig || "").trim(), conc: tr.conc || "",
+    evid: String(tr.evid || "").trim(), efic: tr.efic || "", atrasada: !!tr.prazo && tr.prazo < hojeISO() && abertaSit(sit) });
+}
 function melhoriasDaAEP(a){
   const vistos = new Set();
   return recsEspecificas(a).map(t => { const op = OPORT_RE.test(t), texto = op ? t.replace(OPORT_RE, "").trim() : t, key = `${a.id}|${hashTxt(texto)}`;
     if (!texto || vistos.has(key)) return null; vistos.add(key);
-    const tr = S.melhorias[key] || {}, sit = tr.sit || "Aberta";
-    return { key, a, op, tipo: op ? "Oportunidade de melhoria" : "Recomendação", texto, prio: tr.prio || (op ? "Baixa" : "Média"), resp: tr.resp || "", prazo: tr.prazo || "", sit,
-      atrasada: !!tr.prazo && tr.prazo < hojeISO() && (sit === "Aberta" || sit === "Em andamento") }; }).filter(Boolean);
+    const tr = S.melhorias[key] || {};
+    return acompanhamento(key, { a, kind: op ? "op" : "rec", op, tipo: op ? "Oportunidade de melhoria" : "Recomendação", texto, prio: tr.prio || (op ? "Baixa" : "Média") }); }).filter(Boolean);
 }
-const selMel = (key, campo, lista, val, cls = "") => `<select data-mel="${esc(key)}" data-mc="${campo}" class="${cls}" aria-label="${campo === "prio" ? "Prioridade" : "Situação"}">${lista.map(x => `<option ${x === val ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
-const chipTipo = m => `<span class="mtipo ${m.op ? "op" : "rec"}">${m.op ? "Oportunidade de melhoria" : "Recomendação"}</span>`;
+const temDados = tr => !!tr && (["resp", "prazo", "sig", "acao", "evid", "conc", "efic"].some(k => String(tr[k] || "").trim()) || (!!tr.sit && tr.sit !== "Aberta"));
+const extrasDe = base => Object.keys(S.melhorias).filter(k => k.startsWith(base + "|")).sort((x, y) => Number(x.split("|")[2]) - Number(y.split("|")[2]));
+function acoesDoRisco(a, h, r){
+  const base = `${a.id}|${h.idRisco}`, pc = r.sit === "ok" ? (P_CAT[r.cat] || "") : "", extras = extrasDe(base);
+  const keys = (pc || temDados(S.melhorias[base]) || extras.length) ? [base, ...extras] : [];
+  const t = TAXMAP[h.codigo];
+  return keys.map((key, i) => { const tr = S.melhorias[key] || {};
+    return acompanhamento(key, { a, h, r, t, kind: "risco", op: false, n: i + 1, base, pc, tipo: pc ? `Ação ${pc}` : "Ação", texto: String(tr.acao || "").trim(), hier: tr.hier || "",
+      prio: pc === "P1" ? "Alta" : pc === "P2" ? "Média" : "Baixa", precisa: !!pc }); });
+}
+function acoesDaAEP(a){
+  const c = a.classif || {};
+  return (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).flatMap(h => acoesDoRisco(a, h, calcRisco(h, c[h.idRisco])));
+}
+const fechadaAEP = a => a.status === "concluida" || a.status === "revisao";
+function itensPlanoDe(L){ return L.flatMap(a => [...acoesDaAEP(a), ...melhoriasDaAEP(a)]); }
+function aepsPlano(){
+  return Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y))
+    .filter(a => S.melEsc === "todas" || fechadaAEP(a))
+    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
+}
+const PL_SIT = {
+  abertas: m => abertaSit(m.sit), atrasadas: m => m.atrasada, semsig: m => abertaSit(m.sit) && !m.sig,
+  semacao: m => m.kind === "risco" && !m.texto && m.sit !== "Não se aplica", eficacia: m => m.sit === "Concluída" && m.efic !== "Sim" && m.efic !== "Não",
+  concluidas: m => m.sit === "Concluída" || m.sit === "Não se aplica", todas: () => true };
+const PL_TIPO = { "": () => true, risco: m => m.kind === "risco", mel: m => m.kind !== "risco", rec: m => m.kind === "rec", op: m => m.kind === "op" };
+const KIND_ORD = { risco: 0, rec: 1, op: 2 };
+function listaMelhorias(){
+  const t = norm(S.melBusca);
+  return itensPlanoDe(aepsPlano())
+    .filter(m => !S.melFoco || m.key === S.melFoco || m.base === S.melFoco)
+    .filter(PL_TIPO[S.melTipo] || PL_TIPO[""])
+    .filter(m => !S.melPrio || m.prio === S.melPrio)
+    .filter(m => S.melFoco || (PL_SIT[S.melSit] || PL_SIT.todas)(m))
+    .filter(m => !t || norm(`${m.a.numero} ${m.a.meta?.cargo} ${m.a.meta?.setor} ${m.texto} ${m.resp} ${m.sig} ${m.h ? `${m.h.idRisco} ${m.h.codigo} ${m.t?.nome}` : ""}`).includes(t))
+    .sort((x, y) => MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a) || KIND_ORD[x.kind] - KIND_ORD[y.kind] || String(x.h?.idRisco || "").localeCompare(String(y.h?.idRisco || "")) || (x.n || 0) - (y.n || 0));
+}
+function resumoPlano(todas){
+  const ab = todas.filter(m => abertaSit(m.sit)), r = todas.filter(m => m.kind === "risco");
+  return { total: todas.length, abertas: ab.length, p1: ab.filter(m => m.pc === "P1").length, p2: ab.filter(m => m.pc === "P2").length,
+    atrasadas: todas.filter(m => m.atrasada).length, semsig: ab.filter(m => !m.sig).length, semacao: r.filter(PL_SIT.semacao).length,
+    concluidas: todas.filter(m => m.sit === "Concluída").length, eficacia: todas.filter(PL_SIT.eficacia).length,
+    riscos: r.length, mel: todas.length - r.length, melAb: ab.filter(m => m.kind !== "risco").length };
+}
+function melStatsHTML(){
+  const R = resumoPlano(itensPlanoDe(aepsPlano()));
+  const red = n => n ? ` style="color:var(--bad-ink)"` : "";
+  return `<div class="melstats"><div><b>${R.abertas}</b><span>em aberto</span></div>
+    <div><b${red(R.p1)}>${R.p1}</b><span>ações P1 em aberto</span></div><div><b>${R.p2}</b><span>ações P2 em aberto</span></div>
+    <div><b${red(R.semacao)}>${R.semacao}</b><span>riscos com ação a definir</span></div>
+    <div><b${red(R.atrasadas)}>${R.atrasadas}</b><span>com prazo vencido</span></div>
+    <div><b${red(R.semsig)}>${R.semsig}</b><span>em aberto sem Nº do SIG</span></div>
+    <div><b>${R.concluidas}</b><span>concluídas</span></div>
+    <div><b>${R.eficacia}</b><span>concluídas com eficácia a verificar</span></div></div>`;
+}
+const selMel = (key, campo, lista, val, cls = "", vazio) => `<select data-mel="${esc(key)}" data-mc="${campo}" class="${cls}" aria-label="${{ prio: "Prioridade", sit: "Situação", hier: "Hierarquia", efic: "Eficácia" }[campo] || campo}">${vazio != null ? `<option value="">${esc(vazio)}</option>` : ""}${lista.map(x => `<option ${x === val ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
+const chipTipo = m => m.kind === "risco" ? `<span class="mtipo ${m.pc === "P1" ? "p1" : m.pc === "P2" ? "p2" : ""}">${esc(m.tipo)}</span>`
+  : `<span class="mtipo ${m.op ? "op" : "rec"}">${m.op ? "Oportunidade de melhoria" : "Recomendação"}</span>`;
+const prioFixa = m => `<span class="prio-fixa prio-${m.prio}" title="Vem da categoria do risco no Inventário">${esc(m.prio)}${m.pc ? ` (${m.pc})` : ""}</span>`;
 function vMelItensAEP(a){
   const l = melhoriasDaAEP(completar(clone(a)));
   if (!l.length) return "";
-  return `<div class="melaep"><b class="small">Como cada linha será acompanhada</b> <span class="tiny muted">(a prioridade vale para a aba Melhorias e não altera a situação da AEP)</span>
+  return `<div class="melaep"><b class="small">Como cada linha será acompanhada</b> <span class="tiny muted">(a prioridade vale para o Plano de ação e não altera a situação da AEP)</span>
     ${l.map(m => `<div class="mrow"><div class="mt">${chipTipo(m)}<div>${esc(m.texto)}</div></div><div>${selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</div></div>`).join("")}</div>`;
 }
-function listaMelhorias(){
-  const t = norm(S.melBusca), hoje = hojeISO();
-  return Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y))
-    .filter(a => S.melEsc === "todas" || a.status === "concluida" || a.status === "revisao")
-    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
-    .flatMap(melhoriasDaAEP)
-    .filter(m => !S.melTipo || (S.melTipo === "op") === m.op)
-    .filter(m => !S.melPrio || m.prio === S.melPrio)
-    .filter(m => S.melSit === "todas" || (S.melSit === "abertas" && (m.sit === "Aberta" || m.sit === "Em andamento")) || (S.melSit === "atrasadas" && m.atrasada) || (S.melSit === "concluidas" && (m.sit === "Concluída" || m.sit === "Não se aplica")))
-    .filter(m => !t || norm(`${m.a.numero} ${m.a.meta?.cargo} ${m.a.meta?.setor} ${m.texto} ${m.resp}`).includes(t))
-    .sort((x, y) => MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a));
+function oQueFazer(m){
+  const aviso = [];
+  if (m.kind === "risco" && !m.texto && m.sit !== "Não se aplica") aviso.push("Ação a definir");
+  if (m.sit === "Concluída" && !m.evid) aviso.push("Concluída sem evidência");
+  if (m.kind === "risco" && !m.precisa) aviso.push(m.r.sit === "ok" ? `Risco agora ${m.r.cat.replace("Risco ", "")}: confira se a ação continua necessária` : "Classificação do risco incompleta no Inventário");
+  const cab = m.kind === "risco"
+    ? `${chipTipo(m)} <span class="mono small">${esc(m.h.idRisco)}${m.n > 1 ? ` · ação ${m.n}` : ""}</span> <span class="small">${esc(m.t?.nome || "")}</span> ${chipCat(m.r.cat)}
+       <div class="small" style="margin-top:3px">${m.texto ? esc(m.texto) : `<span class="faint">Descreva a ação em Detalhes.</span>`}</div>`
+    : `${chipTipo(m)}<div class="small">${esc(m.texto)}</div>`;
+  return `${cab}${aviso.map(x => `<div class="tiny plaviso">${esc(x)}</div>`).join("")}
+    <button class="btn ghost small" type="button" data-act="planoDet" data-key="${esc(m.key)}" style="padding:0;margin-top:2px">${S.melAberto === m.key ? "Fechar detalhes" : "Detalhes"}</button>`;
 }
-function melStatsHTML(){
-  const todas = Object.values(S.aeps).map(completar).filter(a => S.melEsc === "todas" || a.status === "concluida" || a.status === "revisao").filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a))).flatMap(melhoriasDaAEP);
-  const ab = todas.filter(m => m.sit === "Aberta" || m.sit === "Em andamento");
-  return `<div class="melstats"><div><b>${todas.length}</b><span>no total</span></div><div><b>${ab.length}</b><span>em aberto</span></div>
-    <div><b style="color:var(--bad-ink)">${ab.filter(m => m.prio === "Alta").length}</b><span>em aberto com prioridade alta</span></div>
-    <div><b style="color:var(--bad-ink)">${todas.filter(m => m.atrasada).length}</b><span>com prazo vencido</span></div>
-    <div><b>${todas.filter(m => m.sit === "Concluída").length}</b><span>concluídas</span></div>
-    <div><b>${todas.filter(m => !m.op).length} / ${todas.filter(m => m.op).length}</b><span>recomendações / oportunidades</span></div></div>`;
+function vPlanoDetalhe(m){
+  const k = esc(m.key), inp = (campo, tipo, val, ph = "") => `<input type="${tipo}" data-mel="${k}" data-mc="${campo}" value="${esc(val)}" placeholder="${esc(ph)}">`;
+  const risco = m.kind === "risco";
+  return `<div class="pldet grid g2">
+    ${risco ? `<label class="f spanall"><span>Ação (o que será feito)</span><textarea rows="2" data-mel="${k}" data-mc="acao" placeholder="Ex.: instalar suporte de notebook com teclado e mouse independentes">${esc(m.texto)}</textarea></label>
+      <div class="spanall tiny muted"><b>Medidas típicas da TAXONOMIA (${esc(m.h.codigo)}):</b> ${esc(m.t?.medidas || "não informadas")}${m.t?.medidas && !m.texto ? ` <button class="btn ghost small" type="button" data-act="sugAcao" data-key="${k}" style="padding:0">Usar como ponto de partida</button>` : ""}</div>
+      <label class="f"><span>Hierarquia da ação</span>${selMel(m.key, "hier", HIERARQUIAS, m.hier, "", "Escolha")}</label>
+      <div class="f"><span>Risco no Inventário</span><div class="small">${chipCat(m.r.cat)} nível ${m.r.N || "—"} · <button class="btn ghost small" type="button" data-act="verRisco" data-key="${esc(m.base)}" style="padding:0">ver a classificação</button></div>
+        <div class="tiny faint">${esc(m.h.fonte || "")}</div></div>` : ""}
+    <label class="f"><span>Data de conclusão</span>${inp("conc", "date", m.conc)}</label>
+    <label class="f"><span>Eficácia da ação</span>${selMel(m.key, "efic", EFIC_ACAO, m.efic, "", "Ainda não avaliada")}</label>
+    <label class="f spanall"><span>Evidência</span><textarea rows="2" data-mel="${k}" data-mc="evid" placeholder="Ex.: foto do posto após a mudança, ordem de serviço, lista de presença">${esc(m.evid)}</textarea></label>
+    ${risco ? `<div class="spanall row" style="gap:8px">${m.n === 1 ? `<button class="btn small" type="button" data-act="novaAcao" data-key="${esc(m.base)}">+ Outra ação para este perigo</button>` : `<button class="btn small" type="button" data-act="tirarAcao" data-key="${k}">Retirar esta ação</button>`}</div>` : ""}
+  </div>`;
 }
 function linhasMelhorias(l){
-  if (!l.length) return `<tr><td colspan="7" class="muted small" style="padding:18px">Nenhuma melhoria com estes filtros.</td></tr>`;
-  return l.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}">
+  if (!l.length) return `<tr><td colspan="8" class="muted small" style="padding:18px">Nenhum item com estes filtros.</td></tr>`;
+  return l.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}${S.melAberto === m.key ? " sel" : ""}">
     <td class="mono"><button class="btn ghost small" type="button" data-open="${esc(m.a.id)}" style="padding:0">${esc(m.a.numero)}</button></td>
     <td><b>${esc(m.a.meta?.cargo || "")}</b><div class="tiny faint">${esc((m.a.meta?.setor || "").trim())}</div></td>
-    <td>${chipTipo(m)}<div class="small">${esc(m.texto)}</div></td>
-    <td>${selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</td>
+    <td>${oQueFazer(m)}</td>
+    <td><input type="text" class="sig" data-mel="${esc(m.key)}" data-mc="sig" value="${esc(m.sig)}" placeholder="Nº SIG" aria-label="Número da ação no SIG"></td>
+    <td>${m.kind === "risco" ? prioFixa(m) : selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</td>
     <td><input type="text" data-mel="${esc(m.key)}" data-mc="resp" value="${esc(m.resp)}" placeholder="Responsável"></td>
     <td><input type="date" data-mel="${esc(m.key)}" data-mc="prazo" value="${esc(m.prazo)}">${m.atrasada ? `<div class="tiny" style="color:var(--bad-ink);font-weight:700">Prazo vencido</div>` : ""}</td>
-    <td>${selMel(m.key, "sit", MEL_SIT, m.sit)}</td></tr>`).join("");
+    <td>${selMel(m.key, "sit", MEL_SIT, m.sit)}</td></tr>
+    ${S.melAberto === m.key ? `<tr class="pldetrow"><td colspan="8">${vPlanoDetalhe(m)}</td></tr>` : ""}`).join("");
 }
+function contPlanoTxt(l){ return `${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.`; }
 function vMelhorias(){
   const l = listaMelhorias();
   const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
-  return `<div class="pagehead"><div><h1>Melhorias</h1><p>Recomendações específicas e oportunidades de melhoria registradas nas AEPs, que não entram no PGR como perigo. Defina a prioridade, o responsável, o prazo e acompanhe a situação. Tudo vai para a planilha no arquivo AEP_para_PGR.xlsx.</p></div></div>
+  const foco = S.melFoco ? itensPlanoDe(aepsPlano()).find(m => m.key === S.melFoco || m.base === S.melFoco) : null;
+  return `<div class="pagehead"><div><h1>Plano de ação</h1><p>Um plano só: as ações dos riscos do Inventário que pedem plano (P1 e P2) e as recomendações e oportunidades de melhoria das AEPs. Registre o Nº da ação no SIG, o responsável, o prazo e acompanhe até a eficácia.</p></div></div>
   <div class="panel"><div class="panel-b">
+    ${foco ? `<div class="note" style="margin-bottom:12px">Mostrando só as ações do perigo <b>${esc(foco.h?.idRisco || "")}</b> da <b>${esc(foco.a.numero)}</b> (${esc(foco.a.meta?.cargo || "")}). <button class="btn small" type="button" data-act="planoTodos">Ver o plano inteiro</button></div>` : ""}
     <div class="melfilt">
       ${vMultiSetor("msel-mel")}
-      <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas as situações")}</select>
+      <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "semsig", "Em aberto sem Nº do SIG")}${op("melSit", "semacao", "Riscos com ação a definir")}${op("melSit", "eficacia", "Concluídas com eficácia a verificar")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas as situações")}</select>
+      <select data-melf="melTipo" aria-label="Tipo">${op("melTipo", "", "Riscos e melhorias")}${op("melTipo", "risco", "Só ações dos riscos (P1 e P2)")}${op("melTipo", "mel", "Só melhorias")}${op("melTipo", "rec", "Só recomendações")}${op("melTipo", "op", "Só oportunidades de melhoria")}</select>
       <select data-melf="melPrio" aria-label="Prioridade">${op("melPrio", "", "Todas as prioridades")}${MEL_PRIO.map(p => op("melPrio", p, "Prioridade " + p.toLowerCase())).join("")}</select>
-      <select data-melf="melTipo" aria-label="Tipo">${op("melTipo", "", "Recomendações e oportunidades")}${op("melTipo", "rec", "Só recomendações")}${op("melTipo", "op", "Só oportunidades de melhoria")}</select>
       <select data-melf="melEsc" aria-label="AEPs">${op("melEsc", "fechadas", "AEPs concluídas e em revisão")}${op("melEsc", "todas", "Todas as AEPs")}</select>
-      <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar cargo, AEP, texto ou responsável">
+      <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar AEP, cargo, perigo, texto, responsável ou Nº SIG">
     </div>
     <p class="tiny muted" style="margin:0">Resumo das gerências selecionadas</p><div id="melstats">${melStatsHTML()}</div>
-    <p class="tiny muted" id="melcont">${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.</p>
-    <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP</th><th>Cargo</th><th>Recomendação ou oportunidade</th><th>Prioridade</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
+    <p class="tiny muted" id="melcont">${contPlanoTxt(l)}</p>
+    <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP</th><th>Cargo</th><th>O que fazer</th><th>Nº SIG</th><th>Prioridade</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
     <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>
+    <p class="tiny muted" style="margin-top:8px">A prioridade das ações dos riscos vem da categoria no Inventário (P1 = alta, P2 = média). A das melhorias você escolhe. Ao marcar “Concluída”, a data de conclusão é preenchida com o dia de hoje; registre a evidência e, depois, a eficácia.</p>
   </div></div>`;
 }
 function atualizarMelhorias(){
   if (S.view !== "melhorias") return;
   const b = $("#melbody"); if (!b) { render(); return; }
-  if (b.contains(document.activeElement) && document.activeElement.type === "text") return;
+  const f = document.activeElement; if (b.contains(f) && (f.type === "text" || f.tagName === "TEXTAREA")) return;
   const l = listaMelhorias(); b.innerHTML = linhasMelhorias(l);
   const s = $("#melstats"); if (s) s.innerHTML = melStatsHTML();
-  const c = $("#melcont"); if (c) c.textContent = `${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.`;
+  const c = $("#melcont"); if (c) c.textContent = contPlanoTxt(l);
 }
 function mudarMelhoria(key, campo, v){
-  const cur = S.melhorias[key] || {};
-  S.melhorias = { ...S.melhorias, [key]: { ...cur, [campo]: v, em: new Date().toISOString() } };
+  const cur = S.melhorias[key] || {}, novo = { ...cur, [campo]: v, em: new Date().toISOString() };
+  if (campo === "sit" && v === "Concluída" && !novo.conc) novo.conc = hojeISO();
+  S.melhorias = { ...S.melhorias, [key]: novo };
   S.melDirty = true; setSaveState("Alterações não salvas");
   clearTimeout(S.melTimer); S.melTimer = setTimeout(salvarMelhorias, 600);
+}
+function novaAcao(base){
+  const n = Math.max(1, ...extrasDe(base).map(k => Number(k.split("|")[2]) || 1)) + 1, key = `${base}|${n}`;
+  if (!S.melhorias[base]) mudarMelhoria(base, "sit", "Aberta");
+  mudarMelhoria(key, "sit", "Aberta"); S.melAberto = key; atualizarMelhorias();
+}
+function tirarAcao(key){
+  const m = { ...S.melhorias }; delete m[key]; S.melhorias = m; if (S.melAberto === key) S.melAberto = null;
+  S.melDirty = true; clearTimeout(S.melTimer); S.melTimer = setTimeout(salvarMelhorias, 300); atualizarMelhorias();
 }
 async function salvarMelhorias(){
   clearTimeout(S.melTimer); if (!S.db) { S.melDirty = false; return; }
@@ -850,7 +995,7 @@ function conclusaoTexto(a){
   if (n){
     const porCat = {}; hz.forEach(h => { const c = TAXMAP[h.codigo]?.cat || "Outros"; porCat[c] = (porCat[c]||0) + 1; });
     const partes = Object.entries(porCat).map(([c, k]) => `${k} ${(CAT_TXT[c] || [c, c])[k > 1 ? 1 : 0]}`);
-    P.push(`A avaliação do cargo ${cargo} identificou ${n} perigo${n > 1 ? "s" : ""} (${juntar(partes)}), que ${n > 1 ? "passam" : "passa"} a integrar o inventário de riscos do PGR. A graduação de cada risco é feita na planilha de controle do GRO, considerando a exposição e as medidas de controle já existentes.`);
+    P.push(`A avaliação do cargo ${cargo} identificou ${n} perigo${n > 1 ? "s" : ""} (${juntar(partes)}), que ${n > 1 ? "passam" : "passa"} a integrar o inventário de riscos do PGR. A graduação de cada risco é feita no inventário de riscos da unidade, considerando a exposição e as medidas de controle já existentes.`);
   } else P.push(`A avaliação do cargo ${cargo} não identificou perigos ergonômicos ou psicossociais que demandem registro no inventário de riscos do PGR.`);
   const crit = ckLista(a).filter(x => x.c.r === "sim");
   if (crit.length) P.push(`O checklist da NR-17 apontou ${crit.length} condiç${crit.length > 1 ? "ões críticas" : "ão crítica"}: ${juntar(crit.map(x => minusc(ckCurto(x.n))))}. ${crit.length > 1 ? "Essas condições requerem" : "Essa condição requer"} intervenção prioritária, conforme o Plano de Ação.`);
@@ -1137,7 +1282,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1202,7 +1347,9 @@ async function iniciar(){
   try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
   db.collection("aeps").onSnapshot(snap => {
     const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
+    Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
     S.aeps = m; S.padraoPend = velhas; S.carregado = true;
+    if (S.view === "inventario") atualizarInventario();
     if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
   }, () => setSaveState("Erro ao ler dados"));
   db.collection("copsoq").onSnapshot(snap => {
@@ -1303,8 +1450,9 @@ async function ir(view, extra){
   if (S.view === "campo") await salvarAEP();
   if (S.melDirty) await salvarMelhorias();
   if (S.planoDirty) await salvarPlano();
+  if (Object.keys(S.invPend).length) await salvarInventario();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias" || view === "inventario" || view === "criterios") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -1326,6 +1474,8 @@ function render(){
   else if (S.view === "gerencia") app.innerHTML = vGerencia();
   else if (S.view === "melhorias") app.innerHTML = vMelhorias();
   else if (S.view === "pendencias") app.innerHTML = vPendencias();
+  else if (S.view === "inventario") app.innerHTML = vInventario();
+  else if (S.view === "criterios") app.innerHTML = vCriterios();
   else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
@@ -1369,7 +1519,6 @@ function atualizarHome(){
   if (!tb || !ct) { render(); return; }
   const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
   atualizarSel(lista); { const pb = $("#padraobox"); if (pb) pb.innerHTML = vPadraoBanner(); }
-  const ex = $("#exportbox"); if (ex && S.exportAberto) ex.innerHTML = vExportPanel();
 }
 /* Seleção de uma ou mais gerências (setor da AEP). O mesmo filtro vale para a lista, a aba Gerências e o detalhamento do Painel. */
 const rotuloSetores = (l, todas = "Todas as gerências") => !l.length ? todas : l.length === 1 ? l[0] : l.length === 2 ? `${l[0]} e ${l[1]}` : `${l.length} gerências`;
@@ -1385,6 +1534,7 @@ function aplicarFiltroSetor(){
   document.querySelectorAll("input[data-msel]").forEach(x => x.checked = S.fSetor.includes(x.dataset.msel));
   if (S.view === "home") atualizarHome();
   const pc = $("#painelcorpo"); if (pc) { pc.innerHTML = painelCorpo(); return; }
+  if (S.view === "inventario") { atualizarInventario(); return; }
   const gc = $("#gercorpo"); if (gc) { gc.innerHTML = gerCorpo(); return; }
   const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
   const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
@@ -1402,7 +1552,6 @@ function vHome(){
   </div>
   ${aviso}
   <div id="padraobox">${vPadraoBanner()}</div>
-  <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
     <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
@@ -1514,22 +1663,28 @@ function vPadraoBanner(){
     <div style="margin-top:8px">${S.confirm === "padrao" ? `<span class="confirm">Gravar o padrão novo em ${n} AEP(s)? <button class="btn small primary" type="button" data-act="padraoTodasSim" id="btnPadrao">Gravar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small primary" type="button" data-act="padraoTodas">Gravar o padrão novo em todas</button>`}</div></div>`;
 }
 function vExportPanel(){
-  const ghes = Array.from(new Set(Object.values(S.aeps).map(a => a.meta?.eg).filter(Boolean).map(String))).sort();
-  const n = linhasPGR().length;
-  return `<div class="panel" style="margin-bottom:14px"><div class="panel-h"><b>Exportar para o Inventário de Riscos / PGR</b><button class="btn ghost small" type="button" data-act="toggleExport">Fechar</button></div>
+  const ghes = Array.from(new Set(Object.values(S.aeps).filter(a => a.status === "concluida").map(a => a.meta?.eg).filter(Boolean).map(String))).sort();
+  const base = baseInventarioPGR(), L = linhasPGRSel(), n = L.length;
+  const ok = base.filter(x => x.r.sit === "ok"), est = e => ok.filter(x => estadoPGR(x) === e).length;
+  const fora = base.filter(x => x.r.sit !== "ok"), fc = sit => fora.filter(x => x.r.sit === sit).length;
+  const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
+  return `<div class="panel" style="margin-bottom:14px"><div class="panel-h"><b>Exportar para o PGR</b><button class="btn ghost small" type="button" data-act="toggleExport">Fechar</button></div>
     <div class="panel-b stack tight">
-      <div class="note"><b>Ligação com a planilha CONTROLE GERAL AEP 2026.</b> Gera o arquivo que a aba AEP_SISTEMA da planilha lê: todas as AEPs e todos os perigos, com a chave “AEP nn|Rnn”. Salve na pasta configurada na planilha e, nela, use Dados &gt; Atualizar tudo.
-        <div style="margin-top:8px"><button class="btn primary" type="button" data-act="exportarLig" id="btnLig" ${S.downloads ? "" : "disabled"}>Baixar AEP_para_PGR.xlsx</button></div></div>
-      <p class="small muted">Formato antigo, para colar direto no PGR: gera um Excel com as mesmas 26 colunas da aba EXPORTA PGR. As colunas A e B (GHE e cargo) são auxiliares, para achar o bloco: cole da coluna C até a Z. O Id. Risco sai como “AEP nn / Rnn” — renumere na colagem seguindo o bloco do GHE.</p>
+      <p class="small" style="margin:0">Gera o Excel com as 26 colunas do Inventário de Riscos do PGR. Entram só os perigos de <b>AEPs concluídas</b> com a classificação <b>completa e sem alerta</b>. As colunas A (GHE) e B (cargo) servem para achar o bloco do GHE: quem lança no PGR copia da coluna C até a Z. A coluna AA traz o Nº da ação no SIG, só para consulta.</p>
+      <div class="pgrnum"><div><b>${est("enviado")}</b><span>já enviados ao PGR</span></div><div><b>${est("novo")}</b><span>classificados e ainda não enviados</span></div><div><b${est("alterado") ? ' style="color:var(--bad-ink)"' : ""}>${est("alterado")}</b><span>alterados depois do envio</span></div><div><b>${fora.length}</b><span>ainda não podem ir</span></div></div>
+      ${fora.length ? `<p class="tiny muted" style="margin:0">Ficam de fora até serem resolvidos: ${[[fc("falta"), "falta classificar"], [fc("incompleta"), "incompleto(s)"], [fc("alerta"), "com alerta"]].filter(z => z[0]).map(z => `${z[0]} ${z[1]}`).join(", ")}. Use o filtro “Falta classificar ou com pendência” abaixo.</p>` : ""}
       <div class="grid g3">
-        <label class="f"><span>Quais AEPs</span><select data-exp="expEscopo"><option value="concluidas" ${S.expEscopo==="concluidas"?"selected":""}>Só as concluídas</option><option value="pendentes" ${S.expEscopo==="pendentes"?"selected":""}>Concluídas ainda não lançadas na planilha</option><option value="todas" ${S.expEscopo==="todas"?"selected":""}>Todas com perigos lançados</option></select></label>
-        <label class="f"><span>GHE</span><select data-exp="expGHE"><option value="">Todos os GHEs</option>${ghes.map(g => `<option ${S.expGHE===g?"selected":""}>${esc(g)}</option>`).join("")}</select></label>
-        <div class="f"><span class="small" style="font-weight:600;color:var(--ink-2)">${n} linha${n===1?"":"s"} para exportar</span><button class="btn primary" type="button" data-act="exportarPGR" id="btnExp" ${n && S.downloads ? "" : "disabled"}>Baixar Excel</button></div>
+        <label class="f"><span>Quais linhas</span><select data-exp="pgrEsc">${op("pgrEsc", "novos", "Novas e alteradas desde o último envio")}${op("pgrEsc", "todos", "Todas as classificadas")}</select></label>
+        <label class="f"><span>GHE</span><select data-exp="expGHE"><option value="">Todos os GHEs</option>${ghes.map(g => `<option ${S.expGHE === g ? "selected" : ""}>${esc(g)}</option>`).join("")}</select></label>
+        <div class="f"><span class="small" style="font-weight:600;color:var(--ink-2)">${n} linha${n === 1 ? "" : "s"} para exportar</span><button class="btn primary" type="button" data-act="exportarPGR" id="btnExp" ${n && S.downloads ? "" : "disabled"}>Baixar Excel para o PGR</button></div>
       </div>
-      ${S.expEscopo === "pendentes" && aepsExport().length ? (S.confirm === "marcarExp"
-        ? `<span class="confirm">Marcar ${aepsExport().length} AEP(s) como lançadas na planilha hoje? Faça isso só depois de colar as linhas no RISCOS_AEP. <button class="btn small primary" type="button" data-act="marcarExpSim">Marcar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
-        : `<div><button class="btn small" type="button" data-act="marcarExp">Marcar estas ${aepsExport().length} AEP(s) como lançadas na planilha</button></div>`) : ""}
+      ${n ? (S.confirm === "marcarExp"
+        ? `<span class="confirm">Marcar ${n} linha(s) como enviadas ao PGR hoje? Faça isso depois de mandar o arquivo. <button class="btn small primary" type="button" data-act="marcarExpSim">Marcar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
+        : `<div><button class="btn small${S.pgrBaixado ? " primary" : ""}" type="button" data-act="marcarExp">Marcar estas ${n} linha(s) como enviadas ao PGR</button> <span class="tiny muted">Assim o próximo arquivo leva só o que for novo ou mudar.</span></div>`) : ""}
       ${!S.downloads ? `<p class="hint">O download não está disponível nesta visualização.</p>` : ""}
+      <details class="pgrtrans"><summary class="small">Planilha de controle (só durante a transição)</summary>
+        <p class="tiny muted">Arquivo que a aba AEP_SISTEMA da planilha CONTROLE GERAL AEP 2026 lê pelo Power Query. Só é necessário enquanto a planilha ainda estiver em uso.</p>
+        <button class="btn small" type="button" data-act="exportarLig" id="btnLig" ${S.downloads ? "" : "disabled"}>Baixar AEP_para_PGR.xlsx</button></details>
     </div></div>`;
 }
 
@@ -1543,8 +1698,9 @@ function conferenciaPerigos(){
     if (temRedacaoAntiga(a)) redAnt.push({ a });
     perigosRepetidos(a).forEach(([x, y]) => rep.push({ a, x, y }));
     if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) comPend.push({ a, txt: Object.values(pd).flat()[0] + (n > 1 ? ` (+${n-1})` : "") }); }
-    if (a.status === "concluida" && !lancadaOk(a)) (lancadaVelha(a) ? velhas : semLanc).push({ a });
-    else if (lancadaVelha(a)) velhas.push({ a });
+    if (a.status === "concluida"){ const c = a.classif || {}, xs = (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).map(h => ({ a, h, c: c[h.idRisco] || {}, r: calcRisco(h, c[h.idRisco]) })).filter(x => x.r.sit === "ok");
+      const nv = xs.filter(x => estadoPGR(x) === "novo").length, alt = xs.filter(x => estadoPGR(x) === "alterado").length;
+      if (nv) semLanc.push({ a, n: nv }); if (alt) velhas.push({ a, n: alt }); }
     if ((a.status||"nao_iniciada") !== "nao_iniciada" && (a.perigos||[]).length){ const k = norm(a.meta?.cargo); if (k) (grupos[k] = grupos[k] || []).push(a); } });
   const cargos = Object.values(grupos).filter(g => g.length > 1 && new Set(g.map(a => [...new Set(a.perigos.map(h => h.codigo))].sort().join(","))).size > 1)
     .map(g => ({ a: g[0], g: g.sort((p, q) => idNum(p) - idNum(q)) }));
@@ -1575,10 +1731,10 @@ function vConferencia(){
       ${lista(c.redAnt, x => lin(x.a, STATUS[x.a.status||"nao_iniciada"]))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
     <div class="stack tight"><b class="small">Concluídas com pendência pelas regras atuais: ${c.comPend.length}</b>
       ${c.comPend.length ? `<p class="tiny muted">Foram concluídas antes de uma regra nova. Abra, resolva a pendência e conclua de novo.</p>${lista(c.comPend, x => lin(x.a, esc(x.txt)))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
-    <div class="stack tight"><b class="small">Concluídas ainda não lançadas na planilha: ${c.semLanc.length}</b>
-      ${c.semLanc.length ? `<p class="tiny muted">Depois de passar os perigos para o RISCOS_AEP, marque a AEP como lançada (botão no topo da AEP ou em Exportar para o PGR).</p>${lista(c.semLanc, x => lin(x.a, "concluída em " + dataLocal(x.a.concluidoEm)))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
-    <div class="stack tight"><b class="small">Alteradas depois do lançamento na planilha: ${c.velhas.length}</b>
-      ${c.velhas.length ? `<p class="tiny muted">A AEP mudou depois que foi lançada: confira o RISCOS_AEP e marque de novo quando estiver igual.</p>${lista(c.velhas, x => lin(x.a, `lançada em ${dataLocal(x.a.planilha.em)} · ${STATUS[x.a.status||"nao_iniciada"]}`))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
+    <div class="stack tight"><b class="small">Perigos classificados ainda não enviados ao PGR: ${c.semLanc.reduce((t, x) => t + x.n, 0)}</b>
+      ${c.semLanc.length ? `<p class="tiny muted">Estão prontos para o PGR. Gere o arquivo no Inventário (Exportar para o PGR) e marque como enviados.</p><div><button class="btn small" type="button" data-act="toggleExport">Exportar para o PGR</button></div>${lista(c.semLanc, x => lin(x.a, `${x.n} perigo(s)`))}` : `<p class="tiny muted">Nenhum.</p>`}</div>
+    <div class="stack tight"><b class="small">Alterados depois do envio ao PGR: ${c.velhas.reduce((t, x) => t + x.n, 0)}</b>
+      ${c.velhas.length ? `<p class="tiny muted">A classificação mudou depois de ir para o PGR. Eles entram no próximo arquivo (opção “Novas e alteradas”).</p>${lista(c.velhas, x => lin(x.a, `${x.n} perigo(s)`))}` : `<p class="tiny muted">Nenhum.</p>`}</div>
     <div class="stack tight"><b class="small">Linhas repetidas (mesmo perigo e mesma fonte): ${c.rep.length}</b>
       ${c.rep.length ? lista(c.rep, x => lin(x.a, `${esc(x.x.idRisco||"")} e ${esc(x.y.idRisco||"")} ${esc(x.x.codigo)}`)) : `<p class="tiny muted">Nenhuma.</p>`}</div>
   </div></div>`;
@@ -1660,9 +1816,37 @@ function painelCorpo(){
       <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
   </div>
   <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x realizadas por mês</b><span class="tiny muted">plano PLA202609SA20-30 · realizada = concluída ou em revisão, no mês da primeira conclusão</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
+  ${vRiscosPainel(L)}
   <div class="panel" id="plistabox">${vListaPainel(L, D)}</div>
 
 `;
+}
+/* Riscos e plano de ação no painel: classificação no Inventário, categorias, plano e envio ao PGR */
+function dadosRiscos(L){
+  const F = L.filter(fechadaAEP), X = [];
+  F.forEach(a => (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).forEach(h => { const c = (a.classif || {})[h.idRisco] || {}; X.push({ a, h, c, r: calcRisco(h, c) }); }));
+  const ok = X.filter(x => x.r.sit === "ok"), conc = ok.filter(x => x.a.status === "concluida");
+  return { X, ok, cats: CATEGORIAS.map(cn => [cn, ok.filter(x => x.r.cat === cn).length]),
+    enviados: conc.filter(x => estadoPGR(x) === "enviado").length, prontos: conc.filter(x => estadoPGR(x) !== "enviado").length,
+    plano: resumoPlano(itensPlanoDe(F.map(completar))) };
+}
+function vRiscosPainel(L){
+  const R = dadosRiscos(L), P = R.plano, n = R.X.length, k = R.ok.length, mx = Math.max(1, ...R.cats.map(c => c[1]));
+  const tile = (v, t, mau, filtro) => `<button class="rtile" type="button" data-act="planoFiltro" data-v="${filtro}"><b${mau && v ? ' class="neg"' : ""}>${v}</b><span>${t}</span></button>`;
+  return `<div class="grid g2 riscospainel" style="margin:16px 0;align-items:stretch">
+    <div class="panel"><div class="panel-h"><b>Inventário de riscos</b><button class="btn ghost small" type="button" data-go="inventario">Abrir</button></div><div class="panel-b">
+      <p class="mbig" style="margin:0"><b>${k}</b> de ${n} perigos classificados</p>
+      <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${k}" style="margin:6px 0 4px"><div style="width:${n ? (k / n * 100).toFixed(0) : 0}%"></div></div>
+      <span class="tiny muted">perigos das AEPs realizadas (concluídas e em revisão)${n - k ? ` · ${n - k} falta(m) classificar ou completar` : ""}</span>
+      <div class="catbars" role="list" aria-label="Riscos classificados por categoria residual">${R.cats.map(([cn, v]) => `<div class="catbar" role="listitem" title="${esc(cn)}: ${v}"><span class="cb-l">${esc(cn.replace("Risco ", ""))}</span><span class="cb-t"><span class="cb-f ${CAT_CLS[cn]}" style="width:${(v / mx * 100).toFixed(1)}%"></span></span><b class="cb-n">${v}</b></div>`).join("")}</div>
+      <p class="tiny muted" style="margin:8px 0 0">Enviados ao PGR: <b>${R.enviados}</b> · prontos para enviar: <b>${R.prontos}</b></p>
+    </div></div>
+    <div class="panel"><div class="panel-h"><b>Plano de ação</b><button class="btn ghost small" type="button" data-go="melhorias">Abrir</button></div><div class="panel-b">
+      <div class="rtiles">${tile(P.p1, "ações P1 em aberto", true, "risco|abertas|Alta")}${tile(P.p2, "ações P2 em aberto", false, "risco|abertas|Média")}${tile(P.semacao, "riscos com ação a definir", true, "risco|semacao|")}
+        ${tile(P.atrasadas, "com prazo vencido", true, "|atrasadas|")}${tile(P.semsig, "em aberto sem Nº do SIG", true, "|semsig|")}${tile(P.melAb, "melhorias em aberto", false, "mel|abertas|")}
+        ${tile(P.concluidas, "concluídas", false, "|concluidas|")}${tile(P.eficacia, "eficácia a verificar", false, "|eficacia|")}</div>
+      <p class="tiny muted" style="margin:8px 0 0">Clique num número para abrir a lista no Plano de ação.</p>
+    </div></div></div>`;
 }
 function vPendencias(){
   const L = Object.values(S.aeps).sort((x, y) => idNum(x) - idNum(y)), alertas = L.map(a => ({ a, al: alertaAET(a) })).filter(x => x.al);
@@ -1722,6 +1906,249 @@ async function salvarPlano(){
   S.planoDirty = false;
 }
 
+/* =========================================================================
+   INVENTÁRIO DE RISCOS: classificação de cada perigo pela Seção 2 dos Critérios do GRO.
+   Fica em a.classif[idRisco] dentro da própria AEP e NÃO muda a situação da AEP.
+   ========================================================================= */
+const EXPOSICOES = ["Habitual e permanente", "Intermitente", "Eventual"];
+const DURACOES = [["curtissima", "Curtíssima", "menos de 1 h", "rara, menos de 1 vez por mês"], ["curta", "Curta", "1 h a menos de 2 h", "eventual, menos de 1 vez por semana"],
+  ["media", "Média", "2 h a 4 h", "semanal ou em alguns dias da semana"], ["longa", "Longa", "mais de 4 h", "diária ou característica da organização do trabalho"]];
+const INTENSIDADES = [["baixa", "Baixa"], ["media", "Média"], ["alta", "Alta"], ["critica", "Crítica ou situação inaceitável"]];
+const EFICACIAS = [[1, "Inexistente", "Nenhuma medida de prevenção para o fator na situação avaliada."],
+  [2, "Insuficiente", "A medida existe, mas sem evidência de implantação, ou com desvios e falhas observados no trabalho real."],
+  [3, "Parcial", "Medida administrativa ou organizacional implantada e com evidência: pausas, rodízio, procedimento, treinamento, autonomia de ritmo."],
+  [4, "Eficaz", "Medida de engenharia ou arranjo ergonômico implantado, com evidência de uso e manutenção: dispositivo auxiliar, mobiliário regulável, reprojeto do posto."],
+  [5, "Controle integrado", "Controle incorporado ao processo, que não depende da ação do trabalhador (mecanização, automação, eliminação ou substituição da etapa)."]];
+const PROB_ROT = ["", "1 - Raro", "2 - Pouco Provável", "3 - Provável", "4 - Muito Provável", "5 - Praticamente Certo"];
+const SEV_ROT = ["", "1 - Lesão leve", "2 - Lesão com incômodo / desconforto leve", "3 - Lesão com restrição de alto potencial", "4 - Lesão grave parcial de alto potencial", "5 - Lesão grave permanente de alto potencial / Fatalidade"];
+const CATEGORIAS = ["Risco trivial", "Risco tolerável", "Risco moderado", "Risco substancial", "Risco intolerável"];
+const HIERARQUIAS = ["Eliminação", "Substituição", "Engenharia", "Administrativo", "Não aplicável"];
+const EXIG_ROT = ["", "1 - Mínima", "2 - Leve", "3 - Moderada", "4 - Alta", "5 - Extrema"];
+/* 2.3.1: duração x intensidade -> Exigência. Curtíssima com intensidade média ou alta não está na Tabela 2: adota o valor da duração curta. */
+const EXIG_TAB = { longa: { baixa: 3, media: 4, alta: 4 }, media: { baixa: 2, media: 3, alta: 4 }, curta: { baixa: 2, media: 2, alta: 3 }, curtissima: { baixa: 1, media: 2, alta: 3 } };
+const exigencia = (dur, int) => !dur || !int ? null : int === "critica" ? 5 : (EXIG_TAB[dur] || {})[int] || null;
+const exigLacuna = (dur, int) => dur === "curtissima" && (int === "media" || int === "alta");
+const probGrade = (e, ef) => e && ef ? Math.round((2 * e + (6 - ef)) / 3) : null;
+const CAT_NIVEL = { 1: 0, 2: 1, 3: 1, 4: 1, 5: 2, 6: 2, 8: 2, 9: 2, 10: 2, 12: 3, 15: 3, 16: 3, 20: 4, 25: 4 };
+const categoriaDe = n => n ? CATEGORIAS[CAT_NIVEL[n]] : "";
+const ACAO_CAT = { "Risco trivial": "SEM PRIORIDADE. Nenhuma ação é necessária, pois o risco está sob controle. Manter as medidas de controle existentes.",
+  "Risco tolerável": "SEM PRIORIDADE. Nenhuma ação é necessária, pois o risco está sob controle. Manter as medidas de controle existentes.",
+  "Risco moderado": "PRIORIDADE 2 (P2). Necessário elaborar plano de ação para reduzir o nível do risco.",
+  "Risco substancial": "PRIORIDADE 1 (P1). Necessário elaborar plano de ação para reduzir o nível do risco.",
+  "Risco intolerável": "PRIORIDADE 1 (P1). Necessário elaborar plano de ação para reduzir o nível do risco." };
+const CAT_CLS = { "Risco trivial": "c1", "Risco tolerável": "c2", "Risco moderado": "c3", "Risco substancial": "c4", "Risco intolerável": "c5" };
+const ancoraDe = h => Number(TAXMAP[h.codigo]?.ancora) || 2;
+function calcRisco(h, c){
+  c = c || {};
+  const anc = ancoraDe(h), E = exigencia(c.dur, c.int), Pg = probGrade(E, Number(c.efic) || null);
+  const P = c.descNR ? 5 : (Number(c.pOver) || Pg);
+  const S = Math.max(anc, Number(c.sev) || anc), N = P && S ? P * S : null, cat = categoriaDe(N);
+  const alertas = [], falta = [];
+  if (!c.exp) falta.push("tipo de exposição"); if (!c.dur) falta.push("duração"); if (!c.int) falta.push("intensidade");
+  if (!c.efic) falta.push("eficácia das medidas"); if (!String(c.medidas || "").trim()) falta.push("medidas existentes (ou “Nenhuma”)");
+  if (!c.catIni) falta.push("categoria inicial");
+  const memo = String(c.memoria || "").trim();
+  if (c.exp === "Habitual e permanente" && c.dur && c.dur !== "longa" && !memo) alertas.push("Exposição habitual e permanente com duração que não é longa: confira ou justifique na memória de cálculo (2.6).");
+  if (c.exp === "Eventual" && c.dur === "longa" && !memo) alertas.push("Exposição eventual com duração longa: confira ou justifique na memória de cálculo (2.6).");
+  if (P === 1 && c.exp === "Habitual e permanente" && !memo) alertas.push("Probabilidade 1 com exposição habitual e permanente exige justificativa técnica (2.6).");
+  if (c.pOver && !c.descNR && Number(c.pOver) !== Pg && !String(c.pJust || "").trim()) alertas.push("Probabilidade diferente da grade: registre a justificativa da divergência (2.7).");
+  if (Number(c.sev) > anc && !String(c.sevJust || "").trim()) alertas.push("Severidade acima da âncora: registre a justificativa (2.8).");
+  if (Number(c.efic) > 2 && !String(c.evid || "").trim()) alertas.push("Eficácia acima de 2 exige evidência da medida na unidade (Regra 1).");
+  if (c.descNR && !String(c.req || "").trim()) alertas.push("Informe o requisito de NR descumprido (2.5).");
+  const vazio = !Object.keys(c).some(k => k !== "em" && c[k] !== "" && c[k] != null && c[k] !== false);
+  const sit = vazio ? "falta" : falta.length ? "incompleta" : alertas.length ? "alerta" : "ok";
+  return { anc, E, Pg, P, S, N, cat, acao: ACAO_CAT[cat] || "", alertas, falta, sit, lacuna: exigLacuna(c.dur, c.int) };
+}
+function sitCelula(x){ const s = SIT_INV[x.r.sit], e = x.r.sit === "ok" && x.a.status === "concluida" ? estadoPGR(x) : "";
+  return `<span class="chip ${s[1]}">${s[0]}</span>${e === "enviado" ? `<div class="tiny faint">no PGR</div>` : e === "alterado" ? `<div class="tiny plaviso">mudou após o envio ao PGR</div>` : ""}`; }
+const SIT_INV = { falta: ["Falta classificar", ""], incompleta: ["Incompleta", "draft"], alerta: ["Com alerta", "ris"], ok: ["Classificado", "fav"] };
+const chipCat = cat => cat ? `<span class="catchip ${CAT_CLS[cat]}">${esc(cat.replace("Risco ", ""))}</span>` : `<span class="tiny faint">—</span>`;
+function linhasInventario(){
+  const out = [];
+  Object.values(S.aeps).filter(a => S.invEsc === "todas" || a.status === "concluida" || a.status === "revisao")
+    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .sort((x, y) => idNum(x) - idNum(y))
+    .forEach(a => (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).forEach(h => { const c = (a.classif || {})[h.idRisco] || {};
+      out.push({ a, h, c, k: `${a.id}|${h.idRisco}`, r: calcRisco(h, c) }); }));
+  return out;
+}
+function listaInventario(){
+  const t = norm(S.invBusca);
+  if (S.invFoco) return linhasInventario().filter(x => x.k === S.invFoco || x.a.id === S.invFoco);
+  return linhasInventario().filter(x => S.invSit === "todas" || (S.invSit === "pendentes" ? x.r.sit !== "ok" : S.invSit === "naoenv" ? x.r.sit === "ok" && x.a.status === "concluida" && estadoPGR(x) !== "enviado" : x.r.sit === S.invSit))
+    .filter(x => !S.invCat || x.r.cat === S.invCat)
+    .filter(x => !t || norm(`${x.a.numero} ${x.a.meta?.cargo} ${x.h.idRisco} ${x.h.codigo} ${TAXMAP[x.h.codigo]?.nome} ${x.h.fonte}`).includes(t));
+}
+function vInvResumo(){
+  const L = linhasInventario(), n = s => L.filter(x => x.r.sit === s).length;
+  return `<div class="stats" style="margin-bottom:10px"><div class="stat"><b>${L.length}</b><span>perigos no inventário</span></div><div class="stat"><b>${n("ok")}</b><span>classificados</span></div>
+    <div class="stat"><b>${n("falta")}</b><span>falta classificar</span></div><div class="stat"><b>${n("incompleta")}</b><span>incompletos</span></div><div class="stat"><b style="${n("alerta") ? "color:var(--bad-ink)" : ""}">${n("alerta")}</b><span>com alerta</span></div></div>
+    <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">${CATEGORIAS.map(cn => `<span class="small">${chipCat(cn)} <b>${L.filter(x => x.r.cat === cn && x.r.sit === "ok").length}</b></span>`).join("")}<span class="tiny muted">classificados por categoria (residual)</span></div>`;
+}
+function vInvLinhas(){
+  const L = listaInventario();
+  if (!L.length) return `<tr><td colspan="8" class="small muted" style="padding:18px">Nenhum perigo com estes filtros.</td></tr>`;
+  return L.map(x => { const t = TAXMAP[x.h.codigo], aberto = S.invAberto === x.k, sit = SIT_INV[x.r.sit];
+    return `<tr class="click${aberto ? " sel" : ""}" data-inv="${esc(x.k)}" tabindex="0"><td class="mono">${esc(x.a.numero)}</td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">${esc((x.a.meta?.setor || "").trim())}</div></td>
+      <td><span class="mono small">${esc(x.h.idRisco)}</span> <span class="code">${esc(x.h.codigo)}</span><div class="small">${esc(t?.nome || "")}</div></td><td class="small">${esc(x.c.exp || "—")}</td>
+      <td class="num">${x.r.P || "—"}</td><td class="num">${x.r.S}</td><td>${chipCat(x.r.cat)}</td><td>${sitCelula(x)}</td></tr>
+      ${aberto ? `<tr class="invedit"><td colspan="8">${vInvEditor(x)}</td></tr>` : ""}`; }).join("");
+}
+const optSel = (lista, val, vazio = "Escolha") => `<option value="">${vazio}</option>` + lista.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(val ?? "") ? "selected" : ""}>${esc(t)}</option>`).join("");
+function vInvResultado(x){
+  const r = x.r, c = x.c;
+  return `<div class="invres">
+    <div class="ir"><span>Exigência</span><b>${r.E ? esc(EXIG_ROT[r.E]) : "—"}</b>${r.lacuna ? `<em>combinação fora da Tabela 2: adotado o valor da duração curta</em>` : ""}</div>
+    <div class="ir"><span>Probabilidade</span><b>${r.P ? esc(PROB_ROT[r.P]) : "—"}</b><em>${c.descNR ? "descumprimento de NR (2.5)" : c.pOver && Number(c.pOver) !== r.Pg ? `divergência da grade (grade: ${r.Pg || "—"})` : r.Pg ? `grade 2.4: (2 × ${r.E} + 6 − ${c.efic}) ÷ 3` : ""}</em></div>
+    <div class="ir"><span>Severidade</span><b>${esc(SEV_ROT[r.S])}</b><em>${r.S > r.anc ? `elevada (âncora ${r.anc})` : `âncora da TAXONOMIA`}</em></div>
+    <div class="ir"><span>Nível</span><b>${r.N || "—"}</b><em>${r.N ? `${r.P} × ${r.S}` : ""}</em></div>
+    <div class="ir"><span>Categoria residual</span><b>${chipCat(r.cat)}</b></div>
+    ${r.acao ? `<div class="ir"><span>Ação resultante</span><b style="font-weight:600;font-size:13px">${esc(r.acao)}</b></div>` : ""}
+    ${r.falta.length ? `<div class="note" style="margin-top:8px"><b>Falta:</b> ${esc(r.falta.join(", "))}.</div>` : ""}
+    ${r.alertas.map(a => `<div class="note bad" style="margin-top:8px">${esc(a)}</div>`).join("")}
+    ${r.sit === "ok" ? `<div class="note ok" style="margin-top:8px">Classificação completa.${x.a.status === "concluida" ? ` ${(e => e === "novo" ? "Ainda não enviada ao PGR." : e === "enviado" ? `Enviada ao PGR em ${fmtData(c.pgr.em)}.` : `Enviada ao PGR em ${fmtData(c.pgr.em)} e alterada depois: entra no próximo envio.`)(estadoPGR(x))}` : ""}</div>` : ""}
+    ${vInvPlano(x)}</div>`;
+}
+function vInvPlano(x){
+  const l = acoesDoRisco(x.a, x.h, x.r); if (!l.length) return "";
+  return `<div class="invplano"><b class="small">Plano de ação</b>${l.map(m => `<div class="small">${m.n > 1 ? `Ação ${m.n}: ` : ""}${m.texto ? esc(m.texto) : `<span class="plaviso">Ação a definir</span>`}<div class="tiny faint">${m.sig ? `SIG ${esc(m.sig)}` : "sem Nº do SIG"} · ${esc(m.sit)}${m.prazo ? ` · prazo ${fmtData(m.prazo)}` : ""}${m.resp ? ` · ${esc(m.resp)}` : ""}</div></div>`).join("")}
+    <button class="btn small" type="button" data-act="verPlano" data-key="${esc(x.k)}">Abrir no Plano de ação</button></div>`;
+}
+function vInvEditor(x){
+  const c = x.c, t = TAXMAP[x.h.codigo], org = t?.area === "org", k = esc(x.k), f = (campo, extra = "") => `data-cf="${campo}" data-ck="${k}" ${extra}`;
+  const sevOpts = [1, 2, 3, 4, 5].filter(n => n >= x.r.anc).map(n => [n, SEV_ROT[n] + (n === x.r.anc ? " (âncora)" : "")]);
+  return `<div class="inved">
+    <div class="invcol">
+      <div class="invper"><b>${esc(x.h.idRisco)} ${esc(x.h.codigo)}: ${esc(t?.nome || "")}</b><p class="small">${esc(x.h.fonte || "")}</p>
+        <p class="tiny muted"><b>Possíveis danos:</b> ${esc(t?.danos || "")}${baseTexto(x.a, x.h) ? ` · <b>Base:</b> ${esc(baseTexto(x.a, x.h))}` : ""}</p>
+        ${c.importadoDaPlanilha ? `<p class="tiny muted">Parte destes campos veio da planilha de controle. Confira e complete.</p>` : ""}
+        <button class="btn ghost small" type="button" data-open="${esc(x.a.id)}" style="padding:0">Abrir a AEP ${esc(x.a.numero)}</button></div>
+      <div class="grid g2">
+        <label class="f"><span>Tipo de exposição</span><select ${f("exp")}>${optSel(EXPOSICOES.map(e => [e, e]), c.exp)}</select></label>
+        <label class="f"><span>Categoria inicial (antes dos controles)</span><select ${f("catIni")}>${optSel(CATEGORIAS.map(e => [e, e]), c.catIni)}</select></label>
+        <label class="f"><span>Duração ${org ? "(frequência, fator de organização)" : "(tempo efetivo na jornada)"}</span><select ${f("dur")}>${optSel(DURACOES.map(([v, n, h, o]) => [v, `${n}: ${org ? o : h}`]), c.dur)}</select></label>
+        <label class="f"><span>Intensidade das exigências</span><select ${f("int")}>${optSel(INTENSIDADES, c.int)}</select></label>
+      </div>
+      <label class="f"><span>Medidas existentes (POAD / EPC)</span><textarea rows="2" ${f("medidas")} placeholder="Descreva as medidas existentes ou escreva “Nenhuma”">${esc(c.medidas || "")}</textarea></label>
+      <div class="grid g2">
+        <label class="f"><span>Hierarquia da medida</span><select ${f("hier")}>${optSel(HIERARQUIAS.map(e => [e, e]), c.hier)}</select></label>
+        <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${optSel([["Sim", "Sim"], ["Não", "Não"], ["NA", "NA"]], c.eficaz)}</select></label>
+      </div>
+      <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${optSel(EFICACIAS.map(([n, nome]) => [n, `${n} - ${nome}`]), c.efic)}</select>
+        ${c.efic ? `<span class="hint">${esc(EFICACIAS[c.efic - 1][2])}</span>` : `<span class="hint">Sem evidência registrada, a nota máxima é 2 (Regra 1).</span>`}</label>
+      <label class="f"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(c.evid || "")}" placeholder="Ex.: registro de manutenção, foto, procedimento assinado"></label>
+      <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" ${f("descNR")} ${c.descNR ? "checked" : ""}> Há descumprimento de requisito específico de NR (probabilidade = 5, item 2.5)</label>
+      ${c.descNR ? `<label class="f"><span>Requisito descumprido</span><input type="text" ${f("req")} value="${esc(c.req || "")}" placeholder="Ex.: NR-17, item 17.6.6 (assento)"></label>` : ""}
+      <div class="grid g2">
+        <label class="f"><span>Probabilidade</span><select ${f("pOver")} ${c.descNR ? "disabled" : ""}><option value="">${c.descNR ? `Descumprimento de NR (${PROB_ROT[5]})` : `Pela grade 2.4${x.r.Pg ? ` (${PROB_ROT[x.r.Pg]})` : ""}`}</option>${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${String(c.pOver) === String(n) ? "selected" : ""}>Divergir: ${PROB_ROT[n]}</option>`).join("")}</select></label>
+        <label class="f"><span>Severidade</span><select ${f("sev")}>${sevOpts.map(([n, tx]) => `<option value="${n}" ${Number(c.sev || x.r.anc) === n ? "selected" : ""}>${esc(tx)}</option>`).join("")}</select></label>
+      </div>
+      ${c.pOver && Number(c.pOver) !== x.r.Pg && !c.descNR ? `<label class="f"><span>Justificativa da divergência da grade</span><input type="text" ${f("pJust")} value="${esc(c.pJust || "")}"></label>` : ""}
+      ${Number(c.sev) > x.r.anc ? `<label class="f"><span>Justificativa da severidade elevada</span><input type="text" ${f("sevJust")} value="${esc(c.sevJust || "")}" placeholder="Nexo estabelecido, CAT, NTEP ou gravidade documentada"></label>` : ""}
+      <label class="f"><span>Memória de cálculo / encaminhamento</span><textarea rows="2" ${f("memoria")} placeholder="Fonte da duração (observação, entrevista, registro), justificativas e encaminhamento">${esc(c.memoria || "")}</textarea></label>
+    </div>
+    <div class="invcol" id="invres-${x.k.replace(/[^A-Za-z0-9_-]/g, "_")}">${vInvResultado(x)}</div>
+  </div>`;
+}
+function vInventario(){
+  const pend = Object.entries(IMPORT_PLANILHA).filter(([key]) => { const [num, rid] = key.split("|"); const a = Object.values(S.aeps).find(x => String(x.numero).trim() === num); return a && (a.perigos || []).some(h => h.idRisco === rid) && !(a.classif || {})[rid]; });
+  const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
+  return `<div class="pagehead"><div><h1>Inventário de riscos</h1><p>Classificação de cada perigo das AEPs pela Seção 2 dos <button class="btn ghost small" type="button" data-go="criterios" style="padding:0">Critérios do GRO</button>. Classificar não muda a situação da AEP.</p></div>
+    <div class="row"><button class="btn primary" type="button" data-act="toggleExport">Exportar para o PGR</button></div></div>
+  <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
+  ${S.invFoco ? (() => { const [id, rid] = S.invFoco.split("|"), a = S.aeps[id]; return `<div class="note" style="margin-bottom:14px">Mostrando só ${rid ? `o perigo <b>${esc(rid)}</b> da` : "os perigos da"} <b>${esc(a?.numero || "")}</b> (${esc(a?.meta?.cargo || "")}). <button class="btn small" type="button" data-act="invTodos">Ver o inventário inteiro</button></div>`; })() : ""}
+  ${pend.length ? `<div class="note warn" style="margin-bottom:14px"><b>${pend.length} classificação(ões) feitas na planilha</b> (aba RISCOS_AEP) ainda não estão aqui. <button class="btn small primary" type="button" data-act="importarPlanilha">Trazer da planilha</button></div>` : ""}
+  <div class="panel"><div class="panel-b">
+    <div class="melfilt">${vMultiSetor("f-inv")}
+      <select data-invf="invSit" aria-label="Situação">${op("invSit", "pendentes", "Falta classificar ou com pendência")}${op("invSit", "falta", "Falta classificar")}${op("invSit", "incompleta", "Incompletos")}${op("invSit", "alerta", "Com alerta")}${op("invSit", "ok", "Classificados")}${op("invSit", "naoenv", "Classificados ainda não enviados ao PGR")}${op("invSit", "todas", "Todos")}</select>
+      <select data-invf="invCat" aria-label="Categoria">${op("invCat", "", "Todas as categorias")}${CATEGORIAS.map(cn => op("invCat", cn, cn)).join("")}</select>
+      <select data-invf="invEsc" aria-label="AEPs">${op("invEsc", "fechadas", "AEPs concluídas e em revisão")}${op("invEsc", "todas", "Todas as AEPs")}</select>
+      <input type="text" data-invbusca="1" value="${esc(S.invBusca)}" placeholder="Buscar AEP, cargo, perigo ou fonte">
+    </div>
+    <div id="invresumo">${vInvResumo()}</div>
+    <div class="tablewrap"><table class="list invtab"><thead><tr><th>AEP</th><th>Cargo</th><th>Perigo</th><th>Exposição</th><th class="num">P</th><th class="num">S</th><th>Categoria</th><th>Situação</th></tr></thead>
+    <tbody id="invbody">${vInvLinhas()}</tbody></table></div>
+    <p class="tiny muted" style="margin-top:8px">Clique numa linha para classificar. P = probabilidade, S = severidade.</p>
+  </div></div>`;
+}
+function atualizarInventario(soResultado){
+  if (S.view !== "inventario") return;
+  if (soResultado && S.invAberto){ const x = linhasInventario().find(y => y.k === S.invAberto);
+    if (x){ const el = document.getElementById("invres-" + x.k.replace(/[^A-Za-z0-9_-]/g, "_")); if (el) el.innerHTML = vInvResultado(x);
+      const tr = document.querySelector(`tr[data-inv="${CSS.escape(x.k)}"]`); if (tr){ const tds = tr.children; tds[3].textContent = x.c.exp || "—"; tds[4].textContent = x.r.P || "—"; tds[5].textContent = x.r.S; tds[6].innerHTML = chipCat(x.r.cat); tds[7].innerHTML = sitCelula(x); } }
+    const rs = $("#invresumo"); if (rs) rs.innerHTML = vInvResumo(); return; }
+  const b = $("#invbody"); if (b) b.innerHTML = vInvLinhas(); const rs = $("#invresumo"); if (rs) rs.innerHTML = vInvResumo();
+}
+function mudarClassif(k, campo, v){
+  const [id, rid] = k.split("|"), a = S.aeps[id]; if (!a) return;
+  a.classif = a.classif || {}; const c = Object.assign({}, a.classif[rid] || {});
+  if (v === "" || v === false || v == null) delete c[campo]; else c[campo] = v;
+  if (campo === "descNR" && !v) delete c.req;
+  if (campo === "pOver" && !v) delete c.pJust;
+  c.em = new Date().toISOString(); a.classif[rid] = c;
+  S.invPend[id] = true; setSaveState("Alterações não salvas");
+  clearTimeout(S.invTimer); S.invTimer = setTimeout(salvarInventario, 500);
+}
+async function salvarInventario(){
+  clearTimeout(S.invTimer); const ids = Object.keys(S.invPend); if (!ids.length) return;
+  if (!S.db){ S.invPend = {}; return; }
+  setSaveState("Salvando…"); let erro = 0;
+  for (const id of ids){ const a = S.aeps[id]; if (!a) { delete S.invPend[id]; continue; }
+    try { const corpo = clone(a); corpo.classifEm = new Date().toISOString(); await S.db.doc("aeps/" + id).set(corpo); delete S.invPend[id]; } catch(e){ erro++; } }
+  setSaveState(erro ? "Erro ao salvar" : "Salvo");
+}
+async function importarPlanilha(){
+  let n = 0; const sevN = s => Number(String(s || "").slice(0, 1)) || null;
+  for (const [key, v] of Object.entries(IMPORT_PLANILHA)){
+    const [num, rid] = key.split("|"); const a = Object.values(S.aeps).find(x => String(x.numero).trim() === num);
+    if (!a || !(a.perigos || []).some(h => h.idRisco === rid) || (a.classif || {})[rid]) continue;
+    const h = a.perigos.find(x => x.idRisco === rid), c = { em: new Date().toISOString(), importadoDaPlanilha: true };
+    if (v.exp) c.exp = v.exp; if (v.catIni) c.catIni = v.catIni; if (v.eficaz) c.eficaz = v.eficaz; if (v.medidas) c.medidas = v.medidas; if (v.hier) c.hier = v.hier;
+    if (v.prob){ c.pOver = sevN(v.prob); c.pJust = "Probabilidade lançada na planilha pelo critério anterior; regraduar pela grade na próxima reavaliação."; }
+    if (v.sev && sevN(v.sev) > ancoraDe(h)){ c.sev = sevN(v.sev); c.sevJust = "Severidade lançada na planilha pelo critério anterior."; }
+    if (v.memoria) c.memoria = v.memoria;
+    a.classif = a.classif || {}; a.classif[rid] = c; S.invPend[a.id] = true; n++;
+  }
+  await salvarInventario(); render(); toast(n ? `${n} classificação(ões) trazidas da planilha. Complete o que faltar.` : "Nada a trazer.");
+}
+
+/* ---------------- Critérios do GRO (documento + tabelas geradas pelo mesmo cálculo do Inventário) ---------------- */
+function vGerado(tipo){
+  const cel = cat => `<td class="mx ${CAT_CLS[cat]}">${esc(cat.replace("Risco ", ""))}</td>`;
+  if (tipo === "MATRIZ") return `<table class="ctab"><thead><tr><th>Severidade \\ Probabilidade</th>${[1, 2, 3, 4, 5].map(p => `<th>${esc(PROB_ROT[p])}</th>`).join("")}</tr></thead><tbody>
+    ${[5, 4, 3, 2, 1].map(s => `<tr><th>${esc(SEV_ROT[s])}</th>${[1, 2, 3, 4, 5].map(p => cel(categoriaDe(p * s))).join("")}</tr>`).join("")}</tbody></table>
+    <table class="ctab" style="margin-top:8px"><thead><tr><th>Categoria</th><th>Ação resultante</th></tr></thead><tbody>${CATEGORIAS.map(cn => `<tr>${cel(cn)}<td>${esc(ACAO_CAT[cn])}</td></tr>`).join("")}</tbody></table>`;
+  if (tipo === "GRADE") return `<table class="ctab"><thead><tr><th>Exigência \\ Eficácia</th>${EFICACIAS.map(([n, nm]) => `<th>${n} - ${esc(nm)}</th>`).join("")}</tr></thead><tbody>
+    ${[1, 2, 3, 4, 5].map(e => `<tr><th>${esc(EXIG_ROT[e])}</th>${[1, 2, 3, 4, 5].map(ef => `<td class="c">${probGrade(e, ef)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  if (tipo === "EXIGENCIA") return `<p class="small"><b>Como o sistema aplica a tabela:</b> duração × intensidade dá a Exigência. Intensidade crítica dá 5 em qualquer duração. Duração curtíssima com intensidade média ou alta não aparece na Tabela 2: o sistema adota o valor da duração curta e mostra o aviso na classificação.</p>
+    <table class="ctab"><thead><tr><th>Duração \\ Intensidade</th>${INTENSIDADES.map(([, n]) => `<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>
+    ${DURACOES.slice().reverse().map(([v, n, hr]) => `<tr><th>${esc(n)} (${esc(hr)})</th>${INTENSIDADES.map(([i]) => `<td class="c">${exigencia(v, i)}${exigLacuna(v, i) ? "*" : ""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  if (tipo === "ANCORAS") return `<table class="ctab"><thead><tr><th>Código</th><th>Perigo</th><th>Severidade-âncora</th></tr></thead><tbody>${TAX.map(t => `<tr><td class="mono">${esc(t.codigo)}</td><td>${esc(t.nome)}</td><td>${esc(SEV_ROT[Number(t.ancora) || 2])}</td></tr>`).join("")}</tbody></table>`;
+  return "";
+}
+function docBlocos(L){
+  return L.map(([t, v]) => t === "h1" ? `<h1 class="cdoc-h1">${esc(v)}</h1>` : t === "h2" ? `<h2>${esc(v)}</h2>` : t === "h3" ? `<h3>${esc(v)}</h3>` : t === "p" ? `<p>${esc(v)}</p>`
+    : t === "gen" ? vGerado(v) : t === "table" ? `<table class="ctab"><thead><tr>${v[0].map(x => `<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${v.slice(1).map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table>` : "").join("");
+}
+function vCriterios(){
+  return `<div class="pagehead"><div><h1>Critérios do GRO</h1><p>Documento de critérios adotados no gerenciamento de riscos, anexo do Procedimento. A matriz, a grade de probabilidade, a tabela de exigência e as âncoras são geradas pelo mesmo cálculo do Inventário.</p></div>
+    <div class="row"><button class="btn" type="button" data-act="pdfCriterios" id="btnPDFcrit">Salvar em PDF</button></div></div>
+  <div class="panel"><div class="panel-b cdoc">${docBlocos(CRITERIOS_DOC)}</div></div>
+  <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Anexo: mapa de polaridade do COPSOQ II</b><span class="tiny muted">critério de recodificação dos 76 itens</span></summary>
+    <div class="panel-b cdoc">${docBlocos(POLARIDADE_DOC)}</div></details>`;
+}
+async function gerarPDFCriterios(){
+  const btn = $("#btnPDFcrit"); if (btn) { btn.disabled = true; btn.textContent = "Preparando…"; }
+  try { const nome = nomeArquivo(`Criterios do GRO - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>@page{size:A4;margin:14mm}body{font:10.5pt/1.45 Arial,sans-serif;color:#222}${CRIT_CSS}</style></head><body><div class="cdoc">${docBlocos(CRITERIOS_DOC)}<h2>Anexo: mapa de polaridade do COPSOQ II</h2>${docBlocos(POLARIDADE_DOC.slice(1))}</div></body></html>`, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF."); }
+  finally { const b = $("#btnPDFcrit"); if (b) { b.disabled = false; b.textContent = "Salvar em PDF"; } }
+}
+const CRIT_CSS = `.cdoc h1.cdoc-h1{font-size:20px;margin:0 0 10px}.cdoc h2{font-size:16px;margin:22px 0 8px;padding-bottom:4px;border-bottom:2px solid #E8501E}.cdoc h3{font-size:13.5px;margin:16px 0 6px}
+.cdoc p{margin:6px 0;max-width:110ch}.cdoc table.ctab{border-collapse:collapse;width:100%;margin:8px 0 12px;font-size:12.5px}.cdoc .ctab th,.cdoc .ctab td{border:1px solid #cfcfcf;padding:5px 7px;text-align:left;vertical-align:top}
+.cdoc .ctab th{background:#f1f1f1}.cdoc .ctab td.c{text-align:center}
+.mx.c1{background:#d9f0d9}.mx.c2{background:#eef3c6}.mx.c3{background:#fde8b0}.mx.c4{background:#fbcfa6}.mx.c5{background:#f5b1aa}.mx{text-align:center;font-weight:600}`;
+
 /* ---------------- Editor ---------------- */
 const ETAPAS = [[1,"Identificação e atividade"],[2,"Checklist NR-17"],[3,"COPSOQ × campo"],[4,"Perigos e fotos"],[5,"Interpretação e conclusão"]];
 function vEditorShell(){ return `<div class="aeptitle" id="titulo"></div><div id="banner"></div><div class="editor"><nav class="rail" id="rail" aria-label="Etapas da AEP"></nav><section id="stepbody" aria-live="polite"></section><aside class="aside" id="aside"></aside></div>`; }
@@ -1730,9 +2157,9 @@ function renderTitulo(){
   el.innerHTML = `<button class="btn ghost" type="button" data-go="home">← AEPs</button>
     <h1><span class="mono" style="font-size:.7em;color:var(--ink-3)">${esc(a.numero)}</span> ${esc(a.meta.cargo || "Nova AEP")}</h1>
     <span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>
-    ${lancadaOk(a) ? `<span class="chip fav" title="Marcação manual">Lançada na planilha em ${dataLocal(a.planilha.em)}</span><button class="btn ghost small" type="button" data-act="desmarcarPlanilha" style="padding:0 4px">desfazer</button>`
-      : lancadaVelha(a) ? `<span class="chip ris">Lançada na planilha em ${dataLocal(a.planilha.em)}, alterada depois — atualizar a planilha</span>${st === "concluida" ? `<button class="btn small" type="button" data-act="marcarPlanilha">Planilha atualizada</button>` : ""}`
-      : st === "concluida" ? `<button class="btn small" type="button" data-act="marcarPlanilha">Marcar como lançada na planilha</button>` : ""}
+    ${(st === "concluida" || st === "revisao") && (a.perigos || []).length ? (() => { const xs = (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).map(h => ({ a, h, c: (a.classif || {})[h.idRisco] || {}, r: calcRisco(h, (a.classif || {})[h.idRisco]) }));
+      const okN = xs.filter(x => x.r.sit === "ok").length, env = st === "concluida" ? xs.filter(x => x.r.sit === "ok" && estadoPGR(x) === "enviado").length : 0;
+      return `<span class="chip ${okN === xs.length ? "fav" : "draft"}">Inventário: ${okN} de ${xs.length} classificado(s)${env ? ` · ${env} no PGR` : ""}</span><button class="btn small" type="button" data-act="verInvAEP" data-id="${esc(a.id)}">${okN === xs.length ? "Ver no Inventário" : "Classificar"}</button>`; })() : ""}
     <span style="margin-left:auto" class="row">${conf ? `<span class="confirm">Excluir esta AEP e suas fotos de vez? <button class="btn small danger" type="button" data-act="delAEPsim">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="delAEP">Excluir AEP</button>`}</span>`;
 }
 /* Faixa com as subescalas altas do setor — visível em todas as etapas */
@@ -1759,7 +2186,7 @@ function renderAside(){
   const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
   el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
       <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
-      <p class="tiny muted">Os perigos ficam registrados aqui; a graduação do risco é feita na planilha de controle.</p>
+      <p class="tiny muted">Os perigos ficam registrados aqui; a graduação do risco é feita no Inventário.</p>
       <hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">
       <span class="eyebrow">${tot ? `${tot} pendência(s) para concluir` : "Pronta para concluir"}</span>
       ${tot ? `<ul class="pendlist">${lista.slice(0,12).join("")}${lista.length>12?`<li>+ ${lista.length-12} outra(s)</li>`:""}</ul>` : `<p class="small muted">Todas as etapas obrigatórias estão preenchidas.</p>`}
@@ -1886,7 +2313,7 @@ function st6(){
       ${h.origemCopsoq || BASE_PERIGO[h.base] ? `<p class="tiny faint" style="margin:2px 0 0">Base: ${esc(baseTexto(a, h))}</p>`
         : `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span class="tiny" style="color:var(--bad-ink);font-weight:600">Base:</span>${["observado","relatado","rotina"].map(k => `<button class="btn small" type="button" data-act="hzBase" data-id="${esc(h.id)}" data-v="${k}">${esc(BASE_PERIGO[k])}</button>`).join("")}</div>`}
     </div>`; }).join("");
-  return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo e o início da fonte geradora vêm da planilha de controle (aba TAXONOMIA); a fonte é complementada com a situação deste cargo.") +
+  return stepHead(4,"Perigos e fotos","Uma linha por circunstância distinta, sem limite; não se admite linha mista. O nome do perigo e o início da fonte geradora vêm da TAXONOMIA; a fonte é complementada com a situação deste cargo.") +
   `<div class="stack">${faltam.length ? `<div class="note bad"><b>Itens críticos do checklist sem perigo vinculado:</b> ${faltam.map(({n}) => `<button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Item ${n}</button>`).join(" ")}</div>` : ""}
     ${S.editHz ? vHzEditor() : `<div><button class="btn primary" type="button" data-act="novoHz">+ Adicionar perigo</button></div>`}
     ${vEsperados(a)}
@@ -1980,7 +2407,7 @@ function vHzEditor(){
         return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Sugestões por tipo de atividade. Clique para acrescentar à fonte e complete os colchetes com o que se viu:</span>
         <div class="row" style="gap:6px;flex-wrap:wrap">${["", ...tipos].map(k => `<button class="btn small${tp === k ? " primary" : ""}" type="button" data-act="sugTipo" data-tp="${k}">${k ? esc(TIPOS_ATV[k]) : "Todos"}</button>`).join("")}</div>
         ${sg.map(([k, x, base], i) => tp && k !== tp ? "" : `<div class="row" style="gap:6px;align-items:flex-start"><span class="chip">${esc(TIPOS_ATV[k])}</span><button class="btn small" type="button" data-act="sugFonte" data-i="${i}" style="text-align:left;white-space:normal">${esc(x || (base === "padrao" ? "Texto padrão do posto informatizado" : ""))}</button></div>`).join("")}</div>`; })() : ""}
-      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da planilha de controle (mesma redação da aba TAXONOMIA). Complemente depois dele com o que é específico deste cargo."})}
+      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da TAXONOMIA. Complemente depois dele com o que é específico deste cargo."})}
       <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
       <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
@@ -2250,7 +2677,7 @@ function docHTML(a, cfg, fotos, opt={}){
   ${a.copsoq?.modelo ? `<p class="small">A observação de cada domínio parte da leitura do setor ${esc(a.copsoq.modelo.setor || "")}, conferida em campo para este cargo; as particularidades do cargo, quando existem, estão indicadas no próprio domínio.</p>` : ""}
   <table class="t"><thead><tr><th style="width:17%">Domínio COPSOQ</th><th style="width:20%">Resultado</th><th>Observação em campo</th><th style="width:19%">Conclusão</th></tr></thead><tbody>${cruz}</tbody></table>
   <h2>Inventário de perigos</h2>
-  <p class="small">Perigos identificados e respectivas fontes geradoras. A caracterização da exposição, os possíveis danos e a graduação do risco (probabilidade, severidade e nível) são registrados na planilha de controle do GRO da unidade, a partir deste registro.</p>
+  <p class="small">Perigos identificados e respectivas fontes geradoras. A caracterização da exposição, os possíveis danos e a graduação do risco (probabilidade, severidade e nível) são registrados no inventário de riscos da unidade, a partir deste registro.</p>
   <table class="t"><thead><tr><th style="width:34%">Perigo / fator de risco</th><th>Fonte geradora</th></tr></thead><tbody>
   ${hz || `<tr><td colspan="2"><b>Nenhum perigo identificado.</b> ${escBr(a.semPerigoJust||"")}</td></tr>`}</tbody></table>
   ${(() => { const nl = PERIGOS_ADM_ESPERADOS.filter(c => a.checklistAdm === "sim" && !(a.perigos||[]).some(h => h.codigo === c) && String(a.naoLancados?.[c]||"").trim());
@@ -2636,8 +3063,9 @@ function vGerencia(){
 const ST_ORDEM = { concluida: 0, revisao: 1, andamento: 2, nao_iniciada: 3 };
 function gerCorpo(){
   const L = aepsFiltradas().sort((x, y) => (ST_ORDEM[x.status || "nao_iniciada"] - ST_ORDEM[y.status || "nao_iniciada"]) || idNum(x) - idNum(y));
-  const mel = L.filter(a => a.status === "concluida" || a.status === "revisao").map(completar).flatMap(melhoriasDaAEP)
-    .sort((x, y) => MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a));
+  const mel = itensPlanoDe(L.filter(fechadaAEP).map(completar)).filter(m => m.sit !== "Não se aplica")
+    .sort((x, y) => (abertaSit(y.sit) - abertaSit(x.sit)) || MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a) || KIND_ORD[x.kind] - KIND_ORD[y.kind]);
+  const nR = mel.filter(m => m.kind === "risco" && abertaSit(m.sit)), prioChip = m => `<span class="prio-fixa prio-${m.prio}">${esc(m.prio)}${m.pc ? ` (${m.pc})` : ""}</span>`;
   const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : "—"; };
   return `<style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
   <div class="panel" style="margin-top:16px"><div class="panel-h"><b>AEPs da área</b><span class="tiny muted">${L.length} AEP(s) · ${L.filter(a => a.status === "concluida" || a.status === "revisao").length} realizada(s)</span></div>
@@ -2645,9 +3073,12 @@ function gerCorpo(){
     ${L.length ? L.map(a => { const st = a.status || "nao_iniciada", fe = st === "concluida" || st === "revisao";
       return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.area || "").trim())}</div></td><td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td><td class="small">${dataC(a)}</td><td class="num">${fe ? (a.perigos||[]).length : "—"}</td><td class="num">${fe ? (ckLista(completar(a)).filter(x => x.c.r === "sim").length || "—") : "—"}</td></tr>`; }).join("") : `<tr><td colspan="6" class="small muted">Nenhuma AEP nesta seleção.</td></tr>`}
     </tbody></table></div></div>
-  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>Recomendações e oportunidades de melhoria</b><span class="tiny muted">das AEPs realizadas · ${mel.filter(m => m.sit === "Aberta" || m.sit === "Em andamento").length} em aberto</span></div>
-    <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>AEP</th><th>Recomendação ou oportunidade</th><th>Prioridade</th><th>Responsável / prazo</th><th>Situação</th></tr></thead><tbody>
-    ${mel.length ? mel.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}"><td class="mono small">${esc(m.a.numero)}<div class="tiny faint" style="font-family:inherit">${esc(m.a.meta?.cargo || "")}</div></td><td>${chipTipo(m)}<div class="small">${esc(m.texto)}</div></td><td><span class="mtipo ${m.prio === "Alta" ? "rec" : m.prio === "Baixa" ? "op" : ""}" style="${m.prio === "Alta" ? "background:var(--bad-bg);color:var(--bad-ink);border:1px solid var(--bad-line)" : m.prio === "Média" ? "background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line)" : ""}">${esc(m.prio)}</span></td><td class="small">${esc(m.resp || "—")}${m.prazo ? `<div class="tiny ${m.atrasada ? "" : "faint"}" style="${m.atrasada ? "color:var(--bad-ink);font-weight:700" : ""}">${fmtData(m.prazo)}${m.atrasada ? " · vencido" : ""}</div>` : ""}</td><td class="small">${esc(m.sit)}</td></tr>`).join("") : `<tr><td colspan="5" class="small muted">Nenhuma recomendação específica registrada nas AEPs realizadas.</td></tr>`}
+  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>Plano de ação da área</b><span class="tiny muted">${mel.filter(m => abertaSit(m.sit)).length} em aberto · ${nR.length} ação(ões) de risco${nR.filter(m => m.pc === "P1").length ? `, ${nR.filter(m => m.pc === "P1").length} P1` : ""}</span></div>
+    <div class="tablewrap"><table class="list" style="min-width:680px"><thead><tr><th>AEP</th><th>O que fazer</th><th>Prioridade</th><th>Nº SIG</th><th>Responsável / prazo</th><th>Situação</th></tr></thead><tbody>
+    ${mel.length ? mel.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}"><td class="mono small">${esc(m.a.numero)}<div class="tiny faint" style="font-family:inherit">${esc(m.a.meta?.cargo || "")}</div></td>
+      <td>${chipTipo(m)}${m.kind === "risco" ? ` <span class="small">${esc(m.t?.nome || "")}</span> ${chipCat(m.r.cat)}<div class="small">${m.texto ? esc(m.texto) : `<span class="plaviso">Ação a definir</span>`}</div>` : `<div class="small">${esc(m.texto)}</div>`}</td>
+      <td>${prioChip(m)}</td><td class="mono small">${esc(m.sig || "—")}</td>
+      <td class="small">${esc(m.resp || "—")}${m.prazo ? `<div class="tiny ${m.atrasada ? "" : "faint"}" style="${m.atrasada ? "color:var(--bad-ink);font-weight:700" : ""}">${fmtData(m.prazo)}${m.atrasada ? " · vencido" : ""}</div>` : ""}</td><td class="small">${esc(m.sit)}</td></tr>`).join("") : `<tr><td colspan="6" class="small muted">Nenhuma ação, recomendação ou oportunidade registrada nas AEPs realizadas.</td></tr>`}
     </tbody></table></div></div>
   <p class="tiny muted" style="margin-top:10px">O detalhamento por cargo e por área sai no botão “PDF: detalhamento por cargo”.</p>`;
 }
@@ -2720,23 +3151,33 @@ async function baixarDoc(){
 /* =========================================================================
    EXPORTAÇÃO PARA O PGR (mesmas 26 colunas da aba EXPORTA PGR)
    ========================================================================= */
-function aepsExport(){
-  return Object.values(S.aeps)
-    .filter(a => S.expEscopo === "todas" || (a.status === "concluida" && (S.expEscopo !== "pendentes" || !lancadaOk(a))))
-    .filter(a => !S.expGHE || String(a.meta?.eg||"") === S.expGHE)
-    .sort((x,y) => String(x.meta?.eg||"").localeCompare(String(y.meta?.eg||"")) || idNum(x) - idNum(y));
+/* Linhas do PGR: perigos de AEPs concluídas com a classificação completa e sem alerta no Inventário.
+   Cada linha guarda, ao ser marcada como enviada, a data e uma assinatura das colunas C a Z (c.pgr = { em, sig }).
+   Se a classificação mudar depois, a assinatura deixa de bater e a linha volta para o próximo envio. */
+const PGR_TECNICA = h => (h.origemCopsoq || h.base === "copsoq") ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)";
+function linhaPGR(x){
+  const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = String(c.medidas || "").trim();
+  return [String(a.meta?.eg || ""), (a.meta?.cargo || "").trim(), `${a.numero} / ${h.idRisco}`, "Ergonomico", t.nome || "", String(h.fonte || "").trim(), "NA", "NA", t.danos || h.danos || "",
+    c.exp || "", PGR_TECNICA(h), "NA", "NA", "NA", "NA", "NA", c.catIni || "", c.hier && c.hier !== "Não aplicável" && med ? `${c.hier}: ${med}` : med, c.eficaz || "", "NA", "NA",
+    PROB_ROT[r.P] || "", SEV_ROT[r.S] || "", r.N || "", r.cat || "", r.acao || ""];
 }
-function linhasPGR(){
-  const L = aepsExport();
+const assinaturaPGR = linha => hashTxt(linha.slice(2).join("¦"));
+function estadoPGR(x){ const g = x.c?.pgr; if (!g || !g.em) return "novo"; return g.sig === assinaturaPGR(linhaPGR(x)) ? "enviado" : "alterado"; }
+function baseInventarioPGR(){
   const out = [];
-  L.forEach(a => (a.perigos||[]).forEach(h => {
-    const t = TAXMAP[h.codigo]; if (!t) return;
-    // Colunas de graduação (Categoria Risco, Probabilidade, Severidade, Nível, Categoria, Ações) saem em
-    // branco: são preenchidas à mão na planilha de controle.
-    out.push([a.meta?.eg||"", (a.meta?.cargo||"").trim(), `${a.numero} / ${h.idRisco||"R??"}`, "Ergonomico", t.nome, h.fonte||"", "NA", "NA", t.danos||h.danos||"", h.tipoExp||"", h.tecnica||"",
-      "NA","NA","NA","NA","NA", "", h.controles||"", h.poadEficaz||"", "NA","NA", "", "", "", "", ""]);
-  }));
+  Object.values(S.aeps).filter(a => a.status === "concluida").filter(a => !S.expGHE || String(a.meta?.eg || "") === S.expGHE)
+    .forEach(a => (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).forEach(h => { const c = (a.classif || {})[h.idRisco] || {}; out.push({ a, h, c, k: `${a.id}|${h.idRisco}`, r: calcRisco(h, c) }); }));
   return out;
+}
+function linhasPGRSel(){
+  return baseInventarioPGR().filter(x => x.r.sit === "ok").filter(x => S.pgrEsc === "todos" || estadoPGR(x) !== "enviado")
+    .sort((x, y) => String(x.a.meta?.eg || "").localeCompare(String(y.a.meta?.eg || "")) || idNum(x.a) - idNum(y.a) || String(x.h.idRisco).localeCompare(String(y.h.idRisco)));
+}
+function linhasPGR(){ return linhasPGRSel().map(x => [...linhaPGR(x), acoesDoRisco(x.a, x.h, x.r).map(m => m.sig).filter(Boolean).join("; ")]); }
+async function marcarEnviadoPGR(){
+  const L = linhasPGRSel(), em = new Date().toISOString();
+  L.forEach(x => { const a = S.aeps[x.a.id]; a.classif = a.classif || {}; a.classif[x.h.idRisco] = Object.assign({}, a.classif[x.h.idRisco] || {}, { pgr: { em, sig: assinaturaPGR(linhaPGR(x)) } }); S.invPend[a.id] = true; });
+  await salvarInventario(); return L.length;
 }
 let xlsxCarregando = null;
 function carregarXLSX(){
@@ -2796,14 +3237,16 @@ async function exportarPGR(){
   const btn = $("#btnExp"); if (btn){ btn.disabled = true; btn.textContent = "Gerando…"; }
   try {
     const X = await carregarXLSX();
-    const ws = X.utils.aoa_to_sheet([PGR_COLS, ...linhas]);
-    ws["!cols"] = [12,28,16,12,40,60,10,10,45,20,26,10,8,8,8,8,18,45,10,6,6,20,34,8,18,40].map(w => ({ wch: w }));
-    ws["!autofilter"] = { ref: X.utils.encode_range({ s:{r:0,c:0}, e:{r:linhas.length, c:PGR_COLS.length-1} }) };
+    const cab = [...PGR_COLS, "Nº da ação no SIG (consulta, não colar)"];
+    const ws = X.utils.aoa_to_sheet([cab, ...linhas]);
+    ws["!cols"] = [12,28,16,12,40,60,10,10,45,20,26,10,8,8,8,8,18,45,10,6,6,20,34,8,18,40,22].map(w => ({ wch: w }));
+    ws["!autofilter"] = { ref: X.utils.encode_range({ s:{r:0,c:0}, e:{r:linhas.length, c:cab.length-1} }) };
     const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "EXPORTA PGR");
     const buf = X.write(wb, { bookType: "xlsx", type: "array" });
     const hoje = new Date().toLocaleDateString("pt-BR").replace(/\//g,"-");
     await S.downloads.save({ filename: `Exporta PGR - AEP 2026${S.expGHE ? " - GHE " + nomeArquivo(S.expGHE) : ""} - ${hoje}.xlsx`, data: buf });
-    toast(`${linhas.length} linha(s) exportada(s).`);
+    S.pgrBaixado = true; { const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); }
+    toast(`${linhas.length} linha(s) exportada(s). Depois de enviar ao PGR, marque como enviadas.`);
   } catch(e){
     if (e && e.code === "declined") {}
     else if (e && e.message === "xlsx") toast("Não foi possível carregar o gerador de Excel. Verifique a internet e tente de novo.");
@@ -2874,18 +3317,29 @@ function campo(e, isChange){
   if (el.dataset.colar !== undefined){ S.colar = el.value; return; }
   if (el.dataset.mel){
     const k = el.dataset.mel, c = el.dataset.mc;
-    if (el.type === "text"){ if (isChange) return; mudarMelhoria(k, c, el.value); return; }
+    if (el.type === "text" || el.tagName === "TEXTAREA"){ if (isChange) return; mudarMelhoria(k, c, el.value); return; }
     if (!isChange) return;
     mudarMelhoria(k, c, el.value);
     if (c === "prio") el.className = "prio-" + el.value;
-    if (S.view === "melhorias") atualizarMelhorias();
+    if (S.view === "melhorias" && c !== "hier" && c !== "efic" && c !== "conc") atualizarMelhorias();
     return;
   }
   if (el.dataset.plano !== undefined){ if (!isChange) return;
     const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
   if (el.dataset.pmes){ if (!isChange) return; S.pMes = el.value; atualizarListaPainel(); return; }
-  if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; atualizarMelhorias(); return; }
+  if (el.dataset.cf){
+    const k = el.dataset.ck, campo = el.dataset.cf, texto = el.tagName === "TEXTAREA" || el.type === "text";
+    if (texto){ if (isChange) return; mudarClassif(k, campo, el.value); atualizarInventario(true); return; }
+    if (!isChange) return;
+    const v = el.type === "checkbox" ? el.checked : (["efic", "pOver", "sev"].includes(campo) && el.value ? Number(el.value) : el.value);
+    mudarClassif(k, campo, campo === "sev" && v === ancoraDe((S.aeps[k.split("|")[0]].perigos || []).find(h => h.idRisco === k.split("|")[1]) || {}) ? "" : v);
+    if (["descNR", "pOver", "sev", "efic"].includes(campo)) atualizarInventario(); else atualizarInventario(true);
+    return;
+  }
+  if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
+  if (el.dataset.invbusca){ if (isChange) return; S.invBusca = el.value; atualizarInventario(); return; }
+  if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; S.melFoco = ""; S.melAberto = null; render(); return; }
   if (el.dataset.melbusca){ if (isChange) return; S.melBusca = el.value; atualizarMelhorias(); return; }
   if (el.dataset.gat !== undefined){
     if (!isChange) return;
@@ -2943,6 +3397,7 @@ document.addEventListener("click", async e => {
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
   if (t.closest("[data-selcell]")) return;
   const op = t.closest("[data-open]"); if (op){ abrirAEP(op.dataset.open); return; }
+  const iv = t.closest("tr[data-inv]"); if (iv && S.view === "inventario"){ S.invAberto = S.invAberto === iv.dataset.inv ? null : iv.dataset.inv; atualizarInventario(); return; }
   const ar = t.closest("tr[data-area]"); if (ar && S.view === "copsoq"){ S.editArea = completarArea(S.areas[ar.dataset.area]); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); window.scrollTo(0,0); return; }
   const btn = t.closest("[data-act]"); if (!btn) return;
   const d = btn.dataset, a = S.draft;
@@ -2951,6 +3406,19 @@ document.addEventListener("click", async e => {
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
+    case "importarPlanilha": importarPlanilha(); break;
+    case "planoDet": S.melAberto = S.melAberto === d.key ? null : d.key; atualizarMelhorias(); break;
+    case "sugAcao": { const m = itensPlanoDe(aepsPlano()).find(x => x.key === d.key) || itensPlanoDe(Object.values(S.aeps).map(completar)).find(x => x.key === d.key);
+      if (m && m.t?.medidas){ mudarMelhoria(d.key, "acao", m.t.medidas); atualizarMelhorias(); const ta = document.querySelector(`textarea[data-mel="${CSS.escape(d.key)}"][data-mc="acao"]`); if (ta) ta.focus(); toast("Medidas típicas copiadas. Ajuste o texto para o posto."); } break; }
+    case "novaAcao": novaAcao(d.key); break;
+    case "tirarAcao": tirarAcao(d.key); toast("Ação retirada do plano."); break;
+    case "planoFiltro": { const [tp, sit, pr] = String(d.v).split("|"); S.melTipo = tp; S.melSit = sit; S.melPrio = pr; S.melFoco = ""; S.melAberto = null; S.melEsc = "fechadas"; ir("melhorias"); break; }
+    case "planoTodos": S.melFoco = ""; S.melAberto = null; render(); break;
+    case "verPlano": S.melFoco = d.key; S.melAberto = d.key; S.melEsc = "todas"; ir("melhorias"); break;
+    case "verRisco": S.invFoco = d.key; S.invAberto = d.key; S.invEsc = "todas"; ir("inventario"); break;
+    case "verInvAEP": S.invFoco = d.id; S.invAberto = null; S.invEsc = "todas"; ir("inventario"); break;
+    case "invTodos": S.invFoco = ""; S.invAberto = null; render(); break;
+    case "pdfCriterios": gerarPDFCriterios(); break;
     case "campoAbrir": abrirCampo(d.id); break;
     case "campoVoltar": await salvarAEP(); S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 }); break;
     case "campoConcluir": concluirCampo(); break;
@@ -2959,7 +3427,8 @@ document.addEventListener("click", async e => {
     case "mselFechar": { const dt = btn.closest("details"); if (dt) dt.open = false; break; }
     case "pdfGerencia": gerarPDFGerencia(); break;
     case "pdfGerDet": gerarPDFGerencia(true); break;
-    case "toggleExport": { S.exportAberto = !S.exportAberto; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
+    case "toggleExport": { if (S.view !== "inventario"){ S.exportAberto = true; S.invFoco = ""; ir("inventario"); break; }
+      S.exportAberto = !S.exportAberto; S.confirm = null; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
     case "exportarLig": exportarLigacao(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
@@ -3046,13 +3515,7 @@ document.addEventListener("click", async e => {
     case "marcarPlanilha": { if (a.status !== "concluida") break; a.planilha = { em: new Date().toISOString() }; S.dirty = true; await salvarAEP(); renderTitulo(); toast("AEP marcada como lançada na planilha."); break; }
     case "desmarcarPlanilha": { a.planilha = null; S.dirty = true; await salvarAEP(); renderTitulo(); break; }
     case "marcarExp": S.confirm = "marcarExp"; { const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); } break;
-    case "marcarExpSim": {
-      const alvo = aepsExport(), em = new Date().toISOString(); let erro = 0;
-      for (const a0 of alvo){ const a2 = completar(S.aeps[a0.id]); a2.planilha = { em }; S.aeps[a2.id] = a2;
-        if (S.db) { try { await S.db.doc("aeps/" + a2.id).set(a2); } catch(_) { erro++; } } }
-      S.confirm = null; { const ex = $("#exportbox"); if (ex) ex.innerHTML = vExportPanel(); }
-      toast(erro ? `${alvo.length - erro} marcada(s); ${erro} não salvaram — tente de novo.` : `${alvo.length} AEP(s) marcada(s) como lançadas na planilha.`); break;
-    }
+    case "marcarExpSim": { const n = await marcarEnviadoPGR(); S.confirm = null; S.pgrBaixado = false; render(); toast(`${n} linha(s) marcada(s) como enviadas ao PGR.`); break; }
     case "edHz": { const h = a.perigos.find(x => x.id === d.id); if (h) { abrirHz(clone(h)); renderStep(); window.scrollTo({top:0}); } break; }
     case "rmHz": S.confirm = "hz-" + d.id; renderStep(); break;
     case "rmHzSim": a.perigos = a.perigos.filter(x => x.id !== d.id); S.confirm = null; marcar(); renderStep(); renderRail(); renderAside(); break;
