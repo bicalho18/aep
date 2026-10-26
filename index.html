@@ -1961,14 +1961,17 @@ function vPainel(){
    Documento para anexar no acompanhamento da ação do plano PLA202609SA20-30: relação das AEPs que contam na meta do mês,
    com datas e responsável, e o texto da "Situação" e o "Realizado (%)" prontos para copiar. As AEPs em si vão para o Teams. */
 const ordemSIG = (meses, m) => { const l = meses.filter(k => k >= "2026-10"); const i = l.indexOf(m); return i >= 0 ? i + 1 : null; };
+/* A evidência usa as AEPs PREVISTAS para o mês (plano) e se cada uma está concluída. Sem datas de realização e sem adiantamento. */
+const feitaEv = a => a.status === "concluida" || a.status === "revisao";
 function dadosEvidencia(mes){
-  const L = Object.values(S.aeps), D = dadosMeta(L), m = mes || D.atual, x = D.acum.find(y => y.m === m) || { p: 0, c: 0, pa: 0, ca: 0 };
-  const lista = L.filter(a => D.conta[a.id] === m).sort((p, q) => dataRealizada(p).localeCompare(dataRealizada(q)) || idNum(p) - idNum(q));
-  const pct = x.p ? Math.min(100, Math.round(x.c / x.p * 100)) : (x.c ? 100 : 0), ordem = ordemSIG(D.meses, m), teams = String((S.planoTeams || {})[m] || "").trim();
-  const sig = ordem ? D.acum.filter(y => y.m >= "2026-10" && y.m <= m) : D.acum.filter(y => y.m <= m);
-  const pa = sig.reduce((t, y) => t + y.p, 0), ca = sig.reduce((t, y) => t + y.c, 0), ac = pa ? Math.min(100, Math.round(ca / pa * 100)) : 0;
-  const texto = `${mesLongo(m).replace(/^./, c => c.toUpperCase())}: concluídas ${x.c} de ${x.p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%). Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs, com datas da avaliação e da conclusão, no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
-  return { D, m, x, lista, pct, ordem, teams, texto, pa, ca };
+  const L = Object.values(S.aeps), D = dadosMeta(L), m = mes || D.atual, ordem = ordemSIG(D.meses, m);
+  const prev = mm => L.filter(a => mesPlan(a) === mm);
+  const lista = prev(m).sort((p, q) => idNum(p) - idNum(q)), p = lista.length, c = lista.filter(feitaEv).length;
+  const pct = p ? Math.round(c / p * 100) : 0, teams = String((S.planoTeams || {})[m] || "").trim();
+  const hist = D.meses.filter(k => k <= m).map(k => { const l = prev(k); return { m: k, p: l.length, c: l.filter(feitaEv).length }; });
+  const acm = hist.filter(y => !ordem || y.m >= "2026-10"), pa = acm.reduce((t, y) => t + y.p, 0), ca = acm.reduce((t, y) => t + y.c, 0), ac = pa ? Math.round(ca / pa * 100) : 0;
+  const texto = `${mesLongo(m).replace(/^./, x => x.toUpperCase())}: concluídas ${c} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%). Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs previstas no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
+  return { D, m, lista, p, c, pct, ordem, teams, texto, pa, ca, ac, hist };
 }
 function vEvidencia(){
   const E = dadosEvidencia(S.evMes), D = E.D;
@@ -1977,30 +1980,39 @@ function vEvidencia(){
       <label class="f"><span>Mês</span><select data-evmes="1">${D.meses.map(k => `<option value="${k}" ${k === E.m ? "selected" : ""}>${esc(mesLongo(k))}${ordemSIG(D.meses, k) ? ` · ordem ${ordemSIG(D.meses, k)} no SIG` : " · fora do SIG"}</option>`).join("")}</select></label>
       <label class="f span2"><span>Pasta das AEPs no Teams (opcional, entra no texto e no PDF)</span><input type="text" data-evteams="${E.m}" value="${esc(E.teams)}" placeholder="Cole aqui o link ou o caminho da pasta do mês"></label>
     </div>
-    <div class="pgrnum"><div><b>${E.x.c} de ${E.x.p}</b><span>AEPs que contam na meta de ${esc(mesLongo(E.m))}</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
+    <div class="pgrnum"><div><b>${E.c} de ${E.p}</b><span>previstas para ${esc(mesLongo(E.m))} concluídas</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
     <label class="f"><span>Texto para o campo “Situação” do acompanhamento</span><textarea rows="4" readonly id="evtexto">${esc(E.texto)}</textarea></label>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn small" type="button" data-act="evCopiar">Copiar o texto</button><button class="btn small primary" type="button" data-act="evPDF" id="btnEvPDF" ${E.lista.length ? "" : "disabled"}>Baixar o PDF para anexar</button>
-      <span class="tiny muted">No SIG: Incluir Acompanhamento → cole o texto em Situação, informe ${E.pct} em Realizado (%) e anexe o PDF.</span></div>
+      <span class="tiny muted">O PDF traz o gráfico até o mês escolhido e a lista das AEPs previstas no mês, sem datas e sem adiantamentos.</span></div>
   </div></div>`;
+}
+function graficoEvidencia(H){
+  const n = H.length, bw = 22, gap = 5, slot = 74, top = 26, h = 120, W = 30 + n * slot, Hh = top + h + 30, max = Math.max(1, ...H.map(x => Math.max(x.p, x.c))), y = v => top + h - v / max * h;
+  const bar = (x0, v, cor, t) => v ? `<rect x="${x0}" y="${y(v)}" width="${bw}" height="${top + h - y(v)}" rx="3" fill="${cor}"><title>${t}</title></rect><text x="${x0 + bw / 2}" y="${y(v) - 5}" text-anchor="middle" font-size="11" font-weight="700" fill="#333">${v}</text>` : "";
+  return `<svg viewBox="0 0 ${W} ${Hh}" width="${Math.min(W, 700)}" style="max-width:100%;height:auto" role="img" aria-label="AEPs previstas e concluídas por mês">
+    <line x1="24" x2="${W - 4}" y1="${top + h}" y2="${top + h}" stroke="#999"/>
+    ${H.map((x, i) => { const x0 = 30 + i * slot + (slot - 2 * bw - gap) / 2; return `${bar(x0, x.p, "#c9c9c9", `${mesLongo(x.m)}: previstas ${x.p}`)}${bar(x0 + bw + gap, x.c, "#E8501E", `${mesLongo(x.m)}: concluídas ${x.c}`)}
+      <text x="${30 + i * slot + slot / 2}" y="${top + h + 18}" text-anchor="middle" font-size="11" fill="#444" ${i === n - 1 ? 'font-weight="700"' : ""}>${mesRot(x.m)}</text>`; }).join("")}</svg>
+    <div style="font-size:8.5pt;color:#555;margin-top:2px"><span style="display:inline-block;width:10px;height:10px;background:#c9c9c9;margin-right:4px"></span>Previstas <span style="display:inline-block;width:10px;height:10px;background:#E8501E;margin:0 4px 0 12px"></span>Concluídas</div>`;
 }
 async function gerarPDFEvidencia(){
   const btn = $("#btnEvPDF"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
   try {
     const E = dadosEvidencia(S.evMes), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "", hoje = new Date().toLocaleDateString("pt-BR");
     const nome = nomeArquivo(`Evidencia AEP - ${mesLongo(E.m)} - ${hoje.replace(/\//g, "-")}`);
-    const linhas = E.lista.map((a, i) => { const dr = dataRealizada(a), dc = String(a.concluidoPrimeiro || a.concluidoEm || "").slice(0, 10), mr = mesReal(a);
-      return `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${fmtData(dr)}${mr && mr < E.m ? `<div class="s">adiantamento</div>` : ""}</td><td class="c">${fmtData(dc)}</td><td class="c">${esc(STATUS[a.status] || "")}</td></tr>`; }).join("");
-    const css = `@page{size:A4;margin:14mm}body{font:9.5pt/1.4 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}p{margin:3px 0}
+    const linhas = E.lista.map((a, i) => `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${esc(STATUS[a.status || "nao_iniciada"] || "")}</td></tr>`).join("");
+    const css = `@page{size:A4;margin:14mm}body{font:9.5pt/1.4 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}h2{font-size:11pt;margin:12px 0 4px}p{margin:3px 0}
       .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:10px}
       .box{display:flex;gap:10px;margin:10px 0}.box div{flex:1;border:1px solid #ddd;border-radius:6px;padding:7px 9px}.box b{display:block;font-size:16pt}.box span{font-size:8.5pt;color:#555}
-      table{border-collapse:collapse;width:100%;margin-top:8px}th,td{border:1px solid #d5d5d5;padding:4px 5px;text-align:left;vertical-align:top}th{background:#f1f1f1;font-size:8.5pt}td.c,th.c{text-align:center}.mono{font-family:monospace;white-space:nowrap}.s{font-size:7.5pt;color:#666}
+      table{border-collapse:collapse;width:100%;margin-top:6px}th,td{border:1px solid #d5d5d5;padding:4px 5px;text-align:left;vertical-align:top}th{background:#f1f1f1;font-size:8.5pt}td.c,th.c{text-align:center}.mono{font-family:monospace;white-space:nowrap}.s{font-size:7.5pt;color:#666}
       .ass{margin-top:34px;display:flex;gap:40px}.ass div{flex:1;border-top:1px solid #444;padding-top:4px;font-size:9pt;text-align:center}tr{page-break-inside:avoid}`;
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
       <div class="head"><div><h1>Evidência de execução: Análises Ergonômicas Preliminares</h1><p>${esc(S.config.empresa || "ArcelorMittal")}${S.config.unidade ? ` · ${esc(S.config.unidade)}` : " · Mina de Serra Azul"} · Plano PLA202609SA20-30 (SIG)${E.ordem ? ` · ação de ordem ${E.ordem}` : ""}</p><p><b>Mês de referência:</b> ${esc(mesLongo(E.m))} · emitido em ${hoje}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
-      <div class="box"><div><span>Previstas para o mês</span><b>${E.x.p}</b></div><div><span>Concluídas que contam na meta</span><b>${E.x.c}</b></div><div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
-      <p>${esc(E.texto)}</p>
-      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Avaliação em campo</th><th class="c">Conclusão</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
-      <p class="s" style="margin-top:8px">Cada AEP conta na meta do mês em que foi realizada (data da avaliação em campo); o que passa da meta de um mês conta nos meses seguintes. Os documentos das AEPs ficam no Teams${E.teams ? ` (${esc(E.teams)})` : ""} e no sistema de AEP.</p>
+      <div class="box"><div><span>Previstas para o mês</span><b>${E.p}</b></div><div><span>Concluídas</span><b>${E.c}</b></div><div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
+      <h2>Previstas x concluídas por mês</h2>${graficoEvidencia(E.hist)}
+      <h2>AEPs previstas para ${esc(mesLongo(E.m))}</h2>
+      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
+      <p class="s" style="margin-top:8px">Os documentos das AEPs ficam no Teams${E.teams ? ` (${esc(E.teams)})` : ""} e no sistema de AEP.</p>
       <div class="ass"><div>${esc(S.config.analista || "Responsável técnico")}<br><span class="s">${esc(S.config.registroAnalista || "")}</span></div><div>Gestor responsável pela ação</div></div></body></html>`;
     await imprimirHTML(html, nome);
   } catch(e){ toast("Não foi possível preparar o PDF."); }
@@ -2054,8 +2066,8 @@ function vListaPainel(L, D){
       <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
       ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
     </div>
-    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em</th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
-    ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td>${S.pLista === "concluidas" ? `<td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th>${S.pLista === "concluidas" ? "<th>Realizada em</th><th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
+    ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td>${S.pLista === "concluidas" ? `<td class="small">${dataC(a) || "—"}</td><td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
     </tbody></table></div></div>`;
 }
 function vContaMeta(a, D){
