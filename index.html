@@ -354,6 +354,14 @@ details.panel[open]>summary b::before{content:"▾ "}
 @media (max-width:700px){.rtiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .pgrnum{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0}.pgrnum b{display:block;font-size:20px}.pgrnum span{font-size:12px;color:var(--ink-3)}
 .pgrtrans{margin-top:6px}.pgrtrans summary{cursor:pointer;color:var(--ink-3)}
+.taxalt{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);vertical-align:middle}
+.taxtab tr.taxinat td{color:var(--ink-3)}
+.melfilt select{max-width:100%}
+.taxtab tr.sel td{background:var(--accent-soft)}
+.taxed textarea,.taxed input[type=text]{width:100%}
+.taxmud{padding:6px 0;border-bottom:1px solid var(--rule)}.taxmud ul{margin:4px 0 0 18px;padding:0}.taxmud li{font-size:13px;margin:2px 0}
+.taxde{color:var(--ink-3);text-decoration:line-through}.taxpara{font-weight:600}
+.taxver{padding:8px 0;border-bottom:1px solid var(--rule)}.taxhist>summary{list-style:none}.taxhist>summary::-webkit-details-marker{display:none}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -437,7 +445,7 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
       <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button>
       <button type="button" data-go="pendencias" id="nav-pendencias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>Pendências</span></button>
       <button type="button" data-go="copsoq" id="nav-copsoq"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c.8-.3 1.6-.5 2.5-.5 2.8 0 5 2.2 5 5"/></svg><span>COPSOQ por setor</span></button>
-      <button type="button" data-go="criterios" id="nav-criterios"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg><span>Critérios do GRO</span></button>
+      <button type="button" data-go="criterios" id="nav-criterios"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg><span>Critérios do GRO</span></button><button type="button" data-go="taxonomia" id="nav-taxonomia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Taxonomia</span></button>
       <button type="button" data-go="config" id="nav-config"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Unidade</span></button>
     </nav>
     <div class="savestate" id="savestate" aria-live="polite"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
@@ -538,7 +546,9 @@ const CK_ADM_PERIGOS = { 14:["EQ-04","EQ-01","BIO-01"], 15:["EQ-04"], 16:["EQ-06
 const PERIGOS_DEFICIENCIA = new Set(["OT-02","OT-03","OT-06","OT-07","OT-08","OT-09","OT-10","OT-11","OT-13","BIO-05","BIO-06","EQ-01","EQ-02","EQ-03","EQ-04","EQ-05","EQ-06","AMB-01","AMB-02"]);
 const PERIGOS_ADM_ESPERADOS = ["BIO-01","BIO-02"];
 const TXT_SEM_PERIGO = "Foram avaliadas as condições de trabalho, a organização da atividade, o mobiliário e os equipamentos, as posturas, os movimentos, as exigências cognitivas e as condições ambientais. Na situação avaliada, não foram identificadas exigências da atividade com duração relevante nem condições inadequadas com potencial de causar lesões ou agravos à saúde que demandassem identificação como perigo no inventário.";
-const CK_PERIGOS = Object.fromEntries(CHECKLIST.map((_,i) => [i+1, [...TAX.filter(t => (t.itens||[]).includes(i+1)).map(t => t.codigo), ...(CK_ADM_PERIGOS[i+1]||[])]]));
+const CK_PERIGOS = {};
+function recalcCK(){ Object.keys(CK_PERIGOS).forEach(k => delete CK_PERIGOS[k]); CHECKLIST.forEach((_,i) => { CK_PERIGOS[i+1] = [...TAX.filter(t => !t.inativo && (t.itens||[]).includes(i+1)).map(t => t.codigo), ...(CK_ADM_PERIGOS[i+1]||[])]; }); }
+recalcCK();
 
 /* COPSOQ — 23 subescalas dos 6 domínios acionáveis, com a ponte para o perigo */
 const SUBS = SUBS_RAW;
@@ -1282,6 +1292,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
+  tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
   invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
@@ -1294,7 +1305,8 @@ function novaAEP(){
 /* 29/09/2026: BIO-01 e BIO-02 passaram a ter como texto padrão o do posto administrativo (aba TAXONOMIA).
    O texto genérico anterior continua aceito como início da fonte, para os cargos que não são de escritório. */
 const FONTES_ALTERNATIVAS = { "BIO-01": ["Permanência em postura extrema ou estática prolongada durante a atividade."], "BIO-02": ["Execução de movimentos articulares repetitivos de membros superiores em ciclo curto."] };
-const prefixosFonte = cod => [TAXMAP[cod]?.fonte, ...(FONTES_ALTERNATIVAS[cod]||[])].filter(Boolean);
+const FONTES_ANTERIORES = {};   /* fontes padrão de versões anteriores da TAXONOMIA: continuam aceitas nas AEPs já feitas */
+const prefixosFonte = cod => [TAXMAP[cod]?.fonte, ...(FONTES_ALTERNATIVAS[cod]||[]), ...(FONTES_ANTERIORES[cod]||[])].filter(Boolean);
 const temPrefixoPadrao = h => prefixosFonte(h.codigo).some(p => String(h.fonte||"").trim().startsWith(p));
 const FONTES_ANTIGAS = {"OT-01": "Execução de tarefas sob volume de demanda e ritmo impostos pelo processo produtivo, com restrição de pausas voluntárias de recuperação.", "OT-04": "Execução de tarefa fragmentada e de ciclo curto, sob método rígido, sem variabilidade ou rodízio de atividades.", "OT-05": "Execução de tarefa com exigência elevada de atenção, memória ou tomada de decisão, sem recursos de regulação (autonomia, pausas, suporte) suficientes para amortecê-la.", "OT-12": "Execução de tarefa que exige lidar com sofrimento, agressividade ou risco de terceiros, sem suporte emocional estruturado disponível.", "BIO-01": "Permanência em postura extrema ou estática prolongada durante a atividade, sem alternância postural ou pausas de recuperação suficientes.", "BIO-02": "Execução de movimentos articulares repetitivos de membros superiores em ciclo curto, sem tempos de recuperação muscular adequados.", "BIO-03": "Aplicação de força manual elevada (empurrar, puxar ou preensão) sem dispositivo auxiliar ou balancim disponível no posto.", "BIO-04": "Manuseio e transporte manual não eventual de cargas, com pega distante do centro de gravidade do corpo e sem disponibilidade de auxílio mecânico no posto.", "BIO-07": "Operação de equipamento ou permanência em estrutura com transmissão de vibração ao corpo, sem sistema de amortecimento eficaz.", "AMB-03": "Permanência em ambiente com ruído de fundo que interfere na comunicação ou concentração, sem controle de fonte.", "AMB-04": "Permanência em posto sujeito a vibração transmitida por piso ou estrutura predial, sem isolamento ou amortecimento."};
 function completar(a){
@@ -1345,6 +1357,9 @@ async function iniciar(){
   if (!db){ S.carregado = true; setSaveState("Modo sem banco — nada é salvo"); render(); return; }
   try { S.assets = await window.claude.use("assets"); } catch(e){ S.assets = null; }
   try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
+  db.doc("config/taxonomia").onSnapshot(d => { if (S.taxDirty) return; const x = d.exists ? (d.data() || {}) : {};
+    S.tax = { versao: x.versao || 1, em: x.em || "", itens: x.itens || {}, historico: x.historico || [] }; S.taxDraft = x.rascunho || null; aplicarTaxonomia(S.tax.itens);
+    if (S.view === "aep") renderStep(); else if (S.view !== "doc" && S.view !== "campo") render(); }, () => {});
   db.collection("aeps").onSnapshot(snap => {
     const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
     Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
@@ -1449,10 +1464,11 @@ async function ir(view, extra){
   if (S.view === "config") await salvarConfig();
   if (S.view === "campo") await salvarAEP();
   if (S.melDirty) await salvarMelhorias();
+  if (S.taxDirty) await salvarTaxRascunho();
   if (S.planoDirty) await salvarPlano();
   if (Object.keys(S.invPend).length) await salvarInventario();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias" || view === "inventario" || view === "criterios") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias" || view === "inventario" || view === "criterios" || view === "taxonomia") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -1476,6 +1492,7 @@ function render(){
   else if (S.view === "pendencias") app.innerHTML = vPendencias();
   else if (S.view === "inventario") app.innerHTML = vInventario();
   else if (S.view === "criterios") app.innerHTML = vCriterios();
+  else if (S.view === "taxonomia") app.innerHTML = vTaxonomia();
   else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
@@ -2112,6 +2129,218 @@ async function importarPlanilha(){
   await salvarInventario(); render(); toast(n ? `${n} classificação(ões) trazidas da planilha. Complete o que faltar.` : "Nada a trazer.");
 }
 
+/* ---------------- TAXONOMIA editável, com controle de versão ----------------
+   Versão 1 = a TAXONOMIA que veio da planilha + PCRE (TAX_BASE, fixa no código).
+   As mudanças ficam em config/taxonomia = { versao, em, itens, historico, rascunho }:
+   itens = o que difere da base (por código e campo); rascunho = cópia de itens em edição, que só vale depois de publicada. */
+const TAX_BASE = JSON.parse(JSON.stringify(TAX_RAW));
+const DEF_BASE = new Set(PERIGOS_DEFICIENCIA), ALT_BASE = JSON.parse(JSON.stringify(FONTES_ALTERNATIVAS));
+
+const TAX_PREF = ["OT", "BIO", "EQ", "AMB"];
+const TAX_CATS = { OT: "Organização do Trabalho", BIO: "Biomecânicos", EQ: "Mobiliários Máquinas Equipamentos e Ferramentas", AMB: "Conforto Ambiental" };
+const TAX_CAMPOS = [
+  ["nome", "Perigo / fator de risco", "text"], ["sub", "Subcategoria", "text"], ["area", "Área da NR-17 (17.1.1.1)", "area"],
+  ["natureza", "Natureza do perigo", "natureza"], ["ancora", "Severidade-âncora", "sev"],
+  ["danos", "Possíveis danos à saúde", "longo"], ["fonte", "Fonte geradora padrão", "longo"], ["fonteAlt", "Fonte geradora alternativa (opcional)", "longo"],
+  ["campos", "Campos locais a coletar em campo", "longo"], ["medidas", "Medidas típicas", "longo"], ["evidencia", "Evidência esperada da medida", "longo"],
+  ["itens", "Itens do checklist que acionam o perigo (1 a 13)", "itens"], ["subescalas", "Subescalas do COPSOQ relacionadas", "text"],
+  ["inerente", "Exigência inerente à função (texto do COPSOQ)", "check"], ["cid", "CID relacionados", "text"], ["base", "Base normativa", "text"], ["inativo", "Desativado", "check"] ];
+const TAX_ROT = Object.fromEntries(TAX_CAMPOS.map(([k, r]) => [k, r]));
+const NATUREZA_ROT = { exigencia: "Exigência (lança quando existe no trabalho real)", deficiencia: "Deficiência (lança só quando a condição inadequada é constatada)" };
+const ordTax = (x, y) => TAX_PREF.indexOf(prefixo(x.codigo)) - TAX_PREF.indexOf(prefixo(y.codigo)) || (Number(String(x.codigo).split("-")[1]) || 0) - (Number(String(y.codigo).split("-")[1]) || 0);
+/* valor de um campo na base (versão 1) */
+function taxBaseValor(cod, campo){
+  const t = TAX_BASE.find(x => x.codigo === cod);
+  if (campo === "natureza") return t ? (DEF_BASE.has(cod) ? "deficiencia" : "exigencia") : "";
+  if (campo === "fonteAlt") return (ALT_BASE[cod] || [])[0] || "";
+  if (campo === "inativo") return false;
+  if (!t) return campo === "itens" ? [] : campo === "inerente" ? false : "";
+  return t[campo] ?? (campo === "itens" ? [] : "");
+}
+/* valor de um campo num conjunto de mudanças (publicado ou rascunho) */
+function taxValor(itens, cod, campo){ const o = (itens || {})[cod]; return o && Object.prototype.hasOwnProperty.call(o, campo) ? o[campo] : taxBaseValor(cod, campo); }
+const taxIgual = (a, b) => JSON.stringify(a ?? "") === JSON.stringify(b ?? "");
+function taxCodigos(itens){ return [...new Set([...TAX_BASE.map(t => t.codigo), ...Object.keys(itens || {})])]; }
+function aplicarTaxonomia(itens){
+  itens = itens || {};
+  TAX.length = 0;
+  taxCodigos(itens).forEach(cod => { const base = TAX_BASE.find(x => x.codigo === cod) || { codigo: cod, cat: TAX_CATS[prefixo(cod)] || "", prov: false };
+    const t = JSON.parse(JSON.stringify(base));
+    ["nome", "sub", "area", "ancora", "danos", "fonte", "campos", "medidas", "evidencia", "itens", "subescalas", "inerente", "cid", "base"].forEach(k => { t[k] = taxValor(itens, cod, k); });
+    t.cat = TAX_CATS[prefixo(cod)] || t.cat; t.inativo = !!taxValor(itens, cod, "inativo"); t.novo = !TAX_BASE.some(x => x.codigo === cod);
+    TAX.push(t); });
+  TAX.sort(ordTax);
+  Object.keys(TAXMAP).forEach(k => delete TAXMAP[k]); TAX.forEach(t => { TAXMAP[t.codigo] = t; });
+  PERIGOS_DEFICIENCIA.clear(); TAX.forEach(t => { if (taxValor(itens, t.codigo, "natureza") === "deficiencia") PERIGOS_DEFICIENCIA.add(t.codigo); });
+  Object.keys(FONTES_ALTERNATIVAS).forEach(k => delete FONTES_ALTERNATIVAS[k]);
+  TAX.forEach(t => { const alt = taxValor(itens, t.codigo, "fonteAlt"); if (String(alt || "").trim()) FONTES_ALTERNATIVAS[t.codigo] = [alt]; });
+  Object.keys(FONTES_ANTERIORES).forEach(k => delete FONTES_ANTERIORES[k]);
+  Object.entries(itens).forEach(([cod, o]) => { if ((o.fontesAnteriores || []).length) FONTES_ANTERIORES[cod] = o.fontesAnteriores.slice(); });
+  recalcCK();
+}
+/* mudanças entre dois conjuntos (publicado x rascunho) */
+function taxDiferencas(de, para){
+  const out = [];
+  taxCodigos({ ...(de || {}), ...(para || {}) }).forEach(cod => TAX_CAMPOS.forEach(([campo]) => {
+    const a = taxValor(de, cod, campo), b = taxValor(para, cod, campo);
+    if (!taxIgual(a, b)) out.push({ codigo: cod, campo, de: a, para: b, novo: !TAX_BASE.some(x => x.codigo === cod) && !(de || {})[cod] }); }));
+  return out;
+}
+const taxPub = () => S.tax.itens || {};
+const taxRasc = () => S.taxDraft || taxPub();
+const taxTemRascunho = () => !!S.taxDraft && taxDiferencas(taxPub(), S.taxDraft).length > 0;
+/* uso de cada código nas AEPs, no Inventário e no PGR */
+function taxUso(cod){
+  let perigos = 0, aeps = 0, classif = 0, pgr = 0;
+  Object.values(S.aeps).forEach(a => { const hs = (a.perigos || []).filter(h => h.codigo === cod); if (!hs.length) return; aeps++; perigos += hs.length;
+    hs.forEach(h => { const c = (a.classif || {})[h.idRisco]; if (!c) return; const r = calcRisco(h, c); if (r.sit === "ok") classif++; if (a.status === "concluida" && c.pgr?.em) pgr++; }); });
+  return { perigos, aeps, classif, pgr };
+}
+/* efeito da publicação nos riscos já classificados (âncora) e nas linhas já enviadas ao PGR (nome, danos, âncora) */
+function taxImpacto(mud){
+  const anc = {}, txt = new Set(); mud.forEach(m => { if (m.campo === "ancora") anc[m.codigo] = Number(m.para) || 2; if (["nome", "danos", "ancora"].includes(m.campo)) txt.add(m.codigo); });
+  let mudaCat = 0, voltaPGR = 0; const cods = new Set([...Object.keys(anc), ...txt]);
+  Object.values(S.aeps).forEach(a => (a.perigos || []).filter(h => cods.has(h.codigo)).forEach(h => { const c = (a.classif || {})[h.idRisco]; if (!c) return; const r = calcRisco(h, c); if (r.sit !== "ok") return;
+    let cat = r.cat; if (anc[h.codigo] != null){ const S2 = Math.max(anc[h.codigo], Number(c.sev) || anc[h.codigo]); cat = categoriaDe(r.P * S2); if (cat !== r.cat) mudaCat++; }
+    if (a.status === "concluida" && c.pgr?.em) voltaPGR++; }));
+  return { mudaCat, voltaPGR };
+}
+const taxFmt = (campo, v) => campo === "ancora" ? (SEV_ROT[Number(v)] || "—") : campo === "natureza" ? (v === "deficiencia" ? "Deficiência" : v === "exigencia" ? "Exigência" : "—")
+  : campo === "area" ? ((AREAS_NR17.find(x => x[0] === v) || [])[1] || "—") : campo === "itens" ? ((v || []).join(", ") || "nenhum") : campo === "inerente" || campo === "inativo" ? (v ? "Sim" : "Não") : (String(v ?? "").trim() || "(vazio)");
+function mudarTax(cod, campo, v){
+  const d = clone(taxRasc()), o = d[cod] = d[cod] || {}, novo = !TAX_BASE.some(x => x.codigo === cod);
+  if (campo === "itens") v = [...new Set(String(v).split(/[^0-9]+/).map(Number).filter(n => n >= 1 && n <= CK_N_BASE))].sort((x, y) => x - y);
+  if (campo === "ancora") v = Number(v) || 2;
+  if (!novo && taxIgual(v, taxBaseValor(cod, campo))) delete o[campo]; else o[campo] = v;
+  if (!novo && !Object.keys(o).some(k => k !== "fontesAnteriores")) { if ((o.fontesAnteriores || []).length) d[cod] = { fontesAnteriores: o.fontesAnteriores }; else delete d[cod]; }
+  S.taxDraft = d; S.taxDirty = true; setSaveState("Alterações não salvas");
+  clearTimeout(S.taxTimer); S.taxTimer = setTimeout(salvarTaxRascunho, 600);
+}
+async function salvarTaxRascunho(){
+  clearTimeout(S.taxTimer); if (!S.db) { S.taxDirty = false; return; }
+  setSaveState("Salvando…");
+  try { await S.db.doc("config/taxonomia").set({ ...clone(S.tax), rascunho: S.taxDraft ? clone(S.taxDraft) : null }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  S.taxDirty = false;
+}
+function novoPerigoTax(pref){
+  const usados = taxCodigos(taxRasc()).filter(c => prefixo(c) === pref).map(c => Number(c.split("-")[1]) || 0);
+  const cod = `${pref}-${String(Math.max(0, ...usados) + 1).padStart(2, "0")}`;
+  const d = clone(taxRasc()); d[cod] = { nome: "", sub: "", area: pref === "OT" ? "org" : pref === "AMB" ? "conf" : pref === "EQ" ? "maq" : "mov", natureza: "exigencia", ancora: 2, danos: "", fonte: "", campos: "", medidas: "", evidencia: "", itens: [], subescalas: "", inerente: false, cid: "", base: "NR-1; NR-17" };
+  S.taxDraft = d; S.taxSel = cod; S.taxDirty = true; clearTimeout(S.taxTimer); S.taxTimer = setTimeout(salvarTaxRascunho, 300); render();
+}
+async function publicarTax(){
+  const mud = taxDiferencas(taxPub(), taxRasc()), motivo = String(S.taxMotivo || "").trim();
+  if (!mud.length || !motivo) return;
+  const falta = taxCodigos(taxRasc()).filter(c => !taxValor(taxRasc(), c, "inativo") && (!String(taxValor(taxRasc(), c, "nome")).trim() || !String(taxValor(taxRasc(), c, "fonte")).trim() || !String(taxValor(taxRasc(), c, "danos")).trim()));
+  if (falta.length) { toast(`Preencha perigo, danos e fonte padrão de ${falta.join(", ")} antes de publicar.`); return; }
+  const novo = clone(taxRasc());
+  mud.filter(m => m.campo === "fonte" && String(m.de || "").trim()).forEach(m => { const o = novo[m.codigo] = novo[m.codigo] || {}; o.fontesAnteriores = [...new Set([...(o.fontesAnteriores || []), m.de])]; });
+  const v = (S.tax.versao || 1) + 1, em = new Date().toISOString();
+  S.tax = { versao: v, em, itens: novo, historico: [...(S.tax.historico || []), { v, em, motivo, por: S.config.analista || "", mud, itens: clone(novo) }] };
+  S.taxDraft = null; S.taxMotivo = ""; S.taxPubAberto = false; aplicarTaxonomia(novo);
+  if (S.db){ setSaveState("Salvando…"); try { await S.db.doc("config/taxonomia").set({ ...clone(S.tax), rascunho: null }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); toast("Não foi possível publicar. Tente de novo."); return; } }
+  render(); toast(`Versão ${v} da TAXONOMIA publicada.`);
+}
+function taxVigenteTxt(){ return S.tax.versao > 1 ? `Versão ${S.tax.versao}, publicada em ${fmtData(String(S.tax.em).slice(0, 10))}` : "Versão 1 (planilha TAXONOMIA e PCRE)"; }
+function listaTax(){
+  const d = taxRasc(), t = norm(S.taxBusca), pub = taxPub();
+  return taxCodigos(d).map(cod => ({ cod, nome: taxValor(d, cod, "nome"), anc: taxValor(d, cod, "ancora"), nat: taxValor(d, cod, "natureza"), inativo: !!taxValor(d, cod, "inativo"),
+      alterado: TAX_CAMPOS.some(([c]) => !taxIgual(taxValor(pub, cod, c), taxValor(d, cod, c))), novo: !TAX_BASE.some(x => x.codigo === cod) && !pub[cod] }))
+    .filter(x => !S.taxCat || prefixo(x.cod) === S.taxCat)
+    .filter(x => S.taxAtivos === "todos" || (S.taxAtivos === "inativos" ? x.inativo : !x.inativo))
+    .filter(x => !t || norm(`${x.cod} ${x.nome} ${taxValor(d, x.cod, "sub")} ${taxValor(d, x.cod, "fonte")}`).includes(t))
+    .sort((x, y) => ordTax({ codigo: x.cod }, { codigo: y.cod }));
+}
+function vTaxEditor(cod){
+  const d = taxRasc(), pub = taxPub(), u = taxUso(cod), k = esc(cod);
+  const marca = campo => !taxIgual(taxValor(pub, cod, campo), taxValor(d, cod, campo)) ? ` <span class="taxalt">alterado</span>` : "";
+  const campo = ([c, rot, tipo]) => { if (c === "inativo") return ""; const v = taxValor(d, cod, c), at = `data-tax="${k}" data-tc="${c}"`;
+    if (tipo === "text") return `<label class="f"><span>${esc(rot)}${marca(c)}</span><input type="text" ${at} value="${esc(v)}"></label>`;
+    if (tipo === "longo") return `<label class="f spanall"><span>${esc(rot)}${marca(c)}</span><textarea rows="${c === "fonte" || c === "medidas" ? 3 : 2}" ${at}>${esc(v)}</textarea></label>`;
+    if (tipo === "itens") return `<label class="f"><span>${esc(rot)}${marca(c)}</span><input type="text" ${at} value="${esc((v || []).join(", "))}" placeholder="Ex.: 1, 2, 5"></label>`;
+    if (tipo === "check") return `<label class="f row" style="gap:8px;align-items:center"><input type="checkbox" ${at} ${v ? "checked" : ""}><span>${esc(rot)}${marca(c)}</span></label>`;
+    if (tipo === "sev") return `<label class="f"><span>${esc(rot)}${marca(c)}</span><select ${at}>${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${Number(v) === n ? "selected" : ""}>${esc(SEV_ROT[n])}</option>`).join("")}</select></label>`;
+    if (tipo === "area") return `<label class="f"><span>${esc(rot)}${marca(c)}</span><select ${at}>${AREAS_NR17.map(([a, n]) => `<option value="${a}" ${v === a ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>`;
+    if (tipo === "natureza") return `<label class="f"><span>${esc(rot)}${marca(c)}</span><select ${at}>${Object.entries(NATUREZA_ROT).map(([a, n]) => `<option value="${a}" ${v === a ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>`;
+    return ""; };
+  const inativo = !!taxValor(d, cod, "inativo"), novo = !TAX_BASE.some(x => x.codigo === cod) && !pub[cod];
+  return `<div class="taxed">
+    <p class="small" style="margin:0 0 10px"><b class="mono">${k}</b> · ${esc(TAX_CATS[prefixo(cod)] || "")} · usado em <b>${u.perigos}</b> perigo(s) de ${u.aeps} AEP(s)${u.classif ? `, ${u.classif} classificado(s) no Inventário` : ""}${u.pgr ? `, ${u.pgr} já enviado(s) ao PGR` : ""}.</p>
+    <div class="grid g2">${TAX_CAMPOS.map(campo).join("")}</div>
+    <p class="tiny muted" style="margin:8px 0 0">As AEPs já feitas guardam a fonte geradora com que foram escritas; mudar a fonte padrão vale para os próximos lançamentos, e a fonte anterior continua aceita. Mudar a âncora, o nome ou os danos muda a classificação e a linha do PGR dos perigos já lançados: o resumo antes de publicar mostra quantos.</p>
+    <div class="row" style="gap:8px;margin-top:10px">${novo ? `<button class="btn small danger" type="button" data-act="taxTirarNovo" data-cod="${k}">Retirar este perigo novo do rascunho</button>`
+      : `<button class="btn small" type="button" data-act="taxAtivar" data-cod="${k}">${inativo ? "Reativar este perigo" : "Desativar este perigo"}</button><span class="tiny muted">${inativo ? "Desativado: não aparece para novos lançamentos." : "Desativar tira o perigo da lista de novos lançamentos; o que já foi lançado continua."}</span>`}</div>
+  </div>`;
+}
+function vTaxLinhas(){
+  const L = listaTax();
+  if (!L.length) return `<tr><td colspan="5" class="small muted" style="padding:16px">Nenhum perigo com estes filtros.</td></tr>`;
+  return L.map(x => { const u = taxUso(x.cod), ab = S.taxSel === x.cod;
+    return `<tr class="click${ab ? " sel" : ""}${x.inativo ? " taxinat" : ""}" data-taxrow="${esc(x.cod)}" tabindex="0"><td class="mono">${esc(x.cod)}</td>
+      <td>${esc(x.nome || "(sem nome)")}${x.novo ? ` <span class="taxalt">novo</span>` : x.alterado ? ` <span class="taxalt">alterado no rascunho</span>` : ""}${x.inativo ? ` <span class="chip">desativado</span>` : ""}</td>
+      <td class="small">${esc(SEV_ROT[Number(x.anc)] || "")}</td><td class="small">${x.nat === "deficiencia" ? "Deficiência" : "Exigência"}</td><td class="num">${u.perigos}</td></tr>
+      ${ab ? `<tr class="invedit"><td colspan="5">${vTaxEditor(x.cod)}</td></tr>` : ""}`; }).join("");
+}
+function vTaxPublicar(){
+  const mud = taxDiferencas(taxPub(), taxRasc()), imp = taxImpacto(mud), porCod = {};
+  mud.forEach(m => (porCod[m.codigo] = porCod[m.codigo] || []).push(m));
+  const corta = t => { t = String(t); return t.length > 160 ? t.slice(0, 157) + "…" : t; };
+  return `<div class="panel" style="margin-bottom:14px"><div class="panel-h"><b>Publicar a versão ${(S.tax.versao || 1) + 1}</b><button class="btn ghost small" type="button" data-act="taxPubFechar">Fechar</button></div><div class="panel-b stack tight">
+    ${Object.entries(porCod).map(([cod, l]) => `<div class="taxmud"><b class="mono">${esc(cod)}</b> ${esc(taxValor(taxRasc(), cod, "nome"))}${l[0].novo ? ` <span class="taxalt">perigo novo</span>` : ""}
+      ${l[0].novo ? "" : `<ul>${l.map(m => `<li><b>${esc(TAX_ROT[m.campo])}:</b> <span class="taxde">${esc(corta(taxFmt(m.campo, m.de)))}</span> → <span class="taxpara">${esc(corta(taxFmt(m.campo, m.para)))}</span></li>`).join("")}</ul>`}</div>`).join("")}
+    <div class="note ${imp.mudaCat || imp.voltaPGR ? "warn" : ""}"><b>Efeito nos riscos já lançados:</b> ${imp.mudaCat ? `${imp.mudaCat} risco(s) classificado(s) mudam de categoria por causa da âncora` : "nenhum risco classificado muda de categoria"}${imp.voltaPGR ? `; ${imp.voltaPGR} linha(s) já enviada(s) ao PGR passam a “alteradas” e entram no próximo arquivo` : ""}.</div>
+    <label class="f"><span>Motivo da mudança (fica registrado no histórico)</span><textarea rows="2" data-taxmotivo="1" placeholder="Ex.: âncora do BIO-03 revista após CAT de 2025 na atividade de empurrar carrinho">${esc(S.taxMotivo || "")}</textarea></label>
+    <div class="row" style="gap:8px"><button class="btn primary" type="button" data-act="taxPublicar" id="btnTaxPub" ${String(S.taxMotivo || "").trim() ? "" : "disabled"}>Publicar a versão ${(S.tax.versao || 1) + 1}</button><span class="tiny muted">Sem o motivo, o botão fica desligado.</span></div>
+  </div></div>`;
+}
+function vTaxHistorico(){
+  const H = (S.tax.historico || []).slice().reverse();
+  return `<details class="panel taxhist" style="margin-top:14px"><summary class="panel-h" style="cursor:pointer"><b>Histórico de versões</b><span class="tiny muted">${H.length + 1} versão(ões)</span></summary><div class="panel-b stack tight">
+    ${H.map(h => `<div class="taxver"><div class="row between" style="gap:8px;flex-wrap:wrap"><span><b>Versão ${h.v}</b> · ${fmtData(String(h.em).slice(0, 10))}${h.por ? ` · ${esc(h.por)}` : ""} · ${h.mud.length} mudança(s)</span>
+      ${h.v !== S.tax.versao ? `<button class="btn small" type="button" data-act="taxRestaurar" data-v="${h.v}">Trazer esta versão para o rascunho</button>` : `<span class="chip fav">vigente</span>`}</div>
+      <p class="small" style="margin:4px 0">${esc(h.motivo)}</p>
+      <p class="tiny muted" style="margin:0">${[...new Set(h.mud.map(m => m.codigo))].map(c => { const l = h.mud.filter(m => m.codigo === c); return `${c} (${l.some(m => m.novo) ? "perigo novo" : [...new Set(l.map(m => m.campo === "inativo" ? (m.para ? "desativado" : "reativado") : TAX_ROT[m.campo].toLowerCase()))].join(", ")})`; }).join("; ")}</p></div>`).join("")}
+    <div class="taxver"><div class="row between" style="gap:8px;flex-wrap:wrap"><span><b>Versão 1</b> · base: planilha TAXONOMIA e PCRE</span>${S.tax.versao > 1 ? `<button class="btn small" type="button" data-act="taxRestaurar" data-v="1">Trazer esta versão para o rascunho</button>` : `<span class="chip fav">vigente</span>`}</div></div>
+  </div></details>`;
+}
+function vTaxonomia(){
+  const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
+  const nR = S.taxDraft ? taxDiferencas(taxPub(), S.taxDraft).length : 0;
+  return `<div class="pagehead"><div><h1>Taxonomia de perigos</h1><p>Lista padronizada de perigos usada nas AEPs, no Inventário e no PGR. As mudanças ficam num rascunho e só passam a valer quando você publica uma nova versão, com o motivo registrado.</p></div>
+    <div class="row"><button class="btn" type="button" data-act="taxPDF" id="btnTaxPDF">Salvar em PDF</button></div></div>
+  <div class="note" style="margin-bottom:14px"><b>Vigente:</b> ${esc(taxVigenteTxt())}.${nR ? ` <b>Rascunho com ${nR} alteração(ões) ainda não publicada(s).</b> <button class="btn small primary" type="button" data-act="taxPubAbrir">Revisar e publicar</button> ${S.confirm === "taxDescartar" ? `<span class="confirm">Descartar o rascunho? <button class="btn small danger" type="button" data-act="taxDescartarSim">Descartar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="taxDescartar">Descartar rascunho</button>`}` : " Nenhuma alteração em rascunho."}</div>
+  <div id="taxpub">${S.taxPubAberto && nR ? vTaxPublicar() : ""}</div>
+  <div class="panel"><div class="panel-b">
+    <div class="melfilt">
+      <select data-taxf="taxCat" aria-label="Categoria">${op("taxCat", "", "Todas as categorias")}${TAX_PREF.map(p => op("taxCat", p, `${p}: ${TAX_CATS[p]}`)).join("")}</select>
+      <select data-taxf="taxAtivos" aria-label="Situação">${op("taxAtivos", "ativos", "Perigos ativos")}${op("taxAtivos", "inativos", "Desativados")}${op("taxAtivos", "todos", "Todos")}</select>
+      <input type="text" data-taxbusca="1" value="${esc(S.taxBusca)}" placeholder="Buscar código, perigo, subcategoria ou fonte">
+      <span class="row" style="gap:6px;flex-wrap:wrap"><span class="small muted">Novo perigo:</span>${TAX_PREF.map(p => `<button class="btn small" type="button" data-act="taxNovo" data-pref="${p}">+ ${p}</button>`).join("")}</span>
+    </div>
+    <div class="tablewrap"><table class="list taxtab"><thead><tr><th>Código</th><th>Perigo</th><th>Severidade-âncora</th><th>Natureza</th><th class="num">Lançados</th></tr></thead><tbody id="taxbody">${vTaxLinhas()}</tbody></table></div>
+    <p class="tiny muted" style="margin-top:8px">Clique num perigo para ver e editar todos os campos. “Lançados” = perigos com este código nas AEPs.</p>
+  </div></div>
+  ${vTaxHistorico()}`;
+}
+function atualizarTax(){
+  if (S.view !== "taxonomia") return;
+  const f = document.activeElement; if (f && f.dataset && f.dataset.tax && (f.type === "text" || f.tagName === "TEXTAREA")) return;
+  render();
+}
+async function gerarPDFTax(){
+  const btn = $("#btnTaxPDF"); if (btn) { btn.disabled = true; btn.textContent = "Preparando…"; }
+  try { const nome = nomeArquivo(`Taxonomia de perigos - versao ${S.tax.versao || 1} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const L = TAX.filter(t => !t.inativo), H = S.tax.historico || [];
+    const linhas = L.map(t => `<tr><td class="mono">${esc(t.codigo)}</td><td><b>${esc(t.nome)}</b><div class="s">${esc(t.cat)} · ${esc(t.sub || "")}</div></td><td>${esc(SEV_ROT[Number(t.ancora)] || "")}</td><td>${PERIGOS_DEFICIENCIA.has(t.codigo) ? "Deficiência" : "Exigência"}</td><td>${esc(t.danos)}</td><td>${esc(t.fonte)}${FONTES_ALTERNATIVAS[t.codigo] ? `<div class="s">Alternativa: ${esc(FONTES_ALTERNATIVAS[t.codigo][0])}</div>` : ""}</td><td>${esc(t.medidas || "")}</td><td>${esc(t.evidencia || "")}</td></tr>`).join("");
+    const hist = `<tr><td>1</td><td>—</td><td>Base: planilha TAXONOMIA e PCRE.</td></tr>` + H.map(h => `<tr><td>${h.v}</td><td>${fmtData(String(h.em).slice(0, 10))}</td><td>${esc(h.motivo)}<div class="s">${esc([...new Set(h.mud.map(m => m.codigo))].join(", "))}</div></td></tr>`).join("");
+    await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>@page{size:A4 landscape;margin:10mm}body{font:8.5pt/1.35 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}p{margin:2px 0 8px}table{border-collapse:collapse;width:100%;margin-bottom:12px}th,td{border:1px solid #cfcfcf;padding:4px 5px;text-align:left;vertical-align:top}th{background:#f1f1f1}.mono{font-family:monospace}.s{color:#666;font-size:7.5pt;margin-top:2px}h2{font-size:11pt;margin:10px 0 4px}tr{page-break-inside:avoid}</style></head><body>
+      <h1>Taxonomia de perigos ergonômicos</h1><p>ArcelorMittal Mina de Serra Azul · ${esc(taxVigenteTxt())} · ${L.length} perigos ativos</p>
+      <table><thead><tr><th>Código</th><th>Perigo</th><th>Severidade-âncora</th><th>Natureza</th><th>Possíveis danos</th><th>Fonte geradora padrão</th><th>Medidas típicas</th><th>Evidência esperada</th></tr></thead><tbody>${linhas}</tbody></table>
+      <h2>Controle de versões</h2><table><thead><tr><th>Versão</th><th>Data</th><th>Motivo</th></tr></thead><tbody>${hist}</tbody></table></body></html>`, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF."); }
+  finally { const b = $("#btnTaxPDF"); if (b) { b.disabled = false; b.textContent = "Salvar em PDF"; } }
+}
+
 /* ---------------- Critérios do GRO (documento + tabelas geradas pelo mesmo cálculo do Inventário) ---------------- */
 function vGerado(tipo){
   const cel = cat => `<td class="mx ${CAT_CLS[cat]}">${esc(cat.replace("Risco ", ""))}</td>`;
@@ -2123,7 +2352,7 @@ function vGerado(tipo){
   if (tipo === "EXIGENCIA") return `<p class="small"><b>Como o sistema aplica a tabela:</b> duração × intensidade dá a Exigência. Intensidade crítica dá 5 em qualquer duração. Duração curtíssima com intensidade média ou alta não aparece na Tabela 2: o sistema adota o valor da duração curta e mostra o aviso na classificação.</p>
     <table class="ctab"><thead><tr><th>Duração \\ Intensidade</th>${INTENSIDADES.map(([, n]) => `<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>
     ${DURACOES.slice().reverse().map(([v, n, hr]) => `<tr><th>${esc(n)} (${esc(hr)})</th>${INTENSIDADES.map(([i]) => `<td class="c">${exigencia(v, i)}${exigLacuna(v, i) ? "*" : ""}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-  if (tipo === "ANCORAS") return `<table class="ctab"><thead><tr><th>Código</th><th>Perigo</th><th>Severidade-âncora</th></tr></thead><tbody>${TAX.map(t => `<tr><td class="mono">${esc(t.codigo)}</td><td>${esc(t.nome)}</td><td>${esc(SEV_ROT[Number(t.ancora) || 2])}</td></tr>`).join("")}</tbody></table>`;
+  if (tipo === "ANCORAS") return `<table class="ctab"><thead><tr><th>Código</th><th>Perigo</th><th>Severidade-âncora</th></tr></thead><tbody>${TAX.filter(t => !t.inativo).map(t => `<tr><td class="mono">${esc(t.codigo)}</td><td>${esc(t.nome)}</td><td>${esc(SEV_ROT[Number(t.ancora) || 2])}</td></tr>`).join("")}</tbody></table>`;
   return "";
 }
 function docBlocos(L){
@@ -2373,7 +2602,7 @@ const SUG_FONTE = {
   "BIO-06": [["adm", "Apoio do antebraço ou do punho na borda da mesa durante o uso de teclado e mouse."], ["ope", "Apoio do braço em aresta ou estrutura rígida da cabine durante a operação."], ["man", "Apoio de joelhos ou cotovelos em superfícies rígidas durante serviços sob o equipamento."], ["lab", "Apoio dos antebraços na borda da bancada durante a preparação de amostras."]],
   "EQ-06": [["adm", "Sistema corporativo com telas e etapas pouco intuitivas para [processo]."], ["ctl", "Sistema de despacho ou supervisório com excesso de alarmes simultâneos, sem priorização por criticidade."], ["ope", "Painel do equipamento com alertas sonoros e visuais frequentes e pouco diferenciados."], ["lab", "Software de equipamento analítico com interface pouco clara: [equipamento]."]]
 };
-function opcoesTax(){ const cat = S.hzCat; return TAX.filter(x => !cat || prefixo(x.codigo) === cat); }
+function opcoesTax(){ const cat = S.hzCat; return TAX.filter(x => !x.inativo && (!cat || prefixo(x.codigo) === cat)); }
 /* A fonte começa pelo texto padrão da planilha (TAXONOMIA); o que vem depois é o complemento escrito na AEP */
 const fontePadrao = f => { const s = String(f||"").trim(); return TAX.flatMap(x => prefixosFonte(x.codigo).map(p => ({ codigo: x.codigo, fonte: p }))).sort((p, q) => q.fonte.length - p.fonte.length).find(x => s.startsWith(x.fonte)); };
 const complementoFonte = f => { const t = fontePadrao(f); return (t ? String(f).trim().slice(t.fonte.length) : String(f||"")).trim(); };
@@ -3339,6 +3568,12 @@ function campo(e, isChange){
   }
   if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
   if (el.dataset.invbusca){ if (isChange) return; S.invBusca = el.value; atualizarInventario(); return; }
+  if (el.dataset.tax){ const cod = el.dataset.tax, c = el.dataset.tc, texto = el.tagName === "TEXTAREA" || el.type === "text";
+    if (texto){ if (isChange){ atualizarTax(); return; } mudarTax(cod, c, el.value); return; }
+    if (!isChange) return; mudarTax(cod, c, el.type === "checkbox" ? el.checked : el.value); atualizarTax(); return; }
+  if (el.dataset.taxf){ if (!isChange) return; S[el.dataset.taxf] = el.value; S.taxSel = null; render(); return; }
+  if (el.dataset.taxbusca){ if (isChange) return; S.taxBusca = el.value; const b = $("#taxbody"); if (b) b.innerHTML = vTaxLinhas(); return; }
+  if (el.dataset.taxmotivo){ if (isChange) return; S.taxMotivo = el.value; const b = $("#btnTaxPub"); if (b) b.disabled = !el.value.trim(); return; }
   if (el.dataset.melf){ if (!isChange) return; S[el.dataset.melf] = el.value; S.melFoco = ""; S.melAberto = null; render(); return; }
   if (el.dataset.melbusca){ if (isChange) return; S.melBusca = el.value; atualizarMelhorias(); return; }
   if (el.dataset.gat !== undefined){
@@ -3397,6 +3632,7 @@ document.addEventListener("click", async e => {
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
   if (t.closest("[data-selcell]")) return;
   const op = t.closest("[data-open]"); if (op){ abrirAEP(op.dataset.open); return; }
+  const txr = t.closest("tr[data-taxrow]"); if (txr && S.view === "taxonomia"){ S.taxSel = S.taxSel === txr.dataset.taxrow ? null : txr.dataset.taxrow; render(); return; }
   const iv = t.closest("tr[data-inv]"); if (iv && S.view === "inventario"){ S.invAberto = S.invAberto === iv.dataset.inv ? null : iv.dataset.inv; atualizarInventario(); return; }
   const ar = t.closest("tr[data-area]"); if (ar && S.view === "copsoq"){ S.editArea = completarArea(S.areas[ar.dataset.area]); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); window.scrollTo(0,0); return; }
   const btn = t.closest("[data-act]"); if (!btn) return;
@@ -3407,6 +3643,18 @@ document.addEventListener("click", async e => {
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
+    case "taxNovo": novoPerigoTax(d.pref); break;
+    case "taxAtivar": mudarTax(d.cod, "inativo", !taxValor(taxRasc(), d.cod, "inativo")); render(); break;
+    case "taxTirarNovo": { const r = clone(taxRasc()); delete r[d.cod]; S.taxDraft = r; S.taxSel = null; S.taxDirty = true; await salvarTaxRascunho(); render(); break; }
+    case "taxPubAbrir": S.taxPubAberto = true; render(); { const p = $("#taxpub"); if (p) p.scrollIntoView({ block: "start" }); } break;
+    case "taxPubFechar": S.taxPubAberto = false; render(); break;
+    case "taxPublicar": await publicarTax(); break;
+    case "taxDescartar": S.confirm = "taxDescartar"; render(); break;
+    case "taxDescartarSim": S.confirm = null; S.taxDraft = null; S.taxPubAberto = false; S.taxDirty = true; await salvarTaxRascunho(); render(); toast("Rascunho descartado."); break;
+    case "taxRestaurar": { const v = Number(d.v), h = (S.tax.historico || []).find(x => x.v === v), r = v === 1 ? {} : clone(h ? h.itens : {});
+      Object.entries(taxPub()).forEach(([c, o]) => { if ((o.fontesAnteriores || []).length){ r[c] = r[c] || {}; r[c].fontesAnteriores = [...new Set([...(r[c].fontesAnteriores || []), ...o.fontesAnteriores])]; } });
+      S.taxDraft = r; S.taxDirty = true; await salvarTaxRascunho(); S.taxPubAberto = true; render(); toast(`Versão ${v} trazida para o rascunho. Revise e publique como nova versão.`); break; }
+    case "taxPDF": gerarPDFTax(); break;
     case "planoDet": S.melAberto = S.melAberto === d.key ? null : d.key; atualizarMelhorias(); break;
     case "sugAcao": { const m = itensPlanoDe(aepsPlano()).find(x => x.key === d.key) || itensPlanoDe(Object.values(S.aeps).map(completar)).find(x => x.key === d.key);
       if (m && m.t?.medidas){ mudarMelhoria(d.key, "acao", m.t.medidas); atualizarMelhorias(); const ta = document.querySelector(`textarea[data-mel="${CSS.escape(d.key)}"][data-mc="acao"]`); if (ta) ta.focus(); toast("Medidas típicas copiadas. Ajuste o texto para o posto."); } break; }
@@ -3458,7 +3706,7 @@ document.addEventListener("click", async e => {
     case "gerarPDF": gerarPDF(); break;
     case "concluir": {
       if (totalPend(pendencias(a))) return;
-      a.status = "concluida"; a.concluidoEm = new Date().toISOString(); a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; S.dirty = true; await salvarAEP();
+      a.status = "concluida"; a.concluidoEm = new Date().toISOString(); a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; a.taxVersao = S.tax.versao || 1; S.dirty = true; await salvarAEP();
       renderTitulo(); renderAside(); toast("AEP concluída."); break;
     }
     case "addEsc": a.escuta.push({ id: uid(), nome:"", matricula:"", funcao: (a.meta.cargo||"").trim(), turno:"", data: hojeISO(), condutor: a.meta.analista||"", conteudo:"" }); marcar(); renderStep(); renderRail(); renderAside(); break;
