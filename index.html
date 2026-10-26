@@ -1562,7 +1562,7 @@ function linhasHome(lista){
       <td class="mono">${esc(a.numero)}</td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
-      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.join(" · "))}">${av.length} aviso(s) de conferência</div>` : "")(avisosAEP(a))}</td>
+      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.map(x => x.longo).join("\n"))}">⚠ ${esc(av[0].curto)}${av.length > 1 ? ` (+${av.length - 1})` : ""}</div>` : "")(avisosAEP(a))}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
       <td class="num">${ckLista(a).filter(x => x.c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
@@ -1617,7 +1617,7 @@ function vHome(){
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
     <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
-    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}<label class="fchip"><input type="checkbox" data-faviso="1" ${S.fAviso ? "checked" : ""}><span>Com aviso <b class="num">${todas.filter(a => avisosAEP(a).length || alertaAET(a)).length}</b></span></label></div></div>
+    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}<label class="fchip"><input type="checkbox" data-faviso="1" ${S.fAviso ? "checked" : ""}><span>Com ponto a conferir <b class="num">${todas.filter(a => avisosAEP(a).length || alertaAET(a)).length}</b></span></label></div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span></span></div>
@@ -2597,25 +2597,27 @@ const orgDatalist = () => `<datalist id="orgnomes">${orgLista().map(p => `<optio
    Antes ficavam na aba Pendências. Agora aparecem na lista de AEPs e dentro da própria AEP;
    o que é do PGR fica no Inventário e as correções em lote ficam em Unidade. */
 const AVISO_CACHE = new WeakMap();
+/* cada aviso tem um texto curto (lista de AEPs) e a explicação com o que fazer (dentro da AEP) */
 function avisosAEP(a0){
   if (!a0) return [];
   if (AVISO_CACHE.has(a0)) return AVISO_CACHE.get(a0);
-  const a = completar(a0), out = [];
-  if (difereDoModelo(a)) out.push("Etapa 3 diferente do modelo do setor (correção em lote em Unidade)");
-  const sp = (a.perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h)); if (sp.length) out.push(`Fonte sem o texto padrão da TAXONOMIA: ${sp.map(h => h.idRisco || h.codigo).join(", ")}`);
-  deficienciaSemItem(a).forEach(x => out.push(`${x.h.idRisco || ""} ${x.h.codigo}: perigo de deficiência com os itens ${x.itens.join(", ")} do checklist marcados “Não”. Marque o item que mostra a condição ou retire o perigo`));
-  perigosRepetidos(a).forEach(([x, y]) => out.push(`Linhas repetidas: ${x.idRisco || ""} e ${y.idRisco || ""} (${x.codigo}, mesma fonte)`));
-  if (temRedacaoAntiga(a)) out.push("Observação do COPSOQ no modelo anterior de texto (etapa 3, “Atualizar a redação”)");
-  if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) out.push(`Concluída antes de uma regra nova: ${Object.values(pd).flat()[0]}${n > 1 ? ` (+${n - 1})` : ""}`); }
-  const st = a.status || "nao_iniciada", k = norm(a.meta?.cargo);
+  const a = completar(a0), out = [], av = (curto, longo) => out.push({ curto, longo });
+  if (difereDoModelo(a)) av("Etapa 3 fora do modelo do setor", "A etapa 3 (COPSOQ) está diferente do texto-modelo do setor. Confira a etapa 3 ou use a correção em lote em Unidade.");
+  const sp = (a.perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h));
+  if (sp.length) av(`Fonte fora do padrão (${sp.map(h => h.idRisco || h.codigo).join(", ")})`, `A fonte geradora de ${sp.map(h => h.idRisco || h.codigo).join(", ")} não começa pelo texto padrão da TAXONOMIA. Abra o perigo na etapa 4 e use o texto padrão, mantendo o seu complemento.`);
+  deficienciaSemItem(a).forEach(x => av(`Perigo sem item do checklist (${x.h.idRisco || x.h.codigo})`, `${x.h.idRisco || ""} ${x.h.codigo} é um perigo de deficiência, mas os itens ${x.itens.join(", ")} do checklist estão marcados “Não”. Marque o item que mostra a condição ou retire o perigo.`));
+  perigosRepetidos(a).forEach(([x, y]) => av(`Perigo repetido (${x.idRisco || ""} e ${y.idRisco || ""})`, `${x.idRisco || ""} e ${y.idRisco || ""} têm o mesmo perigo (${x.codigo}) e a mesma fonte. Retire um deles ou escreva fontes diferentes.`));
+  if (temRedacaoAntiga(a)) av("Texto do COPSOQ desatualizado", "A observação do COPSOQ na etapa 3 usa o modelo antigo de texto. Na etapa 3, use “Atualizar a redação”.");
+  if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) av("Concluída antes de uma regra nova", `Esta AEP foi concluída antes de uma regra que entrou depois: ${Object.values(pd).flat()[0]}${n > 1 ? ` (e mais ${n - 1})` : ""}. Abra, resolva e conclua de novo.`); }
+  const st = a.status || "nao_iniciada", k = norm(a.meta?.cargo), ar = norm(a.meta?.area), se = norm(a.meta?.setor);
   if (k && st !== "nao_iniciada" && (a.perigos || []).length){ const cods = x => [...new Set((x.perigos || []).map(h => h.codigo))].sort().join(",");
-    const outras = Object.values(S.aeps).filter(b => b.id !== a.id && norm(b.meta?.cargo) === k && (b.status || "nao_iniciada") !== "nao_iniciada" && (b.perigos || []).length && cods(b) !== cods(a));
-    if (outras.length) out.push(`Mesmo cargo com perigos diferentes na ${outras.map(b => b.numero).join(", ")}: explique a diferença na descrição ou nas fontes`); }
+    const outras = Object.values(S.aeps).filter(b => b.id !== a.id && norm(b.meta?.cargo) === k && norm(b.meta?.setor) === se && norm(b.meta?.area) === ar && (b.status || "nao_iniciada") !== "nao_iniciada" && (b.perigos || []).length && cods(b) !== cods(a));
+    if (outras.length) av(`Mesmo cargo com perigos diferentes (${outras.map(b => b.numero).join(", ")})`, `A ${outras.map(b => b.numero).join(", ")} tem o mesmo cargo, setor e área, mas perigos diferentes. Se for de propósito, explique a diferença na descrição da atividade ou nas fontes; se não, iguale os perigos.`); }
   AVISO_CACHE.set(a0, out); return out;
 }
 function vAvisosAEP(a0){
   const av = avisosAEP(a0); if (!av.length) return "";
-  return `<div class="note warn" style="margin-bottom:12px"><b>Avisos de conferência desta AEP</b><ul class="avisos">${av.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+  return `<div class="note warn" style="margin-bottom:12px"><b>Pontos para conferir nesta AEP</b> <span class="tiny">(não impedem nada; são ajustes de qualidade)</span><ul class="avisos">${av.map(x => `<li><b>${esc(x.curto.replace(/\s*\(.*\)$/, ""))}:</b> ${esc(x.longo)}</li>`).join("")}</ul></div>`;
 }
 /* Correções em lote (aba Unidade) */
 function vCorrecoesLote(){
