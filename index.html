@@ -378,6 +378,28 @@ details.panel[open]>summary b::before{content:"▾ "}
 .orgresp{display:flex;flex-wrap:wrap;gap:14px}.orgmini{display:flex;gap:10px;align-items:center;min-width:220px}.orgmini>span{display:flex;flex-direction:column}
 .avisoink{color:var(--warn-ink);font-weight:600;margin-top:3px}
 ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px}
+.orgwrap{overflow:auto;padding:4px 0 8px}
+.ochart{display:inline-block;min-width:100%;text-align:center}
+.ochart ul{display:flex;justify-content:center;margin:0;padding:24px 0 0;list-style:none;position:relative}
+.ochart>ul{padding-top:0}
+.ochart li{display:flex;flex-direction:column;align-items:center;position:relative;padding:24px 3px 0}
+.ochart>ul>li{padding-top:0}
+.ochart li::before,.ochart li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:24px;border-top:2px solid var(--rule-strong)}
+.ochart li::after{right:auto;left:50%;border-left:2px solid var(--rule-strong)}
+.ochart li:only-child::before,.ochart li:only-child::after{border-top:0}
+.ochart li:first-child::before,.ochart li:last-child::after{border-top:0}
+.ochart li:last-child::before{border-right:2px solid var(--rule-strong);border-radius:0 8px 0 0}
+.ochart li:first-child::after{border-radius:8px 0 0 0}
+.ochart li:only-child::after{border-radius:0}
+.ochart>ul>li::before,.ochart>ul>li::after{display:none}
+.ochart ul ul::before{content:"";position:absolute;top:0;left:50%;height:24px;border-left:2px solid var(--rule-strong)}
+.onode{display:flex;flex-direction:column;align-items:center;gap:3px;width:116px;padding:8px 4px;border:1px solid transparent;border-radius:10px;background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
+.onode:hover{background:var(--surface-2);border-color:var(--rule)}
+.onode.sel{background:var(--accent-soft);border-color:var(--accent)}
+.onode b{font-size:12.5px;line-height:1.25;text-transform:uppercase;letter-spacing:.01em}
+.onode span{font-size:11.5px;line-height:1.25;color:var(--ink-2)}
+.orgfoto.o{width:66px;height:66px;border:3px solid var(--accent);font-size:20px;margin-bottom:3px}
+.onode.n-diretor .orgfoto.o{width:80px;height:80px;font-size:24px}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -1514,7 +1536,7 @@ function render(){
   else if (S.view === "inventario") app.innerHTML = vInventario();
   else if (S.view === "criterios") app.innerHTML = vCriterios();
   else if (S.view === "taxonomia") app.innerHTML = vTaxonomia();
-  else if (S.view === "organograma") app.innerHTML = vOrganograma();
+  else if (S.view === "organograma") { app.innerHTML = vOrganograma(); ajustarOrg(); }
   else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
@@ -2421,6 +2443,15 @@ const NIVEIS = [["diretor", "Diretor"], ["gerente", "Gerente"], ["gerente_area",
 const NIVEL_ROT = Object.fromEntries(NIVEIS), NIVEL_ORD = Object.fromEntries(NIVEIS.map(([k], i) => [k, i]));
 const orgP = () => S.org.pessoas || {};
 const orgLista = () => Object.values(orgP()).sort((x, y) => (NIVEL_ORD[x.nivel] ?? 9) - (NIVEL_ORD[y.nivel] ?? 9) || String(x.nome).localeCompare(String(y.nome), "pt-BR"));
+const orgTemEquipe = id => Object.values(orgP()).some(x => x.chefe === id);
+const orgFilhos = pai => orgLista().filter(p => (pai ? p.chefe === pai : !p.chefe || !orgP()[p.chefe]))
+  .sort((x, y) => (x.ordem ?? 999) - (y.ordem ?? 999) || orgTemEquipe(y.id) - orgTemEquipe(x.id) || String(x.nome).localeCompare(String(y.nome), "pt-BR"));
+function moverOrg(id, dir){
+  const p = orgP()[id]; if (!p) return; const irm = orgFilhos(orgP()[p.chefe] ? p.chefe : ""), i = irm.findIndex(x => x.id === id), j = i + dir;
+  if (j < 0 || j >= irm.length) return; [irm[i], irm[j]] = [irm[j], irm[i]];
+  const pes = { ...orgP() }; irm.forEach((x, k) => { pes[x.id] = { ...pes[x.id], ordem: k }; });
+  S.org = { ...S.org, pessoas: pes }; S.orgDirty = true; clearTimeout(S.orgTimer); S.orgTimer = setTimeout(salvarOrg, 400); render();
+}
 const orgCuida = (nivel, setor) => orgLista().filter(p => p.nivel === nivel && (p.setores || []).includes(setor));
 function orgCadeia(p){ const out = [], vistos = new Set(); while (p && !vistos.has(p.id)){ out.push(p); vistos.add(p.id); p = orgP()[p.chefe]; } return out; }
 function respAEP(a){
@@ -2440,7 +2471,7 @@ function orgCard(p){
     <span class="tiny faint">${esc(NIVEL_ROT[p.nivel] || "")}${(p.setores || []).length ? ` · ${(p.setores || []).length} setor(es)` : ""}${nA ? ` · ${nA} AEP(s)` : ""}</span></span></button>`;
 }
 function orgArvore(pai){
-  const filhos = orgLista().filter(p => (pai ? p.chefe === pai : !p.chefe || !orgP()[p.chefe]));
+  const filhos = orgFilhos(pai);
   if (!filhos.length) return "";
   return `<ul class="orgtree">${filhos.map(p => `<li>${orgCard(p)}${orgArvore(p.id)}</li>`).join("")}</ul>`;
 }
@@ -2462,7 +2493,7 @@ function vOrgEditor(p){
     ${cuida ? `<div class="f" style="margin-top:10px"><span>Setores (gerências) que ${p.nivel === "supervisor" ? "supervisiona" : "gerencia"}: as AEPs desses setores ficam ligadas a esta pessoa</span>
       <div class="orgsetores">${gerencias().map(s => { const o = outros(s); return `<label class="fchip"><input type="checkbox" data-orgsetor="${k}" value="${esc(s)}" ${(p.setores || []).includes(s) ? "checked" : ""}><span>${esc(s)}${o.length ? ` <span class="tiny faint">(também: ${esc(o.join(", "))})</span>` : ""}</span></label>`; }).join("")}</div></div>` : ""}
     <div class="row" style="gap:8px;margin-top:12px">${S.confirm === "orgDel-" + p.id ? `<span class="confirm">Excluir ${esc(p.nome || "esta pessoa")}? Quem responde a ela passa a responder a ${esc(orgP()[p.chefe]?.nome || "ninguém")}. <button class="btn small danger" type="button" data-act="orgDelSim" data-id="${k}">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
-      : `<button class="btn small danger" type="button" data-act="orgDel" data-id="${k}">Excluir pessoa</button>`}</div>
+      : `<button class="btn small" type="button" data-act="orgMover" data-id="${k}" data-v="-1">◀ Mover para a esquerda</button><button class="btn small" type="button" data-act="orgMover" data-id="${k}" data-v="1">Mover para a direita ▶</button><button class="btn small danger" type="button" data-act="orgDel" data-id="${k}">Excluir pessoa</button>`}</div>
   </div></div>`;
 }
 function vOrgSetores(){
@@ -2473,16 +2504,41 @@ function vOrgSetores(){
       return `<tr><td>${esc(s)}</td><td class="small">${ga.length ? ga.map(x => esc(x.nome)).join(", ") : `<span class="faint">—</span>`}</td><td class="small">${sup.length ? sup.map(x => esc(x.nome)).join(", ") : `<span class="plaviso">sem supervisor</span>`}</td><td class="num">${Object.values(S.aeps).filter(a => setorNome(a) === s).length}</td></tr>`; }).join("")}
     </tbody></table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">Para ligar um setor, abra a pessoa e marque os setores que ela cuida. Numa AEP específica, a etapa 1 permite trocar o supervisor.</p></div>`;
 }
+/* Organograma em árvore (de cima para baixo, como o organograma da empresa) ou em lista (melhor no celular) */
+function orgNo(p){
+  const nA = Object.values(S.aeps).filter(a => { const r = respAEP(a); return [r.sup, r.ga, r.ger, r.dir].some(x => x && x.id === p.id); }).length;
+  return `<button type="button" class="onode n-${esc(p.nivel)}${S.orgSel === p.id ? " sel" : ""}" data-act="orgSel" data-id="${esc(p.id)}" title="${esc([NIVEL_ROT[p.nivel], (p.setores || []).length ? (p.setores || []).join(", ") : "", nA ? nA + " AEP(s)" : ""].filter(Boolean).join(" · "))}">
+    ${orgFoto(p, "o")}<b>${esc(p.nome || "(sem nome)")}</b><span>${esc(p.cargo || NIVEL_ROT[p.nivel] || "")}</span></button>`;
+}
+function orgChartRamo(pai){
+  const filhos = orgFilhos(pai);
+  if (!filhos.length) return "";
+  return `<ul>${filhos.map(p => `<li>${orgNo(p)}${orgChartRamo(p.id)}</li>`).join("")}</ul>`;
+}
+const orgVista = () => S.orgVista || (window.innerWidth < 700 ? "lista" : "arvore");
+function vOrgArv(){
+  if (!Object.keys(orgP()).length) return `<div class="empty">Nenhuma pessoa cadastrada. Comece pelo diretor em “+ Pessoa”.</div>`;
+  if (orgVista() === "lista") return orgArvore("");
+  return `<div class="orgwrap" id="orgwrap"><div class="ochart" id="ochart">${orgChartRamo("")}</div></div>`;
+}
+function ajustarOrg(){
+  const c = $("#ochart"), w = $("#orgwrap"), pct = $("#orgzpct"); if (!c || !w) return;
+  let z = S.orgZoom;
+  if (z == null || z === "fit"){ c.style.zoom = 1; z = Math.max(.4, Math.min(1, (w.clientWidth - 8) / Math.max(1, c.scrollWidth))); }
+  c.style.zoom = z; S.orgZoomAtual = z; if (pct) pct.textContent = Math.round(z * 100) + "%";
+}
 function vOrganograma(){
-  const p = S.orgSel && orgP()[S.orgSel];
+  const p = S.orgSel && orgP()[S.orgSel], arv = orgVista() === "arvore", tem = Object.keys(orgP()).length;
   return `<div class="pagehead"><div><h1>Organograma</h1><p>Diretor, gerentes, gerentes de área e supervisores, com foto e contato. Cada AEP fica ligada ao supervisor do seu setor, e o Plano de ação sugere essas pessoas como responsáveis.</p></div>
     <div class="row"><button class="btn primary" type="button" data-act="orgNova">+ Pessoa</button></div></div>
   ${p ? vOrgEditor(p) : ""}
-  <div class="panel"><div class="panel-b" id="orgarv">${vOrgArv()}</div></div>
+  <div class="panel">${tem ? `<div class="panel-h" style="flex-wrap:wrap;gap:8px"><div class="seg" role="group" aria-label="Forma de ver"><button type="button" data-act="orgVista" data-v="arvore" aria-pressed="${arv}">Organograma</button><button type="button" data-act="orgVista" data-v="lista" aria-pressed="${!arv}">Lista</button></div>
+    ${arv ? `<span class="row" style="gap:6px;align-items:center"><button class="btn small" type="button" data-act="orgZoom" data-v="-" aria-label="Diminuir">−</button><span class="small" id="orgzpct" style="min-width:42px;text-align:center">100%</span><button class="btn small" type="button" data-act="orgZoom" data-v="+" aria-label="Aumentar">+</button><button class="btn small" type="button" data-act="orgZoom" data-v="fit">Ajustar à tela</button></span>` : ""}</div>` : ""}
+    <div class="panel-b" id="orgarv">${vOrgArv()}</div></div>
+  <p class="tiny muted" style="margin:8px 2px 0">Clique numa pessoa para editar. Para pôr alguém abaixo de outra pessoa, clique nela primeiro e depois em “+ Pessoa”.</p>
   <div id="orgset">${vOrgSetores()}</div>`;
 }
-const vOrgArv = () => Object.keys(orgP()).length ? orgArvore("") : `<div class="empty">Nenhuma pessoa cadastrada. Comece pelo diretor em “+ Pessoa”.</div>`;
-function atualizarOrgParcial(){ const a = $("#orgarv"); if (a) a.innerHTML = vOrgArv(); const t = $("#orgset"); if (t) t.innerHTML = vOrgSetores(); }
+function atualizarOrgParcial(){ const a = $("#orgarv"); if (a) { a.innerHTML = vOrgArv(); ajustarOrg(); } const t = $("#orgset"); if (t) t.innerHTML = vOrgSetores(); }
 function mudarOrg(id, campo, v){
   const p = { ...(orgP()[id] || { id }) };
   p[campo] = v; p.em = new Date().toISOString();
@@ -3890,9 +3946,12 @@ document.addEventListener("click", async e => {
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
-    case "orgSel": S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); if (S.orgSel) window.scrollTo({ top: 0 }); break;
+    case "orgSel": { const sx = ($("#orgwrap") || {}).scrollLeft || 0; S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); const w = $("#orgwrap"); if (w) w.scrollLeft = sx; if (S.orgSel) window.scrollTo({ top: 0, behavior: "smooth" }); break; }
     case "orgFechar": S.orgSel = null; S.confirm = null; render(); break;
     case "orgNova": novaPessoaOrg(); break;
+    case "orgMover": moverOrg(d.id, Number(d.v)); break;
+    case "orgVista": S.orgVista = d.v; render(); break;
+    case "orgZoom": { const z = S.orgZoomAtual || 1; S.orgZoom = d.v === "fit" ? "fit" : d.v === "+" ? Math.min(1.6, +(z + .1).toFixed(2)) : Math.max(.3, +(z - .1).toFixed(2)); ajustarOrg(); break; }
     case "orgTirarFoto": { const ant = orgP()[d.id]?.foto; mudarOrg(d.id, "foto", ""); await salvarOrg(); if (ant && S.assets) { try { await S.assets.delete(ant); } catch(_){} } render(); break; }
     case "orgDel": S.confirm = "orgDel-" + d.id; render(); break;
     case "orgDelSim": excluirPessoaOrg(d.id); break;
