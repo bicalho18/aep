@@ -1424,7 +1424,7 @@ async function iniciar(){
     else if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
     if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
   }, () => {});
-  db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; S.planoConta = d.exists ? (d.data().conta || {}) : {}; if (S.view === "painel") render(); }, () => {});
+  db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; S.planoConta = d.exists ? (d.data().conta || {}) : {}; S.planoTeams = d.exists ? (d.data().teams || {}) : {}; if (S.view === "painel") render(); }, () => {});
   db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {};
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
@@ -1952,9 +1952,59 @@ function vPendencias(){
 }
 function vPainel(){
   return `<div class="pagehead"><div><h1>Meu painel</h1><p>Volume de AEPs realizadas e meta do plano PLA202609SA20-30 (SIG). Para mostrar à gerência, use a aba Gerências.</p></div>
-    <div class="row"><button class="btn" type="button" data-act="pdfMeta" id="btnPDFmeta">PDF: acompanhamento da meta</button></div></div>
+    <div class="row"><button class="btn primary" type="button" data-act="evAbrir">Evidência do mês para o SIG</button><button class="btn" type="button" data-act="pdfMeta" id="btnPDFmeta">PDF: acompanhamento da meta</button></div></div>
   <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}</div>
+  <div id="evbox">${S.evAberto ? vEvidencia() : ""}</div>
   <div id="painelcorpo">${painelCorpo()}</div>`;
+}
+/* ---------------- Evidência mensal para o SIG ----------------
+   Documento para anexar no acompanhamento da ação do plano PLA202609SA20-30: relação das AEPs que contam na meta do mês,
+   com datas e responsável, e o texto da "Situação" e o "Realizado (%)" prontos para copiar. As AEPs em si vão para o Teams. */
+const ordemSIG = (meses, m) => { const l = meses.filter(k => k >= "2026-10"); const i = l.indexOf(m); return i >= 0 ? i + 1 : null; };
+function dadosEvidencia(mes){
+  const L = Object.values(S.aeps), D = dadosMeta(L), m = mes || D.atual, x = D.acum.find(y => y.m === m) || { p: 0, c: 0, pa: 0, ca: 0 };
+  const lista = L.filter(a => D.conta[a.id] === m).sort((p, q) => dataRealizada(p).localeCompare(dataRealizada(q)) || idNum(p) - idNum(q));
+  const pct = x.p ? Math.min(100, Math.round(x.c / x.p * 100)) : (x.c ? 100 : 0), ordem = ordemSIG(D.meses, m), teams = String((S.planoTeams || {})[m] || "").trim();
+  const sig = ordem ? D.acum.filter(y => y.m >= "2026-10" && y.m <= m) : D.acum.filter(y => y.m <= m);
+  const pa = sig.reduce((t, y) => t + y.p, 0), ca = sig.reduce((t, y) => t + y.c, 0), ac = pa ? Math.min(100, Math.round(ca / pa * 100)) : 0;
+  const texto = `${mesLongo(m).replace(/^./, c => c.toUpperCase())}: concluídas ${x.c} de ${x.p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%). Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs, com datas da avaliação e da conclusão, no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
+  return { D, m, x, lista, pct, ordem, teams, texto, pa, ca };
+}
+function vEvidencia(){
+  const E = dadosEvidencia(S.evMes), D = E.D;
+  return `<div class="panel" style="margin-bottom:16px"><div class="panel-h"><b>Evidência do mês para o SIG</b><button class="btn ghost small" type="button" data-act="evFechar">Fechar</button></div><div class="panel-b stack tight">
+    <div class="grid g3">
+      <label class="f"><span>Mês</span><select data-evmes="1">${D.meses.map(k => `<option value="${k}" ${k === E.m ? "selected" : ""}>${esc(mesLongo(k))}${ordemSIG(D.meses, k) ? ` · ordem ${ordemSIG(D.meses, k)} no SIG` : " · fora do SIG"}</option>`).join("")}</select></label>
+      <label class="f span2"><span>Pasta das AEPs no Teams (opcional, entra no texto e no PDF)</span><input type="text" data-evteams="${E.m}" value="${esc(E.teams)}" placeholder="Cole aqui o link ou o caminho da pasta do mês"></label>
+    </div>
+    <div class="pgrnum"><div><b>${E.x.c} de ${E.x.p}</b><span>AEPs que contam na meta de ${esc(mesLongo(E.m))}</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
+    <label class="f"><span>Texto para o campo “Situação” do acompanhamento</span><textarea rows="4" readonly id="evtexto">${esc(E.texto)}</textarea></label>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn small" type="button" data-act="evCopiar">Copiar o texto</button><button class="btn small primary" type="button" data-act="evPDF" id="btnEvPDF" ${E.lista.length ? "" : "disabled"}>Baixar o PDF para anexar</button>
+      <span class="tiny muted">No SIG: Incluir Acompanhamento → cole o texto em Situação, informe ${E.pct} em Realizado (%) e anexe o PDF.</span></div>
+  </div></div>`;
+}
+async function gerarPDFEvidencia(){
+  const btn = $("#btnEvPDF"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
+  try {
+    const E = dadosEvidencia(S.evMes), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "", hoje = new Date().toLocaleDateString("pt-BR");
+    const nome = nomeArquivo(`Evidencia AEP - ${mesLongo(E.m)} - ${hoje.replace(/\//g, "-")}`);
+    const linhas = E.lista.map((a, i) => { const dr = dataRealizada(a), dc = String(a.concluidoPrimeiro || a.concluidoEm || "").slice(0, 10), mr = mesReal(a);
+      return `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${fmtData(dr)}${mr && mr < E.m ? `<div class="s">adiantamento</div>` : ""}</td><td class="c">${fmtData(dc)}</td><td class="c">${esc(STATUS[a.status] || "")}</td></tr>`; }).join("");
+    const css = `@page{size:A4;margin:14mm}body{font:9.5pt/1.4 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}p{margin:3px 0}
+      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:10px}
+      .box{display:flex;gap:10px;margin:10px 0}.box div{flex:1;border:1px solid #ddd;border-radius:6px;padding:7px 9px}.box b{display:block;font-size:16pt}.box span{font-size:8.5pt;color:#555}
+      table{border-collapse:collapse;width:100%;margin-top:8px}th,td{border:1px solid #d5d5d5;padding:4px 5px;text-align:left;vertical-align:top}th{background:#f1f1f1;font-size:8.5pt}td.c,th.c{text-align:center}.mono{font-family:monospace;white-space:nowrap}.s{font-size:7.5pt;color:#666}
+      .ass{margin-top:34px;display:flex;gap:40px}.ass div{flex:1;border-top:1px solid #444;padding-top:4px;font-size:9pt;text-align:center}tr{page-break-inside:avoid}`;
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
+      <div class="head"><div><h1>Evidência de execução: Análises Ergonômicas Preliminares</h1><p>${esc(S.config.empresa || "ArcelorMittal")}${S.config.unidade ? ` · ${esc(S.config.unidade)}` : " · Mina de Serra Azul"} · Plano PLA202609SA20-30 (SIG)${E.ordem ? ` · ação de ordem ${E.ordem}` : ""}</p><p><b>Mês de referência:</b> ${esc(mesLongo(E.m))} · emitido em ${hoje}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
+      <div class="box"><div><span>Previstas para o mês</span><b>${E.x.p}</b></div><div><span>Concluídas que contam na meta</span><b>${E.x.c}</b></div><div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
+      <p>${esc(E.texto)}</p>
+      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Avaliação em campo</th><th class="c">Conclusão</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
+      <p class="s" style="margin-top:8px">Cada AEP conta na meta do mês em que foi realizada (data da avaliação em campo); o que passa da meta de um mês conta nos meses seguintes. Os documentos das AEPs ficam no Teams${E.teams ? ` (${esc(E.teams)})` : ""} e no sistema de AEP.</p>
+      <div class="ass"><div>${esc(S.config.analista || "Responsável técnico")}<br><span class="s">${esc(S.config.registroAnalista || "")}</span></div><div>Gestor responsável pela ação</div></div></body></html>`;
+    await imprimirHTML(html, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF."); }
+  finally { const b = $("#btnEvPDF"); if (b){ b.disabled = false; b.textContent = "Baixar o PDF para anexar"; } }
 }
 async function gerarPDFMeta(){
   const btn = $("#btnPDFmeta"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
@@ -2024,7 +2074,7 @@ function vMesPlano(a){
 async function salvarPlano(){
   clearTimeout(S.planoTimer); if (!S.db) { S.planoDirty = false; return; }
   setSaveState("Salvando…");
-  try { await S.db.doc("config/plano").set({ mes: clone(S.plano), conta: clone(S.planoConta || {}) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  try { await S.db.doc("config/plano").set({ mes: clone(S.plano), conta: clone(S.planoConta || {}), teams: clone(S.planoTeams || {}) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
   S.planoDirty = false;
 }
 
@@ -3906,6 +3956,9 @@ function campo(e, isChange){
     if (S.view === "melhorias" && c !== "hier" && c !== "efic" && c !== "conc") atualizarMelhorias();
     return;
   }
+  if (el.dataset.evmes){ if (!isChange) return; S.evMes = el.value; const e = $("#evbox"); if (e) e.innerHTML = vEvidencia(); return; }
+  if (el.dataset.evteams !== undefined){ const k = el.dataset.evteams; S.planoTeams = { ...(S.planoTeams || {}), [k]: el.value }; S.planoDirty = true; clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 700);
+    if (!isChange){ const t = $("#evtexto"); if (t) t.value = dadosEvidencia(S.evMes).texto; } return; }
   if (el.dataset.pconta !== undefined){ if (!isChange) return;
     const k = el.dataset.pconta; S.planoConta = { ...(S.planoConta || {}) }; if (el.value) S.planoConta[k] = el.value; else delete S.planoConta[k];
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500);
@@ -4013,6 +4066,10 @@ document.addEventListener("click", async e => {
     case "orgDelSim": excluirPessoaOrg(d.id); break;
     case "usarResp": mudarMelhoria(d.key, "resp", d.nome); atualizarMelhorias(); break;
     case "pdfMeta": gerarPDFMeta(); break;
+    case "evAbrir": S.evAberto = !S.evAberto; { const e = $("#evbox"); if (e) e.innerHTML = S.evAberto ? vEvidencia() : ""; } break;
+    case "evFechar": S.evAberto = false; { const e = $("#evbox"); if (e) e.innerHTML = ""; } break;
+    case "evCopiar": { const t = $("#evtexto"); if (!t) break; try { await navigator.clipboard.writeText(t.value); toast("Texto copiado. Cole no campo Situação do SIG."); } catch(_) { t.select(); toast("Selecionei o texto: use Ctrl+C."); } break; }
+    case "evPDF": gerarPDFEvidencia(); break;
     case "taxNovo": novoPerigoTax(d.pref); break;
     case "taxAtivar": mudarTax(d.cod, "inativo", !taxValor(taxRasc(), d.cod, "inativo")); render(); break;
     case "taxTirarNovo": { const r = clone(taxRasc()); delete r[d.cod]; S.taxDraft = r; S.taxSel = null; S.taxDirty = true; await salvarTaxRascunho(); render(); break; }
