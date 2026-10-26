@@ -400,6 +400,7 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .onode span{font-size:11.5px;line-height:1.25;color:var(--ink-2)}
 .orgfoto.o{width:66px;height:66px;border:3px solid var(--accent);font-size:20px;margin-bottom:3px}
 .onode.n-diretor .orgfoto.o{width:80px;height:80px;font-size:24px}
+.orgsettab tr.falta td:first-child{box-shadow:inset 3px 0 0 var(--warn-line)}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -1850,7 +1851,7 @@ function dadosMeta(L){
   const plan = Object.fromEntries(meses.map(m => [m, 0])), real = Object.fromEntries(meses.map(m => [m, 0]));
   L.forEach(a => { const p = mesPlan(a); if (p in plan) plan[p]++; const r = mesReal(a); if (r) real[r < ini ? ini : r > fim ? fim : r]++; });
   const AL = alocarMeta(L, meses, plan), cont = Object.fromEntries(meses.map(m => [m, 0])), vinda = Object.fromEntries(meses.map(m => [m, 0]));
-  Object.entries(AL.conta).forEach(([id, m]) => { cont[m]++; if (AL.real[id] < m) vinda[m]++; });
+  Object.entries(AL.conta).forEach(([id, m]) => { cont[m]++; if (m > atual) vinda[m]++; });
   let pa = 0, ra = 0, ca = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; ca += cont[m]; return { m, p: plan[m], r: real[m], c: cont[m], v: vinda[m], pa, ra, ca }; });
   const at = acum.find(x => x.m === atual) || { p: 0, r: 0, c: 0, v: 0, pa: 0, ra: 0, ca: 0 };
   const feitas = L.filter(a => mesReal(a)).length, faltam = L.length - feitas, mesesRest = meses.filter(m => m >= atual).length;
@@ -1870,19 +1871,17 @@ function graficoMeta(D){
   const y = v => top + h - (v / max) * h, alt = v => (v / max) * h;
   const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual, x1 = x0 + bw + gap, prop = x.c - x.v;
     const pl = x.p ? `<rect x="${x0}" y="${y(x.p)}" width="${bw}" height="${alt(x.p)}" rx="3" class="gp"><title>${mesLongo(x.m)}: planejadas ${x.p}</title></rect><text x="${x0 + bw/2}" y="${y(x.p) - 5}" text-anchor="middle" class="gv">${x.p}</text>` : "";
-    const ct = x.c ? `${prop ? `<rect x="${x1}" y="${y(prop)}" width="${bw}" height="${alt(prop)}" rx="3" class="gr"><title>${mesLongo(x.m)}: ${prop} realizada(s) no próprio mês</title></rect>` : ""}
-      ${x.v ? `<rect x="${x1}" y="${y(x.c)}" width="${bw}" height="${alt(x.v)}" rx="3" class="gra"><title>${mesLongo(x.m)}: ${x.v} adiantada(s) de meses anteriores</title></rect>` : ""}
+    const ct = x.c ? `${prop ? `<rect x="${x1}" y="${y(prop)}" width="${bw}" height="${alt(prop)}" rx="3" class="gr"><title>${mesLongo(x.m)}: ${prop} realizada(s)</title></rect>` : ""}
+      ${x.v ? `<rect x="${x1}" y="${y(x.c)}" width="${bw}" height="${alt(x.v)}" rx="3" class="gra"><title>${mesLongo(x.m)}: ${x.v} adiantada(s), já garantida(s)</title></rect>` : ""}
       <text x="${x1 + bw/2}" y="${y(x.c) - 5}" text-anchor="middle" class="gv">${x.c}</text>` : "";
     return `${cur ? `<rect x="${40 + i*slot + 2}" y="${top - 18}" width="${slot - 4}" height="${h + 52}" rx="6" class="gcur"/>` : ""}${pl}${ct}
       <text x="${40 + i*slot + slot/2}" y="${top + h + 18}" text-anchor="middle" class="gl${cur ? " gb" : ""}">${mesRot(x.m)}</text>`; }).join("");
-  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas no mês</span><span><i class="gra"></i>Adiantadas de meses anteriores</span><span class="tiny muted">Destaque: mês atual</span></div>
+  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas</span><span><i class="gra"></i>Adiantadas (já garantem meses seguintes)</span><span class="tiny muted">Destaque: mês atual</span></div>
   <div class="tablewrap"><svg class="gmeta" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="AEPs planejadas e contabilizadas na meta por mês">
     <line x1="34" x2="${W - 6}" y1="${top + h}" y2="${top + h}" class="gaxis"/>${barras}</svg></div>
   <div class="tablewrap"><table class="list mtab"><thead><tr><th>Mês</th>${D.acum.map(x => `<th class="num${x.m === D.atual ? " cur" : ""}">${mesRot(x.m)}</th>`).join("")}</tr></thead><tbody>
     <tr><td>Planejadas</td>${D.acum.map(x => `<td class="num">${x.p}</td>`).join("")}</tr>
     <tr><td><b>Contam na meta</b></td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.c < x.p ? " neg" : ""}"><b>${x.m > D.atual && !x.c ? "" : x.c}</b></td>`).join("")}</tr>
-    <tr><td class="tiny muted">adiantadas de meses anteriores</td>${D.acum.map(x => `<td class="num tiny muted">${x.v || ""}</td>`).join("")}</tr>
-    <tr><td class="tiny muted">realizadas no mês (data da avaliação)</td>${D.acum.map(x => `<td class="num tiny muted">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
     <tr><td>Acumulado planejado</td>${D.acum.map(x => `<td class="num">${x.pa}</td>`).join("")}</tr>
     <tr><td>Acumulado na meta</td>${D.acum.map(x => `<td class="num">${x.m > D.atual ? "" : x.ca}</td>`).join("")}</tr>
     <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.pa && x.ca < x.pa ? " neg" : ""}">${x.m > D.atual || !x.pa ? "" : pctTxt(x.ca / x.pa)}</td>`).join("")}</tr>
@@ -2005,14 +2004,14 @@ function vListaPainel(L, D){
       <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
       ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
     </div>
-    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em <span class="faint" style="font-weight:400;text-transform:none">(avaliação em campo)</span></th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em</th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
     ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td>${S.pLista === "concluidas" ? `<td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
     </tbody></table></div></div>`;
 }
 function vContaMeta(a, D){
   const r0 = mesReal(a), r = r0 < D.meses[0] ? D.meses[0] : r0, man = mesContaManual(a), m = D.conta[a.id];
   return `<select data-pconta="${esc(String(a.numero || "").trim())}" aria-label="Mês da meta em que esta AEP conta" style="width:auto;font-size:12.5px;padding:4px 6px">
-    <option value="">Automático${!man ? ` (${esc(mesRot(m))})` : ""}</option>${D.meses.filter(k => k >= r).map(k => `<option value="${k}" ${man === k ? "selected" : ""}>${esc(mesRot(k))}</option>`).join("")}</select>${m > r ? `<div class="tiny" style="color:var(--ok-ink)">adiantada de ${esc(mesRot(r))}</div>` : ""}`;
+    <option value="">Automático${!man ? ` (${esc(mesRot(m))})` : ""}</option>${D.meses.filter(k => k >= r).map(k => `<option value="${k}" ${man === k ? "selected" : ""}>${esc(mesRot(k))}</option>`).join("")}</select>${m > D.atual ? `<div class="tiny" style="color:var(--ok-ink)">adiantada (feita em ${esc(mesRot(r))})</div>` : ""}`;
 }
 const atualizarListaPainel = () => { const b = $("#plistabox"); if (b) { const L = aepsFiltradas(); b.innerHTML = vListaPainel(L, dadosMeta(L)); } };
 /* Mês planejado de uma AEP (etapa 1): fica em config/plano e não altera a situação da AEP */
@@ -2466,12 +2465,37 @@ function moverOrg(id, dir){
 }
 const orgCuida = (nivel, setor) => orgLista().filter(p => p.nivel === nivel && (p.setores || []).includes(setor));
 function orgCadeia(p){ const out = [], vistos = new Set(); while (p && !vistos.has(p.id)){ out.push(p); vistos.add(p.id); p = orgP()[p.chefe]; } return out; }
+const copsoqNome = a => (String(a.meta?.setorCopsoq || "").trim() || setorPeloDepara(a.meta?.setor, a.meta?.area) || "").trim() || "Sem área COPSOQ";
+const chaveCop = nome => "copsoq:" + nome;
+const GER_NIV = ["gerente_area", "gerente"];
+const orgCuidaG = key => orgLista().filter(p => GER_NIV.includes(p.nivel) && (p.setores || []).includes(key));
+/* Gerente de cada área do COPSOQ (lista da unidade, 26/10/2026): usada no botão "Ligar os gerentes da lista" */
+const GERENTES_COPSOQ = { "ALMOX SUPRI": "ADRIANO LOPES DOURADO", "APOIO ADM": "ADRIANO LOPES DOURADO", "LABORATÓRIO": "JOÃO CARLOS SILVEIRA", "COMERC LOG": "JOÃO CARLOS SILVEIRA",
+  "EQM": "LEONARDO AUGUSTO ROCHA", "BENEFICIAMENTO": "DIEGO DE SOUZA ARENARE", "MANUT IND": "MARCELO FERREIRA DE ALMEIDA", "MEIO AMB": "MARCELO DE FREITAS BUFFON",
+  "OP MINA": "ANDERSON CASSIO UMBELINO", "PESSOAS BP": "ADRIANA MARTINS DO AMARAL", "RELAC COMUNIDADE": "FABIANA RIBEIRO LOPES", "SESMT": "GERSON DA COSTA ALECRIM", "TEC CTO MINA": "GABRIEL SILVA" };
+const nomeProprio = n => String(n).toLowerCase().split(/\s+/).filter(Boolean).map((w, i) => i && ["de", "da", "do", "das", "dos", "e"].includes(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+function acharPessoa(nomeCompleto){
+  const tk = new Set(norm(nomeCompleto).split(" "));
+  return orgLista().find(p => norm(p.nome) === norm(nomeCompleto)) || orgLista().find(p => { const t = norm(p.nome).split(" ").filter(Boolean); return t.length >= 2 && t.every(x => tk.has(x)); }) || null;
+}
+function previaGerentesLista(){
+  return Object.entries(GERENTES_COPSOQ).map(([area, nome]) => { const atual = orgCuidaG(chaveCop(area))[0], p = acharPessoa(nome);
+    return { area, nome, atual, p, acao: atual ? "ja" : p ? "ligar" : "criar" }; });
+}
+function aplicarGerentesLista(){
+  let lig = 0; const novos = [];
+  previaGerentesLista().forEach(x => { if (x.acao === "ja") return; let p = acharPessoa(x.nome);
+    if (!p){ const id = "p" + uid(), nome = nomeProprio(x.nome); S.org = { ...S.org, pessoas: { ...orgP(), [id]: { id, nome, nivel: "gerente_area", cargo: "", chefe: "", setores: [], em: new Date().toISOString() } } }; p = orgP()[id]; novos.push(nome); }
+    ligarSetor(chaveCop(x.area), "ger", p.id); lig++; });
+  return { lig, novos };
+}
 function respAEP(a){
-  const setor = setorNome(a), man = orgP()[(S.org.aepSup || {})[a.id]], sup = man || orgCuida("supervisor", setor)[0] || null;
-  const cad = sup ? orgCadeia(sup) : [], nivel = n => cad.find(p => p.nivel === n) || null;
-  const ga = nivel("gerente_area") || orgCuida("gerente_area", setor)[0] || null, cad2 = ga ? orgCadeia(ga) : [];
-  const acima = n => nivel(n) || cad2.find(p => p.nivel === n) || null;
-  return { sup, ga, ger: acima("gerente"), dir: acima("diretor"), manual: !!man };
+  const key = chaveCop(copsoqNome(a)), man = orgP()[(S.org.aepSup || {})[a.id]], sup = man || orgCuida("supervisor", key)[0] || null;
+  const cad = sup ? orgCadeia(sup) : [], g0 = orgCuidaG(key)[0] || null, cadG = g0 ? orgCadeia(g0) : [];
+  const ga = (g0 && g0.nivel === "gerente_area" ? g0 : null) || cad.find(p => p.nivel === "gerente_area") || null;
+  const chain = [...(ga ? orgCadeia(ga) : []), ...cadG, ...cad];
+  const ger = (g0 && g0.nivel === "gerente" ? g0 : null) || chain.find(p => p.nivel === "gerente") || null;
+  return { sup, ga, ger, dir: chain.find(p => p.nivel === "diretor") || null, manual: !!man };
 }
 const iniciais = n => String(n || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("") || "?";
 const orgFoto = (p, cls = "") => p.foto ? `<img class="orgfoto ${cls}" data-foto="${esc(p.foto)}" alt="">` : `<span class="orgfoto ini ${cls}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
@@ -2490,7 +2514,7 @@ function orgArvore(pai){
 function vOrgEditor(p){
   const k = esc(p.id), f = (c, rot, tipo = "text", ph = "") => `<label class="f"><span>${rot}</span><input type="${tipo}" data-org="${k}" data-oc="${c}" value="${esc(p[c] || "")}" placeholder="${esc(ph)}"></label>`;
   const chefes = orgLista().filter(x => x.id !== p.id && (NIVEL_ORD[x.nivel] ?? 9) < (NIVEL_ORD[p.nivel] ?? 9) && !orgCadeia(x).some(y => y.id === p.id));
-  const cuida = p.nivel === "gerente_area" || p.nivel === "supervisor", outros = s => orgCuida(p.nivel, s).filter(x => x.id !== p.id).map(x => x.nome);
+  const cuida = p.nivel === "gerente" || p.nivel === "gerente_area" || p.nivel === "supervisor", outros = s => orgCuida(p.nivel, s).filter(x => x.id !== p.id).map(x => x.nome);
   return `<div class="panel orged" style="margin-bottom:14px"><div class="panel-h"><b>${esc(p.nome || "Nova pessoa")}</b><button class="btn ghost small" type="button" data-act="orgFechar">Fechar</button></div><div class="panel-b">
     <div class="row" style="gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">${orgFoto(p, "g")}
       <span class="row" style="gap:8px;flex-wrap:wrap">${S.assets ? `<label class="btn small" for="orgFotoIn">${p.foto ? "Trocar foto" : "Pôr foto"}</label><input type="file" id="orgFotoIn" data-orgfoto="${k}" accept="image/*" hidden>` : `<span class="tiny muted">Fotos indisponíveis nesta visualização.</span>`}
@@ -2502,19 +2526,38 @@ function vOrgEditor(p){
       <label class="f"><span>Responde a</span><select data-org="${k}" data-oc="chefe"><option value="">Ninguém (topo do organograma)</option>${chefes.map(x => `<option value="${esc(x.id)}" ${p.chefe === x.id ? "selected" : ""}>${esc(x.nome)} (${esc(NIVEL_ROT[x.nivel])})</option>`).join("")}</select></label>
       ${f("email", "E-mail", "email")}${f("telefone", "Telefone ou ramal", "tel")}
     </div>
-    ${cuida ? `<div class="f" style="margin-top:10px"><span>Setores (gerências) que ${p.nivel === "supervisor" ? "supervisiona" : "gerencia"}: as AEPs desses setores ficam ligadas a esta pessoa</span>
-      <div class="orgsetores">${gerencias().map(s => { const o = outros(s); return `<label class="fchip"><input type="checkbox" data-orgsetor="${k}" value="${esc(s)}" ${(p.setores || []).includes(s) ? "checked" : ""}><span>${esc(s)}${o.length ? ` <span class="tiny faint">(também: ${esc(o.join(", "))})</span>` : ""}</span></label>`; }).join("")}</div></div>` : ""}
+    ${cuida ? `<div class="f" style="margin-top:10px"><span>Áreas do COPSOQ ligadas a esta pessoa</span><div class="orgsetores">${(p.setores || []).filter(x => x.startsWith("copsoq:")).length ? (p.setores || []).filter(x => x.startsWith("copsoq:")).map(x => `<span class="chip">${esc(x.slice(7))}</span>`).join("") : `<span class="tiny muted">Nenhuma ainda.</span>`}</div><span class="hint">A ligação é feita na tabela “Áreas do COPSOQ e responsáveis”, abaixo do organograma.</span></div>` : ""}
     <div class="row" style="gap:8px;margin-top:12px">${S.confirm === "orgDel-" + p.id ? `<span class="confirm">Excluir ${esc(p.nome || "esta pessoa")}? Quem responde a ela passa a responder a ${esc(orgP()[p.chefe]?.nome || "ninguém")}. <button class="btn small danger" type="button" data-act="orgDelSim" data-id="${k}">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
       : `<button class="btn small" type="button" data-act="orgMover" data-id="${k}" data-v="-1">◀ Mover para a esquerda</button><button class="btn small" type="button" data-act="orgMover" data-id="${k}" data-v="1">Mover para a direita ▶</button><button class="btn small danger" type="button" data-act="orgDel" data-id="${k}">Excluir pessoa</button>`}</div>
   </div></div>`;
 }
+function ligarSetor(key, grupo, id){
+  const niveis = grupo === "sup" ? ["supervisor"] : GER_NIV, pes = { ...orgP() };
+  Object.values(pes).forEach(p => { if (niveis.includes(p.nivel) && (p.setores || []).includes(key) && p.id !== id) pes[p.id] = { ...p, setores: p.setores.filter(x => x !== key) }; });
+  if (id && pes[id]) pes[id] = { ...pes[id], setores: [...new Set([...(pes[id].setores || []), key])].sort() };
+  S.org = { ...S.org, pessoas: pes }; S.orgDirty = true; clearTimeout(S.orgTimer); S.orgTimer = setTimeout(salvarOrg, 400);
+}
+function areasCopsoq(){
+  const m = new Map(); Object.keys(GERENTES_COPSOQ).forEach(n => m.set(n, 0));
+  Object.values(S.aeps).forEach(a => { const n = copsoqNome(a); m.set(n, (m.get(n) || 0) + 1); });
+  return [...m.entries()].sort((x, y) => x[0].localeCompare(y[0], "pt-BR")).map(([nome, n]) => ({ nome, n }));
+}
 function vOrgSetores(){
-  const G = gerencias();
-  return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Setores e responsáveis</b><span class="tiny muted">${G.filter(s => !orgCuida("supervisor", s).length).length} setor(es) sem supervisor</span></div>
-    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>Setor (gerência das AEPs)</th><th>Gerente de área</th><th>Supervisor</th><th class="num">AEPs</th></tr></thead><tbody>
-    ${G.map(s => { const sup = orgCuida("supervisor", s), ga = orgCuida("gerente_area", s).length ? orgCuida("gerente_area", s) : [...new Set(sup.map(x => orgCadeia(x).find(y => y.nivel === "gerente_area")).filter(Boolean))];
-      return `<tr><td>${esc(s)}</td><td class="small">${ga.length ? ga.map(x => esc(x.nome)).join(", ") : `<span class="faint">—</span>`}</td><td class="small">${sup.length ? sup.map(x => esc(x.nome)).join(", ") : `<span class="plaviso">sem supervisor</span>`}</td><td class="num">${Object.values(S.aeps).filter(a => setorNome(a) === s).length}</td></tr>`; }).join("")}
-    </tbody></table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">Para ligar um setor, abra a pessoa e marque os setores que ela cuida. Numa AEP específica, a etapa 1 permite trocar o supervisor.</p></div>`;
+  const A = areasCopsoq(), gers = orgLista().filter(p => GER_NIV.includes(p.nivel)), sups = orgLista().filter(p => p.nivel === "supervisor");
+  const semG = A.filter(x => !orgCuidaG(chaveCop(x.nome)).length).length, semS = A.filter(x => !orgCuida("supervisor", chaveCop(x.nome)).length).length;
+  const prev = previaGerentesLista(), pend = prev.filter(x => x.acao !== "ja");
+  const sel = (key, grupo, lista, atual) => `<select data-ligasetor="${esc(key)}" data-grupo="${grupo}" aria-label="${grupo === "sup" ? "Supervisor" : "Gerente"} de ${esc(key.slice(7))}" style="font-size:13px;padding:5px 7px">
+    <option value="">${lista.length ? "Escolha" : grupo === "sup" ? "Cadastre supervisores" : "Cadastre gerentes"}</option>${lista.map(p => `<option value="${esc(p.id)}" ${atual && atual.id === p.id ? "selected" : ""}>${esc(p.nome)}${p.cargo ? " · " + esc(p.cargo) : ""}</option>`).join("")}</select>`;
+  return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Áreas do COPSOQ e responsáveis</b><span class="tiny muted">${A.length} área(s) · ${semG} sem gerente · ${semS} sem supervisor</span></div>
+    <div class="panel-b stack tight" style="padding-bottom:0"><p class="small" style="margin:0">Cada AEP pertence a uma área do COPSOQ (pelo DE-PARA do setor e da área da AEP). Escolha o gerente e o supervisor de cada área: as AEPs dela ficam ligadas a essas pessoas.</p>
+      ${pend.length ? (S.confirm === "orgLista"
+        ? `<div class="note"><b>Ligar os gerentes da lista:</b><ul class="avisos">${pend.map(x => `<li>${esc(x.area)} → ${x.acao === "ligar" ? `<b>${esc(x.p.nome)}</b> (já cadastrado)` : `<b>${esc(nomeProprio(x.nome))}</b> (será cadastrado como gerente de área; depois ajuste a foto e a quem responde)`}</li>`).join("")}</ul>
+           <div class="row" style="gap:8px;margin-top:6px"><button class="btn small primary" type="button" data-act="orgListaSim">Ligar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></div></div>`
+        : `<div><button class="btn small primary" type="button" data-act="orgLista">Ligar os gerentes da lista da unidade (${pend.length} área(s))</button></div>`) : ""}</div>
+    <div class="tablewrap"><table class="list orgsettab" style="min-width:640px"><thead><tr><th>Área do COPSOQ</th><th>Gerente</th><th>Supervisor</th><th class="num">AEPs</th></tr></thead><tbody>
+    ${A.map(({ nome, n }) => { const key = chaveCop(nome), g = orgCuidaG(key), sp = orgCuida("supervisor", key);
+      return `<tr class="${!g.length || !sp.length ? "falta" : ""}"><td><b>${esc(nome)}</b></td><td>${sel(key, "ger", gers, g[0])}</td><td>${sel(key, "sup", sups, sp[0])}${sp.length > 1 ? `<div class="tiny faint">também: ${esc(sp.slice(1).map(x => x.nome).join(", "))}</div>` : ""}</td><td class="num">${n}</td></tr>`; }).join("")}
+    </tbody></table></div><p class="tiny muted" style="padding:8px 16px 12px;margin:0">Numa AEP específica, a etapa 1 permite trocar o supervisor.</p></div>`;
 }
 /* Organograma em árvore (de cima para baixo, como o organograma da empresa) ou em lista (melhor no celular) */
 function orgNo(p){
@@ -2554,7 +2597,7 @@ function atualizarOrgParcial(){ const a = $("#orgarv"); if (a) { a.innerHTML = v
 function mudarOrg(id, campo, v){
   const p = { ...(orgP()[id] || { id }) };
   p[campo] = v; p.em = new Date().toISOString();
-  if (campo === "nivel" && v !== "gerente_area" && v !== "supervisor") p.setores = [];
+  if (campo === "nivel" && v === "diretor") p.setores = [];
   S.org = { ...S.org, pessoas: { ...orgP(), [id]: p } };
   S.orgDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.orgTimer); S.orgTimer = setTimeout(salvarOrg, 600);
 }
@@ -2587,9 +2630,9 @@ async function excluirPessoaOrg(id){
 /* Etapa 1 da AEP: supervisor responsável (automático pelo setor ou escolhido); fica no organograma, não na AEP */
 function vSupAEP(a){
   const sups = orgLista().filter(p => p.nivel === "supervisor"); if (!sups.length) return "";
-  const auto = orgCuida("supervisor", setorNome(a))[0], man = (S.org.aepSup || {})[a.id] || "", r = respAEP(a);
+  const auto = orgCuida("supervisor", chaveCop(copsoqNome(a)))[0], man = (S.org.aepSup || {})[a.id] || "", r = respAEP(a);
   return `<label class="f span2"><span>Supervisor responsável (organograma)</span><select data-aepsup="${esc(a.id)}">
-    <option value="">Automático pelo setor${auto ? ` (${esc(auto.nome)})` : " (setor sem supervisor)"}</option>${sups.map(p => `<option value="${esc(p.id)}" ${man === p.id ? "selected" : ""}>${esc(p.nome)}</option>`).join("")}</select>
+    <option value="">Automático pela área do COPSOQ${auto ? ` (${esc(auto.nome)})` : " (área sem supervisor)"}</option>${sups.map(p => `<option value="${esc(p.id)}" ${man === p.id ? "selected" : ""}>${esc(p.nome)}</option>`).join("")}</select>
     <span class="hint">${r.ga ? `Gerente de área: ${esc(r.ga.nome)}. ` : ""}Trocar aqui não altera a situação da AEP.</span></label>`;
 }
 /* Responsáveis da área (aba Gerências) */
@@ -3829,6 +3872,7 @@ function campo(e, isChange){
   if (el.dataset.org){ const id = el.dataset.org, c = el.dataset.oc, texto = el.tagName === "INPUT" && el.type !== "checkbox";
     if (texto){ if (isChange){ atualizarOrgParcial(); return; } mudarOrg(id, c, el.value); return; }
     if (!isChange) return; mudarOrg(id, c, el.value); render(); return; }
+  if (el.dataset.ligasetor !== undefined){ if (!isChange) return; ligarSetor(el.dataset.ligasetor, el.dataset.grupo, el.value); atualizarOrgParcial(); { const ed = $(".orged"), p = S.orgSel && orgP()[S.orgSel]; if (ed && p) ed.outerHTML = vOrgEditor(p); } toast(el.value ? "Área ligada." : "Área sem responsável."); return; }
   if (el.dataset.orgsetor){ if (!isChange) return; const id = el.dataset.orgsetor, p = orgP()[id]; if (!p) return; const set = new Set(p.setores || []); el.checked ? set.add(el.value) : set.delete(el.value); mudarOrg(id, "setores", [...set].sort()); render(); return; }
   if (el.dataset.orgfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoOrg(el.dataset.orgfoto, f); return; }
   if (el.dataset.aepsup){ if (!isChange) return; const sup = { ...(S.org.aepSup || {}) }; if (el.value) sup[el.dataset.aepsup] = el.value; else delete sup[el.dataset.aepsup];
@@ -3959,6 +4003,8 @@ document.addEventListener("click", async e => {
     case "orgSel": { const sx = ($("#orgwrap") || {}).scrollLeft || 0; S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); const w = $("#orgwrap"); if (w) w.scrollLeft = sx; if (S.orgSel) window.scrollTo({ top: 0, behavior: "smooth" }); break; }
     case "orgFechar": S.orgSel = null; S.confirm = null; render(); break;
     case "orgNova": novaPessoaOrg(); break;
+    case "orgLista": S.confirm = "orgLista"; atualizarOrgParcial(); break;
+    case "orgListaSim": { const r = aplicarGerentesLista(); S.confirm = null; await salvarOrg(); render(); toast(`${r.lig} área(s) ligada(s)${r.novos.length ? `; cadastrado(s): ${r.novos.join(", ")}` : ""}.`); break; }
     case "orgMover": moverOrg(d.id, Number(d.v)); break;
     case "orgVista": S.orgVista = d.v; render(); break;
     case "orgZoom": { const z = S.orgZoomAtual || 1; S.orgZoom = d.v === "fit" ? "fit" : d.v === "+" ? Math.min(1.6, +(z + .1).toFixed(2)) : Math.max(.3, +(z - .1).toFixed(2)); ajustarOrg(); break; }
