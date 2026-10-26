@@ -129,7 +129,7 @@ div.f > span em{font-style:normal;color:var(--bad-ink)}
 div.f > .seg{align-self:flex-start;max-width:100%;flex-wrap:wrap}
 label.f > span em{font-style:normal;color:var(--bad-ink)}
 .hint{font-size:11.5px;color:var(--ink-3);line-height:1.45}
-input[type=text],input[type=number],input[type=date],select,textarea{width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:8px 10px;min-width:0}
+input[type=text],input[type=number],input[type=date],input[type=email],input[type=tel],select,textarea{width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:8px 10px;min-width:0}
 textarea{resize:vertical;min-height:72px;line-height:1.5}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .grid{display:grid;gap:14px}
@@ -282,6 +282,7 @@ table.list tr:last-child td{border-bottom:0}
 .glegend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 .glegend i.gp,.gmeta .gp{fill:var(--rule-strong);background:var(--rule-strong)}
 .glegend i.gr,.gmeta .gr{fill:var(--accent);background:var(--accent)}
+.glegend i.gra,.gmeta .gra{fill:color-mix(in srgb,var(--accent) 45%,var(--surface));background:color-mix(in srgb,var(--accent) 45%,var(--surface))}
 .gmeta{display:block;max-width:none}
 .gmeta .gcur{fill:var(--accent-soft)}
 .gmeta .gaxis{stroke:var(--rule-strong);stroke-width:1}
@@ -362,6 +363,21 @@ details.panel[open]>summary b::before{content:"▾ "}
 .taxmud{padding:6px 0;border-bottom:1px solid var(--rule)}.taxmud ul{margin:4px 0 0 18px;padding:0}.taxmud li{font-size:13px;margin:2px 0}
 .taxde{color:var(--ink-3);text-decoration:line-through}.taxpara{font-weight:600}
 .taxver{padding:8px 0;border-bottom:1px solid var(--rule)}.taxhist>summary{list-style:none}.taxhist>summary::-webkit-details-marker{display:none}
+.orgtree{list-style:none;margin:0;padding:0 0 0 22px;border-left:2px solid var(--rule)}
+.orgtree:first-child{padding-left:0;border-left:0}
+.orgtree li{margin:8px 0;position:relative}
+.orgtree .orgtree li::before{content:"";position:absolute;left:-22px;top:28px;width:18px;border-top:2px solid var(--rule)}
+.orgcard{display:inline-flex;gap:10px;align-items:center;text-align:left;padding:8px 12px 8px 8px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;max-width:100%}
+.orgcard:hover,.orgcard.sel{border-color:var(--accent)}.orgcard.sel{background:var(--accent-soft)}
+.orgcard.n-diretor{border-left:4px solid var(--accent)}.orgcard.n-gerente{border-left:4px solid var(--ink-3)}
+.orgtx{display:flex;flex-direction:column;gap:1px;min-width:0}.orgtx b{font-size:14px}
+.orgfoto{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:var(--surface-2)}
+.orgfoto.ini{display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--ink-2);border:1px solid var(--rule)}
+.orgfoto.g{width:72px;height:72px;font-size:22px}
+.orgsetores{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.orgresp{display:flex;flex-wrap:wrap;gap:14px}.orgmini{display:flex;gap:10px;align-items:center;min-width:220px}.orgmini>span{display:flex;flex-direction:column}
+.avisoink{color:var(--warn-ink);font-weight:600;margin-top:3px}
+ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -442,8 +458,7 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
       <button type="button" data-go="inventario" id="nav-inventario"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="7" cy="6" r="1.2"/><circle cx="7" cy="12" r="1.2"/><circle cx="7" cy="18" r="1.2"/></svg><span>Inventário</span></button>
       <button type="button" data-go="melhorias" id="nav-melhorias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>Plano de ação</span></button>
       <button type="button" data-go="painel" id="nav-painel"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Meu painel</span></button>
-      <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button>
-      <button type="button" data-go="pendencias" id="nav-pendencias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>Pendências</span></button>
+      <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button><button type="button" data-go="organograma" id="nav-organograma"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-3h14v3"/></svg><span>Organograma</span></button>
       <button type="button" data-go="copsoq" id="nav-copsoq"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c.8-.3 1.6-.5 2.5-.5 2.8 0 5 2.2 5 5"/></svg><span>COPSOQ por setor</span></button>
       <button type="button" data-go="criterios" id="nav-criterios"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg><span>Critérios do GRO</span></button><button type="button" data-go="taxonomia" id="nav-taxonomia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Taxonomia</span></button>
       <button type="button" data-go="config" id="nav-config"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Unidade</span></button>
@@ -931,7 +946,8 @@ function linhasMelhorias(l){
     <td>${oQueFazer(m)}</td>
     <td><input type="text" class="sig" data-mel="${esc(m.key)}" data-mc="sig" value="${esc(m.sig)}" placeholder="Nº SIG" aria-label="Número da ação no SIG"></td>
     <td>${m.kind === "risco" ? prioFixa(m) : selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</td>
-    <td><input type="text" data-mel="${esc(m.key)}" data-mc="resp" value="${esc(m.resp)}" placeholder="Responsável"></td>
+    <td>${(sug => { const pp = pessoaPorNome(m.resp);
+      return `<input type="text" list="orgnomes" data-mel="${esc(m.key)}" data-mc="resp" value="${esc(m.resp)}" placeholder="${sug ? esc("Sugestão: " + sug.nome) : "Responsável"}">${!m.resp && sug ? `<button class="btn ghost small" type="button" data-act="usarResp" data-key="${esc(m.key)}" data-nome="${esc(sug.nome)}" style="padding:0">usar ${esc(sug.nome)}</button>` : ""}${pp ? `<div class="tiny faint">${orgContato(pp) || esc(NIVEL_ROT[pp.nivel])}</div>` : ""}`; })(respSugerido(m))}</td>
     <td><input type="date" data-mel="${esc(m.key)}" data-mc="prazo" value="${esc(m.prazo)}">${m.atrasada ? `<div class="tiny" style="color:var(--bad-ink);font-weight:700">Prazo vencido</div>` : ""}</td>
     <td>${selMel(m.key, "sit", MEL_SIT, m.sit)}</td></tr>
     ${S.melAberto === m.key ? `<tr class="pldetrow"><td colspan="8">${vPlanoDetalhe(m)}</td></tr>` : ""}`).join("");
@@ -955,7 +971,7 @@ function vMelhorias(){
     <p class="tiny muted" style="margin:0">Resumo das gerências selecionadas</p><div id="melstats">${melStatsHTML()}</div>
     <p class="tiny muted" id="melcont">${contPlanoTxt(l)}</p>
     <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP</th><th>Cargo</th><th>O que fazer</th><th>Nº SIG</th><th>Prioridade</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
-    <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>
+    <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>${orgDatalist()}
     <p class="tiny muted" style="margin-top:8px">A prioridade das ações dos riscos vem da categoria no Inventário (P1 = alta, P2 = média). A das melhorias você escolhe. Ao marcar “Concluída”, a data de conclusão é preenchida com o dia de hoje; registre a evidência e, depois, a eficácia.</p>
   </div></div>`;
 }
@@ -1292,6 +1308,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
+  org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
   invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
@@ -1357,6 +1374,8 @@ async function iniciar(){
   if (!db){ S.carregado = true; setSaveState("Modo sem banco — nada é salvo"); render(); return; }
   try { S.assets = await window.claude.use("assets"); } catch(e){ S.assets = null; }
   try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
+  db.doc("config/organograma").onSnapshot(d => { if (S.orgDirty) return; const x = d.exists ? (d.data() || {}) : {}; S.org = { pessoas: x.pessoas || {}, aepSup: x.aepSup || {} };
+    if (S.view === "organograma" || S.view === "gerencia" || S.view === "melhorias") render(); }, () => {});
   db.doc("config/taxonomia").onSnapshot(d => { if (S.taxDirty) return; const x = d.exists ? (d.data() || {}) : {};
     S.tax = { versao: x.versao || 1, em: x.em || "", itens: x.itens || {}, historico: x.historico || [] }; S.taxDraft = x.rascunho || null; aplicarTaxonomia(S.tax.itens);
     if (S.view === "aep") renderStep(); else if (S.view !== "doc" && S.view !== "campo") render(); }, () => {});
@@ -1374,7 +1393,7 @@ async function iniciar(){
     else if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
     if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
   }, () => {});
-  db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; if (S.view === "painel") render(); }, () => {});
+  db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; S.planoConta = d.exists ? (d.data().conta || {}) : {}; if (S.view === "painel") render(); }, () => {});
   db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {};
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
@@ -1459,16 +1478,18 @@ function alertaAET(a){
    NAVEGAÇÃO
    ========================================================================= */
 async function ir(view, extra){
+  if (view === "pendencias") view = "home";
   if (S.view === "aep") await salvarAEP();
   if (S.view === "copsoq" && S.editArea) await salvarArea();
   if (S.view === "config") await salvarConfig();
   if (S.view === "campo") await salvarAEP();
   if (S.melDirty) await salvarMelhorias();
   if (S.taxDirty) await salvarTaxRascunho();
+  if (S.orgDirty) await salvarOrg();
   if (S.planoDirty) await salvarPlano();
   if (Object.keys(S.invPend).length) await salvarInventario();
   S.view = view; S.confirm = null;
-  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias" || view === "inventario" || view === "criterios" || view === "taxonomia") { S.draft = null; S.aepId = null; S.editHz = null; }
+  if (view === "home" || view === "painel" || view === "gerencia" || view === "campo" || view === "melhorias" || view === "pendencias" || view === "inventario" || view === "criterios" || view === "taxonomia" || view === "organograma") { S.draft = null; S.aepId = null; S.editHz = null; }
   if (view !== "copsoq") S.editArea = null;
   if (view !== "config") S.cfgDraft = null;
   Object.assign(S, extra||{});
@@ -1493,6 +1514,7 @@ function render(){
   else if (S.view === "inventario") app.innerHTML = vInventario();
   else if (S.view === "criterios") app.innerHTML = vCriterios();
   else if (S.view === "taxonomia") app.innerHTML = vTaxonomia();
+  else if (S.view === "organograma") app.innerHTML = vOrganograma();
   else if (S.view === "campo") { app.innerHTML = S.draft ? vCampoShell() : vCampoLista(); if (S.draft) renderCampo(); }
   else if (S.view === "aep") { app.innerHTML = vEditorShell(); renderTitulo(); renderBanner(); renderRail(); renderStep(); renderAside(); }
   else if (S.view === "doc") { app.innerHTML = vDoc(); montarPrevia(); }
@@ -1506,6 +1528,7 @@ function listaFiltrada(){
   return Object.values(S.aeps)
     .filter(a => !S.fStatus.length || S.fStatus.includes(a.status||"nao_iniciada"))
     .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .filter(a => !S.fAviso || avisosAEP(a).length || alertaAET(a))
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t))
     .sort((a,b) => idNum(a) - idNum(b));
 }
@@ -1517,7 +1540,7 @@ function linhasHome(lista){
       <td class="mono">${esc(a.numero)}</td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
-      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}</td>
+      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.join(" · "))}">${av.length} aviso(s) de conferência</div>` : "")(avisosAEP(a))}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
       <td class="num">${ckLista(a).filter(x => x.c.r === "sim").length || "—"}</td></tr>`;
   }).join("");
@@ -1572,7 +1595,7 @@ function vHome(){
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
     <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
-    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
+    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}<label class="fchip"><input type="checkbox" data-faviso="1" ${S.fAviso ? "checked" : ""}><span>Com aviso <b class="num">${todas.filter(a => avisosAEP(a).length || alertaAET(a)).length}</b></span></label></div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span></span></div>
@@ -1774,16 +1797,32 @@ function mesReal(a){
 }
 const mesesPlano = () => [...new Set([...Object.values(PLANO_PADRAO), ...Object.values(S.plano||{})])].filter(Boolean).sort();
 const aepsFiltradas = () => Object.values(S.aeps).filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
+/* Contabilização na meta do SIG: cada AEP realizada conta no primeiro mês, a partir do mês em que foi realizada
+   (primeira conclusão), que ainda tem vaga na meta. O que passa da meta do mês vira adiantamento e conta nos meses seguintes.
+   Nunca conta num mês anterior ao da realização. O mês pode ser escolhido à mão em config/plano.conta, com a mesma regra. */
+const mesContaManual = a => (S.planoConta || {})[String(a.numero || "").trim()] || "";
+const dataReal = a => String(a.concluidoPrimeiro || a.concluidoEm || "");
+function alocarMeta(L, meses, plan){
+  const ini = meses[0], fim = meses[meses.length - 1], usado = Object.fromEntries(meses.map(m => [m, 0])), conta = {};
+  const R = L.filter(a => mesReal(a)).map(a => { const r = mesReal(a); return { a, r: r < ini ? ini : r > fim ? fim : r }; })
+    .sort((x, y) => x.r.localeCompare(y.r) || dataReal(x.a).localeCompare(dataReal(y.a)) || idNum(x.a) - idNum(y.a));
+  R.forEach(x => { const m = mesContaManual(x.a); if (m && m >= x.r && m in usado){ conta[x.a.id] = m; usado[m]++; } });
+  R.forEach(x => { if (conta[x.a.id]) return; const m = meses.find(k => k >= x.r && usado[k] < (plan[k] || 0)) || x.r; conta[x.a.id] = m; usado[m]++; });
+  return { conta, real: Object.fromEntries(R.map(x => [x.a.id, x.r])) };
+}
 function dadosMeta(L){
   const meses = mesesPlano(), ini = meses[0], fim = meses[meses.length-1], hoje = hojeISO().slice(0,7);
   const atual = hoje < ini ? ini : hoje > fim ? fim : hoje;
   const plan = Object.fromEntries(meses.map(m => [m, 0])), real = Object.fromEntries(meses.map(m => [m, 0]));
   L.forEach(a => { const p = mesPlan(a); if (p in plan) plan[p]++; const r = mesReal(a); if (r) real[r < ini ? ini : r > fim ? fim : r]++; });
-  let pa = 0, ra = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; return { m, p: plan[m], r: real[m], pa, ra }; });
-  const at = acum.find(x => x.m === atual) || { p: 0, r: 0, pa: 0, ra: 0 };
+  const AL = alocarMeta(L, meses, plan), cont = Object.fromEntries(meses.map(m => [m, 0])), vinda = Object.fromEntries(meses.map(m => [m, 0]));
+  Object.entries(AL.conta).forEach(([id, m]) => { cont[m]++; if (AL.real[id] < m) vinda[m]++; });
+  let pa = 0, ra = 0, ca = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; ca += cont[m]; return { m, p: plan[m], r: real[m], c: cont[m], v: vinda[m], pa, ra, ca }; });
+  const at = acum.find(x => x.m === atual) || { p: 0, r: 0, c: 0, v: 0, pa: 0, ra: 0, ca: 0 };
   const feitas = L.filter(a => mesReal(a)).length, faltam = L.length - feitas, mesesRest = meses.filter(m => m >= atual).length;
-  return { meses, atual, hoje, acum, at, feitas, faltam,
-    indice: at.pa ? at.ra / at.pa : null,
+  const garantidas = Object.values(AL.conta).filter(m => m > atual).length;
+  return { meses, atual, hoje, acum, at, feitas, faltam, conta: AL.conta, garantidas,
+    indice: at.pa ? at.ca / at.pa : null,
     necessario: mesesRest ? faltam / mesesRest : null,
     doMes: L.filter(a => mesPlan(a) === atual).sort((x, y) => (mesReal(x) ? 1 : 0) - (mesReal(y) ? 1 : 0) || idNum(x) - idNum(y)),
     atrasadas: L.filter(a => mesPlan(a) && mesPlan(a) < atual && !mesReal(a)).sort((x, y) => mesPlan(x).localeCompare(mesPlan(y)) || idNum(x) - idNum(y)),
@@ -1793,23 +1832,26 @@ function dadosMeta(L){
 const pctTxt = v => v == null ? "—" : `${(v*100).toFixed(1).replace(".", ",")}%`;
 function graficoMeta(D){
   const n = D.acum.length, bw = 16, gap = 4, slot = 56, top = 26, h = 150, W = 40 + n * slot, H = top + h + 34;
-  const max = Math.max(1, ...D.acum.map(x => Math.max(x.p, x.r)));
-  const y = v => top + h - (v / max) * h;
-  const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual;
-    const bar = (xx, v, cls) => v ? `<rect x="${xx}" y="${y(v)}" width="${bw}" height="${top + h - y(v)}" rx="3" class="${cls}"><title>${mesLongo(x.m)}: ${cls === "gp" ? "planejadas" : "realizadas"} ${v}</title></rect>
-      <text x="${xx + bw/2}" y="${y(v) - 5}" text-anchor="middle" class="gv">${v}</text>` : "";
-    return `${cur ? `<rect x="${40 + i*slot + 2}" y="${top - 18}" width="${slot - 4}" height="${h + 52}" rx="6" class="gcur"/>` : ""}
-      ${bar(x0, x.p, "gp")}${bar(x0 + bw + gap, x.r, "gr")}
+  const max = Math.max(1, ...D.acum.map(x => Math.max(x.p, x.c)));
+  const y = v => top + h - (v / max) * h, alt = v => (v / max) * h;
+  const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual, x1 = x0 + bw + gap, prop = x.c - x.v;
+    const pl = x.p ? `<rect x="${x0}" y="${y(x.p)}" width="${bw}" height="${alt(x.p)}" rx="3" class="gp"><title>${mesLongo(x.m)}: planejadas ${x.p}</title></rect><text x="${x0 + bw/2}" y="${y(x.p) - 5}" text-anchor="middle" class="gv">${x.p}</text>` : "";
+    const ct = x.c ? `${prop ? `<rect x="${x1}" y="${y(prop)}" width="${bw}" height="${alt(prop)}" rx="3" class="gr"><title>${mesLongo(x.m)}: ${prop} realizada(s) no próprio mês</title></rect>` : ""}
+      ${x.v ? `<rect x="${x1}" y="${y(x.c)}" width="${bw}" height="${alt(x.v)}" rx="3" class="gra"><title>${mesLongo(x.m)}: ${x.v} adiantada(s) de meses anteriores</title></rect>` : ""}
+      <text x="${x1 + bw/2}" y="${y(x.c) - 5}" text-anchor="middle" class="gv">${x.c}</text>` : "";
+    return `${cur ? `<rect x="${40 + i*slot + 2}" y="${top - 18}" width="${slot - 4}" height="${h + 52}" rx="6" class="gcur"/>` : ""}${pl}${ct}
       <text x="${40 + i*slot + slot/2}" y="${top + h + 18}" text-anchor="middle" class="gl${cur ? " gb" : ""}">${mesRot(x.m)}</text>`; }).join("");
-  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas</span><span class="tiny muted">Destaque: mês atual</span></div>
-  <div class="tablewrap"><svg class="gmeta" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="AEPs planejadas e realizadas por mês">
+  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas no mês</span><span><i class="gra"></i>Adiantadas de meses anteriores</span><span class="tiny muted">Destaque: mês atual</span></div>
+  <div class="tablewrap"><svg class="gmeta" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="AEPs planejadas e contabilizadas na meta por mês">
     <line x1="34" x2="${W - 6}" y1="${top + h}" y2="${top + h}" class="gaxis"/>${barras}</svg></div>
   <div class="tablewrap"><table class="list mtab"><thead><tr><th>Mês</th>${D.acum.map(x => `<th class="num${x.m === D.atual ? " cur" : ""}">${mesRot(x.m)}</th>`).join("")}</tr></thead><tbody>
     <tr><td>Planejadas</td>${D.acum.map(x => `<td class="num">${x.p}</td>`).join("")}</tr>
-    <tr><td>Realizadas</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.r < x.p ? " neg" : ""}">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
+    <tr><td><b>Contam na meta</b></td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.c < x.p ? " neg" : ""}"><b>${x.m > D.atual && !x.c ? "" : x.c}</b></td>`).join("")}</tr>
+    <tr><td class="tiny muted">adiantadas de meses anteriores</td>${D.acum.map(x => `<td class="num tiny muted">${x.v || ""}</td>`).join("")}</tr>
+    <tr><td class="tiny muted">realizadas no mês (data real)</td>${D.acum.map(x => `<td class="num tiny muted">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
     <tr><td>Acumulado planejado</td>${D.acum.map(x => `<td class="num">${x.pa}</td>`).join("")}</tr>
-    <tr><td>Acumulado realizado</td>${D.acum.map(x => `<td class="num">${x.m > D.hoje ? "" : x.ra}</td>`).join("")}</tr>
-    <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.hoje && x.pa && x.ra < x.pa ? " neg" : ""}">${x.m > D.hoje || !x.pa ? "" : pctTxt(x.ra / x.pa)}</td>`).join("")}</tr>
+    <tr><td>Acumulado na meta</td>${D.acum.map(x => `<td class="num">${x.m > D.atual ? "" : x.ca}</td>`).join("")}</tr>
+    <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.pa && x.ca < x.pa ? " neg" : ""}">${x.m > D.atual || !x.pa ? "" : pctTxt(x.ca / x.pa)}</td>`).join("")}</tr>
   </tbody></table></div>`;
 }
 const linhaAEP = (a, extra) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td>${extra}</td></tr>`;
@@ -1817,22 +1859,22 @@ function painelCorpo(){
   const L = aepsFiltradas(), tot = L.length, c = st => L.filter(a => (a.status||"nao_iniciada") === st).length;
   const concl = c("concluida"), and = c("andamento"), nao = c("nao_iniciada"), rev = c("revisao");
   const D = dadosMeta(L), mesTxt = mesLongo(D.atual);
-  const pm = D.at.p ? Math.min(1, D.at.r / D.at.p) : 0;
+  const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
   const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
   return `
   <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs ${S.fSetor.length ? "nas gerências selecionadas" : "cadastradas"}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas</span></div><div class="stat"><b>${concl}</b><span>Concluídas</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div><div class="stat"><b>${rev}</b><span>Em revisão</span></div></div>
   <div class="grid g4 metacards">
-    <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.r}</b> de ${D.at.p}</p>
-      <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.r}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
-      <span class="tiny muted">${D.at.r >= D.at.p ? "Meta do mês atingida." : `Faltam ${D.at.p - D.at.r} para a meta do mês.`}</span></div></div>
+    <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
+      <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
+      <span class="tiny muted">${D.at.c >= D.at.p ? "Meta do mês atingida." : `Faltam ${D.at.p - D.at.c} para a meta do mês.`}${D.garantidas ? ` <b class="pos">+${D.garantidas} adiantada(s)</b> já contam para os próximos meses.` : ""}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Atendimento acumulado</span><p class="mbig"><b class="${D.indice != null && D.indice < 1 ? "neg" : "pos"}">${pctTxt(D.indice)}</b></p>
-      <span class="tiny muted">${D.at.ra} realizadas de ${D.at.pa} planejadas até ${esc(mesTxt)}</span></div></div>
+      <span class="tiny muted">${D.at.ca} na meta de ${D.at.pa} planejadas até ${esc(mesTxt)}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Atrasadas</span><p class="mbig"><b class="${D.atrasadas.length ? "neg" : "pos"}">${D.atrasadas.length}</b></p>
       <span class="tiny muted">planejadas para meses anteriores e ainda não realizadas${D.adiantadas ? ` · ${D.adiantadas} realizada(s) antes do mês previsto` : ""}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Para fechar o plano</span><p class="mbig"><b>${D.faltam}</b> AEPs</p>
       <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
   </div>
-  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x realizadas por mês</b><span class="tiny muted">plano PLA202609SA20-30 · realizada = concluída ou em revisão, no mês da primeira conclusão</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
+  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x contam na meta, por mês</b><span class="tiny muted">plano PLA202609SA20-30 · o que passa da meta de um mês conta nos meses seguintes, nunca antes do mês em que a AEP foi realizada</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
   ${vRiscosPainel(L)}
   <div class="panel" id="plistabox">${vListaPainel(L, D)}</div>
 
@@ -1876,16 +1918,41 @@ function vPendencias(){
   </div>`;
 }
 function vPainel(){
-  return `<div class="pagehead"><div><h1>Meu painel</h1><p>Volume de AEPs realizadas e meta do plano PLA202609SA20-30 (SIG). Para mostrar à gerência, use a aba Gerências.</p></div></div>
+  return `<div class="pagehead"><div><h1>Meu painel</h1><p>Volume de AEPs realizadas e meta do plano PLA202609SA20-30 (SIG). Para mostrar à gerência, use a aba Gerências.</p></div>
+    <div class="row"><button class="btn" type="button" data-act="pdfMeta" id="btnPDFmeta">PDF: acompanhamento da meta</button></div></div>
   <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}</div>
   <div id="painelcorpo">${painelCorpo()}</div>`;
 }
+async function gerarPDFMeta(){
+  const btn = $("#btnPDFmeta"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
+  try {
+    const L = aepsFiltradas(), D = dadosMeta(L), mesTxt = mesLongo(D.atual), ger = S.fSetor.length ? rotuloSetores(S.fSetor) : "Todas as gerências";
+    const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
+    const nome = nomeArquivo(`Acompanhamento da meta de AEP - ${mesTxt} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const css = `@page{size:A4 landscape;margin:12mm}body{font:10pt/1.4 Arial,sans-serif;color:#222}h1{font-size:16pt;margin:0}p{margin:2px 0 8px}
+      .cards{display:flex;gap:10px;margin:10px 0}.card{flex:1;border:1px solid #ddd;border-radius:6px;padding:8px 10px}.card b.big{font-size:20pt;display:block}.card span{font-size:8.5pt;color:#555}
+      .gmeta .gp{fill:#c9c9c9}.gmeta .gr{fill:#E8501E}.gmeta .gra{fill:#F4A27F}.gmeta .gcur{fill:#FDEEE8}.gmeta .gaxis{stroke:#999}.gmeta .gv{font-size:10px;font-weight:700;fill:#333}.gmeta .gl{font-size:10px;fill:#666}.gmeta .gl.gb{font-weight:700;fill:#222}
+      .glegend{display:flex;gap:16px;font-size:9pt;margin:4px 0}.glegend i{display:inline-block;width:10px;height:10px;margin-right:5px}.glegend i.gp{background:#c9c9c9}.glegend i.gr{background:#E8501E}.glegend i.gra{background:#F4A27F}.tiny{font-size:8pt}.muted{color:#666}
+      table{border-collapse:collapse;width:100%;font-size:8.5pt}th,td{border:1px solid #ddd;padding:3px 5px;text-align:right}td:first-child,th:first-child{text-align:left}th.cur{color:#E8501E}.neg{color:#b42318}
+      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:8px}.tablewrap{overflow:visible}svg{max-width:100%;height:auto}`;
+    const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
+      <div class="head"><div><h1>Acompanhamento da meta de AEP</h1><p>Plano PLA202609SA20-30 (SIG) · ${esc(ger)} · posição em ${new Date().toLocaleDateString("pt-BR")}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
+      <div class="cards"><div class="card"><span>Meta de ${esc(mesTxt)}</span><b class="big">${D.at.c} de ${D.at.p}</b><span>${D.at.c >= D.at.p ? "meta do mês atingida" : `faltam ${D.at.p - D.at.c}`}</span></div>
+        <div class="card"><span>Atendimento acumulado até ${esc(mesTxt)}</span><b class="big">${pctTxt(D.indice)}</b><span>${D.at.ca} de ${D.at.pa} planejadas</span></div>
+        <div class="card"><span>Adiantadas para os próximos meses</span><b class="big">${D.garantidas}</b><span>realizadas além da meta, já contam nos meses seguintes</span></div>
+        <div class="card"><span>Para fechar o plano</span><b class="big">${D.faltam}</b><span>AEPs a realizar</span></div></div>
+      ${graficoMeta(D)}
+      <p class="tiny muted" style="margin-top:8px">Regra de contagem: cada AEP conta na meta do mês em que foi realizada; o que passa da meta do mês conta como adiantamento nos meses seguintes, nunca em mês anterior ao da realização. A data real de conclusão de cada AEP fica registrada no sistema.</p></body></html>`;
+    await imprimirHTML(html, nome);
+  } catch(e){ toast("Não foi possível preparar o PDF."); }
+  finally { const b = $("#btnPDFmeta"); if (b){ b.disabled = false; b.textContent = "PDF: acompanhamento da meta"; } }
+}
 /* Lista do painel: previstas, concluídas, em andamento, em revisão, atrasadas ou todas */
-const P_LISTAS = [["previstas","Previstas"],["concluidas","Realizadas"],["andamento","Em andamento"],["revisao","Em revisão"],["atrasadas","Atrasadas"],["todas","Todas"]];
+const P_LISTAS = [["previstas","Previstas"],["concluidas","Contam na meta"],["andamento","Em andamento"],["revisao","Em revisão"],["atrasadas","Atrasadas"],["todas","Todas"]];
 function listaPainel(L, D, tipo, mes){
   switch (tipo){
     case "previstas": return L.filter(a => mes ? mesPlan(a) === mes : !!mesPlan(a));
-    case "concluidas": return L.filter(a => mesReal(a) && (!mes || mesReal(a) === mes));
+    case "concluidas": return L.filter(a => mesReal(a) && (!mes || D.conta[a.id] === mes));
     case "andamento": return L.filter(a => a.status === "andamento");
     case "revisao": return L.filter(a => a.status === "revisao");
     case "atrasadas": return D.atrasadas;
@@ -1897,16 +1964,21 @@ function vListaPainel(L, D){
   const l = listaPainel(L, D, S.pLista, comMes ? mes : "").slice().sort((x, y) => (mesPlan(x) || "9").localeCompare(mesPlan(y) || "9") || idNum(x) - idNum(y));
   const conta = t => listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? mes : "").length;
   const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : ""; };
-  const tit = { previstas: `Previstas ${mes ? "para " + mesLongo(mes) : "no plano"}`, concluidas: `Realizadas ${mes ? "em " + mesLongo(mes) : "no total"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou e não foi realizada)", todas: "Todas as AEPs" }[S.pLista];
+  const tit = { previstas: `Previstas ${mes ? "para " + mesLongo(mes) : "no plano"}`, concluidas: `Contam na meta ${mes ? "de " + mesLongo(mes) : "(todo o período)"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou e não foi realizada)", todas: "Todas as AEPs" }[S.pLista];
   return `<div class="panel-h" style="flex-wrap:wrap;gap:10px"><b>${esc(tit)}</b><span class="tiny muted">${l.length} AEP(s)</span></div>
   <div class="panel-b stack tight">
     <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
       <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
       ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
     </div>
-    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em</th><th>Situação</th></tr></thead><tbody>
-    ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td><td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em</th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
+    ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td>${S.pLista === "concluidas" ? `<td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
     </tbody></table></div></div>`;
+}
+function vContaMeta(a, D){
+  const r0 = mesReal(a), r = r0 < D.meses[0] ? D.meses[0] : r0, man = mesContaManual(a), m = D.conta[a.id];
+  return `<select data-pconta="${esc(String(a.numero || "").trim())}" aria-label="Mês da meta em que esta AEP conta" style="width:auto;font-size:12.5px;padding:4px 6px">
+    <option value="">Automático${!man ? ` (${esc(mesRot(m))})` : ""}</option>${D.meses.filter(k => k >= r).map(k => `<option value="${k}" ${man === k ? "selected" : ""}>${esc(mesRot(k))}</option>`).join("")}</select>${m > r ? `<div class="tiny" style="color:var(--ok-ink)">adiantada de ${esc(mesRot(r))}</div>` : ""}`;
 }
 const atualizarListaPainel = () => { const b = $("#plistabox"); if (b) { const L = aepsFiltradas(); b.innerHTML = vListaPainel(L, dadosMeta(L)); } };
 /* Mês planejado de uma AEP (etapa 1): fica em config/plano e não altera a situação da AEP */
@@ -1919,7 +1991,7 @@ function vMesPlano(a){
 async function salvarPlano(){
   clearTimeout(S.planoTimer); if (!S.db) { S.planoDirty = false; return; }
   setSaveState("Salvando…");
-  try { await S.db.doc("config/plano").set({ mes: clone(S.plano) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  try { await S.db.doc("config/plano").set({ mes: clone(S.plano), conta: clone(S.planoConta || {}) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
   S.planoDirty = false;
 }
 
@@ -2341,6 +2413,167 @@ async function gerarPDFTax(){
   finally { const b = $("#btnTaxPDF"); if (b) { b.disabled = false; b.textContent = "Salvar em PDF"; } }
 }
 
+/* ---------------- ORGANOGRAMA ----------------
+   config/organograma = { pessoas: { id: { nome, nivel, cargo, email, telefone, foto, chefe, setores[] } }, aepSup: { idAEP: idPessoa } }
+   Cada AEP fica ligada ao supervisor pelo setor (gerência) da AEP; quando precisar, troca-se o supervisor de uma AEP (aepSup).
+   O gerente de área, o gerente e o diretor vêm da cadeia "responde a". Nada disso altera a AEP. */
+const NIVEIS = [["diretor", "Diretor"], ["gerente", "Gerente"], ["gerente_area", "Gerente de área"], ["supervisor", "Supervisor"]];
+const NIVEL_ROT = Object.fromEntries(NIVEIS), NIVEL_ORD = Object.fromEntries(NIVEIS.map(([k], i) => [k, i]));
+const orgP = () => S.org.pessoas || {};
+const orgLista = () => Object.values(orgP()).sort((x, y) => (NIVEL_ORD[x.nivel] ?? 9) - (NIVEL_ORD[y.nivel] ?? 9) || String(x.nome).localeCompare(String(y.nome), "pt-BR"));
+const orgCuida = (nivel, setor) => orgLista().filter(p => p.nivel === nivel && (p.setores || []).includes(setor));
+function orgCadeia(p){ const out = [], vistos = new Set(); while (p && !vistos.has(p.id)){ out.push(p); vistos.add(p.id); p = orgP()[p.chefe]; } return out; }
+function respAEP(a){
+  const setor = setorNome(a), man = orgP()[(S.org.aepSup || {})[a.id]], sup = man || orgCuida("supervisor", setor)[0] || null;
+  const cad = sup ? orgCadeia(sup) : [], nivel = n => cad.find(p => p.nivel === n) || null;
+  const ga = nivel("gerente_area") || orgCuida("gerente_area", setor)[0] || null, cad2 = ga ? orgCadeia(ga) : [];
+  const acima = n => nivel(n) || cad2.find(p => p.nivel === n) || null;
+  return { sup, ga, ger: acima("gerente"), dir: acima("diretor"), manual: !!man };
+}
+const iniciais = n => String(n || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("") || "?";
+const orgFoto = (p, cls = "") => p.foto ? `<img class="orgfoto ${cls}" data-foto="${esc(p.foto)}" alt="">` : `<span class="orgfoto ini ${cls}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
+const orgContato = p => [p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : "", p.telefone ? `<a href="tel:${esc(String(p.telefone).replace(/[^0-9+]/g, ""))}">${esc(p.telefone)}</a>` : ""].filter(Boolean).join(" · ");
+function orgCard(p){
+  const nA = Object.values(S.aeps).filter(a => { const r = respAEP(a); return [r.sup, r.ga, r.ger, r.dir].some(x => x && x.id === p.id); }).length;
+  return `<button type="button" class="orgcard${S.orgSel === p.id ? " sel" : ""} n-${esc(p.nivel)}" data-act="orgSel" data-id="${esc(p.id)}">${orgFoto(p)}
+    <span class="orgtx"><b>${esc(p.nome || "(sem nome)")}</b><span class="small">${esc(p.cargo || NIVEL_ROT[p.nivel] || "")}</span>
+    <span class="tiny faint">${esc(NIVEL_ROT[p.nivel] || "")}${(p.setores || []).length ? ` · ${(p.setores || []).length} setor(es)` : ""}${nA ? ` · ${nA} AEP(s)` : ""}</span></span></button>`;
+}
+function orgArvore(pai){
+  const filhos = orgLista().filter(p => (pai ? p.chefe === pai : !p.chefe || !orgP()[p.chefe]));
+  if (!filhos.length) return "";
+  return `<ul class="orgtree">${filhos.map(p => `<li>${orgCard(p)}${orgArvore(p.id)}</li>`).join("")}</ul>`;
+}
+function vOrgEditor(p){
+  const k = esc(p.id), f = (c, rot, tipo = "text", ph = "") => `<label class="f"><span>${rot}</span><input type="${tipo}" data-org="${k}" data-oc="${c}" value="${esc(p[c] || "")}" placeholder="${esc(ph)}"></label>`;
+  const chefes = orgLista().filter(x => x.id !== p.id && (NIVEL_ORD[x.nivel] ?? 9) < (NIVEL_ORD[p.nivel] ?? 9) && !orgCadeia(x).some(y => y.id === p.id));
+  const cuida = p.nivel === "gerente_area" || p.nivel === "supervisor", outros = s => orgCuida(p.nivel, s).filter(x => x.id !== p.id).map(x => x.nome);
+  return `<div class="panel orged" style="margin-bottom:14px"><div class="panel-h"><b>${esc(p.nome || "Nova pessoa")}</b><button class="btn ghost small" type="button" data-act="orgFechar">Fechar</button></div><div class="panel-b">
+    <div class="row" style="gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">${orgFoto(p, "g")}
+      <span class="row" style="gap:8px;flex-wrap:wrap">${S.assets ? `<label class="btn small" for="orgFotoIn">${p.foto ? "Trocar foto" : "Pôr foto"}</label><input type="file" id="orgFotoIn" data-orgfoto="${k}" accept="image/*" hidden>` : `<span class="tiny muted">Fotos indisponíveis nesta visualização.</span>`}
+        ${p.foto ? `<button class="btn small ghost" type="button" data-act="orgTirarFoto" data-id="${k}">Tirar foto</button>` : ""}</span></div>
+    <div class="grid g2">
+      ${f("nome", "Nome *")}
+      <label class="f"><span>Nível</span><select data-org="${k}" data-oc="nivel">${NIVEIS.map(([v, t]) => `<option value="${v}" ${p.nivel === v ? "selected" : ""}>${t}</option>`).join("")}</select></label>
+      ${f("cargo", "Cargo ou função", "text", "Ex.: Gerente de Manutenção da Mina")}
+      <label class="f"><span>Responde a</span><select data-org="${k}" data-oc="chefe"><option value="">Ninguém (topo do organograma)</option>${chefes.map(x => `<option value="${esc(x.id)}" ${p.chefe === x.id ? "selected" : ""}>${esc(x.nome)} (${esc(NIVEL_ROT[x.nivel])})</option>`).join("")}</select></label>
+      ${f("email", "E-mail", "email")}${f("telefone", "Telefone ou ramal", "tel")}
+    </div>
+    ${cuida ? `<div class="f" style="margin-top:10px"><span>Setores (gerências) que ${p.nivel === "supervisor" ? "supervisiona" : "gerencia"}: as AEPs desses setores ficam ligadas a esta pessoa</span>
+      <div class="orgsetores">${gerencias().map(s => { const o = outros(s); return `<label class="fchip"><input type="checkbox" data-orgsetor="${k}" value="${esc(s)}" ${(p.setores || []).includes(s) ? "checked" : ""}><span>${esc(s)}${o.length ? ` <span class="tiny faint">(também: ${esc(o.join(", "))})</span>` : ""}</span></label>`; }).join("")}</div></div>` : ""}
+    <div class="row" style="gap:8px;margin-top:12px">${S.confirm === "orgDel-" + p.id ? `<span class="confirm">Excluir ${esc(p.nome || "esta pessoa")}? Quem responde a ela passa a responder a ${esc(orgP()[p.chefe]?.nome || "ninguém")}. <button class="btn small danger" type="button" data-act="orgDelSim" data-id="${k}">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>`
+      : `<button class="btn small danger" type="button" data-act="orgDel" data-id="${k}">Excluir pessoa</button>`}</div>
+  </div></div>`;
+}
+function vOrgSetores(){
+  const G = gerencias();
+  return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Setores e responsáveis</b><span class="tiny muted">${G.filter(s => !orgCuida("supervisor", s).length).length} setor(es) sem supervisor</span></div>
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>Setor (gerência das AEPs)</th><th>Gerente de área</th><th>Supervisor</th><th class="num">AEPs</th></tr></thead><tbody>
+    ${G.map(s => { const sup = orgCuida("supervisor", s), ga = orgCuida("gerente_area", s).length ? orgCuida("gerente_area", s) : [...new Set(sup.map(x => orgCadeia(x).find(y => y.nivel === "gerente_area")).filter(Boolean))];
+      return `<tr><td>${esc(s)}</td><td class="small">${ga.length ? ga.map(x => esc(x.nome)).join(", ") : `<span class="faint">—</span>`}</td><td class="small">${sup.length ? sup.map(x => esc(x.nome)).join(", ") : `<span class="plaviso">sem supervisor</span>`}</td><td class="num">${Object.values(S.aeps).filter(a => setorNome(a) === s).length}</td></tr>`; }).join("")}
+    </tbody></table></div><p class="tiny muted" style="padding:0 16px 12px;margin:0">Para ligar um setor, abra a pessoa e marque os setores que ela cuida. Numa AEP específica, a etapa 1 permite trocar o supervisor.</p></div>`;
+}
+function vOrganograma(){
+  const p = S.orgSel && orgP()[S.orgSel];
+  return `<div class="pagehead"><div><h1>Organograma</h1><p>Diretor, gerentes, gerentes de área e supervisores, com foto e contato. Cada AEP fica ligada ao supervisor do seu setor, e o Plano de ação sugere essas pessoas como responsáveis.</p></div>
+    <div class="row"><button class="btn primary" type="button" data-act="orgNova">+ Pessoa</button></div></div>
+  ${p ? vOrgEditor(p) : ""}
+  <div class="panel"><div class="panel-b" id="orgarv">${vOrgArv()}</div></div>
+  <div id="orgset">${vOrgSetores()}</div>`;
+}
+const vOrgArv = () => Object.keys(orgP()).length ? orgArvore("") : `<div class="empty">Nenhuma pessoa cadastrada. Comece pelo diretor em “+ Pessoa”.</div>`;
+function atualizarOrgParcial(){ const a = $("#orgarv"); if (a) a.innerHTML = vOrgArv(); const t = $("#orgset"); if (t) t.innerHTML = vOrgSetores(); }
+function mudarOrg(id, campo, v){
+  const p = { ...(orgP()[id] || { id }) };
+  p[campo] = v; p.em = new Date().toISOString();
+  if (campo === "nivel" && v !== "gerente_area" && v !== "supervisor") p.setores = [];
+  S.org = { ...S.org, pessoas: { ...orgP(), [id]: p } };
+  S.orgDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.orgTimer); S.orgTimer = setTimeout(salvarOrg, 600);
+}
+async function salvarOrg(){
+  clearTimeout(S.orgTimer); if (!S.db) { S.orgDirty = false; return; }
+  setSaveState("Salvando…");
+  try { await S.db.doc("config/organograma").set(clone(S.org)); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+  S.orgDirty = false;
+}
+function novaPessoaOrg(){
+  const L = orgLista(), temDir = L.some(p => p.nivel === "diretor"), sel = orgP()[S.orgSel];
+  const nivel = !temDir ? "diretor" : sel ? (NIVEIS[Math.min(3, (NIVEL_ORD[sel.nivel] ?? 0) + 1)][0]) : "supervisor";
+  const id = "p" + uid(); mudarOrg(id, "nivel", nivel); mudarOrg(id, "nome", ""); if (sel && sel.nivel !== nivel) mudarOrg(id, "chefe", sel.id);
+  S.orgSel = id; render(); const i = document.querySelector(`[data-org="${id}"][data-oc="nome"]`); if (i) i.focus();
+}
+async function fotoOrg(id, file){
+  if (!S.assets || !file) return;
+  try { setSaveState("Enviando foto…"); const r = await S.assets.upload(await comprimir(file), { type: "image/jpeg" }); const ant = orgP()[id]?.foto;
+    mudarOrg(id, "foto", r.id); await salvarOrg(); if (ant) { try { await S.assets.delete(ant); } catch(_){} } render(); toast("Foto colocada."); }
+  catch(e){ toast("Não foi possível enviar a foto."); setSaveState(""); }
+}
+async function excluirPessoaOrg(id){
+  const p = orgP()[id]; if (!p) return; const pes = { ...orgP() }; delete pes[id];
+  Object.values(pes).forEach(x => { if (x.chefe === id) pes[x.id] = { ...x, chefe: p.chefe || "" }; });
+  const sup = { ...(S.org.aepSup || {}) }; Object.keys(sup).forEach(k => { if (sup[k] === id) delete sup[k]; });
+  S.org = { ...S.org, pessoas: pes, aepSup: sup }; S.orgSel = null; S.confirm = null; S.orgDirty = true; await salvarOrg();
+  if (p.foto && S.assets) { try { await S.assets.delete(p.foto); } catch(_){} }
+  render(); toast("Pessoa excluída.");
+}
+/* Etapa 1 da AEP: supervisor responsável (automático pelo setor ou escolhido); fica no organograma, não na AEP */
+function vSupAEP(a){
+  const sups = orgLista().filter(p => p.nivel === "supervisor"); if (!sups.length) return "";
+  const auto = orgCuida("supervisor", setorNome(a))[0], man = (S.org.aepSup || {})[a.id] || "", r = respAEP(a);
+  return `<label class="f span2"><span>Supervisor responsável (organograma)</span><select data-aepsup="${esc(a.id)}">
+    <option value="">Automático pelo setor${auto ? ` (${esc(auto.nome)})` : " (setor sem supervisor)"}</option>${sups.map(p => `<option value="${esc(p.id)}" ${man === p.id ? "selected" : ""}>${esc(p.nome)}</option>`).join("")}</select>
+    <span class="hint">${r.ga ? `Gerente de área: ${esc(r.ga.nome)}. ` : ""}Trocar aqui não altera a situação da AEP.</span></label>`;
+}
+/* Responsáveis da área (aba Gerências) */
+function vRespArea(L){
+  const P = new Map(); L.forEach(a => { const r = respAEP(a); [r.dir, r.ger, r.ga, r.sup].forEach(p => { if (p) P.set(p.id, p); }); });
+  const l = [...P.values()].sort((x, y) => (NIVEL_ORD[x.nivel] ?? 9) - (NIVEL_ORD[y.nivel] ?? 9) || String(x.nome).localeCompare(String(y.nome), "pt-BR"));
+  if (!l.length) return "";
+  return `<div class="panel" style="margin-bottom:16px"><div class="panel-h"><b>Responsáveis da área</b><span class="tiny muted">pelo organograma</span></div><div class="panel-b orgresp">
+    ${l.map(p => `<div class="orgmini">${orgFoto(p)}<span><b>${esc(p.nome)}</b><span class="tiny faint">${esc(p.cargo || NIVEL_ROT[p.nivel])}</span><span class="tiny">${orgContato(p)}</span></span></div>`).join("")}</div></div>`;
+}
+/* Plano de ação: sugestão de responsável e contato */
+const respSugerido = m => { const r = respAEP(m.a); return (r.sup || r.ga || r.ger || null); };
+const pessoaPorNome = n => { const t = norm(n); return t ? orgLista().find(p => norm(p.nome) === t) : null; };
+const orgDatalist = () => `<datalist id="orgnomes">${orgLista().map(p => `<option value="${esc(p.nome)}">${esc(NIVEL_ROT[p.nivel])}${p.cargo ? " · " + esc(p.cargo) : ""}</option>`).join("")}</datalist>`;
+
+/* ---------------- Avisos de conferência de cada AEP ----------------
+   Antes ficavam na aba Pendências. Agora aparecem na lista de AEPs e dentro da própria AEP;
+   o que é do PGR fica no Inventário e as correções em lote ficam em Unidade. */
+const AVISO_CACHE = new WeakMap();
+function avisosAEP(a0){
+  if (!a0) return [];
+  if (AVISO_CACHE.has(a0)) return AVISO_CACHE.get(a0);
+  const a = completar(a0), out = [];
+  if (difereDoModelo(a)) out.push("Etapa 3 diferente do modelo do setor (correção em lote em Unidade)");
+  const sp = (a.perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h)); if (sp.length) out.push(`Fonte sem o texto padrão da TAXONOMIA: ${sp.map(h => h.idRisco || h.codigo).join(", ")}`);
+  deficienciaSemItem(a).forEach(x => out.push(`${x.h.idRisco || ""} ${x.h.codigo}: perigo de deficiência com os itens ${x.itens.join(", ")} do checklist marcados “Não”. Marque o item que mostra a condição ou retire o perigo`));
+  perigosRepetidos(a).forEach(([x, y]) => out.push(`Linhas repetidas: ${x.idRisco || ""} e ${y.idRisco || ""} (${x.codigo}, mesma fonte)`));
+  if (temRedacaoAntiga(a)) out.push("Observação do COPSOQ no modelo anterior de texto (etapa 3, “Atualizar a redação”)");
+  if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) out.push(`Concluída antes de uma regra nova: ${Object.values(pd).flat()[0]}${n > 1 ? ` (+${n - 1})` : ""}`); }
+  const st = a.status || "nao_iniciada", k = norm(a.meta?.cargo);
+  if (k && st !== "nao_iniciada" && (a.perigos || []).length){ const cods = x => [...new Set((x.perigos || []).map(h => h.codigo))].sort().join(",");
+    const outras = Object.values(S.aeps).filter(b => b.id !== a.id && norm(b.meta?.cargo) === k && (b.status || "nao_iniciada") !== "nao_iniciada" && (b.perigos || []).length && cods(b) !== cods(a));
+    if (outras.length) out.push(`Mesmo cargo com perigos diferentes na ${outras.map(b => b.numero).join(", ")}: explique a diferença na descrição ou nas fontes`); }
+  AVISO_CACHE.set(a0, out); return out;
+}
+function vAvisosAEP(a0){
+  const av = avisosAEP(a0); if (!av.length) return "";
+  return `<div class="note warn" style="margin-bottom:12px"><b>Avisos de conferência desta AEP</b><ul class="avisos">${av.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+}
+/* Correções em lote (aba Unidade) */
+function vCorrecoesLote(){
+  const c = conferenciaPerigos(), nAeps = new Set(c.semPadrao.map(x => x.a.id)).size;
+  const bloco = (tit, n, txt, conf, sim, botao, act) => `<div class="stack tight" style="padding:10px 0;border-bottom:1px solid var(--rule)"><b class="small">${tit}: ${n}</b>
+    ${n ? `<p class="tiny muted" style="margin:0">${txt}</p>${S.confirm === conf ? `<span class="confirm">Confirmar? <button class="btn small primary" type="button" data-act="${sim}">Aplicar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<div><button class="btn small" type="button" data-act="${act}">${botao}</button></div>`}` : `<p class="tiny muted" style="margin:0">Nada a corrigir.</p>`}</div>`;
+  return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Correções em lote</b><span class="tiny muted">avisos que se resolvem de uma vez em várias AEPs</span></div><div class="panel-b">
+    ${bloco("Etapa 3 diferente do modelo do setor", c.difModelo.length, "Troca a etapa 3 inteira pela do modelo do setor e lança os perigos que ela exige. Antes de gravar, o sistema baixa uma cópia de segurança. AEP concluída volta para “Em revisão”.", "modeloTodas", "modeloTodasSim", "Aplicar o modelo em todas", "modeloTodas")}
+    ${bloco("Fonte sem o texto padrão da TAXONOMIA", c.semPadrao.length, `Coloca o texto padrão no início de ${c.semPadrao.length} fonte(s) em ${nAeps} AEP(s) e mantém o que foi escrito como complemento. AEP concluída volta para “Em revisão”.`, "fontes", "corrigirFontesSim", "Colocar o texto padrão em todas", "corrigirFontes")}
+    ${bloco("Observação do COPSOQ no modelo anterior de texto", c.redAnt.length, "Troca só as frases-modelo e mantém o que foi completado. AEP concluída volta para “Em revisão”.", "redacao", "redacaoTodasSim", "Atualizar a redação em todas", "redacaoTodas")}
+    <p class="tiny muted" style="margin:10px 0 0">Os outros avisos são de cada AEP e aparecem na lista de AEPs (filtro “Com aviso”) e dentro da própria AEP. O que falta mandar ao PGR fica no Inventário, em Exportar para o PGR.</p>
+  </div></div>`;
+}
+
 /* ---------------- Critérios do GRO (documento + tabelas geradas pelo mesmo cálculo do Inventário) ---------------- */
 function vGerado(tipo){
   const cel = cat => `<td class="mx ${CAT_CLS[cat]}">${esc(cat.replace("Risco ", ""))}</td>`;
@@ -2392,7 +2625,8 @@ function renderTitulo(){
     <span style="margin-left:auto" class="row">${conf ? `<span class="confirm">Excluir esta AEP e suas fotos de vez? <button class="btn small danger" type="button" data-act="delAEPsim">Excluir</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small danger" type="button" data-act="delAEP">Excluir AEP</button>`}</span>`;
 }
 /* Faixa com as subescalas altas do setor — visível em todas as etapas */
-function renderBanner(){
+function renderBanner(){ renderBanner0(); const el = $("#banner"); if (el && S.draft) el.insertAdjacentHTML("afterbegin", vAvisosAEP(S.aeps[S.draft.id])); }
+function renderBanner0(){
   const el = $("#banner"); if (!el || !S.draft) return;
   const snap = copsoqDaAEP(S.draft);
   if (!snap){ el.innerHTML = S.draft.meta.setorCopsoq ? `<div class="note warn" style="margin-bottom:16px">Setor COPSOQ “${esc(S.draft.meta.setorCopsoq)}” sem notas cadastradas.</div>` : ""; return; }
@@ -2446,7 +2680,7 @@ function st1(){
     ${fld("meta.setor","Setor",{req:1,cls:"span2"})}${fld("meta.area","Área",{cls:"span2"})}
     <div class="spanall" id="setorcop">${vSetorCop()}</div>
     ${fld("meta.analista","Responsável técnico",{req:1,cls:"span2"})}${fld("meta.registroAnalista","Qualificação / registro",{cls:"span2"})}
-    ${vMesPlano(S.draft)}
+    ${vMesPlano(S.draft)}${vSupAEP(S.draft)}
     ${vNotasCampo(S.draft)}
     ${fld("trabalho.sumaria","Descrição sumária da atividade",{area:1,rows:9,req:1,cls:"spanall"})}
   </div></div>`;
@@ -2796,7 +3030,8 @@ function importarColagem(){
 /* =========================================================================
    UNIDADE
    ========================================================================= */
-function vConfig(){
+function vConfig(){ return vConfig0() + vCorrecoesLote(); }
+function vConfig0(){
   if (!S.cfgDraft) S.cfgDraft = Object.assign({ empresa:"", unidade:"", cnpj:"", analista:"", registroAnalista:"", dataInicio:"", dataMeta:"" }, clone(S.config||{}));
   const c = S.cfgDraft, f = (k, rot, o={}) => `<label class="f ${o.cls||""}"><span>${rot}</span><input id="f-cfg-${k}" type="${o.type||"text"}" data-b="cfgDraft.${k}" value="${esc(c[k]||"")}" placeholder="${esc(o.ph||"")}"></label>`;
   return `<div class="pagehead"><div><h1>Dados da unidade</h1><p>Aparecem no cabeçalho dos documentos. O responsável técnico padrão é sugerido em cada AEP; início e meta alimentam o painel.</p></div></div>
@@ -3296,7 +3531,7 @@ function gerCorpo(){
     .sort((x, y) => (abertaSit(y.sit) - abertaSit(x.sit)) || MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a) || KIND_ORD[x.kind] - KIND_ORD[y.kind]);
   const nR = mel.filter(m => m.kind === "risco" && abertaSit(m.sit)), prioChip = m => `<span class="prio-fixa prio-${m.prio}">${esc(m.prio)}${m.pc ? ` (${m.pc})` : ""}</span>`;
   const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : "—"; };
-  return `<style>${GX_CSS}</style><div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
+  return `<style>${GX_CSS}</style>${vRespArea(L)}<div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
   <div class="panel" style="margin-top:16px"><div class="panel-h"><b>AEPs da área</b><span class="tiny muted">${L.length} AEP(s) · ${L.filter(a => a.status === "concluida" || a.status === "revisao").length} realizada(s)</span></div>
     <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th><th>Concluída em</th><th class="num">Perigos</th><th class="num">Itens críticos</th></tr></thead><tbody>
     ${L.length ? L.map(a => { const st = a.status || "nao_iniciada", fe = st === "concluida" || st === "revisao";
@@ -3525,6 +3760,14 @@ function onAreaChange(b, el){
 }
 function campo(e, isChange){
   const el = e.target; if (!el || !el.dataset) return;
+  if (el.dataset.org){ const id = el.dataset.org, c = el.dataset.oc, texto = el.tagName === "INPUT" && el.type !== "checkbox";
+    if (texto){ if (isChange){ atualizarOrgParcial(); return; } mudarOrg(id, c, el.value); return; }
+    if (!isChange) return; mudarOrg(id, c, el.value); render(); return; }
+  if (el.dataset.orgsetor){ if (!isChange) return; const id = el.dataset.orgsetor, p = orgP()[id]; if (!p) return; const set = new Set(p.setores || []); el.checked ? set.add(el.value) : set.delete(el.value); mudarOrg(id, "setores", [...set].sort()); render(); return; }
+  if (el.dataset.orgfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoOrg(el.dataset.orgfoto, f); return; }
+  if (el.dataset.aepsup){ if (!isChange) return; const sup = { ...(S.org.aepSup || {}) }; if (el.value) sup[el.dataset.aepsup] = el.value; else delete sup[el.dataset.aepsup];
+    S.org = { ...S.org, aepSup: sup }; S.orgDirty = true; clearTimeout(S.orgTimer); S.orgTimer = setTimeout(salvarOrg, 400); renderStep(); toast(el.value ? "Supervisor escolhido para esta AEP." : "Supervisor automático pelo setor."); return; }
+  if (el.dataset.faviso){ if (!isChange) return; S.fAviso = el.checked; atualizarHome(); return; }
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
   if (el.dataset.cbusca){ if (isChange) return; S.campoBusca = el.value; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
   if (el.dataset.ctodas){ if (!isChange) return; S.campoTodas = el.checked; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
@@ -3553,6 +3796,10 @@ function campo(e, isChange){
     if (S.view === "melhorias" && c !== "hier" && c !== "efic" && c !== "conc") atualizarMelhorias();
     return;
   }
+  if (el.dataset.pconta !== undefined){ if (!isChange) return;
+    const k = el.dataset.pconta; S.planoConta = { ...(S.planoConta || {}) }; if (el.value) S.planoConta[k] = el.value; else delete S.planoConta[k];
+    S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500);
+    const pc = $("#painelcorpo"); if (pc) pc.innerHTML = painelCorpo(); toast(el.value ? `Conta na meta de ${mesLongo(el.value)}.` : "Mês da meta automático."); return; }
   if (el.dataset.plano !== undefined){ if (!isChange) return;
     const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
@@ -3643,6 +3890,14 @@ document.addEventListener("click", async e => {
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
+    case "orgSel": S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); if (S.orgSel) window.scrollTo({ top: 0 }); break;
+    case "orgFechar": S.orgSel = null; S.confirm = null; render(); break;
+    case "orgNova": novaPessoaOrg(); break;
+    case "orgTirarFoto": { const ant = orgP()[d.id]?.foto; mudarOrg(d.id, "foto", ""); await salvarOrg(); if (ant && S.assets) { try { await S.assets.delete(ant); } catch(_){} } render(); break; }
+    case "orgDel": S.confirm = "orgDel-" + d.id; render(); break;
+    case "orgDelSim": excluirPessoaOrg(d.id); break;
+    case "usarResp": mudarMelhoria(d.key, "resp", d.nome); atualizarMelhorias(); break;
+    case "pdfMeta": gerarPDFMeta(); break;
     case "taxNovo": novoPerigoTax(d.pref); break;
     case "taxAtivar": mudarTax(d.cod, "inativo", !taxValor(taxRasc(), d.cod, "inativo")); render(); break;
     case "taxTirarNovo": { const r = clone(taxRasc()); delete r[d.cod]; S.taxDraft = r; S.taxSel = null; S.taxDirty = true; await salvarTaxRascunho(); render(); break; }
