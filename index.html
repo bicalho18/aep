@@ -763,7 +763,7 @@ function aplicarModelo(a, area){
   const m = area?.modelo; if (!m) return 0; let n = 0;
   DOMINIOS.forEach(d => { const md = m.dominios?.[d.id]; if (!md) return; const dd = a.copsoq.dominios[d.id];
     if (!String(dd.obs||"").trim() && md.obs) { dd.obs = limparTravessao(md.obs); n++; }
-    if (!dd.concl && md.concl) dd.concl = md.concl;
+    if (!dd.concl && md.concl) dd.concl = conclModelo(md.concl);
     dd.dec = Object.assign({}, md.dec || {}, dd.dec || {}); });
   lancarPerigosCopsoq(a);
   a.copsoq.modelo = { setor: area.nome, em: m.em, origem: m.origem || "" };
@@ -771,12 +771,20 @@ function aplicarModelo(a, area){
 }
 /* Etapa 3 igual ao modelo do setor? (texto, conclusão e decisões de cada domínio) */
 const decTxt = o => JSON.stringify(Object.entries(o||{}).filter(([, v]) => v).sort());
+const txtModelo = t => limparTravessao(String(t || "")).replace(/\r\n?/g, "\n").split("\n").map(l => l.replace(/\s+/g, " ").trim()).join("\n").trim();
+const conclModelo = c => CONCL_ANTIGAS[c] || c || "";
 function difereDoModelo(a){
   const m = setorDaAEP(a)?.modelo; if (!m) return false;
   return DOMINIOS.some(d => { const md = m.dominios?.[d.id]; if (!md) return false; const dd = a.copsoq?.dominios?.[d.id] || {};
-    return String(dd.obs||"").trim() !== limparTravessao(md.obs).trim() || (dd.concl||"") !== (md.concl||"") || decTxt(dd.dec) !== decTxt(md.dec); });
+    return txtModelo(dd.obs) !== txtModelo(md.obs) || conclModelo(dd.concl) !== conclModelo(md.concl) || decTxt(dd.dec) !== decTxt(md.dec); });
 }
 /* Troca a etapa 3 inteira pela do modelo. O texto anterior fica guardado na própria AEP (copsoq.antesDoModelo) e pode ser recuperado. */
+/* Aviso e correção em lote: só quando a AEP ainda não recebeu a versão atual do modelo do setor */
+function modeloPendente(a){
+  const m = setorDaAEP(a)?.modelo; if (!m) return false;
+  const ap = a.copsoq?.modelo; if (ap && (!m.em || !ap.em || String(ap.em) >= String(m.em))) return false;
+  return difereDoModelo(a);
+}
 function substituirPeloModelo(a, area){
   const m = area?.modelo; if (!m) return { mudou: false, perigos: 0 };
   if (!a.copsoq.antesDoModelo && DOMINIOS.some(d => String(a.copsoq.dominios[d.id]?.obs||"").trim()))
@@ -784,7 +792,7 @@ function substituirPeloModelo(a, area){
   if (!a.copsoq.antesDoModelo?.snapshot && a.copsoq.antesDoModelo) a.copsoq.antesDoModelo.snapshot = a.copsoq.snapshot ? clone(a.copsoq.snapshot) : null;
   a.copsoq.snapshot = snapDe(area); /* o texto do modelo cita as notas atuais do setor */
   DOMINIOS.forEach(d => { const md = m.dominios?.[d.id]; if (!md) return; const dd = a.copsoq.dominios[d.id];
-    dd.obs = limparTravessao(md.obs); dd.concl = md.concl || ""; dd.dec = Object.assign({}, md.dec || {}); });
+    dd.obs = txtModelo(md.obs); dd.concl = conclModelo(md.concl); dd.dec = Object.assign({}, md.dec || {}); });
   const perigos = lancarPerigosCopsoq(a);
   a.copsoq.modelo = { setor: area.nome, em: m.em, origem: m.origem || "" };
   return { mudou: true, perigos };
@@ -1767,7 +1775,7 @@ function conferenciaPerigos(){
   const cargos = Object.values(grupos).filter(g => g.length > 1 && new Set(g.map(a => [...new Set(a.perigos.map(h => h.codigo))].sort().join(","))).size > 1)
     .map(g => ({ a: g[0], g: g.sort((p, q) => idNum(p) - idNum(q)) }));
   const ord = l => l.sort((p, q) => idNum(p.a) - idNum(q.a));
-  const difModelo = Object.values(S.aeps).filter(a => difereDoModelo(completar(a))).map(a => ({ a }));
+  const difModelo = Object.values(S.aeps).filter(a => modeloPendente(completar(a))).map(a => ({ a }));
   return { difModelo: ord(difModelo), semPadrao: ord(semPadrao), defic: ord(defic), rep: ord(rep), semLanc: ord(semLanc), velhas: ord(velhas), comPend: ord(comPend), redAnt: ord(redAnt), cargos: ord(cargos) };
 }
 function vConferencia(){
@@ -2602,7 +2610,7 @@ function avisosAEP(a0){
   if (!a0) return [];
   if (AVISO_CACHE.has(a0)) return AVISO_CACHE.get(a0);
   const a = completar(a0), out = [], av = (curto, longo) => out.push({ curto, longo });
-  if (difereDoModelo(a)) av("Etapa 3 fora do modelo do setor", "A etapa 3 (COPSOQ) está diferente do texto-modelo do setor. Confira a etapa 3 ou use a correção em lote em Unidade.");
+  if (modeloPendente(a)) av("Etapa 3 fora do modelo do setor", "A etapa 3 (COPSOQ) está diferente do texto-modelo do setor. Confira a etapa 3 ou use a correção em lote em Unidade.");
   const sp = (a.perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h));
   if (sp.length) av(`Fonte fora do padrão (${sp.map(h => h.idRisco || h.codigo).join(", ")})`, `A fonte geradora de ${sp.map(h => h.idRisco || h.codigo).join(", ")} não começa pelo texto padrão da TAXONOMIA. Abra o perigo na etapa 4 e use o texto padrão, mantendo o seu complemento.`);
   deficienciaSemItem(a).forEach(x => av(`Perigo sem item do checklist (${x.h.idRisco || x.h.codigo})`, `${x.h.idRisco || ""} ${x.h.codigo} é um perigo de deficiência, mas os itens ${x.itens.join(", ")} do checklist estão marcados “Não”. Marque o item que mostra a condição ou retire o perigo.`));
