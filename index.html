@@ -1467,7 +1467,7 @@ function pendencias(a){
       if (v === "nao" && lanc.has(s.tax) && !altasComPerigo(a).some(x => x.tax === s.tax) && !Object.entries(dec).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax) && !DOMINIOS.some(dm => dm.id !== d.id && Object.entries(a.copsoq?.dominios?.[dm.id]?.dec || {}).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax)))
         p[3].push(`${s.nome}: marcada como “Não é exigência relevante”, mas o perigo ${s.tax} está lançado na etapa 4`); });
     altasComPerigo(a).filter(s => s.dom === d.id && !lanc.has(s.tax) && !p[4].some(x => x.includes("o perigo " + s.tax + " ") || x.endsWith("o perigo " + s.tax))).forEach(s =>
-      p[4].push(`${s.nome}: acima de 3,66 no setor (etapa 3); lançar o perigo ${s.tax}, mesmo que o risco seja graduado como baixo na planilha`));
+      p[4].push(`${s.nome}: acima de 3,66 no setor (etapa 3); lançar o perigo ${s.tax}, mesmo que o risco seja graduado como baixo no Inventário`));
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
   esperadosFaltando(a).forEach(c => { if (!String(a.naoLancados?.[c]||"").trim()) p[4].push(`Posto administrativo: lançar ${c} (${TAXMAP[c]?.nome||""}) ou justificar por que essa exigência não é relevante neste cargo`); });
@@ -2609,10 +2609,6 @@ function avisosAEP(a0){
   perigosRepetidos(a).forEach(([x, y]) => av(`Perigo repetido (${x.idRisco || ""} e ${y.idRisco || ""})`, `${x.idRisco || ""} e ${y.idRisco || ""} têm o mesmo perigo (${x.codigo}) e a mesma fonte. Retire um deles ou escreva fontes diferentes.`));
   if (temRedacaoAntiga(a)) av("Texto do COPSOQ desatualizado", "A observação do COPSOQ na etapa 3 usa o modelo antigo de texto. Na etapa 3, use “Atualizar a redação”.");
   if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) av("Concluída antes de uma regra nova", `Esta AEP foi concluída antes de uma regra que entrou depois: ${Object.values(pd).flat()[0]}${n > 1 ? ` (e mais ${n - 1})` : ""}. Abra, resolva e conclua de novo.`); }
-  const st = a.status || "nao_iniciada", k = norm(a.meta?.cargo), ar = norm(a.meta?.area), se = norm(a.meta?.setor);
-  if (k && st !== "nao_iniciada" && (a.perigos || []).length){ const cods = x => [...new Set((x.perigos || []).map(h => h.codigo))].sort().join(",");
-    const outras = Object.values(S.aeps).filter(b => b.id !== a.id && norm(b.meta?.cargo) === k && norm(b.meta?.setor) === se && norm(b.meta?.area) === ar && (b.status || "nao_iniciada") !== "nao_iniciada" && (b.perigos || []).length && cods(b) !== cods(a));
-    if (outras.length) av(`Mesmo cargo com perigos diferentes (${outras.map(b => b.numero).join(", ")})`, `A ${outras.map(b => b.numero).join(", ")} tem o mesmo cargo, setor e área, mas perigos diferentes. Se for de propósito, explique a diferença na descrição da atividade ou nas fontes; se não, iguale os perigos.`); }
   AVISO_CACHE.set(a0, out); return out;
 }
 function vAvisosAEP(a0){
@@ -2695,7 +2691,7 @@ function renderBanner0(){
     ? `<div class="note ok" style="margin-bottom:16px">Setor ${esc(snap.nome)}: nenhuma subescala acima de 3,66.</div>`
     : faltam.length
     ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes) com perigo ainda não lançado nesta AEP: ${itens}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button></div>`
-    : `<div class="note" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes): ${itens}. Perigos já lançados nesta AEP; a graduação é feita na planilha.</div>`;
+    : `<div class="note" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes): ${itens}. Perigos já lançados nesta AEP; a graduação é feita no Inventário.</div>`;
 }
 function renderRail(){
   const el = $("#rail"); if (!el) return; const p = pendencias(S.draft);
@@ -2748,7 +2744,7 @@ function vOutrosPerigos(a){
   const l = (a.perigos||[]).filter(h => !itensDoPerigo(a, h).length);
   if (!l.length) return "";
   return `<div class="note" style="margin-top:4px;font-size:12.5px"><b>Outros perigos lançados nesta AEP (${l.length})</b>, sem item crítico marcado: ${l.map(h => `<span class="code" style="white-space:nowrap">${esc(h.codigo)}</span> ${esc(TAXMAP[h.codigo]?.nome || "")}${h.origemCopsoq ? " (COPSOQ)" : ""}`).join("; ")}.
-    <br><span class="muted">Eles seguem para a planilha normalmente. Marque Sim neste item só se houver outra condição crítica que os itens 1 a 12 não cobrem.</span></div>`;
+    <br><span class="muted">Eles seguem para o Inventário normalmente. Marque Sim neste item só se houver outra condição crítica que os itens 1 a 12 não cobrem.</span></div>`;
 }
 function st4(){
   const a = S.draft;
