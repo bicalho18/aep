@@ -1819,19 +1819,23 @@ const MESES_LONGO = ["janeiro","fevereiro","março","abril","maio","junho","julh
 const mesRot = k => k ? `${MESES_PT[Number(k.slice(5,7))-1]}/${k.slice(2,4)}` : "—";
 const mesLongo = k => k ? `${MESES_LONGO[Number(k.slice(5,7))-1]}/${k.slice(0,4)}` : "—";
 const mesPlan = a => { const n = String(a.numero||"").trim(); return (S.plano && S.plano[n]) || PLANO_PADRAO[n] || ""; };
-function mesReal(a){
+/* Data em que a AEP foi realizada: a data da avaliação em campo (etapa 1). Se ela estiver vazia ou depois da conclusão,
+   vale a data da primeira conclusão no sistema. Assim, AEP feita em campo em setembro e concluída no sistema em outubro conta em setembro. */
+function dataRealizada(a){
   if (a.status !== "concluida" && a.status !== "revisao") return "";
   const x = a.concluidoPrimeiro || a.concluidoEm; if (!x) return "";
-  const d = new Date(x); if (isNaN(d)) return String(x).slice(0, 7);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  const d = new Date(x), conc = isNaN(d) ? String(x).slice(0, 10) : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const campo = String(a.meta?.data || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(campo) && campo <= conc ? campo : conc;
 }
+function mesReal(a){ return dataRealizada(a).slice(0, 7); }
 const mesesPlano = () => [...new Set([...Object.values(PLANO_PADRAO), ...Object.values(S.plano||{})])].filter(Boolean).sort();
 const aepsFiltradas = () => Object.values(S.aeps).filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
 /* Contabilização na meta do SIG: cada AEP realizada conta no primeiro mês, a partir do mês em que foi realizada
-   (primeira conclusão), que ainda tem vaga na meta. O que passa da meta do mês vira adiantamento e conta nos meses seguintes.
+   (data da avaliação em campo), que ainda tem vaga na meta. O que passa da meta do mês vira adiantamento e conta nos meses seguintes.
    Nunca conta num mês anterior ao da realização. O mês pode ser escolhido à mão em config/plano.conta, com a mesma regra. */
 const mesContaManual = a => (S.planoConta || {})[String(a.numero || "").trim()] || "";
-const dataReal = a => String(a.concluidoPrimeiro || a.concluidoEm || "");
+const dataReal = a => dataRealizada(a);
 function alocarMeta(L, meses, plan){
   const ini = meses[0], fim = meses[meses.length - 1], usado = Object.fromEntries(meses.map(m => [m, 0])), conta = {};
   const R = L.filter(a => mesReal(a)).map(a => { const r = mesReal(a); return { a, r: r < ini ? ini : r > fim ? fim : r }; })
@@ -1878,7 +1882,7 @@ function graficoMeta(D){
     <tr><td>Planejadas</td>${D.acum.map(x => `<td class="num">${x.p}</td>`).join("")}</tr>
     <tr><td><b>Contam na meta</b></td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.c < x.p ? " neg" : ""}"><b>${x.m > D.atual && !x.c ? "" : x.c}</b></td>`).join("")}</tr>
     <tr><td class="tiny muted">adiantadas de meses anteriores</td>${D.acum.map(x => `<td class="num tiny muted">${x.v || ""}</td>`).join("")}</tr>
-    <tr><td class="tiny muted">realizadas no mês (data real)</td>${D.acum.map(x => `<td class="num tiny muted">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
+    <tr><td class="tiny muted">realizadas no mês (data da avaliação)</td>${D.acum.map(x => `<td class="num tiny muted">${x.m > D.hoje ? "" : x.r}</td>`).join("")}</tr>
     <tr><td>Acumulado planejado</td>${D.acum.map(x => `<td class="num">${x.pa}</td>`).join("")}</tr>
     <tr><td>Acumulado na meta</td>${D.acum.map(x => `<td class="num">${x.m > D.atual ? "" : x.ca}</td>`).join("")}</tr>
     <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.pa && x.ca < x.pa ? " neg" : ""}">${x.m > D.atual || !x.pa ? "" : pctTxt(x.ca / x.pa)}</td>`).join("")}</tr>
@@ -1904,7 +1908,7 @@ function painelCorpo(){
     <div class="panel"><div class="panel-b"><span class="eyebrow">Para fechar o plano</span><p class="mbig"><b>${D.faltam}</b> AEPs</p>
       <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
   </div>
-  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x contam na meta, por mês</b><span class="tiny muted">plano PLA202609SA20-30 · o que passa da meta de um mês conta nos meses seguintes, nunca antes do mês em que a AEP foi realizada</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
+  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x contam na meta, por mês</b><span class="tiny muted">plano PLA202609SA20-30 · realizada = data da avaliação em campo · o que passa da meta de um mês conta nos meses seguintes</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
   ${vRiscosPainel(L)}
   <div class="panel" id="plistabox">${vListaPainel(L, D)}</div>
 
@@ -1972,7 +1976,7 @@ async function gerarPDFMeta(){
         <div class="card"><span>Adiantadas para os próximos meses</span><b class="big">${D.garantidas}</b><span>realizadas além da meta, já contam nos meses seguintes</span></div>
         <div class="card"><span>Para fechar o plano</span><b class="big">${D.faltam}</b><span>AEPs a realizar</span></div></div>
       ${graficoMeta(D)}
-      <p class="tiny muted" style="margin-top:8px">Regra de contagem: cada AEP conta na meta do mês em que foi realizada; o que passa da meta do mês conta como adiantamento nos meses seguintes, nunca em mês anterior ao da realização. A data real de conclusão de cada AEP fica registrada no sistema.</p></body></html>`;
+      <p class="tiny muted" style="margin-top:8px">Regra de contagem: cada AEP conta na meta do mês em que foi realizada (data da avaliação em campo); o que passa da meta do mês conta como adiantamento nos meses seguintes, nunca em mês anterior ao da realização. A data real de conclusão de cada AEP fica registrada no sistema.</p></body></html>`;
     await imprimirHTML(html, nome);
   } catch(e){ toast("Não foi possível preparar o PDF."); }
   finally { const b = $("#btnPDFmeta"); if (b){ b.disabled = false; b.textContent = "PDF: acompanhamento da meta"; } }
@@ -1993,7 +1997,7 @@ function vListaPainel(L, D){
   const mes = S.pMes === "todo" ? "" : (S.pMes || D.atual), comMes = S.pLista === "previstas" || S.pLista === "concluidas";
   const l = listaPainel(L, D, S.pLista, comMes ? mes : "").slice().sort((x, y) => (mesPlan(x) || "9").localeCompare(mesPlan(y) || "9") || idNum(x) - idNum(y));
   const conta = t => listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? mes : "").length;
-  const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : ""; };
+  const dataC = a => dataRealizada(a) ? fmtData(dataRealizada(a)) : "";
   const tit = { previstas: `Previstas ${mes ? "para " + mesLongo(mes) : "no plano"}`, concluidas: `Contam na meta ${mes ? "de " + mesLongo(mes) : "(todo o período)"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou e não foi realizada)", todas: "Todas as AEPs" }[S.pLista];
   return `<div class="panel-h" style="flex-wrap:wrap;gap:10px"><b>${esc(tit)}</b><span class="tiny muted">${l.length} AEP(s)</span></div>
   <div class="panel-b stack tight">
@@ -2001,7 +2005,7 @@ function vListaPainel(L, D){
       <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
       ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
     </div>
-    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em</th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
+    <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th><th>Realizada em <span class="faint" style="font-weight:400;text-transform:none">(avaliação em campo)</span></th>${S.pLista === "concluidas" ? "<th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
     ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td><td class="small">${dataC(a) || "—"}</td>${S.pLista === "concluidas" ? `<td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
     </tbody></table></div></div>`;
 }
