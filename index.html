@@ -2302,7 +2302,7 @@ async function aplicarLote(){
     campos.forEach(k => { c[k] = k === "efic" ? Number(v[k]) : v[k]; }); c.em = em; a.classif[x.h.idRisco] = c; S.invPend[a.id] = true; });
   await salvarInventario();
   const depois = linhasInventario().filter(x => S.invSel.has(x.k)), ok = depois.filter(x => x.r.sit === "ok").length, inc = depois.filter(x => x.r.sit === "incompleta").length, al = depois.filter(x => x.r.sit === "alerta").length;
-  S.invSel = new Set(); atualizarInventario(); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote();
+  S.invSel = new Set(); S.invLote = {}; atualizarInventario(); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote();
   toast(`Aplicado em ${sel.length} perigo(s): ${ok} classificado(s)${inc ? `, ${inc} ainda incompleto(s)` : ""}${al ? `, ${al} com alerta` : ""}.`);
 }
 function mudarClassif(k, campo, v){
@@ -2617,7 +2617,8 @@ function orgArvore(pai){
 }
 function vOrgEditor(p){
   const k = esc(p.id), f = (c, rot, tipo = "text", ph = "") => `<label class="f"><span>${rot}</span><input type="${tipo}" data-org="${k}" data-oc="${c}" value="${esc(p[c] || "")}" placeholder="${esc(ph)}"></label>`;
-  const chefes = orgLista().filter(x => x.id !== p.id && (NIVEL_ORD[x.nivel] ?? 9) < (NIVEL_ORD[p.nivel] ?? 9) && !orgCadeia(x).some(y => y.id === p.id));
+  /* qualquer pessoa pode ser o chefe, inclusive do mesmo nível (gerente abaixo do gerente geral), menos ela mesma e quem já responde a ela */
+  const chefes = orgLista().filter(x => x.id !== p.id && x.nivel !== "supervisor" && !orgCadeia(x).some(y => y.id === p.id));
   const cuida = p.nivel === "gerente" || p.nivel === "gerente_area" || p.nivel === "supervisor", outros = s => orgCuida(p.nivel, s).filter(x => x.id !== p.id).map(x => x.nome);
   return `<div class="panel orged" style="margin-bottom:14px"><div class="panel-h"><b>${esc(p.nome || "Nova pessoa")}</b><button class="btn ghost small" type="button" data-act="orgFechar">Fechar</button></div><div class="panel-b">
     <div class="row" style="gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">${orgFoto(p, "g")}
