@@ -403,6 +403,10 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .orgsettab tr.falta td:first-child{box-shadow:inset 3px 0 0 var(--warn-line)}
 .lote{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 14px}
 .lote textarea,.lote input[type=text]{width:100%}
+.medlista{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:4px}
+.medrow{display:grid;grid-template-columns:200px 1fr auto;gap:6px;width:100%;align-items:center}
+.medrow select,.medrow input{width:100%}
+@media (max-width:700px){.medrow{grid-template-columns:1fr auto}.medrow select{grid-column:1/-1}}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -2124,6 +2128,23 @@ const ACAO_CAT = { "Risco trivial": "SEM PRIORIDADE. Nenhuma ação é necessár
   "Risco intolerável": "PRIORIDADE 1 (P1). Necessário elaborar plano de ação para reduzir o nível do risco." };
 const CAT_CLS = { "Risco trivial": "c1", "Risco tolerável": "c2", "Risco moderado": "c3", "Risco substancial": "c4", "Risco intolerável": "c5" };
 const ancoraDe = h => Number(TAXMAP[h.codigo]?.ancora) || 2;
+/* Medidas existentes no formato do PGR: cada medida com o número da hierarquia, todas na mesma célula ("3 - ...; 4 - ...") */
+const HIER_PGR = [["1", "1 - Eliminação"], ["2", "2 - Substituição"], ["3", "3 - Controle de Engenharia"], ["4", "4 - Controles Administrativos"], ["5", "5 - EPI"]];
+const HIER_NUM = { "Eliminação": "1", "Substituição": "2", "Engenharia": "3", "Administrativo": "4" };
+const EFICAZ_OP = [["Sim", "Sim"], ["Não", "Não"], ["Não avaliado", "Não avaliado"], ["NA", "Não se aplica"], ["Inexistente", "Inexistente"]];
+function medidasDe(c){
+  c = c || {};
+  if (Array.isArray(c.medidasL)) return c.medidasL.map(x => ({ h: String(x.h || ""), t: String(x.t || "") }));
+  const t = String(c.medidas || "").trim(); return t ? [{ h: HIER_NUM[c.hier] || "", t }] : [];
+}
+const medidasOk = c => medidasDe(c).filter(x => x.t.trim());
+const medidasTxt = c => medidasOk(c).map(x => x.h ? `${x.h} - ${x.t.trim().replace(/[;.\s]+$/, "")}` : x.t.trim().replace(/[;.\s]+$/, "")).join("; ");
+function vMedidas(lista, attr, vazio){
+  const l = lista.length ? lista : [{ h: "", t: "" }];
+  return `<div class="medlista">${l.map((x, i) => `<div class="medrow"><select ${attr(i, "h")} aria-label="Hierarquia da medida ${i + 1}"><option value="">Nº</option>${HIER_PGR.map(([v, t]) => `<option value="${v}" ${x.h === v ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+    <input type="text" ${attr(i, "t")} value="${esc(x.t)}" placeholder="${esc(vazio)}" aria-label="Medida ${i + 1}">${l.length > 1 ? `<button class="btn ghost small" type="button" data-act="medTirar" ${attr(i, "x")} aria-label="Retirar a medida ${i + 1}">×</button>` : ""}</div>`).join("")}
+    <button class="btn small" type="button" data-act="medMais" ${attr(l.length, "add")}>+ Medida</button></div>`;
+}
 function calcRisco(h, c){
   c = c || {};
   const anc = ancoraDe(h), E = exigencia(c.dur, c.int), Pg = probGrade(E, Number(c.efic) || null);
@@ -2131,7 +2152,7 @@ function calcRisco(h, c){
   const S = Math.max(anc, Number(c.sev) || anc), N = P && S ? P * S : null, cat = categoriaDe(N);
   const alertas = [], falta = [];
   if (!c.exp) falta.push("tipo de exposição"); if (!c.dur) falta.push("duração"); if (!c.int) falta.push("intensidade");
-  if (!c.efic) falta.push("eficácia das medidas"); if (!String(c.medidas || "").trim()) falta.push("medidas existentes (ou “Nenhuma”)");
+  if (!c.efic) falta.push("eficácia das medidas"); if (!medidasOk(c).length) falta.push("medidas existentes (ou “Nenhuma”)");
   if (!c.catIni) falta.push("categoria inicial");
   const memo = String(c.memoria || "").trim();
   if (c.exp === "Habitual e permanente" && c.dur && c.dur !== "longa" && !memo) alertas.push("Exposição habitual e permanente com duração que não é longa: confira ou justifique na memória de cálculo (2.6).");
@@ -2215,11 +2236,9 @@ function vInvEditor(x){
         <label class="f"><span>Duração ${org ? "(frequência, fator de organização)" : "(tempo efetivo na jornada)"}</span><select ${f("dur")}>${optSel(DURACOES.map(([v, n, h, o]) => [v, `${n}: ${org ? o : h}`]), c.dur)}</select></label>
         <label class="f"><span>Intensidade das exigências</span><select ${f("int")}>${optSel(INTENSIDADES, c.int)}</select></label>
       </div>
-      <label class="f"><span>Medidas existentes (POAD / EPC)</span><textarea rows="2" ${f("medidas")} placeholder="Descreva as medidas existentes ou escreva “Nenhuma”">${esc(c.medidas || "")}</textarea></label>
-      <div class="grid g2">
-        <label class="f"><span>Hierarquia da medida</span><select ${f("hier")}>${optSel(HIERARQUIAS.map(e => [e, e]), c.hier)}</select></label>
-        <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${optSel([["Sim", "Sim"], ["Não", "Não"], ["NA", "NA"]], c.eficaz)}</select></label>
-      </div>
+      <div class="f"><span>Medidas existentes (POAD / EPC): uma por linha, com o número da hierarquia</span>${vMedidas(medidasDe(c), (i, fld) => `data-medk="${k}" data-mi="${i}" data-mf="${fld}"`, "Descreva a medida ou escreva “Nenhuma”")}
+        <span class="hint">No PGR, saem todas na mesma célula: “3 - ...; 4 - ...”.</span></div>
+      <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${optSel(EFICAZ_OP, c.eficaz)}</select></label>
       <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${optSel(EFICACIAS.map(([n, nome]) => [n, `${n} - ${nome}`]), c.efic)}</select>
         ${c.efic ? `<span class="hint">${esc(EFICACIAS[c.efic - 1][2])}</span>` : `<span class="hint">Sem evidência registrada, a nota máxima é 2 (Regra 1).</span>`}</label>
       <label class="f"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(c.evid || "")}" placeholder="Ex.: registro de manutenção, foto, procedimento assinado"></label>
@@ -2269,12 +2288,14 @@ function atualizarInventario(soResultado){
 /* ---------------- Classificação em lote ----------------
    Marque várias linhas, preencha só o que for igual para todas e aplique. Campo em branco = não muda.
    Severidade, divergência da grade e descumprimento de NR continuam linha a linha. */
-const LOTE_CAMPOS = ["exp", "catIni", "dur", "int", "hier", "eficaz", "efic", "medidas", "evid", "memoria"];
+const LOTE_CAMPOS = ["exp", "catIni", "dur", "int", "eficaz", "efic", "evid", "memoria"];
+const loteMedidas = () => (S.invLote?.medidasL || []).filter(x => String(x.t || "").trim());
+const loteN = () => LOTE_CAMPOS.filter(k => String(S.invLote?.[k] ?? "").trim()).length + (loteMedidas().length ? 1 : 0);
 function linhasSelecionadas(){ const m = new Map(linhasInventario().map(x => [x.k, x])); return [...S.invSel].map(k => m.get(k)).filter(Boolean); }
 function vInvLote(){
   const sel = linhasSelecionadas(); if (!sel.length) return "";
   const v = S.invLote || {}, f = c => `data-lote="${c}"`, n = sel.length, cods = {}; sel.forEach(x => { cods[x.h.codigo] = (cods[x.h.codigo] || 0) + 1; });
-  const jaTem = sel.filter(x => x.r.sit !== "falta").length, preench = LOTE_CAMPOS.filter(c => String(v[c] ?? "").trim()).length;
+  const jaTem = sel.filter(x => x.r.sit !== "falta").length, preench = loteN();
   const opt = (lista, val) => `<option value="">Não mudar</option>` + lista.map(([a, t]) => `<option value="${esc(a)}" ${String(a) === String(val ?? "") ? "selected" : ""}>${esc(t)}</option>`).join("");
   return `<div class="lote"><div class="row between" style="gap:8px;flex-wrap:wrap"><b>Classificar ${n} perigo(s) de uma vez</b><span class="tiny muted">${Object.entries(cods).sort((a, b) => b[1] - a[1]).map(([c, q]) => `${esc(c)} (${q})`).join(" · ")}</span></div>
     <p class="tiny muted" style="margin:4px 0 10px">Preencha só o que vale para todos os marcados. O que ficar em “Não mudar” ou em branco continua como está em cada linha. Severidade, divergência da grade e descumprimento de NR seguem linha a linha.</p>
@@ -2283,11 +2304,10 @@ function vInvLote(){
       <label class="f"><span>Categoria inicial (antes dos controles)</span><select ${f("catIni")}>${opt(CATEGORIAS.map(e => [e, e]), v.catIni)}</select></label>
       <label class="f"><span>Duração</span><select ${f("dur")}>${opt(DURACOES.map(([a, nm, h, o]) => [a, `${nm}: ${h} (organização: ${o})`]), v.dur)}</select></label>
       <label class="f"><span>Intensidade das exigências</span><select ${f("int")}>${opt(INTENSIDADES, v.int)}</select></label>
-      <label class="f"><span>Hierarquia da medida</span><select ${f("hier")}>${opt(HIERARQUIAS.map(e => [e, e]), v.hier)}</select></label>
-      <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${opt([["Sim", "Sim"], ["Não", "Não"], ["NA", "NA"]], v.eficaz)}</select></label>
+      <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${opt(EFICAZ_OP, v.eficaz)}</select></label>
       <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${opt(EFICACIAS.map(([a, nm]) => [a, `${a} - ${nm}`]), v.efic)}</select></label>
-      <label class="f span2"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(v.evid || "")}" placeholder="Em branco = não muda"></label>
-      <label class="f spanall"><span>Medidas existentes (POAD / EPC)</span><textarea rows="2" ${f("medidas")} placeholder="Em branco = não muda">${esc(v.medidas || "")}</textarea></label>
+      <label class="f spanall"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(v.evid || "")}" placeholder="Em branco = não muda"></label>
+      <div class="f spanall"><span>Medidas existentes (POAD / EPC): uma por linha, com o número da hierarquia. Em branco = não muda; se preencher, substitui as medidas de todos os marcados.</span>${vMedidas(v.medidasL || [], (i, fld) => `data-lmi="${i}" data-mf="${fld}"`, "Em branco = não muda")}</div>
       <label class="f spanall"><span>Memória de cálculo / encaminhamento</span><textarea rows="2" ${f("memoria")} placeholder="Em branco = não muda">${esc(v.memoria || "")}</textarea></label>
     </div>
     ${jaTem ? `<p class="tiny" style="color:var(--warn-ink);margin:8px 0 0">${jaTem} dos marcados já têm algum campo preenchido: os campos que você preencher aqui substituem os deles; os demais ficam como estão.</p>` : ""}
@@ -2296,10 +2316,12 @@ function vInvLote(){
 }
 async function aplicarLote(){
   const sel = linhasSelecionadas(), v = S.invLote || {}, campos = LOTE_CAMPOS.filter(c => String(v[c] ?? "").trim());
-  if (!sel.length || !campos.length) return;
+  if (!sel.length || (!campos.length && !loteMedidas().length)) return;
   const em = new Date().toISOString();
   sel.forEach(x => { const a = S.aeps[x.a.id]; a.classif = a.classif || {}; const c = Object.assign({}, a.classif[x.h.idRisco] || {});
-    campos.forEach(k => { c[k] = k === "efic" ? Number(v[k]) : v[k]; }); c.em = em; a.classif[x.h.idRisco] = c; S.invPend[a.id] = true; });
+    campos.forEach(k => { c[k] = k === "efic" ? Number(v[k]) : v[k]; });
+    if (loteMedidas().length){ c.medidasL = loteMedidas().map(m => ({ h: String(m.h || ""), t: String(m.t).trim() })); c.medidas = medidasTxt(c); delete c.hier; }
+    c.em = em; a.classif[x.h.idRisco] = c; S.invPend[a.id] = true; });
   await salvarInventario();
   const depois = linhasInventario().filter(x => S.invSel.has(x.k)), ok = depois.filter(x => x.r.sit === "ok").length, inc = depois.filter(x => x.r.sit === "incompleta").length, al = depois.filter(x => x.r.sit === "alerta").length;
   S.invSel = new Set(); S.invLote = {}; atualizarInventario(); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote();
@@ -3834,9 +3856,9 @@ async function baixarDoc(){
    Se a classificação mudar depois, a assinatura deixa de bater e a linha volta para o próximo envio. */
 const PGR_TECNICA = h => (h.origemCopsoq || h.base === "copsoq") ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)";
 function linhaPGR(x){
-  const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = String(c.medidas || "").trim();
+  const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = medidasTxt(c);
   return [String(a.meta?.eg || ""), (a.meta?.cargo || "").trim(), `${a.numero} / ${h.idRisco}`, "Ergonomico", t.nome || "", String(h.fonte || "").trim(), "NA", "NA", t.danos || h.danos || "",
-    c.exp || "", PGR_TECNICA(h), "NA", "NA", "NA", "NA", "NA", c.catIni || "", c.hier && c.hier !== "Não aplicável" && med ? `${c.hier}: ${med}` : med, c.eficaz || "", "NA", "NA",
+    c.exp || "", PGR_TECNICA(h), "NA", "NA", "NA", "NA", "NA", c.catIni || "", med, c.eficaz || "", "NA", "NA",
     PROB_ROT[r.P] || "", SEV_ROT[r.S] || "", r.N || "", r.cat || "", r.acao || ""];
 }
 const assinaturaPGR = linha => hashTxt(linha.slice(2).join("¦"));
@@ -4034,9 +4056,18 @@ function campo(e, isChange){
   if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
   if (el.dataset.invsel){ if (!isChange) return; el.checked ? S.invSel.add(el.dataset.invsel) : S.invSel.delete(el.dataset.invsel); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
   if (el.dataset.invselall){ if (!isChange) return; listaInventario().forEach(x => el.checked ? S.invSel.add(x.k) : S.invSel.delete(x.k)); document.querySelectorAll("[data-invsel]").forEach(c => { c.checked = S.invSel.has(c.dataset.invsel); }); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
+  if (el.dataset.medk !== undefined && el.dataset.mi !== undefined && (el.dataset.mf === "h" || el.dataset.mf === "t")){
+    const k = el.dataset.medk, [id, rid] = k.split("|"), a = S.aeps[id]; if (!a) return; const l = medidasDe((a.classif || {})[rid]); const i = Number(el.dataset.mi);
+    while (l.length <= i) l.push({ h: "", t: "" }); l[i] = { ...l[i], [el.dataset.mf]: el.value };
+    if (el.dataset.mf === "t" && isChange) return; if (el.dataset.mf === "h" && !isChange) return;
+    mudarClassif(k, "medidasL", l); const c = a.classif[rid]; c.medidas = medidasTxt(c); delete c.hier; atualizarInventario(true); return; }
+  if (el.dataset.lmi !== undefined && (el.dataset.mf === "h" || el.dataset.mf === "t")){
+    const l = (S.invLote?.medidasL || []).map(x => ({ ...x })), i = Number(el.dataset.lmi); while (l.length <= i) l.push({ h: "", t: "" }); l[i] = { ...l[i], [el.dataset.mf]: el.value };
+    S.invLote = { ...(S.invLote || {}), medidasL: l }; if (el.dataset.mf === "h" && !isChange) return; if (el.dataset.mf === "t" && isChange) return;
+    const n = loteN(), b = $("#btnLote"), m = $("#lotemsg"); if (b) b.disabled = !n; if (m) m.textContent = n ? `${n} campo(s) para aplicar` : "Preencha pelo menos um campo"; return; }
   if (el.dataset.lote){ const c = el.dataset.lote; S.invLote = { ...(S.invLote || {}), [c]: el.value };
     if (el.tagName === "SELECT"){ if (!isChange) return; } else if (isChange) return;
-    const n = LOTE_CAMPOS.filter(k => String(S.invLote[k] ?? "").trim()).length, b = $("#btnLote"), m = $("#lotemsg"); if (b) b.disabled = !n; if (m) m.textContent = n ? `${n} campo(s) para aplicar` : "Preencha pelo menos um campo"; return; }
+    const n = loteN(), b = $("#btnLote"), m = $("#lotemsg"); if (b) b.disabled = !n; if (m) m.textContent = n ? `${n} campo(s) para aplicar` : "Preencha pelo menos um campo"; return; }
   if (el.dataset.invbusca){ if (isChange) return; S.invBusca = el.value; atualizarInventario(); return; }
   if (el.dataset.tax){ const cod = el.dataset.tax, c = el.dataset.tc, texto = el.tagName === "TEXTAREA" || el.type === "text";
     if (texto){ if (isChange){ atualizarTax(); return; } mudarTax(cod, c, el.value); return; }
@@ -4114,6 +4145,16 @@ document.addEventListener("click", async e => {
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
     case "invLoteAplicar": aplicarLote(); break;
+    case "medMais": case "medTirar": {
+      const tirar = d.act === "medTirar";
+      if (d.medk !== undefined){ const k = d.medk, [id, rid] = k.split("|"), a = S.aeps[id]; if (!a) break; let l = medidasDe((a.classif || {})[rid]); if (!l.length) l = [{ h: "", t: "" }];
+        if (tirar) l.splice(Number(d.mi), 1); else l.push({ h: "", t: "" });
+        mudarClassif(k, "medidasL", l); const c = a.classif[rid]; c.medidas = medidasTxt(c); delete c.hier; atualizarInventario();
+        if (!tirar){ const ins = document.querySelectorAll(`[data-medk="${CSS.escape(k)}"][data-mf="t"]`); if (ins.length) ins[ins.length - 1].focus(); } }
+      else { let l = (S.invLote?.medidasL || []).map(x => ({ ...x })); if (!l.length) l = [{ h: "", t: "" }]; if (tirar) l.splice(Number(d.lmi), 1); else l.push({ h: "", t: "" });
+        S.invLote = { ...(S.invLote || {}), medidasL: l }; const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote();
+        if (!tirar){ const ins = document.querySelectorAll('[data-lmi][data-mf="t"]'); if (ins.length) ins[ins.length - 1].focus(); } }
+      break; }
     case "invLoteLimpar": S.invSel = new Set(); atualizarInventario(); { const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); } break;
     case "orgSel": { const sx = ($("#orgwrap") || {}).scrollLeft || 0; S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); const w = $("#orgwrap"); if (w) w.scrollLeft = sx; if (S.orgSel) window.scrollTo({ top: 0, behavior: "smooth" }); break; }
     case "orgFechar": S.orgSel = null; S.confirm = null; render(); break;
