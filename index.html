@@ -401,6 +401,8 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .orgfoto.o{width:66px;height:66px;border:3px solid var(--accent);font-size:20px;margin-bottom:3px}
 .onode.n-diretor .orgfoto.o{width:80px;height:80px;font-size:24px}
 .orgsettab tr.falta td:first-child{box-shadow:inset 3px 0 0 var(--warn-line)}
+.lote{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.lote textarea,.lote input[type=text]{width:100%}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -1341,7 +1343,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -2171,12 +2173,12 @@ function vInvResumo(){
 }
 function vInvLinhas(){
   const L = listaInventario();
-  if (!L.length) return `<tr><td colspan="8" class="small muted" style="padding:18px">Nenhum perigo com estes filtros.</td></tr>`;
+  if (!L.length) return `<tr><td colspan="9" class="small muted" style="padding:18px">Nenhum perigo com estes filtros.</td></tr>`;
   return L.map(x => { const t = TAXMAP[x.h.codigo], aberto = S.invAberto === x.k, sit = SIT_INV[x.r.sit];
-    return `<tr class="click${aberto ? " sel" : ""}" data-inv="${esc(x.k)}" tabindex="0"><td class="mono">${esc(x.a.numero)}</td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">${esc((x.a.meta?.setor || "").trim())}</div></td>
+    return `<tr class="click${aberto ? " sel" : ""}" data-inv="${esc(x.k)}" tabindex="0"><td data-selcell style="width:34px;padding:0"><label style="display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer"><input type="checkbox" data-invsel="${esc(x.k)}" ${S.invSel.has(x.k) ? "checked" : ""} aria-label="Selecionar ${esc(x.a.numero)} ${esc(x.h.idRisco)}"></label></td><td class="mono">${esc(x.a.numero)}</td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">${esc((x.a.meta?.setor || "").trim())}</div></td>
       <td><span class="mono small">${esc(x.h.idRisco)}</span> <span class="code">${esc(x.h.codigo)}</span><div class="small">${esc(t?.nome || "")}</div></td><td class="small">${esc(x.c.exp || "—")}</td>
       <td class="num">${x.r.P || "—"}</td><td class="num">${x.r.S}</td><td>${chipCat(x.r.cat)}</td><td>${sitCelula(x)}</td></tr>
-      ${aberto ? `<tr class="invedit"><td colspan="8">${vInvEditor(x)}</td></tr>` : ""}`; }).join("");
+      ${aberto ? `<tr class="invedit"><td colspan="9">${vInvEditor(x)}</td></tr>` : ""}`; }).join("");
 }
 const optSel = (lista, val, vazio = "Escolha") => `<option value="">${vazio}</option>` + lista.map(([v, t]) => `<option value="${esc(v)}" ${String(v) === String(val ?? "") ? "selected" : ""}>${esc(t)}</option>`).join("");
 function vInvResultado(x){
@@ -2250,18 +2252,58 @@ function vInventario(){
       <input type="text" data-invbusca="1" value="${esc(S.invBusca)}" placeholder="Buscar AEP, cargo, perigo ou fonte">
     </div>
     <div id="invresumo">${vInvResumo()}</div>
-    <div class="tablewrap"><table class="list invtab"><thead><tr><th>AEP</th><th>Cargo</th><th>Perigo</th><th>Exposição</th><th class="num">P</th><th class="num">S</th><th>Categoria</th><th>Situação</th></tr></thead>
+    <div id="invlote">${vInvLote()}</div>
+    <div class="tablewrap"><table class="list invtab"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" data-invselall="1" aria-label="Selecionar todos os perigos da lista"></th><th>AEP</th><th>Cargo</th><th>Perigo</th><th>Exposição</th><th class="num">P</th><th class="num">S</th><th>Categoria</th><th>Situação</th></tr></thead>
     <tbody id="invbody">${vInvLinhas()}</tbody></table></div>
-    <p class="tiny muted" style="margin-top:8px">Clique numa linha para classificar. P = probabilidade, S = severidade.</p>
+    <p class="tiny muted" style="margin-top:8px">Clique numa linha para classificar uma por uma, ou marque várias linhas para classificar em lote. Dica: busque pelo código (ex.: BIO-01) e use a caixa do cabeçalho para marcar todos da lista. P = probabilidade, S = severidade.</p>
   </div></div>`;
 }
 function atualizarInventario(soResultado){
   if (S.view !== "inventario") return;
   if (soResultado && S.invAberto){ const x = linhasInventario().find(y => y.k === S.invAberto);
     if (x){ const el = document.getElementById("invres-" + x.k.replace(/[^A-Za-z0-9_-]/g, "_")); if (el) el.innerHTML = vInvResultado(x);
-      const tr = document.querySelector(`tr[data-inv="${CSS.escape(x.k)}"]`); if (tr){ const tds = tr.children; tds[3].textContent = x.c.exp || "—"; tds[4].textContent = x.r.P || "—"; tds[5].textContent = x.r.S; tds[6].innerHTML = chipCat(x.r.cat); tds[7].innerHTML = sitCelula(x); } }
+      const tr = document.querySelector(`tr[data-inv="${CSS.escape(x.k)}"]`); if (tr){ const tds = tr.children; tds[4].textContent = x.c.exp || "—"; tds[5].textContent = x.r.P || "—"; tds[6].textContent = x.r.S; tds[7].innerHTML = chipCat(x.r.cat); tds[8].innerHTML = sitCelula(x); } }
     const rs = $("#invresumo"); if (rs) rs.innerHTML = vInvResumo(); return; }
-  const b = $("#invbody"); if (b) b.innerHTML = vInvLinhas(); const rs = $("#invresumo"); if (rs) rs.innerHTML = vInvResumo();
+  const b = $("#invbody"); if (b) b.innerHTML = vInvLinhas(); const rs = $("#invresumo"); if (rs) rs.innerHTML = vInvResumo(); const all = document.querySelector("[data-invselall]"); if (all){ const l = listaInventario(); all.checked = !!l.length && l.every(x => S.invSel.has(x.k)); }
+}
+/* ---------------- Classificação em lote ----------------
+   Marque várias linhas, preencha só o que for igual para todas e aplique. Campo em branco = não muda.
+   Severidade, divergência da grade e descumprimento de NR continuam linha a linha. */
+const LOTE_CAMPOS = ["exp", "catIni", "dur", "int", "hier", "eficaz", "efic", "medidas", "evid", "memoria"];
+function linhasSelecionadas(){ const m = new Map(linhasInventario().map(x => [x.k, x])); return [...S.invSel].map(k => m.get(k)).filter(Boolean); }
+function vInvLote(){
+  const sel = linhasSelecionadas(); if (!sel.length) return "";
+  const v = S.invLote || {}, f = c => `data-lote="${c}"`, n = sel.length, cods = {}; sel.forEach(x => { cods[x.h.codigo] = (cods[x.h.codigo] || 0) + 1; });
+  const jaTem = sel.filter(x => x.r.sit !== "falta").length, preench = LOTE_CAMPOS.filter(c => String(v[c] ?? "").trim()).length;
+  const opt = (lista, val) => `<option value="">Não mudar</option>` + lista.map(([a, t]) => `<option value="${esc(a)}" ${String(a) === String(val ?? "") ? "selected" : ""}>${esc(t)}</option>`).join("");
+  return `<div class="lote"><div class="row between" style="gap:8px;flex-wrap:wrap"><b>Classificar ${n} perigo(s) de uma vez</b><span class="tiny muted">${Object.entries(cods).sort((a, b) => b[1] - a[1]).map(([c, q]) => `${esc(c)} (${q})`).join(" · ")}</span></div>
+    <p class="tiny muted" style="margin:4px 0 10px">Preencha só o que vale para todos os marcados. O que ficar em “Não mudar” ou em branco continua como está em cada linha. Severidade, divergência da grade e descumprimento de NR seguem linha a linha.</p>
+    <div class="grid g3">
+      <label class="f"><span>Tipo de exposição</span><select ${f("exp")}>${opt(EXPOSICOES.map(e => [e, e]), v.exp)}</select></label>
+      <label class="f"><span>Categoria inicial (antes dos controles)</span><select ${f("catIni")}>${opt(CATEGORIAS.map(e => [e, e]), v.catIni)}</select></label>
+      <label class="f"><span>Duração</span><select ${f("dur")}>${opt(DURACOES.map(([a, nm, h, o]) => [a, `${nm}: ${h} (organização: ${o})`]), v.dur)}</select></label>
+      <label class="f"><span>Intensidade das exigências</span><select ${f("int")}>${opt(INTENSIDADES, v.int)}</select></label>
+      <label class="f"><span>Hierarquia da medida</span><select ${f("hier")}>${opt(HIERARQUIAS.map(e => [e, e]), v.hier)}</select></label>
+      <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${opt([["Sim", "Sim"], ["Não", "Não"], ["NA", "NA"]], v.eficaz)}</select></label>
+      <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${opt(EFICACIAS.map(([a, nm]) => [a, `${a} - ${nm}`]), v.efic)}</select></label>
+      <label class="f span2"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(v.evid || "")}" placeholder="Em branco = não muda"></label>
+      <label class="f spanall"><span>Medidas existentes (POAD / EPC)</span><textarea rows="2" ${f("medidas")} placeholder="Em branco = não muda">${esc(v.medidas || "")}</textarea></label>
+      <label class="f spanall"><span>Memória de cálculo / encaminhamento</span><textarea rows="2" ${f("memoria")} placeholder="Em branco = não muda">${esc(v.memoria || "")}</textarea></label>
+    </div>
+    ${jaTem ? `<p class="tiny" style="color:var(--warn-ink);margin:8px 0 0">${jaTem} dos marcados já têm algum campo preenchido: os campos que você preencher aqui substituem os deles; os demais ficam como estão.</p>` : ""}
+    <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn primary" type="button" data-act="invLoteAplicar" id="btnLote" ${preench ? "" : "disabled"}>Aplicar em ${n} perigo(s)</button>
+      <button class="btn" type="button" data-act="invLoteLimpar">Desmarcar todos</button><span class="tiny muted" id="lotemsg">${preench ? `${preench} campo(s) para aplicar` : "Preencha pelo menos um campo"}</span></div></div>`;
+}
+async function aplicarLote(){
+  const sel = linhasSelecionadas(), v = S.invLote || {}, campos = LOTE_CAMPOS.filter(c => String(v[c] ?? "").trim());
+  if (!sel.length || !campos.length) return;
+  const em = new Date().toISOString();
+  sel.forEach(x => { const a = S.aeps[x.a.id]; a.classif = a.classif || {}; const c = Object.assign({}, a.classif[x.h.idRisco] || {});
+    campos.forEach(k => { c[k] = k === "efic" ? Number(v[k]) : v[k]; }); c.em = em; a.classif[x.h.idRisco] = c; S.invPend[a.id] = true; });
+  await salvarInventario();
+  const depois = linhasInventario().filter(x => S.invSel.has(x.k)), ok = depois.filter(x => x.r.sit === "ok").length, inc = depois.filter(x => x.r.sit === "incompleta").length, al = depois.filter(x => x.r.sit === "alerta").length;
+  S.invSel = new Set(); atualizarInventario(); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote();
+  toast(`Aplicado em ${sel.length} perigo(s): ${ok} classificado(s)${inc ? `, ${inc} ainda incompleto(s)` : ""}${al ? `, ${al} com alerta` : ""}.`);
 }
 function mudarClassif(k, campo, v){
   const [id, rid] = k.split("|"), a = S.aeps[id]; if (!a) return;
@@ -3989,6 +4031,11 @@ function campo(e, isChange){
     return;
   }
   if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
+  if (el.dataset.invsel){ if (!isChange) return; el.checked ? S.invSel.add(el.dataset.invsel) : S.invSel.delete(el.dataset.invsel); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
+  if (el.dataset.invselall){ if (!isChange) return; listaInventario().forEach(x => el.checked ? S.invSel.add(x.k) : S.invSel.delete(x.k)); document.querySelectorAll("[data-invsel]").forEach(c => { c.checked = S.invSel.has(c.dataset.invsel); }); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
+  if (el.dataset.lote){ const c = el.dataset.lote; S.invLote = { ...(S.invLote || {}), [c]: el.value };
+    if (el.tagName === "SELECT"){ if (!isChange) return; } else if (isChange) return;
+    const n = LOTE_CAMPOS.filter(k => String(S.invLote[k] ?? "").trim()).length, b = $("#btnLote"), m = $("#lotemsg"); if (b) b.disabled = !n; if (m) m.textContent = n ? `${n} campo(s) para aplicar` : "Preencha pelo menos um campo"; return; }
   if (el.dataset.invbusca){ if (isChange) return; S.invBusca = el.value; atualizarInventario(); return; }
   if (el.dataset.tax){ const cod = el.dataset.tax, c = el.dataset.tc, texto = el.tagName === "TEXTAREA" || el.type === "text";
     if (texto){ if (isChange){ atualizarTax(); return; } mudarTax(cod, c, el.value); return; }
@@ -4065,6 +4112,8 @@ document.addEventListener("click", async e => {
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
+    case "invLoteAplicar": aplicarLote(); break;
+    case "invLoteLimpar": S.invSel = new Set(); atualizarInventario(); { const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); } break;
     case "orgSel": { const sx = ($("#orgwrap") || {}).scrollLeft || 0; S.orgSel = S.orgSel === d.id ? null : d.id; S.confirm = null; render(); const w = $("#orgwrap"); if (w) w.scrollLeft = sx; if (S.orgSel) window.scrollTo({ top: 0, behavior: "smooth" }); break; }
     case "orgFechar": S.orgSel = null; S.confirm = null; render(); break;
     case "orgNova": novaPessoaOrg(); break;
