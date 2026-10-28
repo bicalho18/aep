@@ -2293,9 +2293,9 @@ function linhasInventario(){
 function listaInventario(){
   const t = norm(S.invBusca);
   if (S.invFoco) return linhasInventario().filter(x => x.k === S.invFoco || x.a.id === S.invFoco);
-  return linhasInventario().filter(x => S.invSit === "todas" || (S.invSit === "pendentes" ? !resolvido(x.r) : S.invSit === "naoenv" ? x.r.sit === "ok" && x.a.status === "concluida" && estadoPGR(x) !== "enviado" : x.r.sit === S.invSit))
-    .filter(x => !S.invCat || x.r.cat === S.invCat)
-    .filter(x => !t || norm(`${x.a.numero} ${x.a.meta?.cargo} ${x.h.idRisco} ${x.h.codigo} ${TAXMAP[x.h.codigo]?.nome} ${x.h.fonte}`).includes(t));
+  return linhasInventario().filter(x => x.k === S.invAberto || S.invSit === "todas" || (S.invSit === "pendentes" ? !resolvido(x.r) : S.invSit === "naoenv" ? x.r.sit === "ok" && x.a.status === "concluida" && estadoPGR(x) !== "enviado" : x.r.sit === S.invSit))
+    .filter(x => x.k === S.invAberto || !S.invCat || x.r.cat === S.invCat)
+    .filter(x => x.k === S.invAberto || !t || norm(`${x.a.numero} ${x.a.meta?.cargo} ${x.h.idRisco} ${x.h.codigo} ${TAXMAP[x.h.codigo]?.nome} ${x.h.fonte}`).includes(t));
 }
 function vInvResumo(){
   const L = linhasInventario(), n = s => L.filter(x => x.r.sit === s).length;
@@ -2425,9 +2425,11 @@ function fontesCopia(x){
 }
 const rotDur = v => (DURACOES.find(d => d[0] === v) || [])[1] || "—", rotInt = v => (INTENSIDADES.find(d => d[0] === v) || [])[1] || "—";
 function vCopiaBox(x){
-  if (foraPGR(x.c)) return ""; const L = fontesCopia(x); if (!L.length) return "";
+  if (foraPGR(x.c)) return ""; const L = fontesCopia(x);
+  const aviso = S.copiado && S.copiado.k === x.k ? `<div class="note ok" style="margin:0 0 10px"><b>Copiado de ${esc(S.copiado.de)}.</b> Confira os campos abaixo e o resultado ao lado. Ajuste o que for diferente neste cargo e, quando estiver certo, use “Fechar” ou “Fechar e abrir o próximo”.</div>` : "";
+  if (!L.length) return aviso;
   S.copiaFontes = S.copiaFontes || {}; S.copiaFontes[x.k] = L.map(o => o.k);
-  return `<div class="corrbox"><label class="f"><span>Usar a classificação de outra linha do mesmo perigo (${esc(x.h.codigo)})</span><select data-copiar="${esc(x.k)}" aria-label="Usar a classificação de outra linha"><option value="">${L.length === 1 ? "Escolha a classificação já feita" : `Escolha uma das ${L.length} classificações já feitas`}</option>${L.map((o, i) => `<option value="${i}">Nível ${o.r.N} ${esc(o.r.cat.replace("Risco ", ""))} · ${esc(rotDur(o.c.dur))} × ${esc(rotInt(o.c.int))} · eficácia ${esc(o.c.efic)} · usada em ${o.n} linha(s) · ex.: ${esc(o.a.numero)} ${esc((o.a.meta?.cargo || "").trim())}</option>`).join("")}</select>
+  return `${aviso}<div class="corrbox"><label class="f"><span>Usar a classificação de outra linha do mesmo perigo (${esc(x.h.codigo)})</span><select data-copiar="${esc(x.k)}" aria-label="Usar a classificação de outra linha"><option value="">${L.length === 1 ? "Escolha a classificação já feita" : `Escolha uma das ${L.length} classificações já feitas`}</option>${L.map((o, i) => `<option value="${i}">Nível ${o.r.N} ${esc(o.r.cat.replace("Risco ", ""))} · ${esc(rotDur(o.c.dur))} × ${esc(rotInt(o.c.int))} · eficácia ${esc(o.c.efic)} · usada em ${o.n} linha(s) · ex.: ${esc(o.a.numero)} ${esc((o.a.meta?.cargo || "").trim())}</option>`).join("")}</select>
     <span class="hint">Copia exposição, categoria inicial, duração, intensidade, medidas, eficácia e evidência. Severidade e divergências continuam desta linha. Depois ajuste só a exceção.</span></label></div>`;
 }
 async function copiarClassif(k, de){
@@ -2435,7 +2437,7 @@ async function copiarClassif(k, de){
   a.classif = a.classif || {}; const c = Object.assign({}, a.classif[rid] || {});
   COPIA_CAMPOS.forEach(f => { if (src[f] !== undefined && src[f] !== "") c[f] = clone(src[f]); else delete c[f]; });
   c.medidasL = clone(medidasDe(src)); c.medidas = medidasTxt(c); delete c.hier;
-  c.em = new Date().toISOString(); a.classif[rid] = c; S.invPend[id] = true; await salvarInventario(); atualizarInventario();
+  c.em = new Date().toISOString(); a.classif[rid] = c; S.invPend[id] = true; S.copiado = { k, de: `${S.aeps[id2].numero} ${rid2}` }; await salvarInventario(); atualizarInventario();
   toast(`Classificação copiada de ${S.aeps[id2].numero} ${rid2}. Confira e ajuste só a exceção.`);
 }
 function vTratBox(x){
@@ -4448,10 +4450,10 @@ document.addEventListener("click", async e => {
       if (!id || !h || !h.idRisco){ toast("Salve a AEP e tente de novo."); break; }
       const key = `${id}|${h.idRisco}`; S.invFoco = key; S.invAberto = key; S.invEsc = "todas"; await ir("inventario"); break; }
     case "verPlanoDesv": S.melFoco = d.key; S.melAberto = `${d.key.split("|")[0]}|desv-${d.key.split("|")[1]}`; S.melEsc = "todas"; S.melSit = "todas"; ir("melhorias"); break;
-    case "invFechar": await salvarInventario(); S.invAberto = null; atualizarInventario(); break;
+    case "invFechar": await salvarInventario(); S.invAberto = null; S.copiado = null; atualizarInventario(); break;
     case "invProximo": { await salvarInventario(); const L = listaInventario(), i = L.findIndex(x => x.k === d.key), resto = L.slice(i + 1).filter(x => x.k !== d.key);
       const prox = resto.find(x => !resolvido(x.r)) || resto[0] || null;
-      S.invAberto = prox ? prox.k : null; atualizarInventario();
+      S.invAberto = prox ? prox.k : null; S.copiado = null; atualizarInventario();
       if (prox){ const tr = document.querySelector(`tr[data-inv="${CSS.escape(prox.k)}"]`); if (tr) tr.scrollIntoView({ block: "start", behavior: "smooth" }); } else toast("Fim da lista."); break; }
     case "verPlanoCorr": S.melFoco = d.key; S.melAberto = `${d.key.split("|")[0]}|corr-${d.key.split("|")[1]}`; S.melEsc = "todas"; S.melSit = "todas"; ir("melhorias"); break;
     case "corrTirarFoto": { const [id, rid] = d.key.split("|"), ant = S.aeps[id]?.classif?.[rid]?.corrFoto; mudarClassif(d.key, "corrFoto", ""); await salvarInventario();
