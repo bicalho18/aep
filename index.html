@@ -411,6 +411,12 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .mtipo.corr{background:var(--surface-2);color:var(--ok-ink);border:1px solid var(--ok-line)}
 .corrbox{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;margin:10px 0;background:var(--surface-2)}
 .corrbox.on{border-color:var(--ok-line);background:var(--ok-bg)}
+.selo{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.selo.pgr{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--rule-strong)}
+.selo.fora{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
+.invjust{border:1px dashed var(--rule-strong);border-radius:10px;padding:8px 12px}
+.invjust>summary{cursor:pointer;color:var(--ink-2);font-weight:600}
+.invjust[open]>summary{margin-bottom:8px}
 .corrfoto{max-width:220px;max-height:160px;border-radius:8px;display:block;margin:4px 0 6px;object-fit:cover;background:var(--surface-2)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
@@ -763,6 +769,11 @@ function itemCorrigido(a, n){
 const ckCriticos = a => ckLista(a).filter(x => x.c.r === "sim" && !itemCorrigido(a, x.n));
 const ckCorrigidos = a => ckLista(a).filter(x => x.c.r === "sim" && !!itemCorrigido(a, x.n));
 const resolvido = r => r.sit === "ok" || r.sit === "corrigido" || r.sit === "desvio";
+/* Destino de cada perigo: exigência e deficiência de projeto vão ao PGR; corrigido e desvio de conservação ficam fora */
+const foraPGR = c => !!(c && (c.corr || c.desvio));
+const seloPGR = c => foraPGR(c) ? `<span class="selo fora" title="Não vai ao inventário do PGR">Fora do PGR</span>` : `<span class="selo pgr" title="Vai ao inventário do PGR">PGR</span>`;
+/* Evidência da medida (Regra 1): escolha curta, sem amarrar a um documento específico */
+const EVID_TIPOS = [["campo", "Observação de campo registrada na AEP"], ["doc", "Registro documental (lista de presença, procedimento, OS)"], ["ambos", "Observação de campo e registro documental"]];
 /* Desvio de conservação (27/10/2026): item ADEQUADO que quebrou, queimou ou parou (cadeira regulável quebrada, lâmpada queimada, ventilador parado).
    classif.desvio + desvTxt (o que foi encontrado e o que fazer) + desvOS. Nunca vai ao PGR: é falha pontual de uma medida que existe,
    tratada como correção da medida (NR-1, 1.5.5.3.1 e 1.5.5.3.2.1), com acompanhamento no Plano de ação ("idAEP|desv-Rnn") até a execução e a evidência.
@@ -959,6 +970,7 @@ function listaMelhorias(){
   return itensPlanoDe(aepsPlano())
     .filter(m => !S.melFoco || m.key === S.melFoco || m.base === S.melFoco)
     .filter(PL_TIPO[S.melTipo] || PL_TIPO[""])
+    .filter(m => !S.melPGR || (S.melPGR === "pgr") === (m.kind === "risco"))
     .filter(m => !S.melPrio || m.prio === S.melPrio)
     .filter(m => S.melFoco || (PL_SIT[S.melSit] || PL_SIT.todas)(m))
     .filter(m => !t || norm(`${m.a.numero} ${m.a.meta?.cargo} ${m.a.meta?.setor} ${m.texto} ${m.resp} ${m.sig} ${m.h ? `${m.h.idRisco} ${m.h.codigo} ${m.t?.nome}` : ""}`).includes(t))
@@ -1006,7 +1018,7 @@ function oQueFazer(m){
        <div class="small" style="margin-top:3px">${m.texto ? esc(m.texto) : `<span class="faint">Descreva a ação em Detalhes.</span>`}</div>`
     : m.kind === "corr" || m.kind === "desv" ? `${chipTipo(m)} <span class="mono small">${esc(m.h.idRisco)}</span> <span class="small">${esc(m.t?.nome || "")}</span><div class="small" style="margin-top:3px">${esc(m.texto)}</div>`
     : `${chipTipo(m)}<div class="small">${esc(m.texto)}</div>`;
-  return `${cab}${aviso.map(x => `<div class="tiny plaviso">${esc(x)}</div>`).join("")}
+  return `${cab}${m.kind === "risco" ? `<span class="selo pgr" title="Ação de um risco do inventário do PGR">PGR</span>` : `<span class="selo fora" title="Ação fora do inventário do PGR">Fora do PGR</span>`}${aviso.map(x => `<div class="tiny plaviso">${esc(x)}</div>`).join("")}
     <button class="btn ghost small" type="button" data-act="planoDet" data-key="${esc(m.key)}" style="padding:0;margin-top:2px">${S.melAberto === m.key ? "Fechar detalhes" : "Detalhes"}</button>`;
 }
 function vPlanoDetalhe(m){
@@ -1052,6 +1064,7 @@ function vMelhorias(){
       ${vMultiSetor("msel-mel")}
       <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "semsig", "Em aberto sem Nº do SIG")}${op("melSit", "semacao", "Riscos com ação a definir")}${op("melSit", "eficacia", "Concluídas com eficácia a verificar")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas as situações")}</select>
       <select data-melf="melTipo" aria-label="Tipo">${op("melTipo", "", "Riscos e melhorias")}${op("melTipo", "risco", "Só ações dos riscos (P1 e P2)")}${op("melTipo", "mel", "Só melhorias")}${op("melTipo", "rec", "Só recomendações")}${op("melTipo", "desv", "Só desvios de conservação")}${op("melTipo", "corr", "Só correções imediatas")}${op("melTipo", "op", "Só oportunidades de melhoria")}</select>
+      <select data-melf="melPGR" aria-label="PGR">${op("melPGR", "", "PGR e fora do PGR")}${op("melPGR", "pgr", "Só ações de riscos do PGR")}${op("melPGR", "fora", "Só ações fora do PGR")}</select>
       <select data-melf="melPrio" aria-label="Prioridade">${op("melPrio", "", "Todas as prioridades")}${MEL_PRIO.map(p => op("melPrio", p, "Prioridade " + p.toLowerCase())).join("")}</select>
       <select data-melf="melEsc" aria-label="AEPs">${op("melEsc", "fechadas", "AEPs concluídas e em revisão")}${op("melEsc", "todas", "Todas as AEPs")}</select>
       <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar AEP, cargo, perigo, texto, responsável ou Nº SIG">
@@ -1406,7 +1419,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -2255,7 +2268,7 @@ function calcRisco(h, c){
   if (P === 1 && c.exp === "Habitual e permanente" && !memo) alertas.push("Probabilidade 1 com exposição habitual e permanente exige justificativa técnica (2.6).");
   if (c.pOver && !c.descNR && Number(c.pOver) !== Pg && !String(c.pJust || "").trim()) alertas.push("Probabilidade diferente da grade: registre a justificativa da divergência (2.7).");
   if (Number(c.sev) > anc && !String(c.sevJust || "").trim()) alertas.push("Severidade acima da âncora: registre a justificativa (2.8).");
-  if (Number(c.efic) > 2 && !String(c.evid || "").trim()) alertas.push("Eficácia acima de 2 exige evidência da medida na unidade (Regra 1).");
+  if (Number(c.efic) > 2 && !c.evidTipo && !String(c.evid || "").trim()) alertas.push("Eficácia acima de 2 exige evidência: escolha em “Evidência da medida” (Regra 1).");
   if (c.descNR && !String(c.req || "").trim()) alertas.push("Informe o requisito de NR descumprido (2.5).");
   const vazio = !Object.keys(c).some(k => k !== "em" && c[k] !== "" && c[k] != null && c[k] !== false);
   const sit = vazio ? "falta" : falta.length ? "incompleta" : alertas.length ? "alerta" : "ok";
@@ -2296,7 +2309,7 @@ function vInvLinhas(){
   if (!L.length) return `<tr><td colspan="9" class="small muted" style="padding:18px">Nenhum perigo com estes filtros.</td></tr>`;
   return L.map(x => { const t = TAXMAP[x.h.codigo], aberto = S.invAberto === x.k, sit = SIT_INV[x.r.sit];
     return `<tr class="click${aberto ? " sel" : ""}" data-inv="${esc(x.k)}" tabindex="0"><td data-selcell style="width:34px;padding:0"><label style="display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer"><input type="checkbox" data-invsel="${esc(x.k)}" ${S.invSel.has(x.k) ? "checked" : ""} aria-label="Selecionar ${esc(x.a.numero)} ${esc(x.h.idRisco)}"></label></td><td class="mono">${esc(x.a.numero)}</td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">${esc((x.a.meta?.setor || "").trim())}</div></td>
-      <td><span class="mono small">${esc(x.h.idRisco)}</span> <span class="code">${esc(x.h.codigo)}</span><div class="small">${esc(t?.nome || "")}</div></td><td class="small">${esc(x.c.exp || "—")}</td>
+      <td><span class="mono small">${esc(x.h.idRisco)}</span> <span class="code">${esc(x.h.codigo)}</span>${seloPGR(x.c)}<div class="small">${esc(t?.nome || "")}</div></td><td class="small">${esc(x.c.exp || "—")}</td>
       <td class="num">${x.r.P || "—"}</td><td class="num">${x.r.S}</td><td>${chipCat(x.r.cat)}</td><td>${sitCelula(x)}</td></tr>
       ${aberto ? `<tr class="invedit"><td colspan="9">${vInvEditor(x)}${vInvFim(x)}</td></tr>` : ""}`; }).join("");
 }
@@ -2361,11 +2374,12 @@ function vInvEditor(x){
   const sevOpts = [1, 2, 3, 4, 5].filter(n => n >= x.r.anc).map(n => [n, SEV_ROT[n] + (n === x.r.anc ? " (âncora)" : "")]);
   return `<div class="inved">
     <div class="invcol">
-      <div class="invper"><b>${esc(x.h.idRisco)} ${esc(x.h.codigo)}: ${esc(t?.nome || "")}</b><p class="small">${esc(x.h.fonte || "")}</p>
+      <div class="invper"><b>${esc(x.h.idRisco)} ${esc(x.h.codigo)}: ${esc(t?.nome || "")}</b>${seloPGR(c)}<p class="small">${esc(x.h.fonte || "")}</p>
         <p class="tiny muted"><b>Possíveis danos:</b> ${esc(t?.danos || "")}${baseTexto(x.a, x.h) ? ` · <b>Base:</b> ${esc(baseTexto(x.a, x.h))}` : ""}</p>
         ${c.importadoDaPlanilha ? `<p class="tiny muted">Parte destes campos veio da planilha de controle. Confira e complete.</p>` : ""}
         <a class="btn ghost small" href="#aep=${encodeURIComponent(x.a.id)}" data-open="${esc(x.a.id)}" style="padding:0" title="Botão direito: abrir em nova aba">Abrir a AEP ${esc(x.a.numero)}</a></div>
       ${vTratBox(x)}
+      ${vCopiaBox(x)}
       ${c.corr || c.desvio ? `<p class="tiny muted">Com esse tratamento, a graduação (exposição, exigência, eficácia, probabilidade) não se aplica e fica escondida. O que já estava preenchido continua guardado: se voltar para “Classificar”, a classificação volta.</p></div>
     <div class="invcol" id="invres-${x.k.replace(/[^A-Za-z0-9_-]/g, "_")}">${vInvResultado(x)}</div>
   </div>` : `
@@ -2380,7 +2394,7 @@ function vInvEditor(x){
       <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${optSel(EFICAZ_OP, c.eficaz)}</select></label>
       <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${optSel(EFICACIAS.map(([n, nome]) => [n, `${n} - ${nome}`]), c.efic)}</select>
         ${c.efic ? `<span class="hint">${esc(org ? EFIC_ORG[c.efic] : EFICACIAS[c.efic - 1][2])}</span>` : `<span class="hint">Sem evidência registrada, a nota máxima é 2 (Regra 1).</span>`}</label>
-      <label class="f"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(c.evid || "")}" placeholder="Ex.: registro de manutenção, foto, procedimento assinado"></label>
+      <label class="f"><span>Evidência da medida</span><select ${f("evidTipo")}>${optSel(EVID_TIPOS, c.evidTipo, String(c.evid || "").trim() ? "Escolha (há detalhe escrito abaixo)" : "Escolha")}</select></label>
       <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" ${f("descNR")} ${c.descNR ? "checked" : ""}> Há descumprimento de requisito específico de NR (probabilidade = 5, item 2.5)</label>
       ${c.descNR ? `<label class="f"><span>Requisito descumprido</span><input type="text" ${f("req")} value="${esc(c.req || "")}" placeholder="Ex.: NR-17, item 17.6.6 (assento)"></label>` : ""}
       <div class="grid g2">
@@ -2389,10 +2403,40 @@ function vInvEditor(x){
       </div>
       ${c.pOver && Number(c.pOver) !== x.r.Pg && !c.descNR ? `<label class="f"><span>Justificativa da divergência da grade</span><input type="text" ${f("pJust")} value="${esc(c.pJust || "")}"></label>` : ""}
       ${Number(c.sev) > x.r.anc ? `<label class="f"><span>Justificativa da severidade elevada</span><input type="text" ${f("sevJust")} value="${esc(c.sevJust || "")}" placeholder="Nexo estabelecido, CAT, NTEP ou gravidade documentada"></label>` : ""}
-      <label class="f"><span>Memória de cálculo / encaminhamento</span><textarea rows="2" ${f("memoria")} placeholder="Fonte da duração (observação, entrevista, registro), justificativas e encaminhamento">${esc(c.memoria || "")}</textarea></label>
+      <details class="invjust" ${x.r.alertas.some(a => /\(2\.6\)/.test(a)) ? "open" : ""}><summary class="small">Justificativa e detalhes (só se precisar)${String(c.memoria || "").trim() || String(c.evid || "").trim() ? " · preenchida" : ""}</summary>
+        <div class="stack tight">
+          <label class="f"><span>Detalhe da evidência (opcional)</span><input type="text" ${f("evid")} value="${esc(c.evid || "")}" placeholder="Em branco é o normal"></label>
+          <label class="f"><span>Memória de cálculo / justificativa</span><textarea rows="2" ${f("memoria")} placeholder="Só quando o sistema pedir: combinação fora do padrão ou probabilidade 1 com exposição habitual">${esc(c.memoria || "")}</textarea></label>
+          <span class="hint">Não vai para o PGR nem para o documento da AEP. Abre sozinho quando o sistema pede justificativa (regra 2.6).</span>
+        </div></details>
     </div>
     <div class="invcol" id="invres-${x.k.replace(/[^A-Za-z0-9_-]/g, "_")}">${vInvResultado(x)}</div>
   </div>`}`;
+}
+/* Usar a classificação de outra linha do mesmo perigo: as já feitas, agrupadas pelos mesmos valores, das mais usadas para as menos */
+const COPIA_CAMPOS = ["exp", "catIni", "dur", "int", "eficaz", "efic", "evidTipo", "evid", "memoria"];
+function fontesCopia(x){
+  const g = new Map();
+  Object.values(S.aeps).forEach(a => (a.perigos || []).forEach(h => { if (h.codigo !== x.h.codigo || !h.idRisco) return; const k = `${a.id}|${h.idRisco}`; if (k === x.k) return;
+    const c = (a.classif || {})[h.idRisco]; if (!c || foraPGR(c)) return; const r = calcRisco(h, c); if (r.sit !== "ok") return;
+    const sig = JSON.stringify([c.exp, c.catIni, c.dur, c.int, c.eficaz, Number(c.efic), medidasTxt(c)]);
+    const o = g.get(sig) || { k, a, h, c, r, n: 0 }; o.n++; g.set(sig, o); }));
+  return [...g.values()].sort((p, q) => q.n - p.n || idNum(p.a) - idNum(q.a)).slice(0, 8);
+}
+const rotDur = v => (DURACOES.find(d => d[0] === v) || [])[1] || "—", rotInt = v => (INTENSIDADES.find(d => d[0] === v) || [])[1] || "—";
+function vCopiaBox(x){
+  if (foraPGR(x.c)) return ""; const L = fontesCopia(x); if (!L.length) return "";
+  S.copiaFontes = S.copiaFontes || {}; S.copiaFontes[x.k] = L.map(o => o.k);
+  return `<div class="corrbox"><label class="f"><span>Usar a classificação de outra linha do mesmo perigo (${esc(x.h.codigo)})</span><select data-copiar="${esc(x.k)}" aria-label="Usar a classificação de outra linha"><option value="">${L.length === 1 ? "Escolha a classificação já feita" : `Escolha uma das ${L.length} classificações já feitas`}</option>${L.map((o, i) => `<option value="${i}">Nível ${o.r.N} ${esc(o.r.cat.replace("Risco ", ""))} · ${esc(rotDur(o.c.dur))} × ${esc(rotInt(o.c.int))} · eficácia ${esc(o.c.efic)} · usada em ${o.n} linha(s) · ex.: ${esc(o.a.numero)} ${esc((o.a.meta?.cargo || "").trim())}</option>`).join("")}</select>
+    <span class="hint">Copia exposição, categoria inicial, duração, intensidade, medidas, eficácia e evidência. Severidade e divergências continuam desta linha. Depois ajuste só a exceção.</span></label></div>`;
+}
+async function copiarClassif(k, de){
+  if (!de) return; const [id, rid] = k.split("|"), [id2, rid2] = de.split("|"), a = S.aeps[id], src = ((S.aeps[id2] || {}).classif || {})[rid2]; if (!a || !src) return;
+  a.classif = a.classif || {}; const c = Object.assign({}, a.classif[rid] || {});
+  COPIA_CAMPOS.forEach(f => { if (src[f] !== undefined && src[f] !== "") c[f] = clone(src[f]); else delete c[f]; });
+  c.medidasL = clone(medidasDe(src)); c.medidas = medidasTxt(c); delete c.hier;
+  c.em = new Date().toISOString(); a.classif[rid] = c; S.invPend[id] = true; await salvarInventario(); atualizarInventario();
+  toast(`Classificação copiada de ${S.aeps[id2].numero} ${rid2}. Confira e ajuste só a exceção.`);
 }
 function vTratBox(x){
   const c = x.c, k = esc(x.k), f = campo => `data-cf="${campo}" data-ck="${k}"`, kid = x.k.replace(/[^A-Za-z0-9_-]/g, "_"), defic = PERIGOS_DEFICIENCIA.has(x.h.codigo);
@@ -2459,7 +2503,7 @@ function atualizarInventario(soResultado){
 /* ---------------- Classificação em lote ----------------
    Marque várias linhas, preencha só o que for igual para todas e aplique. Campo em branco = não muda.
    Severidade, divergência da grade e descumprimento de NR continuam linha a linha. */
-const LOTE_CAMPOS = ["exp", "catIni", "dur", "int", "eficaz", "efic", "evid", "memoria"];
+const LOTE_CAMPOS = ["exp", "catIni", "dur", "int", "eficaz", "efic", "evidTipo", "evid", "memoria"];
 const loteMedidas = () => (S.invLote?.medidasL || []).filter(x => String(x.t || "").trim());
 const loteN = () => LOTE_CAMPOS.filter(k => String(S.invLote?.[k] ?? "").trim()).length + (loteMedidas().length ? 1 : 0);
 function linhasSelecionadas(){ const m = new Map(linhasInventario().map(x => [x.k, x])); return [...S.invSel].map(k => m.get(k)).filter(Boolean); }
@@ -2477,7 +2521,7 @@ function vInvLote(){
       <label class="f"><span>Intensidade das exigências</span><select ${f("int")}>${opt(INTENSIDADES, v.int)}</select></label>
       <label class="f"><span>POAD / EPC eficaz?</span><select ${f("eficaz")}>${opt(EFICAZ_OP, v.eficaz)}</select></label>
       <label class="f"><span>Eficácia das medidas (2.3.2)</span><select ${f("efic")}>${opt(EFICACIAS.map(([a, nm]) => [a, `${a} - ${nm}`]), v.efic)}</select></label>
-      <label class="f spanall"><span>Evidência da medida</span><input type="text" ${f("evid")} value="${esc(v.evid || "")}" placeholder="Em branco = não muda"></label>
+      <label class="f"><span>Evidência da medida</span><select ${f("evidTipo")}>${opt(EVID_TIPOS, v.evidTipo)}</select></label>
       <div class="f spanall"><span>Medidas existentes (POAD / EPC): uma por linha, com o número da hierarquia. Em branco = não muda; se preencher, substitui as medidas de todos os marcados.</span>${vMedidas(v.medidasL || [], (i, fld) => `data-lmi="${i}" data-mf="${fld}"`, "Em branco = não muda")}</div>
       <label class="f spanall"><span>Memória de cálculo / encaminhamento</span><textarea rows="2" ${f("memoria")} placeholder="Em branco = não muda">${esc(v.memoria || "")}</textarea></label>
     </div>
@@ -4247,6 +4291,7 @@ function campo(e, isChange){
     const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
   if (el.dataset.pmes){ if (!isChange) return; S.pMes = el.value; atualizarListaPainel(); return; }
+  if (el.dataset.copiar !== undefined){ if (!isChange || el.value === "") return; copiarClassif(el.dataset.copiar, ((S.copiaFontes || {})[el.dataset.copiar] || [])[Number(el.value)]); return; }
   if (el.dataset.trat !== undefined){ if (!isChange) return; const k = el.dataset.trat, v = el.value;
     mudarClassif(k, "corr", v === "corr"); mudarClassif(k, "desvio", v === "desvio"); atualizarInventario(); return; }
   if (el.dataset.cf){
@@ -4255,7 +4300,7 @@ function campo(e, isChange){
     if (!isChange) return;
     const v = el.type === "checkbox" ? el.checked : (["efic", "pOver", "sev"].includes(campo) && el.value ? Number(el.value) : el.value);
     mudarClassif(k, campo, campo === "sev" && v === ancoraDe((S.aeps[k.split("|")[0]].perigos || []).find(h => h.idRisco === k.split("|")[1]) || {}) ? "" : v);
-    if (["descNR", "pOver", "sev", "efic", "corr"].includes(campo)) atualizarInventario(); else atualizarInventario(true);
+    if (["descNR", "pOver", "sev", "efic", "corr", "exp", "dur", "int"].includes(campo)) atualizarInventario(); else atualizarInventario(true);
     return;
   }
   if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
