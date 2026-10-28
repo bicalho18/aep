@@ -1029,7 +1029,7 @@ function vPlanoDetalhe(m){
 function linhasMelhorias(l){
   if (!l.length) return `<tr><td colspan="8" class="muted small" style="padding:18px">Nenhum item com estes filtros.</td></tr>`;
   return l.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}${S.melAberto === m.key ? " sel" : ""}">
-    <td class="mono"><button class="btn ghost small" type="button" data-open="${esc(m.a.id)}" style="padding:0">${esc(m.a.numero)}</button></td>
+    <td class="mono"><a class="btn ghost small" href="#aep=${encodeURIComponent(m.a.id)}" data-open="${esc(m.a.id)}" style="padding:0" title="Botão direito: abrir em nova aba">${esc(m.a.numero)}</a></td>
     <td><b>${esc(m.a.meta?.cargo || "")}</b><div class="tiny faint">${esc((m.a.meta?.setor || "").trim())}</div></td>
     <td>${oQueFazer(m)}</td>
     <td><input type="text" class="sig" data-mel="${esc(m.key)}" data-mc="sig" value="${esc(m.sig)}" placeholder="Nº SIG" aria-label="Número da ação no SIG"></td>
@@ -1475,13 +1475,8 @@ async function iniciar(){
   db.doc("config/taxonomia").onSnapshot(d => { if (S.taxDirty) return; const x = d.exists ? (d.data() || {}) : {};
     S.tax = { versao: x.versao || 1, em: x.em || "", itens: x.itens || {}, historico: x.historico || [] }; S.taxDraft = x.rascunho || null; aplicarTaxonomia(S.tax.itens);
     if (S.view === "aep") renderStep(); else if (S.view !== "doc" && S.view !== "campo") render(); }, () => {});
-  db.collection("aeps").onSnapshot(snap => {
-    const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
-    Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
-    S.aeps = m; S.padraoPend = velhas; S.carregado = true;
-    if (S.view === "inventario") atualizarInventario();
-    if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
-  }, () => setSaveState("Erro ao ler dados"));
+  db.collection("aeps").onSnapshot(aoLerAEPs, () => setSaveState("Erro ao ler dados"));
+  S.lerAEPs = () => db.collection("aeps").onSnapshot(aoLerAEPs, () => {});
   db.collection("copsoq").onSnapshot(snap => {
     const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); });
     S.areas = m;
@@ -1494,12 +1489,26 @@ async function iniciar(){
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
 }
+function aoLerAEPs(snap){
+    const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
+    Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
+    S.aeps = m; S.padraoPend = velhas; S.carregado = true;
+    if (S.view === "inventario") atualizarInventario();
+    if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
+    S.lidoEm = Date.now();
+    if (!S.hashFeito){ S.hashFeito = true; const mh = String(location.hash || "").match(/^#aep=(.+)$/), id = mh ? decodeURIComponent(mh[1]) : "";
+      if (id && S.aeps[id]){ history.replaceState(null, "", location.pathname + location.search); abrirAEP(id); } }
+}
 async function salvarAEP(){
   clearTimeout(S.saveTimer);
   if (!S.draft || !S.dirty) return;
   numerarRiscos(S.draft);
   S.draft.atualizadoEm = new Date().toISOString();
-  const corpo = clone(S.draft); S.aeps[corpo.id] = corpo; if (S.padraoPend) S.padraoPend.delete(corpo.id);
+  const corpo = clone(S.draft);
+  /* Duas abas (AEP numa, Inventário noutra): a AEP nunca grava a classificação; ela vem do banco, para não apagar o que a outra aba classificou */
+  if (S.db && S.db.doc("aeps/" + corpo.id).get){ try { const srv = await S.db.doc("aeps/" + corpo.id).get();
+    if (srv && srv.classif){ corpo.classif = srv.classif; if (srv.classifEm) corpo.classifEm = srv.classifEm; if (S.draft && S.draft.id === corpo.id) S.draft.classif = clone(srv.classif); } } catch(_){} }
+  S.aeps[corpo.id] = corpo; if (S.padraoPend) S.padraoPend.delete(corpo.id);
   if (!S.db){ S.dirty = false; return; }
   setSaveState("Salvando…");
   try { await S.db.doc("aeps/" + corpo.id).set(corpo); S.dirty = false; setSaveState("Salvo"); }
@@ -1633,7 +1642,7 @@ function linhasHome(lista){
     const st = a.status || "nao_iniciada", altas = altasDe(setorPorNome(a.meta?.setorCopsoq)).length, al = alertaAET(a);
     return `<tr class="click" data-open="${esc(a.id)}" tabindex="0">
       <td data-selcell style="width:34px;padding:0"><label style="display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer"><input type="checkbox" data-sel="${esc(a.id)}" ${S.sel.has(a.id) ? "checked" : ""} aria-label="Selecionar ${esc(a.numero)}"></label></td>
-      <td class="mono">${esc(a.numero)}</td>
+      <td class="mono"><a href="#aep=${encodeURIComponent(a.id)}" data-open="${esc(a.id)}" style="color:inherit;text-decoration:none" title="Botão direito: abrir em nova aba">${esc(a.numero)}</a></td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
       <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.map(x => x.longo).join("\n"))}">⚠ ${esc(av[0].curto)}${av.length > 1 ? ` (+${av.length - 1})` : ""}</div>` : "")(avisosAEP(a))}</td>
@@ -2355,7 +2364,7 @@ function vInvEditor(x){
       <div class="invper"><b>${esc(x.h.idRisco)} ${esc(x.h.codigo)}: ${esc(t?.nome || "")}</b><p class="small">${esc(x.h.fonte || "")}</p>
         <p class="tiny muted"><b>Possíveis danos:</b> ${esc(t?.danos || "")}${baseTexto(x.a, x.h) ? ` · <b>Base:</b> ${esc(baseTexto(x.a, x.h))}` : ""}</p>
         ${c.importadoDaPlanilha ? `<p class="tiny muted">Parte destes campos veio da planilha de controle. Confira e complete.</p>` : ""}
-        <button class="btn ghost small" type="button" data-open="${esc(x.a.id)}" style="padding:0">Abrir a AEP ${esc(x.a.numero)}</button></div>
+        <a class="btn ghost small" href="#aep=${encodeURIComponent(x.a.id)}" data-open="${esc(x.a.id)}" style="padding:0" title="Botão direito: abrir em nova aba">Abrir a AEP ${esc(x.a.numero)}</a></div>
       ${vTratBox(x)}
       ${c.corr || c.desvio ? `<p class="tiny muted">Com esse tratamento, a graduação (exposição, exigência, eficácia, probabilidade) não se aplica e fica escondida. O que já estava preenchido continua guardado: se voltar para “Classificar”, a classificação volta.</p></div>
     <div class="invcol" id="invres-${x.k.replace(/[^A-Za-z0-9_-]/g, "_")}">${vInvResultado(x)}</div>
@@ -2504,7 +2513,11 @@ async function salvarInventario(){
   if (!S.db){ S.invPend = {}; return; }
   setSaveState("Salvando…"); let erro = 0;
   for (const id of ids){ const a = S.aeps[id]; if (!a) { delete S.invPend[id]; continue; }
-    try { const corpo = clone(a); corpo.classifEm = new Date().toISOString(); await S.db.doc("aeps/" + id).set(corpo); delete S.invPend[id]; } catch(e){ erro++; } }
+    try { let corpo = clone(a);
+      if (S.db.doc("aeps/" + id).get){ const srv = await S.db.doc("aeps/" + id).get();
+        if (srv){ corpo = clone(srv); corpo.classif = Object.assign({}, srv.classif || {}, clone(a.classif || {})); } }
+      corpo.classifEm = new Date().toISOString(); await S.db.doc("aeps/" + id).set(corpo); delete S.invPend[id];
+      if (corpo !== a && S.aeps[id] === a){ const novo = migrarAEP(clone(corpo)); novo.classif = a.classif; S.aeps[id] = novo; } } catch(e){ erro++; } }
   setSaveState(erro ? "Erro ao salvar" : "Salvo");
 }
 async function importarPlanilha(){
@@ -4324,7 +4337,7 @@ document.addEventListener("click", async e => {
   const go = t.closest("[data-go]"); if (go){ e.preventDefault(); ir(go.dataset.go); return; }
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
   if (t.closest("[data-selcell]")) return;
-  const op = t.closest("[data-open]"); if (op){ abrirAEP(op.dataset.open); return; }
+  const op = t.closest("[data-open]"); if (op){ if (op.tagName === "A" && (e.ctrlKey || e.metaKey || e.shiftKey)) return; e.preventDefault(); abrirAEP(op.dataset.open); return; }
   const txr = t.closest("tr[data-taxrow]"); if (txr && S.view === "taxonomia"){ S.taxSel = S.taxSel === txr.dataset.taxrow ? null : txr.dataset.taxrow; render(); return; }
   const iv = t.closest("tr[data-inv]"); if (iv && S.view === "inventario"){ S.invAberto = S.invAberto === iv.dataset.inv ? null : iv.dataset.inv; atualizarInventario(); return; }
   const ar = t.closest("tr[data-area]"); if (ar && S.view === "copsoq"){ S.editArea = completarArea(S.areas[ar.dataset.area]); S.areaDirty = false; S.colar = ""; S.colarMsg = ""; render(); window.scrollTo(0,0); return; }
@@ -4666,6 +4679,10 @@ const dbShim = {
         const { error } = await sb.from(col).delete().eq("id", id);
         if (error) throw error;
       },
+      async get(){
+        const { data, error } = await sb.from(col).select("data").eq("id", id).maybeSingle();
+        if (error) throw error; return data ? data.data : null;
+      },
       onSnapshot(cb, err){
         sb.from(col).select("data").eq("id", id).maybeSingle()
           .then(({ data, error }) => { if (error) throw error; cb(docSnap(id, data ? data.data : null)); })
@@ -4740,6 +4757,13 @@ document.addEventListener("error", ev => {
 }, true);
 /* aba voltou a ficar visível depois de muito tempo: renova os links vencidos */
 document.addEventListener("visibilitychange", () => { if (!document.hidden) aplicarFotos(); });
+/* Voltou para esta aba (ex.: classificou numa e editou a AEP noutra): relê as AEPs, se não houver nada por salvar aqui */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden || !S.db || !S.carregado || !S.lerAEPs) return;
+  if (Object.keys(S.invPend || {}).length || S.dirty) return;
+  if (Date.now() - (S.lidoEm || 0) < 4000) return;
+  S.lidoEm = Date.now(); S.lerAEPs();
+});
 
 const blobParaDataURL = b => new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = no; fr.readAsDataURL(b); });
 async function paraDataURL(assetId){
