@@ -1578,7 +1578,7 @@ function pendencias(a){
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
   esperadosFaltando(a).forEach(c => { if (!String(a.naoLancados?.[c]||"").trim()) p[4].push(`Posto administrativo: lançar ${c} (${TAXMAP[c]?.nome||""}) ou justificar por que essa exigência não é relevante neste cargo`); });
   if (!(a.perigos||[]).length && !String(a.semPerigoJust||"").trim()) p[4].push("Nenhum perigo lançado: escrever a justificativa");
-  pgrAntDaAEP(a).filter(x => x.st === "pendente").forEach(x => p[4].push(`PGR anterior, linha ${x.l.i} (${x.l.p}): lançar ${(PGRANT_COD[x.l.p] || [])[0]} ou justificar por que não procede`));
+  pgrAntDaAEP(a).filter(x => x.st === "pendente").forEach(x => p[4].push(`PGR anterior: ${x.l.p} (${curto(x.l.f, 50, true)}). Lance ou ignore no quadro da etapa 4`));
   (a.perigos||[]).forEach(h => { if (/\[[^\]]*\]/.test(h.fonte||"")) p[4].push(`${h.idRisco||h.codigo}: complete os trechos entre colchetes da fonte geradora`); });
   perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
@@ -1674,7 +1674,7 @@ function pgrAntStatus(l, a){
   const hs = re ? todos.filter(h => re.test(h.fonte || "")) : todos;
   if (hs.length) return { st: "contemplado", hs };
   const dec = (S.pgrAnt || {})[pgrAntKey(l, a)];
-  if (dec && String(dec.just || "").trim()) return { st: "naoprocede", just: dec.just, em: dec.em };
+  if (dec && (dec.ign || String(dec.just || "").trim())) return { st: "ignorado", em: dec.em };
   return { st: "pendente", quase: todos };
 }
 const pgrAntDaAEP = a => (PGRANT_POR_GHE[gheDe(a)] || []).map(l => Object.assign({ l }, pgrAntStatus(l, a)));
@@ -1683,70 +1683,40 @@ function pgrAntSevAviso(l){ const cod = (PGRANT_COD[l.p] || [])[0], anc = TAXMAP
 const ROT_ST = { contemplado: ["Contemplado", "fav"], naoprocede: ["Não procede (justificado)", "done"], pendente: ["A decidir", "ris"] };
 const pgrAntTxtAntes = l => `P${pgrAntP(l) || "?"} × S${l.S || "?"} = ${l.N || "?"} (${String(l.c || "").replace("Risco ", "risco ")})`;
 
-/* Etapa 4 da AEP: as linhas do PGR anterior deste GHE */
+/* Etapa 4 da AEP: só as linhas do PGR anterior que não batem com nenhum perigo desta AEP e ainda não foram decididas.
+   Decisão em um clique: lançar o perigo (do seu jeito) ou ignorar. Nada disso vai para o documento nem para o PGR. */
 function vPgrAntAEP(a){
-  const L = pgrAntDaAEP(a); if (!L.length) return "";
-  const pend = L.filter(x => x.st === "pendente").length, tab = PGRANT_TAB[gheDe(a)] || {};
-  return `<div class="panel" id="pgrantaep"><div class="panel-h"><b>Riscos do PGR anterior para este GHE (${esc(gheDe(a))})</b><span class="tiny ${pend ? "plaviso" : "muted"}">${L.length} linha(s)${pend ? ` · ${pend} a decidir` : " · todas decididas"}</span></div><div class="panel-b stack">
-    <p class="small muted">Linhas específicas do ${esc(PGR_ANT.arquivo)} (${esc(tab.s || "")}${tab.a ? " · " + esc(tab.a) : ""}). Cada uma precisa estar contemplada por um perigo desta AEP ou ter a justificativa de por que não procede. Assim o histórico mostra que nenhuma foi esquecida. A justificativa não muda a situação da AEP.</p>
-    ${L.map(x => { const l = x.l, k = pgrAntKey(l, a), r = ROT_ST[x.st], sev = pgrAntSevAviso(l), cods = PGRANT_COD[l.p] || [];
-      return `<div class="pgrlin"><div class="row between" style="gap:8px;flex-wrap:wrap"><span class="small"><span class="mono">${esc(l.i)}</span> <b>${esc(l.p)}</b> · antes: ${esc(pgrAntTxtAntes(l))}</span><span class="chip ${r[1]}">${r[0]}</span></div>
+  const L = pgrAntDaAEP(a).filter(x => x.st === "pendente"); if (!L.length) return "";
+  return `<div class="panel" id="pgrantaep"><div class="panel-h"><b>PGR anterior: ${L.length} situação(ões) para olhar</b><span class="tiny muted">GHE ${esc(gheDe(a))}</span></div><div class="panel-b stack">
+    <p class="small muted">Estavam no PGR anterior e não têm perigo correspondente nesta AEP. Lance como perigo do seu jeito, se a situação existe, ou ignore. Depois de decidida, a linha some.</p>
+    ${L.map(x => { const l = x.l, k = pgrAntKey(l, a), sev = pgrAntSevAviso(l), cod = (PGRANT_COD[l.p] || [])[0];
+      return `<div class="pgrlin"><div class="small"><b>${esc(l.p)}</b> <span class="tiny muted">(linha ${esc(l.i)}, antes ${esc(pgrAntTxtAntes(l))})</span></div>
         <p class="tiny muted" style="margin:2px 0 0">${esc(l.f)}</p>
-        ${x.st === "contemplado" ? `<p class="tiny" style="color:var(--ok-ink);margin:2px 0 0">Contemplado por ${x.hs.map(h => `${esc(h.idRisco || "novo")} ${esc(h.codigo)}`).join(", ")}.</p>` : ""}
-        ${x.st !== "contemplado" && x.quase && x.quase.length ? `<p class="tiny plaviso" style="margin:2px 0 0">Há ${x.quase.map(h => `${esc(h.idRisco || "novo")} ${esc(h.codigo)}`).join(", ")}, mas a fonte não fala desta postura. Se ele contempla esta linha, escreva abaixo “Contemplado pelo ${esc(x.quase[0].idRisco || "")}”; senão, lance ou justifique.</p>` : ""}
-        ${sev ? `<p class="tiny plaviso" style="margin:2px 0 0">No PGR anterior a severidade era ${l.S}; a âncora atual do ${esc(sev.cod)} é ${sev.anc}. No Inventário, eleve a severidade (2.8) ou registre na justificativa da linha por que ela não se mantém.</p>` : ""}
-        ${x.st !== "contemplado" ? `<div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn small" type="button" data-act="pgrLancar" data-k="${esc(k)}">Lançar ${esc(cods[0])}</button><span class="tiny muted">ou, se não procede neste cargo:</span></div>
-          <textarea rows="2" data-pgrj="${esc(k)}" placeholder="Por que não procede (ex.: a atividade deixou de existir; o cargo não executa mais essa tarefa; condição eliminada com ...)">${esc(x.just || "")}</textarea>` : ""}</div>`; }).join("")}
+        ${x.quase && x.quase.length ? `<p class="tiny muted" style="margin:2px 0 0">Há ${x.quase.map(h => `${esc(h.idRisco || "novo")} ${esc(h.codigo)}`).join(", ")} nesta AEP, mas sobre outra postura. Se já cobre, ignore.</p>` : ""}
+        ${sev ? `<p class="tiny plaviso" style="margin:2px 0 0">No PGR anterior a severidade era ${l.S}; a âncora atual do ${esc(sev.cod)} é ${sev.anc}.</p>` : ""}
+        <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn small primary" type="button" data-act="pgrLancar" data-k="${esc(k)}">Lançar ${esc(cod)}</button><button class="btn small" type="button" data-act="pgrIgnorar" data-k="${esc(k)}">Ignorar</button></div></div>`; }).join("")}
   </div></div>`;
 }
+function docPgrAnt(){ return ""; }
 
-/* Documento da AEP: rastreabilidade das linhas do PGR anterior */
-function docPgrAnt(a){
-  const L = pgrAntDaAEP(a); if (!L.length) return "";
-  return `<h3>Riscos registrados no PGR anterior</h3><p class="small">Linhas do inventário anterior (${esc(PGR_ANT.arquivo)}) para o GHE ${esc(gheDe(a))}, reavaliadas nesta AEP.</p>
-  <table class="t"><thead><tr><th style="width:9%">Linha</th><th style="width:22%">Perigo no PGR anterior</th><th>Fonte no PGR anterior</th><th style="width:30%">Situação nesta AEP</th></tr></thead><tbody>${L.map(x =>
-    `<tr><td class="c">${esc(x.l.i)}</td><td>${esc(x.l.p)}</td><td>${esc(x.l.f)}</td><td>${x.st === "contemplado" ? `Contemplado: ${x.hs.map(h => `${esc(h.idRisco || "")} ${esc(h.codigo)}`).join(", ")}` : x.st === "naoprocede" ? `Não procede: ${escBr(x.just)}` : "Em análise"}</td></tr>`).join("")}</tbody></table>`;
-}
-
-/* Tela do cruzamento */
+/* Tela: lista simples do que falta olhar, AEP por AEP */
 function dadosPgrAnt(){
-  const aepsPorGhe = {}; Object.values(S.aeps).forEach(a => { const g = gheDe(a); if (g) (aepsPorGhe[g] = aepsPorGhe[g] || []).push(a); });
-  const fechada = a => a.status === "concluida" || a.status === "revisao";
-  const linhas = PGR_ANT.linhas.map(l => { const as = (aepsPorGhe[l.g] || []).sort((p, q) => idNum(p) - idNum(q));
-    const pares = as.map(a => Object.assign({ a, feita: fechada(a) }, pgrAntStatus(l, a)));
-    return { l, tab: PGRANT_TAB[l.g] || {}, pares, sev: pgrAntSevAviso(l),
-      alerta: pares.filter(p => p.feita && p.st === "pendente").length, aguarda: pares.filter(p => !p.feita && p.st === "pendente").length,
-      ok: pares.filter(p => p.st !== "pendente").length, semAEP: !pares.length }; });
-  const R = { linhas, pares: linhas.reduce((t, x) => t + x.pares.length, 0), alerta: linhas.reduce((t, x) => t + x.alerta, 0), aguarda: linhas.reduce((t, x) => t + x.aguarda, 0),
-    ok: linhas.reduce((t, x) => t + x.ok, 0), semAEP: linhas.filter(x => x.semAEP).length, sev: linhas.filter(x => x.sev).length };
-  return R;
+  const out = []; let alerta = 0;
+  Object.values(S.aeps).sort((p, q) => idNum(p) - idNum(q)).forEach(a => { const L = pgrAntDaAEP(a).filter(x => x.st === "pendente"); if (L.length){ out.push({ a, L }); alerta += L.length; } });
+  return { aeps: out, alerta };
 }
 function vPgrAnt(){
-  const R = dadosPgrAnt(), t = norm(S.pgrAntBusca || ""), f = S.pgrAntFiltro || "alerta";
-  const L = R.linhas.filter(x => f === "todas" || (f === "alerta" ? x.alerta : f === "aguarda" ? x.aguarda : f === "sev" ? x.sev : f === "ok" ? !x.alerta && !x.aguarda && !x.semAEP : x.semAEP))
-    .filter(x => !t || norm(`${x.l.i} ${x.l.g} ${x.tab.s} ${x.tab.a} ${x.l.p} ${x.l.f} ${x.pares.map(p => `${p.a.numero} ${p.a.meta?.cargo}`).join(" ")}`).includes(t));
-  const op = (v, tx) => `<option value="${v}" ${f === v ? "selected" : ""}>${tx}</option>`;
-  return `<div class="pagehead"><div><h1>PGR anterior × AEPs</h1><p>Cada linha específica do ${esc(PGR_ANT.arquivo)} cruzada com as AEPs do mesmo GHE. Uma linha só fica resolvida quando, em cada AEP, está contemplada por um perigo ou tem a justificativa de por que não procede.</p></div>
+  const R = dadosPgrAnt(), t = norm(S.pgrAntBusca || "");
+  const L = R.aeps.filter(x => !t || norm(`${x.a.numero} ${x.a.meta?.cargo} ${x.a.meta?.setor} ${gheDe(x.a)} ${x.L.map(y => `${y.l.p} ${y.l.f}`).join(" ")}`).includes(t));
+  return `<div class="pagehead"><div><h1>PGR anterior: o que falta olhar</h1><p>Situações do ${esc(PGR_ANT.arquivo)} sem perigo correspondente nas AEPs do mesmo GHE. Abra a AEP e, na etapa 4, lance ou ignore cada uma.</p></div>
     <div class="row"><button class="btn" type="button" data-go="inventario">Voltar ao Inventário</button></div></div>
-  <div class="panel" style="margin-bottom:14px"><div class="panel-b stack tight">
-    <div class="stats"><div class="stat"><b>${PGR_ANT.linhas.length}</b><span>linhas específicas no PGR anterior</span></div><div class="stat"><b>${R.ok}</b><span>pares resolvidos (contemplado ou justificado)</span></div>
-      <div class="stat"><b style="${R.alerta ? "color:var(--bad-ink)" : ""}">${R.alerta}</b><span>em AEP já feita, sem perigo nem justificativa</span></div><div class="stat"><b>${R.aguarda}</b><span>aguardando a AEP</span></div>
-      <div class="stat"><b>${R.sev}</b><span>linhas com severidade antiga acima da âncora</span></div></div>
-    <p class="tiny muted" style="margin:0">O arquivo tem ${PGR_ANT.total} linhas: ${PGR_ANT.linhas.length} cruzadas aqui e ${PGR_ANT.naoEvid} “não evidenciado” (afastados). Os fatores psicossociais seguem o lançamento próprio do sistema (COPSOQ por setor e etapa 3 da AEP). “Aguardando a AEP”: a linha já está pré-lançada na AEP do cargo e aparece na etapa 4 quando ela for feita; a AEP não conclui sem decidir cada linha.</p>
-  </div></div>
   <div class="panel"><div class="panel-b">
-    <div class="melfilt"><select data-pgrf="1" aria-label="Filtro">${op("alerta", "Com pendência em AEP já feita")}${op("aguarda", "Aguardando a AEP")}${op("sev", "Severidade antiga acima da âncora")}${op("ok", "Resolvidas")}${op("semaep", "GHE sem AEP no sistema")}${op("todas", "Todas")}</select>
-      <input type="text" data-pgrbusca="1" value="${esc(S.pgrAntBusca || "")}" placeholder="Buscar GHE, área, perigo, fonte, AEP ou cargo"></div>
-    <p class="tiny muted" style="margin:8px 0">${L.length} linha(s) neste filtro.</p>
-    <div class="stack">${L.slice(0, 120).map(x => `<div class="pgrlin">
-      <div class="row between" style="gap:8px;flex-wrap:wrap"><span class="small"><span class="mono">${esc(x.l.i)}</span> · GHE <b>${esc(x.l.g)}</b> · ${esc(x.tab.s || "")}${x.tab.a ? " / " + esc(x.tab.a) : ""}</span><span class="tiny muted">antes: ${esc(pgrAntTxtAntes(x.l))}</span></div>
-      <div class="small"><b>${esc(x.l.p)}</b> → ${esc((PGRANT_COD[x.l.p] || []).join(" ou "))}: ${esc(x.l.f)}</div>
-      ${x.sev ? `<div class="tiny plaviso">Severidade antiga ${x.l.S} acima da âncora atual do ${esc(x.sev.cod)} (${x.sev.anc}): confira no Inventário se a severidade deve ser elevada (2.8).</div>` : ""}
-      <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">${x.pares.length ? x.pares.map(p => { const cls = p.st === "pendente" ? (p.feita ? "ris" : "draft") : p.st === "contemplado" ? "fav" : "done";
-        const tx = p.st === "contemplado" ? `${p.hs.map(h => h.idRisco || h.codigo).join(", ")}` : p.st === "naoprocede" ? "não procede" : p.feita ? "falta decidir" : "aguarda a AEP";
-        return `<a class="chip ${cls}" href="#aep=${encodeURIComponent(p.a.id)}" data-open="${esc(p.a.id)}" title="${esc((p.a.meta?.cargo || "").trim())} · botão direito: abrir em nova aba" style="text-decoration:none">${esc(p.a.numero)}: ${esc(tx)}</a>`; }).join("")
-        : `<span class="tiny muted">Nenhuma AEP com este GHE no sistema.</span>`}</div></div>`).join("")}
-      ${L.length > 120 ? `<p class="tiny muted">+ ${L.length - 120} linha(s). Use a busca para ver as demais.</p>` : ""}</div>
+    <div class="melfilt"><input type="text" data-pgrbusca="1" value="${esc(S.pgrAntBusca || "")}" placeholder="Buscar AEP, cargo, GHE ou situação"></div>
+    <p class="tiny muted" style="margin:8px 0">${R.alerta} situação(ões) em ${R.aeps.length} AEP(s).</p>
+    ${L.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>AEP</th><th>Cargo</th><th>Situação</th><th>O que falta olhar</th></tr></thead><tbody>
+      ${L.map(x => `<tr><td class="mono"><a href="#aep=${encodeURIComponent(x.a.id)}" data-open="${esc(x.a.id)}" title="Botão direito: abrir em nova aba">${esc(x.a.numero)}</a></td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">GHE ${esc(gheDe(x.a))}</div></td><td><span class="chip ${STATUS_CLS[x.a.status || "nao_iniciada"]}">${STATUS[x.a.status || "nao_iniciada"]}</span></td>
+        <td class="small">${x.L.map(y => `${esc(y.l.p)}: <span class="muted">${esc(curto(y.l.f, 70, true))}</span>`).join("<br>")}</td></tr>`).join("")}</tbody></table></div>`
+      : `<p class="small muted">Nada a olhar.</p>`}
   </div></div>`;
 }
 async function salvarPgrAnt(){
@@ -2592,7 +2562,7 @@ function vInventario(){
   const pend = Object.entries(IMPORT_PLANILHA).filter(([key]) => { const [num, rid] = key.split("|"); const a = Object.values(S.aeps).find(x => String(x.numero).trim() === num); return a && (a.perigos || []).some(h => h.idRisco === rid) && !(a.classif || {})[rid]; });
   const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
   return `<div class="pagehead"><div><h1>Inventário de riscos</h1><p>Classificação de cada perigo das AEPs pela Seção 2 dos <button class="btn ghost small" type="button" data-go="criterios" style="padding:0">Critérios do GRO</button>. Classificar não muda a situação da AEP.</p></div>
-    <div class="row"><button class="btn" type="button" data-go="pgrant">${(n => `PGR anterior${n ? ` (${n} a decidir)` : ""}`)(dadosPgrAnt().alerta)}</button><button class="btn primary" type="button" data-act="toggleExport">Exportar para o PGR</button></div></div>
+    <div class="row"><button class="btn" type="button" data-go="pgrant">${(n => `PGR anterior${n ? ` (${n} a olhar)` : ""}`)(dadosPgrAnt().alerta)}</button><button class="btn primary" type="button" data-act="toggleExport">Exportar para o PGR</button></div></div>
   <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   ${S.invFoco ? (() => { const [id, rid] = S.invFoco.split("|"), a = S.aeps[id]; return `<div class="note" style="margin-bottom:14px">Mostrando só ${rid ? `o perigo <b>${esc(rid)}</b> da` : "os perigos da"} <b>${esc(a?.numero || "")}</b> (${esc(a?.meta?.cargo || "")}). <button class="btn small" type="button" data-act="invTodos">Ver o inventário inteiro</button></div>`; })() : ""}
   ${pend.length ? `<div class="note warn" style="margin-bottom:14px"><b>${pend.length} classificação(ões) feitas na planilha</b> (aba RISCOS_AEP) ainda não estão aqui. <button class="btn small primary" type="button" data-act="importarPlanilha">Trazer da planilha</button></div>` : ""}
@@ -3128,6 +3098,7 @@ function avisosAEP(a0){
   perigosRepetidos(a).forEach(([x, y]) => av(`Perigo repetido (${x.idRisco || ""} e ${y.idRisco || ""})`, `${x.idRisco || ""} e ${y.idRisco || ""} têm o mesmo perigo (${x.codigo}) e a mesma fonte. Retire um deles ou escreva fontes diferentes.`));
   if (temRedacaoAntiga(a)) av("Texto do COPSOQ desatualizado", "A observação do COPSOQ na etapa 3 usa o modelo antigo de texto. Na etapa 3, use “Atualizar a redação”.");
   if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) av("Concluída antes de uma regra nova", `Esta AEP foi concluída antes de uma regra que entrou depois: ${Object.values(pd).flat()[0]}${n > 1 ? ` (e mais ${n - 1})` : ""}. Abra, resolva e conclua de novo.`); }
+  if (a.status !== "concluida"){ const pa = pgrAntDaAEP(a).filter(x => x.st === "pendente").length; if (pa) av(`PGR anterior: ${pa} a olhar`, `${pa} situação(ões) do PGR anterior sem perigo correspondente. Na etapa 4, lance ou ignore cada uma.`); }
   AVISO_CACHE.set(a0, out); return out;
 }
 function vAvisosAEP(a0){
@@ -3724,7 +3695,6 @@ function docHTML(a, cfg, fotos, opt={}){
   ${hz || `<tr><td colspan="2"><b>Nenhum perigo identificado.</b> ${escBr(a.semPerigoJust||"")}</td></tr>`}</tbody></table>
   ${(() => { const nl = PERIGOS_ADM_ESPERADOS.filter(c => a.checklistAdm === "sim" && !(a.perigos||[]).some(h => h.codigo === c) && String(a.naoLancados?.[c]||"").trim());
     return nl.length ? `<p class="small"><b>Exigências avaliadas e não lançadas como perigo:</b></p><table class="t"><tbody>${nl.map(c => `<tr><td style="width:34%"><b>${esc(c)}</b>: ${esc(TAXMAP[c]?.nome||"")}</td><td>${escBr(a.naoLancados[c])}</td></tr>`).join("")}</tbody></table>` : ""; })()}
-  ${docPgrAnt(a)}
   ${(() => { const L = (a.perigos || []).map(h => ({ h, c: corrDe(a, h) })).filter(x => x.c); if (!L.length) return "";
     const ft = []; for (let i = 0; i < fotosCorr.length; i += 2) ft.push(`<tr>${[fotosCorr[i], fotosCorr[i+1]].map(f => f ? `<td><div class="cap">${esc(f.titulo || "")}</div><img src="${f.src}" alt=""></td>` : "<td></td>").join("")}</tr>`);
     return `<h2>Correções imediatas</h2><p class="small">Condições de deficiência encontradas na avaliação e já corrigidas. Como a condição deixou de existir na situação de trabalho, esses perigos não seguem para o inventário de riscos do PGR. O registro fica nesta AEP como evidência.</p>
@@ -4677,6 +4647,9 @@ document.addEventListener("click", async e => {
       toast(`${novas.length} linha(s) acrescentada(s). Revise o texto.`); break;
     }
     case "ckRestoNao": { const n = ckLista(a).filter(x => !x.c.r).length; if (!n) break; ckLista(a).forEach(x => { if (!x.c.r) x.c.r = "nao"; }); marcar(); renderStep(); renderRail(); renderAside(); toast(`${n} item(ns) marcados como Não.`); break; }
+    case "pgrIgnorar": { S.pgrAnt = { ...(S.pgrAnt || {}), [d.k]: { ign: true, em: new Date().toISOString() } }; S.pgrAntDirty = true; AVISO_CACHE = new WeakMap();
+      setSaveState("Alterações não salvas"); clearTimeout(S.pgrAntTimer); S.pgrAntTimer = setTimeout(salvarPgrAnt, 400);
+      if (S.view === "aep" && S.draft){ renderStep(); renderAside(); renderRail(); } else render(); toast("Ignorado. A linha saiu da lista."); break; }
     case "pgrLancar": { const [lid, aid] = String(d.k).split("|"), l = PGR_ANT.linhas.find(x => x.i === lid); if (!l || !S.aeps[aid]) break;
       if (S.view !== "aep" || S.aepId !== aid) await abrirAEP(aid);
       const cod = (PGRANT_COD[l.p] || [])[0], tx = TAXMAP[cod]; if (!tx) break;
