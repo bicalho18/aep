@@ -1441,7 +1441,13 @@ function novaAEP(){
 const FONTES_ALTERNATIVAS = { "BIO-01": ["Permanência em postura extrema ou estática prolongada durante a atividade."], "BIO-02": ["Execução de movimentos articulares repetitivos de membros superiores em ciclo curto."] };
 const FONTES_ANTERIORES = {};   /* fontes padrão de versões anteriores da TAXONOMIA: continuam aceitas nas AEPs já feitas */
 const prefixosFonte = cod => [TAXMAP[cod]?.fonte, ...(FONTES_ALTERNATIVAS[cod]||[]), ...(FONTES_ANTERIORES[cod]||[])].filter(Boolean);
-const temPrefixoPadrao = h => prefixosFonte(h.codigo).some(p => String(h.fonte||"").trim().startsWith(p));
+const fontePropria = h => !!(h && h.id && (S.fontesProprias || {})[h.id]);
+const temPrefixoPadrao = h => fontePropria(h) || prefixosFonte(h.codigo).some(p => String(h.fonte||"").trim().startsWith(p));
+async function marcarFontePropria(id, sim){
+  S.fontesProprias = { ...(S.fontesProprias || {}) }; if (sim) S.fontesProprias[id] = new Date().toISOString(); else delete S.fontesProprias[id];
+  AVISO_CACHE = new WeakMap(); if (!S.db) return;
+  try { await S.db.doc("config/fontes").set({ proprias: clone(S.fontesProprias) }); setSaveState("Salvo"); } catch(e){ setSaveState("Erro ao salvar"); }
+}
 const FONTES_ANTIGAS = {"OT-01": "Execução de tarefas sob volume de demanda e ritmo impostos pelo processo produtivo, com restrição de pausas voluntárias de recuperação.", "OT-04": "Execução de tarefa fragmentada e de ciclo curto, sob método rígido, sem variabilidade ou rodízio de atividades.", "OT-05": "Execução de tarefa com exigência elevada de atenção, memória ou tomada de decisão, sem recursos de regulação (autonomia, pausas, suporte) suficientes para amortecê-la.", "OT-12": "Execução de tarefa que exige lidar com sofrimento, agressividade ou risco de terceiros, sem suporte emocional estruturado disponível.", "BIO-01": "Permanência em postura extrema ou estática prolongada durante a atividade, sem alternância postural ou pausas de recuperação suficientes.", "BIO-02": "Execução de movimentos articulares repetitivos de membros superiores em ciclo curto, sem tempos de recuperação muscular adequados.", "BIO-03": "Aplicação de força manual elevada (empurrar, puxar ou preensão) sem dispositivo auxiliar ou balancim disponível no posto.", "BIO-04": "Manuseio e transporte manual não eventual de cargas, com pega distante do centro de gravidade do corpo e sem disponibilidade de auxílio mecânico no posto.", "BIO-07": "Operação de equipamento ou permanência em estrutura com transmissão de vibração ao corpo, sem sistema de amortecimento eficaz.", "AMB-03": "Permanência em ambiente com ruído de fundo que interfere na comunicação ou concentração, sem controle de fonte.", "AMB-04": "Permanência em posto sujeito a vibração transmitida por piso ou estrutura predial, sem isolamento ou amortecimento."};
 function completar(a){
   const r = migrarAEP(clone(a||{}));
@@ -1510,6 +1516,7 @@ async function iniciar(){
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/pgrAnterior").onSnapshot(d => { if (S.pgrAntDirty) return; S.pgrAnt = d.exists ? (d.data().decisoes || {}) : {}; AVISO_CACHE = new WeakMap();
     if (S.view === "pgrant") render(); else if (S.view === "home") atualizarHome(); }, () => {});
+  db.doc("config/fontes").onSnapshot(d => { S.fontesProprias = d.exists ? (d.data().proprias || {}) : {}; AVISO_CACHE = new WeakMap(); if (S.view === "home") atualizarHome(); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
 }
 function aoLerAEPs(snap){
@@ -1670,8 +1677,9 @@ const pgrAntP = l => l.P || (Number(l.N) && l.S ? Math.round(Number(l.N) / l.S) 
 const pgrAntKey = (l, a) => `${l.i}|${a.id}`;
 const gheDe = a => String(a.meta?.eg || "").trim();
 function pgrAntStatus(l, a){
+  const lig = (a.perigos || []).filter(h => h.origemPGRant === l.i); if (lig.length) return { st: "contemplado", hs: lig };
   const cods = PGRANT_COD[l.p] || [], todos = (a.perigos || []).filter(h => cods.includes(h.codigo)), re = PGRANT_TXT[l.p];
-  const hs = re ? todos.filter(h => re.test(h.fonte || "")) : todos;
+  const fa = norm(l.f), hs = re ? todos.filter(h => re.test(h.fonte || "") || (fa.length > 8 && norm(h.fonte || "").includes(fa))) : todos;
   if (hs.length) return { st: "contemplado", hs };
   const dec = (S.pgrAnt || {})[pgrAntKey(l, a)];
   if (dec && (dec.ign || String(dec.just || "").trim())) return { st: "ignorado", em: dec.em };
@@ -1694,6 +1702,7 @@ function vPgrAntAEP(a){
         <p class="tiny muted" style="margin:2px 0 0">${esc(l.f)}</p>
         ${x.quase && x.quase.length ? `<p class="tiny muted" style="margin:2px 0 0">Há ${x.quase.map(h => `${esc(h.idRisco || "novo")} ${esc(h.codigo)}`).join(", ")} nesta AEP, mas sobre outra postura. Se já cobre, ignore.</p>` : ""}
         ${sev ? `<p class="tiny plaviso" style="margin:2px 0 0">No PGR anterior a severidade era ${l.S}; a âncora atual do ${esc(sev.cod)} é ${sev.anc}.</p>` : ""}
+        ${S.editHz && S.editHz.origemPGRant === l.i && S.draft && S.draft.id === a.id ? `<p class="tiny plaviso" style="margin:6px 0 0">Perigo em edição no alto da etapa: clique em “Salvar perigo” e esta linha sai da lista.</p>` : ""}
         <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:6px"><button class="btn small primary" type="button" data-act="pgrLancar" data-k="${esc(k)}">Lançar ${esc(cod)}</button><button class="btn small" type="button" data-act="pgrIgnorar" data-k="${esc(k)}">Ignorar</button></div></div>`; }).join("")}
   </div></div>`;
 }
@@ -3103,7 +3112,8 @@ function avisosAEP(a0){
 }
 function vAvisosAEP(a0){
   const av = avisosAEP(a0); if (!av.length) return "";
-  return `<div class="note warn" style="margin-bottom:12px"><b>Pontos para conferir nesta AEP</b> <span class="tiny">(não impedem nada; são ajustes de qualidade)</span><ul class="avisos">${av.map(x => `<li><b>${esc(x.curto.replace(/\s*\(.*\)$/, ""))}:</b> ${esc(x.longo)}</li>`).join("")}</ul></div>`;
+  const sp = (completar(a0).perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h));
+  return `<div class="note warn" style="margin-bottom:12px"><b>Pontos para conferir nesta AEP</b> <span class="tiny">(não impedem nada; são ajustes de qualidade)</span><ul class="avisos">${av.map(x => `<li><b>${esc(x.curto.replace(/\s*\(.*\)$/, ""))}:</b> ${esc(x.longo)}</li>`).join("")}</ul>${sp.length ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${sp.map(h => `<button class="btn small" type="button" data-act="fontePropria" data-id="${esc(h.id)}">Manter a fonte de ${esc(h.idRisco || h.codigo)} como escrevi</button>`).join("")}</div>` : ""}</div>`;
 }
 /* Correções em lote (aba Unidade) */
 function vCorrecoesLote(){
@@ -3420,6 +3430,7 @@ function vHzEditor(){
         <div class="row" style="gap:6px;flex-wrap:wrap">${["", ...tipos].map(k => `<button class="btn small${tp === k ? " primary" : ""}" type="button" data-act="sugTipo" data-tp="${k}">${k ? esc(TIPOS_ATV[k]) : "Todos"}</button>`).join("")}</div>
         ${sg.map(([k, x, base], i) => tp && k !== tp ? "" : `<div class="row" style="gap:6px;align-items:flex-start"><span class="chip">${esc(TIPOS_ATV[k])}</span><button class="btn small" type="button" data-act="sugFonte" data-i="${i}" style="text-align:left;white-space:normal">${esc(x || (base === "padrao" ? "Texto padrão do posto informatizado" : ""))}</button></div>`).join("")}</div>`; })() : ""}
       ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da TAXONOMIA. Complemente depois dele com o que é específico deste cargo."})}
+      <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" data-fonteprop="${esc(S.editHz?.id || "")}" ${fontePropria(S.editHz) ? "checked" : ""}> Fonte própria: escrevi a fonte do meu jeito, sem o texto padrão (o aviso de padrão não aparece para este perigo)</label>
       <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
       <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
@@ -4338,6 +4349,7 @@ function campo(e, isChange){
   if (el.dataset.ligasetor !== undefined){ if (!isChange) return; ligarSetor(el.dataset.ligasetor, el.dataset.grupo, el.value); atualizarOrgParcial(); { const ed = $(".orged"), p = S.orgSel && orgP()[S.orgSel]; if (ed && p) ed.outerHTML = vOrgEditor(p); } toast(el.value ? "Área ligada." : "Área sem responsável."); return; }
   if (el.dataset.orgsetor){ if (!isChange) return; const id = el.dataset.orgsetor, p = orgP()[id]; if (!p) return; const set = new Set(p.setores || []); el.checked ? set.add(el.value) : set.delete(el.value); mudarOrg(id, "setores", [...set].sort()); render(); return; }
   if (el.dataset.orgfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoOrg(el.dataset.orgfoto, f); return; }
+  if (el.dataset.fonteprop !== undefined){ if (!isChange) return; marcarFontePropria(el.dataset.fonteprop, el.checked); return; }
   if (el.dataset.corrfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoCorr(el.dataset.corrfoto, f); return; }
   if (el.dataset.pgrj !== undefined){ const k = el.dataset.pgrj; S.pgrAnt = { ...(S.pgrAnt || {}) };
     if (String(el.value).trim()) S.pgrAnt[k] = { just: el.value, em: new Date().toISOString() }; else delete S.pgrAnt[k];
@@ -4647,6 +4659,7 @@ document.addEventListener("click", async e => {
       toast(`${novas.length} linha(s) acrescentada(s). Revise o texto.`); break;
     }
     case "ckRestoNao": { const n = ckLista(a).filter(x => !x.c.r).length; if (!n) break; ckLista(a).forEach(x => { if (!x.c.r) x.c.r = "nao"; }); marcar(); renderStep(); renderRail(); renderAside(); toast(`${n} item(ns) marcados como Não.`); break; }
+    case "fontePropria": await marcarFontePropria(d.id, true); if (S.view === "aep") { renderBanner(); renderStep(); } else render(); toast("Fonte mantida como escrita. O aviso saiu."); break;
     case "pgrIgnorar": { S.pgrAnt = { ...(S.pgrAnt || {}), [d.k]: { ign: true, em: new Date().toISOString() } }; S.pgrAntDirty = true; AVISO_CACHE = new WeakMap();
       setSaveState("Alterações não salvas"); clearTimeout(S.pgrAntTimer); S.pgrAntTimer = setTimeout(salvarPgrAnt, 400);
       if (S.view === "aep" && S.draft){ renderStep(); renderAside(); renderRail(); } else render(); toast("Ignorado. A linha saiu da lista."); break; }
