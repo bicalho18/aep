@@ -988,6 +988,10 @@ function resumoPlano(todas){
     riscos: r.length, mel: todas.length - r.length, melAb: ab.filter(m => m.kind !== "risco").length };
 }
 function melStatsHTML(){
+  const T = itensPlanoDe(aepsPlano()), ab = T.filter(m => abertaSit(m.sit)), venc = ab.filter(m => m.atrasada).length, falta = ab.filter(m => !m.resp || !m.prazo).length;
+  return `<div class="melstats"><div><b>${ab.length}</b><span>em aberto</span></div><div><b${venc ? ` style="color:var(--bad-ink)"` : ""}>${venc}</b><span>com prazo vencido</span></div><div><b${falta ? ` style="color:var(--bad-ink)"` : ""}>${falta}</b><span>em aberto sem responsável ou prazo</span></div></div>`;
+}
+function melStatsHTMLAntigo(){
   const R = resumoPlano(itensPlanoDe(aepsPlano()));
   const red = n => n ? ` style="color:var(--bad-ink)"` : "";
   return `<div class="melstats"><div><b>${R.abertas}</b><span>em aberto</span></div>
@@ -1008,7 +1012,25 @@ function vMelItensAEP(a){
   return `<div class="melaep"><b class="small">Como cada linha será acompanhada</b> <span class="tiny muted">(a prioridade vale para o Plano de ação e não altera a situação da AEP)</span>
     ${l.map(m => `<div class="mrow"><div class="mt">${chipTipo(m)}<div>${esc(m.texto)}</div></div><div>${selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</div></div>`).join("")}</div>`;
 }
+const TIPO_CURTO = m => m.kind === "risco" ? (m.pc ? `Ação ${m.pc}` : "Ação de risco") : m.kind === "desv" ? "Desvio de conservação" : m.kind === "corr" ? "Correção imediata" : m.op ? "Oportunidade de melhoria" : "Recomendação";
+function avisosPlano(m){
+  const a = [];
+  if (m.kind === "risco" && !m.texto && m.sit !== "Não se aplica") a.push(["Ação a definir", "Descreva a ação em Detalhes."]);
+  if (abertaSit(m.sit) && !m.resp) a.push(["sem responsável", ""]);
+  if (abertaSit(m.sit) && !m.prazo) a.push(["sem prazo", ""]);
+  if (m.sit === "Concluída" && !m.evid) a.push(["sem evidência", "Concluída sem evidência: registre em Detalhes."]);
+  if (m.kind === "desv" && m.sit === "Concluída" && !m.conc) a.push(["sem data de conclusão", ""]);
+  if (m.kind === "risco" && !m.precisa && m.r.corr) a.push(["perigo já corrigido", "Perigo corrigido (correção imediata): se esta ação é a própria correção, marque como Concluída."]);
+  else if (m.kind === "risco" && !m.precisa) a.push([m.r.sit === "ok" ? "risco mudou" : "classificação incompleta", m.r.sit === "ok" ? `Risco agora ${m.r.cat.replace("Risco ", "")}: confira se a ação continua necessária.` : "Classificação do risco incompleta no Inventário."]);
+  return a;
+}
 function oQueFazer(m){
+  const av = avisosPlano(m), tit = m.kind === "risco" ? (m.texto || "Ação a definir") : m.texto;
+  return `<div class="small"${m.kind === "risco" && !m.texto ? ` style="color:var(--bad-ink)"` : ""}>${esc(tit)}</div>
+    <div class="tiny faint">${esc(TIPO_CURTO(m))}${m.n > 1 ? ` · ação ${m.n}` : ""}${m.h ? ` · ${esc(m.h.idRisco || "")} ${esc(m.t?.nome || m.h.codigo)}` : ""}${(tag => tag ? ` · <span class="plaviso" style="font-weight:700">${esc(tag[0])}</span>` : "")(av.find(x => x[0] !== "Ação a definir"))}</div>
+    <button class="btn ghost small" type="button" data-act="planoDet" data-key="${esc(m.key)}" style="padding:0;margin-top:2px">${S.melAberto === m.key ? "Fechar detalhes" : "Detalhes"}</button>`;
+}
+function oQueFazerAntigo(m){
   const aviso = [];
   if (m.kind === "risco" && !m.texto && m.sit !== "Não se aplica") aviso.push("Ação a definir");
   if (m.sit === "Concluída" && !m.evid) aviso.push("Concluída sem evidência");
@@ -1027,8 +1049,11 @@ function oQueFazer(m){
 }
 function vPlanoDetalhe(m){
   const k = esc(m.key), inp = (campo, tipo, val, ph = "") => `<input type="${tipo}" data-mel="${k}" data-mc="${campo}" value="${esc(val)}" placeholder="${esc(ph)}">`;
-  const risco = m.kind === "risco";
+  const risco = m.kind === "risco", av = avisosPlano(m).filter(x => x[1]);
   return `<div class="pldet grid g2">
+    <div class="spanall small">${chipTipo(m)} ${risco ? `${chipCat(m.r.cat)} ` : ""}${m.kind === "risco" ? `<span class="selo pgr">PGR</span>` : `<span class="selo fora">Fora do PGR</span>`}${m.h ? ` <span class="tiny muted">${esc(m.h.idRisco || "")} ${esc(m.h.codigo)}: ${esc(m.t?.nome || "")}</span>` : ""}</div>
+    ${av.map(x => `<div class="spanall tiny plaviso">${esc(x[1])}</div>`).join("")}
+    <label class="f"><span>Prioridade</span>${risco ? prioFixa(m) : selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</label><div></div>
     ${m.kind === "desv" ? `<div class="spanall small">Desvio de conservação (item adequado danificado): não vai ao PGR. Acompanhe aqui até a execução. Encaminhar não é resolver: conclua só com a data de conclusão e a evidência (foto, OS encerrada). <button class="btn ghost small" type="button" data-act="verRisco" data-key="${esc(m.base)}" style="padding:0">ver no Inventário</button></div>` : ""}
     ${m.kind === "corr" ? `<div class="spanall small">Correção imediata registrada no Inventário: o perigo não vai para o PGR. O texto, a data e a evidência vêm de lá; aqui você pode completar o Nº do SIG, o responsável e a eficácia. <button class="btn ghost small" type="button" data-act="verRisco" data-key="${esc(m.base)}" style="padding:0">ver no Inventário</button></div>` : ""}
     ${risco ? `<label class="f spanall"><span>Ação (o que será feito)</span><textarea rows="2" data-mel="${k}" data-mc="acao" placeholder="Ex.: instalar suporte de notebook com teclado e mouse independentes">${esc(m.texto)}</textarea></label>
@@ -1043,18 +1068,16 @@ function vPlanoDetalhe(m){
   </div>`;
 }
 function linhasMelhorias(l){
-  if (!l.length) return `<tr><td colspan="8" class="muted small" style="padding:18px">Nenhum item com estes filtros.</td></tr>`;
+  if (!l.length) return `<tr><td colspan="6" class="muted small" style="padding:18px">Nenhum item com estes filtros.</td></tr>`;
   return l.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}${S.melAberto === m.key ? " sel" : ""}">
-    <td class="mono"><a class="btn ghost small" href="#aep=${encodeURIComponent(m.a.id)}" data-open="${esc(m.a.id)}" style="padding:0" title="Botão direito: abrir em nova aba">${esc(m.a.numero)}</a></td>
-    <td><b>${esc(m.a.meta?.cargo || "")}</b><div class="tiny faint">${esc((m.a.meta?.setor || "").trim())}</div></td>
+    <td><a class="mono small" href="#aep=${encodeURIComponent(m.a.id)}" data-open="${esc(m.a.id)}" title="Botão direito: abrir em nova aba">${esc(m.a.numero)}</a><div class="small"><b>${esc(m.a.meta?.cargo || "")}</b></div></td>
     <td>${oQueFazer(m)}</td>
     <td><input type="text" class="sig" data-mel="${esc(m.key)}" data-mc="sig" value="${esc(m.sig)}" placeholder="Nº SIG" aria-label="Número da ação no SIG"></td>
-    <td>${m.kind === "risco" ? prioFixa(m) : selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</td>
     <td>${(sug => { const pp = pessoaPorNome(m.resp);
       return `<input type="text" list="orgnomes" data-mel="${esc(m.key)}" data-mc="resp" value="${esc(m.resp)}" placeholder="${sug ? esc("Sugestão: " + sug.nome) : "Responsável"}">${!m.resp && sug ? `<button class="btn ghost small" type="button" data-act="usarResp" data-key="${esc(m.key)}" data-nome="${esc(sug.nome)}" style="padding:0">usar ${esc(sug.nome)}</button>` : ""}${pp ? `<div class="tiny faint">${orgContato(pp) || esc(NIVEL_ROT[pp.nivel])}</div>` : ""}`; })(respSugerido(m))}</td>
     <td><input type="date" data-mel="${esc(m.key)}" data-mc="prazo" value="${esc(m.prazo)}">${m.atrasada ? `<div class="tiny" style="color:var(--bad-ink);font-weight:700">Prazo vencido</div>` : ""}</td>
     <td>${selMel(m.key, "sit", MEL_SIT, m.sit)}</td></tr>
-    ${S.melAberto === m.key ? `<tr class="pldetrow"><td colspan="8">${vPlanoDetalhe(m)}</td></tr>` : ""}`).join("");
+    ${S.melAberto === m.key ? `<tr class="pldetrow"><td colspan="6">${vPlanoDetalhe(m)}</td></tr>` : ""}`).join("");
 }
 function contPlanoTxt(l){ return `${l.length} item(ns) na lista. Ordem: prioridade alta primeiro.`; }
 function vMelhorias(){
@@ -1066,16 +1089,18 @@ function vMelhorias(){
     ${foco ? `<div class="note" style="margin-bottom:12px">Mostrando só as ações do perigo <b>${esc(foco.h?.idRisco || "")}</b> da <b>${esc(foco.a.numero)}</b> (${esc(foco.a.meta?.cargo || "")}). <button class="btn small" type="button" data-act="planoTodos">Ver o plano inteiro</button></div>` : ""}
     <div class="melfilt">
       ${vMultiSetor("msel-mel")}
-      <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "semsig", "Em aberto sem Nº do SIG")}${op("melSit", "semacao", "Riscos com ação a definir")}${op("melSit", "eficacia", "Concluídas com eficácia a verificar")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas as situações")}</select>
+      <select data-melf="melSit" aria-label="Situação">${op("melSit", "abertas", "Em aberto")}${op("melSit", "atrasadas", "Prazo vencido")}${op("melSit", "concluidas", "Concluídas")}${op("melSit", "todas", "Todas")}<optgroup label="Pendências">${op("melSit", "semsig", "Em aberto sem Nº do SIG")}${op("melSit", "semacao", "Riscos com ação a definir")}${op("melSit", "eficacia", "Concluídas com eficácia a verificar")}</optgroup></select>
+      <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar AEP, cargo, texto, responsável ou Nº SIG">
+    </div>
+    <details class="melmais" ${S.melTipo || S.melPGR || S.melPrio || S.melEsc === "todas" ? "open" : ""}><summary class="tiny muted">Mais filtros${S.melTipo || S.melPGR || S.melPrio || S.melEsc === "todas" ? " (em uso)" : ""}</summary><div class="melfilt" style="margin-top:8px">
       <select data-melf="melTipo" aria-label="Tipo">${op("melTipo", "", "Riscos e melhorias")}${op("melTipo", "risco", "Só ações dos riscos (P1 e P2)")}${op("melTipo", "mel", "Só melhorias")}${op("melTipo", "rec", "Só recomendações")}${op("melTipo", "desv", "Só desvios de conservação")}${op("melTipo", "corr", "Só correções imediatas")}${op("melTipo", "op", "Só oportunidades de melhoria")}</select>
       <select data-melf="melPGR" aria-label="PGR">${op("melPGR", "", "PGR e fora do PGR")}${op("melPGR", "pgr", "Só ações de riscos do PGR")}${op("melPGR", "fora", "Só ações fora do PGR")}</select>
       <select data-melf="melPrio" aria-label="Prioridade">${op("melPrio", "", "Todas as prioridades")}${MEL_PRIO.map(p => op("melPrio", p, "Prioridade " + p.toLowerCase())).join("")}</select>
       <select data-melf="melEsc" aria-label="AEPs">${op("melEsc", "fechadas", "AEPs concluídas e em revisão")}${op("melEsc", "todas", "Todas as AEPs")}</select>
-      <input type="text" data-melbusca="1" value="${esc(S.melBusca)}" placeholder="Buscar AEP, cargo, perigo, texto, responsável ou Nº SIG">
-    </div>
-    <p class="tiny muted" style="margin:0">Resumo das gerências selecionadas</p><div id="melstats">${melStatsHTML()}</div>
+    </div></details>
+    <p class="tiny muted" style="margin:8px 0 0">Resumo das gerências selecionadas</p><div id="melstats">${melStatsHTML()}</div>
     <p class="tiny muted" id="melcont">${contPlanoTxt(l)}</p>
-    <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP</th><th>Cargo</th><th>O que fazer</th><th>Nº SIG</th><th>Prioridade</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
+    <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP / cargo</th><th>O que fazer</th><th>Nº SIG</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
     <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>${orgDatalist()}
     <p class="tiny muted" style="margin-top:8px">A prioridade das ações dos riscos vem da categoria no Inventário (P1 = alta, P2 = média). A das melhorias você escolhe. Ao marcar “Concluída”, a data de conclusão é preenchida com o dia de hoje; registre a evidência e, depois, a eficácia.</p>
   </div></div>`;
@@ -1749,7 +1774,6 @@ function listaFiltrada(){
   return Object.values(S.aeps)
     .filter(a => !S.fStatus.length || S.fStatus.includes(a.status||"nao_iniciada"))
     .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
-    .filter(a => !S.fAviso || avisosAEP(a).length || alertaAET(a))
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t))
     .sort((a,b) => idNum(a) - idNum(b));
 }
@@ -1761,7 +1785,7 @@ function linhasHome(lista){
       <td class="mono"><a href="#aep=${encodeURIComponent(a.id)}" data-open="${esc(a.id)}" style="color:inherit;text-decoration:none" title="Botão direito: abrir em nova aba">${esc(a.numero)}</a></td>
       <td><b>${esc(a.meta?.cargo || "Sem cargo")}</b><div class="tiny faint">${esc((a.meta?.setor||"").trim())}${a.meta?.area ? " · " + esc(a.meta.area) : ""}</div></td>
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
-      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.map(x => x.longo).join("\n"))}">⚠ ${esc(av[0].curto)}${av.length > 1 ? ` (+${av.length - 1})` : ""}</div>` : "")(avisosAEP(a))}</td>
+      <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.map(x => x.longo).join("\n"))}">⚠ ${esc(av[0].curto)}${av.length > 1 ? ` (+${av.length - 1})` : ""}</div>` : "")(st === "concluida" || st === "revisao" ? avisosAEP(a) : [])}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
       <td class="num">${ckCriticos(a).length || "—"}${ckCorrigidos(a).length ? `<div class="tiny faint">+${ckCorrigidos(a).length} corrigido(s)</div>` : ""}</td></tr>`;
   }).join("");
@@ -1816,7 +1840,7 @@ function vHome(){
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
     <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
-    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}<label class="fchip"><input type="checkbox" data-faviso="1" ${S.fAviso ? "checked" : ""}><span>Com ponto a conferir <b class="num">${todas.filter(a => avisosAEP(a).length || alertaAET(a)).length}</b></span></label></div></div>
+    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span></span></div>
@@ -2088,7 +2112,7 @@ function painelCorpo(){
   const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
   const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
   return `
-  <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs ${S.fSetor.length ? "nas gerências selecionadas" : "cadastradas"}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas</span></div><div class="stat"><b>${concl}</b><span>Concluídas</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div><div class="stat"><b>${rev}</b><span>Em revisão</span></div></div>
+  <div class="stats"><div class="stat"><b>${tot}</b><span>AEPs ${S.fSetor.length ? "nas gerências selecionadas" : "cadastradas"}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
   <div class="grid g4 metacards">
     <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
       <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
@@ -2396,13 +2420,14 @@ function linhasInventario(){
 function listaInventario(){
   const t = norm(S.invBusca);
   if (S.invFoco) return linhasInventario().filter(x => x.k === S.invFoco || x.a.id === S.invFoco);
-  return linhasInventario().filter(x => x.k === S.invAberto || S.invSit === "todas" || (S.invSit === "pendentes" ? !resolvido(x.r) : S.invSit === "naoenv" ? x.r.sit === "ok" && x.a.status === "concluida" && estadoPGR(x) !== "enviado" : x.r.sit === S.invSit))
+  return linhasInventario().filter(x => x.k === S.invAberto || S.invSit === "todas" || (S.invSit === "pendentes" ? !resolvido(x.r) : S.invSit === "prontos" ? resolvido(x.r) : S.invSit === "naoenv" ? x.r.sit === "ok" && x.a.status === "concluida" && estadoPGR(x) !== "enviado" : x.r.sit === S.invSit))
     .filter(x => x.k === S.invAberto || !S.invCat || x.r.cat === S.invCat)
     .filter(x => x.k === S.invAberto || !t || norm(`${x.a.numero} ${x.a.meta?.cargo} ${x.h.idRisco} ${x.h.codigo} ${TAXMAP[x.h.codigo]?.nome} ${x.h.fonte}`).includes(t));
 }
 function vInvResumo(){
-  const L = linhasInventario(), n = s => L.filter(x => x.r.sit === s).length;
-  return `<div class="stats" style="margin-bottom:10px"><div class="stat"><b>${L.length}</b><span>perigos no inventário</span></div><div class="stat"><b>${n("ok")}</b><span>classificados</span></div>
+  const L = linhasInventario(), n = s => L.filter(x => x.r.sit === s).length, pr = L.filter(x => resolvido(x.r)).length, fz = L.length - pr, fora = n("corrigido") + n("desvio");
+  return `<div class="stats" style="margin-bottom:10px"><div class="stat"><b>${L.length}</b><span>perigos</span></div><div class="stat"><b>${pr}</b><span>prontos${fora ? ` <span class="faint">(${fora} fora do PGR)</span>` : ""}</span></div><div class="stat"><b style="${fz ? "color:var(--bad-ink)" : ""}">${fz}</b><span>a fazer</span></div></div>
+    <div hidden>
     <div class="stat"><b>${n("falta")}</b><span>falta classificar</span></div><div class="stat"><b>${n("incompleta")}</b><span>incompletos</span></div><div class="stat"><b style="${n("alerta") ? "color:var(--bad-ink)" : ""}">${n("alerta")}</b><span>com alerta</span></div>${n("corrigido") ? `<div class="stat"><b>${n("corrigido")}</b><span>corrigidos (fora do PGR)</span></div>` : ""}${n("desvio") ? `<div class="stat"><b>${n("desvio")}</b><span>desvios de conservação (fora do PGR)</span></div>` : ""}</div>
     ${(rec => rec.length ? `<div class="note warn" style="margin-bottom:12px"><b>Desvio de conservação repetido:</b> ${rec.map(([cod, q]) => `${esc(cod)} em ${q} AEPs`).join("; ")}. A repetição indica que a inspeção, a manutenção ou a reposição não está funcionando (NR-1, 1.5.4.4.6, c). Avalie tratar esse controle no PGR, com uma linha para o controle e não uma por item.</div>` : "")(desviosRecorrentes())}
     <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">${CATEGORIAS.map(cn => `<span class="small">${chipCat(cn)} <b>${L.filter(x => x.r.cat === cn && x.r.sit === "ok").length}</b></span>`).join("")}<span class="tiny muted">classificados por categoria (residual)</span></div>`;
@@ -2585,9 +2610,8 @@ function vInventario(){
   ${pend.length ? `<div class="note warn" style="margin-bottom:14px"><b>${pend.length} classificação(ões) feitas na planilha</b> (aba RISCOS_AEP) ainda não estão aqui. <button class="btn small primary" type="button" data-act="importarPlanilha">Trazer da planilha</button></div>` : ""}
   <div class="panel"><div class="panel-b">
     <div class="melfilt">${vMultiSetor("f-inv")}
-      <select data-invf="invSit" aria-label="Situação">${op("invSit", "pendentes", "Falta classificar ou com pendência")}${op("invSit", "falta", "Falta classificar")}${op("invSit", "incompleta", "Incompletos")}${op("invSit", "alerta", "Com alerta")}${op("invSit", "ok", "Classificados")}${op("invSit", "corrigido", "Corrigidos (correção imediata)")}${op("invSit", "desvio", "Desvios de conservação")}${op("invSit", "naoenv", "Classificados ainda não enviados ao PGR")}${op("invSit", "todas", "Todos")}</select>
-      <select data-invf="invCat" aria-label="Categoria">${op("invCat", "", "Todas as categorias")}${CATEGORIAS.map(cn => op("invCat", cn, cn)).join("")}</select>
-      <select data-invf="invEsc" aria-label="AEPs">${op("invEsc", "fechadas", "AEPs concluídas e em revisão")}${op("invEsc", "todas", "Todas as AEPs")}</select>
+      <select data-invf="invSit" aria-label="Situação">${op("invSit", "pendentes", "A fazer")}${op("invSit", "prontos", "Prontos")}${op("invSit", "todas", "Todos")}</select>
+      <label class="row small" style="gap:6px;align-items:center;cursor:pointer;white-space:nowrap"><input type="checkbox" data-invesc="1" ${S.invEsc === "todas" ? "checked" : ""}> Incluir AEPs ainda não concluídas</label>
       <input type="text" data-invbusca="1" value="${esc(S.invBusca)}" placeholder="Buscar AEP, cargo, perigo ou fonte">
     </div>
     <div id="invresumo">${vInvResumo()}</div>
@@ -3115,7 +3139,6 @@ function avisosAEP(a0){
   perigosRepetidos(a).forEach(([x, y]) => av(`Perigo repetido (${x.idRisco || ""} e ${y.idRisco || ""})`, `${x.idRisco || ""} e ${y.idRisco || ""} têm o mesmo perigo (${x.codigo}) e a mesma fonte. Retire um deles ou escreva fontes diferentes.`));
   if (temRedacaoAntiga(a)) av("Texto do COPSOQ desatualizado", "A observação do COPSOQ na etapa 3 usa o modelo antigo de texto. Na etapa 3, use “Atualizar a redação”.");
   if (a.status === "concluida"){ const pd = pendencias(a), n = totalPend(pd); if (n) av("Concluída antes de uma regra nova", `Esta AEP foi concluída antes de uma regra que entrou depois: ${Object.values(pd).flat()[0]}${n > 1 ? ` (e mais ${n - 1})` : ""}. Abra, resolva e conclua de novo.`); }
-  if (a.status !== "concluida"){ const pa = pgrAntDaAEP(a).filter(x => x.st === "pendente").length; if (pa) av(`PGR anterior: ${pa} a olhar`, `${pa} situação(ões) do PGR anterior sem perigo correspondente. Na etapa 4, lance ou ignore cada uma.`); }
   AVISO_CACHE.set(a0, out); return out;
 }
 function vAvisosAEP(a0){
@@ -3994,6 +4017,9 @@ const ico = (n, cls = "") => `<svg class="gx-i ${cls}" viewBox="0 0 24 24" fill=
 const ICO_CAT = { OT: "relogio", BIO: "corpo", EQ: "ferramenta", AMB: "sol" };
 const icoItem = n => ICO_CAT[String((CK_PERIGOS[n]||[])[0] || "BIO").split("-")[0]] || "alert";
 const GX_CSS = `
+.gx-sub2{margin:0 0 8px;font-size:13px;color:var(--x-ink2)}
+.gx-pl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.gx-pl>div{border:1px solid var(--x-rule);border-radius:10px;padding:8px 12px}.gx-pl b{display:block;font-size:24px;line-height:1.1}.gx-pl span{font-size:12px;color:var(--x-ink3)}.gx-pl .hot b{color:var(--x-acc)}
+.gx-acts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.gx-acts li{border-left:3px solid var(--x-o2);padding:2px 0 2px 10px}.gx-acts .t{font-weight:600;font-size:13px}.gx-acts .s{font-size:12px;color:var(--x-ink3)}
 .gx{--x-ink:var(--ink,#232323);--x-ink2:var(--ink-2,#4F4F4F);--x-ink3:var(--ink-3,#767676);--x-rule:var(--rule,#E0DFDD);--x-surf:var(--surface,#fff);--x-paper:var(--surface-2,#F8F8F7);
   --x-o1:#9E3612;--x-o2:#D9622E;--x-o3:#EE9A6C;--x-track:var(--rule,#E7E5E2);--x-soft:var(--accent-soft,#FDF2EC);--x-acc:var(--accent,#C2451A);
   font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--x-ink);font-size:14px;line-height:1.45}
@@ -4093,6 +4119,19 @@ function gerExecHTML(setor, opt = {}){
       ${hz.length ? `<ul class="gx-list">${hz.map(([cd, v]) => linha(ICO_CAT[cd.split("-")[0]] || "alert", esc(TAXMAP[cd]?.nome || cd), v, maxH, v > 1 ? "AEPs" : "AEP")).join("")}</ul>`
         : `<p class="gx-vazio">${ico("check")}Nenhum perigo registrado nas AEPs realizadas.</p>`}</div>
   </div>
+  ${(() => { const R = { cat: {}, fora: 0, falta: 0 }; D.val.forEach(a => (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).forEach(h => { const r = calcRisco(h, (a.classif || {})[h.idRisco]);
+        if (r.sit === "ok") R.cat[r.cat] = (R.cat[r.cat] || 0) + 1; else if (r.sit === "corrigido" || r.sit === "desvio") R.fora++; else R.falta++; }));
+      const cats = CATEGORIAS.filter(cn => R.cat[cn]), maxC = Math.max(1, ...cats.map(cn => R.cat[cn])), nCl = cats.reduce((t, cn) => t + R.cat[cn], 0), altos = (R.cat["Risco moderado"] || 0) + (R.cat["Risco substancial"] || 0) + (R.cat["Risco intolerável"] || 0);
+      const P = itensPlanoDe(D.val.map(completar)).filter(m => m.sit !== "Não se aplica"), ab = P.filter(m => abertaSit(m.sit)), venc = ab.filter(m => m.atrasada), concl = P.filter(m => m.sit === "Concluída");
+      const prox = ab.slice().sort((x, y) => (x.atrasada ? 0 : 1) - (y.atrasada ? 0 : 1) || String(x.prazo || "9").localeCompare(String(y.prazo || "9"))).slice(0, 4);
+      return `<div class="gx-row gx-r2">
+    <div class="gx-box"><h2>${ico("alert")}Como estão os riscos</h2>
+      ${nCl ? `<p class="gx-sub2">${nCl} risco(s) classificado(s)${altos ? `, <b>${altos} pede(m) plano de ação</b> (moderado ou acima)` : ", todos sob controle (trivial ou tolerável)"}.</p><ul class="gx-list">${cats.map(cn => linha(cn === "Risco trivial" || cn === "Risco tolerável" ? "check" : "alert", esc(cn.replace("Risco ", "").replace(/^./, c => c.toUpperCase())), R.cat[cn], maxC, R.cat[cn] > 1 ? "riscos" : "risco")).join("")}</ul>` : `<p class="gx-vazio">${ico("check")}Nenhum risco classificado ainda.</p>`}
+      ${R.falta || R.fora ? `<p class="gx-sub2" style="margin-top:8px">${R.falta ? `${R.falta} ainda em classificação` : ""}${R.falta && R.fora ? " · " : ""}${R.fora ? `${R.fora} corrigido(s) ou em correção, fora do PGR` : ""}.</p>` : ""}</div>
+    <div class="gx-box"><h2>${ico("flag")}Como está o plano de ação</h2>
+      <div class="gx-pl"><div><b>${ab.length}</b><span>em aberto</span></div><div class="${venc.length ? "hot" : ""}"><b>${venc.length}</b><span>prazo vencido</span></div><div><b>${concl.length}</b><span>concluídas</span></div></div>
+      ${prox.length ? `<ul class="gx-acts">${prox.map(m => `<li><div class="t">${esc(curto(m.texto || "Ação a definir", 90, true))}</div><div class="s">${esc(m.a.meta?.cargo || m.a.numero)} · ${esc(m.resp || "sem responsável")} · ${m.prazo ? `${m.atrasada ? "<b>vencido em</b> " : "até "}${fmtData(m.prazo)}` : "sem prazo"}</div></li>`).join("")}</ul>` : `<p class="gx-vazio">${ico("check")}Nenhuma ação em aberto.</p>`}</div>
+  </div>`; })()}
   <div class="gx-box" style="margin-bottom:12px"><h2>${ico("flag")}Próximos passos</h2><div class="gx-next">${passos.map(([i, t, s]) => `<div class="gx-step">${ico(i)}<div><b>${t}</b><span>${s}</span></div></div>`).join("")}</div></div>
   <p class="gx-foot">AEPs realizadas = concluídas e em revisão. A graduação do risco e o plano de ação estão no PGR; o detalhamento por cargo está no PDF “detalhamento por cargo”. Resultados do questionário psicossocial não são apresentados por gerência.</p>
 </div>`;
@@ -4112,18 +4151,18 @@ function gerCorpo(){
   const nR = mel.filter(m => m.kind === "risco" && abertaSit(m.sit)), prioChip = m => `<span class="prio-fixa prio-${m.prio}">${esc(m.prio)}${m.pc ? ` (${m.pc})` : ""}</span>`;
   const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : "—"; };
   return `<style>${GX_CSS}</style>${vRespArea(L)}<div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
-  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>AEPs da área</b><span class="tiny muted">${L.length} AEP(s) · ${L.filter(a => a.status === "concluida" || a.status === "revisao").length} realizada(s)</span></div>
+  <details class="panel gerlista" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Ver a lista de AEPs da área</b><span class="tiny muted">${L.length} AEP(s) · ${L.filter(a => a.status === "concluida" || a.status === "revisao").length} realizada(s)</span></summary>
     <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th><th>Concluída em</th><th class="num">Perigos</th><th class="num">Itens críticos</th></tr></thead><tbody>
     ${L.length ? L.map(a => { const st = a.status || "nao_iniciada", fe = st === "concluida" || st === "revisao";
       return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.area || "").trim())}</div></td><td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td><td class="small">${dataC(a)}</td><td class="num">${fe ? (a.perigos||[]).length : "—"}</td><td class="num">${fe ? (ckCriticos(completar(a)).length || "—") : "—"}</td></tr>`; }).join("") : `<tr><td colspan="6" class="small muted">Nenhuma AEP nesta seleção.</td></tr>`}
-    </tbody></table></div></div>
-  <div class="panel" style="margin-top:16px"><div class="panel-h"><b>Plano de ação da área</b><span class="tiny muted">${mel.filter(m => abertaSit(m.sit)).length} em aberto · ${nR.length} ação(ões) de risco${nR.filter(m => m.pc === "P1").length ? `, ${nR.filter(m => m.pc === "P1").length} P1` : ""}</span></div>
+    </tbody></table></div></details>
+  <details class="panel gerlista" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Ver todas as ações do plano</b><span class="tiny muted">${mel.filter(m => abertaSit(m.sit)).length} em aberto · ${nR.length} ação(ões) de risco${nR.filter(m => m.pc === "P1").length ? `, ${nR.filter(m => m.pc === "P1").length} P1` : ""}</span></summary>
     <div class="tablewrap"><table class="list" style="min-width:680px"><thead><tr><th>AEP</th><th>O que fazer</th><th>Prioridade</th><th>Nº SIG</th><th>Responsável / prazo</th><th>Situação</th></tr></thead><tbody>
     ${mel.length ? mel.map(m => `<tr class="${m.atrasada ? "mel-atr" : ""}"><td class="mono small">${esc(m.a.numero)}<div class="tiny faint" style="font-family:inherit">${esc(m.a.meta?.cargo || "")}</div></td>
       <td>${chipTipo(m)}${m.kind === "risco" ? ` <span class="small">${esc(m.t?.nome || "")}</span> ${chipCat(m.r.cat)}<div class="small">${m.texto ? esc(m.texto) : `<span class="plaviso">Ação a definir</span>`}</div>` : `<div class="small">${esc(m.texto)}</div>`}</td>
       <td>${prioChip(m)}</td><td class="mono small">${esc(m.sig || "—")}</td>
       <td class="small">${esc(m.resp || "—")}${m.prazo ? `<div class="tiny ${m.atrasada ? "" : "faint"}" style="${m.atrasada ? "color:var(--bad-ink);font-weight:700" : ""}">${fmtData(m.prazo)}${m.atrasada ? " · vencido" : ""}</div>` : ""}</td><td class="small">${esc(m.sit)}</td></tr>`).join("") : `<tr><td colspan="6" class="small muted">Nenhuma ação, recomendação ou oportunidade registrada nas AEPs realizadas.</td></tr>`}
-    </tbody></table></div></div>
+    </tbody></table></div></details>
   <p class="tiny muted" style="margin-top:10px">O detalhamento por cargo e por área sai no botão “PDF: detalhamento por cargo”.</p>`;
 }
 /* Detalhamento (aba Painel) */
@@ -4420,6 +4459,7 @@ function campo(e, isChange){
     if (["descNR", "pOver", "sev", "efic", "corr", "exp", "dur", "int"].includes(campo)) atualizarInventario(); else atualizarInventario(true);
     return;
   }
+  if (el.dataset.invesc){ if (!isChange) return; S.invEsc = el.checked ? "todas" : "fechadas"; S.invAberto = null; atualizarInventario(); return; }
   if (el.dataset.invf){ if (!isChange) return; S[el.dataset.invf] = el.value; S.invAberto = null; if (S.invFoco){ S.invFoco = ""; render(); } else atualizarInventario(); return; }
   if (el.dataset.invsel){ if (!isChange) return; el.checked ? S.invSel.add(el.dataset.invsel) : S.invSel.delete(el.dataset.invsel); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
   if (el.dataset.invselall){ if (!isChange) return; listaInventario().forEach(x => el.checked ? S.invSel.add(x.k) : S.invSel.delete(x.k)); document.querySelectorAll("[data-invsel]").forEach(c => { c.checked = S.invSel.has(c.dataset.invsel); }); const lt = $("#invlote"); if (lt) lt.innerHTML = vInvLote(); return; }
