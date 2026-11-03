@@ -2388,6 +2388,7 @@ function calcRisco(h, c){
   const alertas = [], falta = [];
   if (!c.exp) falta.push("tipo de exposição"); if (!c.dur) falta.push("duração"); if (!c.int) falta.push("intensidade");
   if (!c.efic) falta.push("eficácia das medidas"); if (!medidasOk(c).length) falta.push("medidas existentes (ou “Nenhuma”)");
+  if (!c.eficaz) falta.push("POAD / EPC eficaz?");
   if (!c.catIni) falta.push("categoria inicial");
   const memo = String(c.memoria || "").trim();
   if (c.exp === "Habitual e permanente" && c.dur && c.dur !== "longa" && !memo) alertas.push("Exposição habitual e permanente com duração que não é longa: confira ou justifique na memória de cálculo (2.6).");
@@ -3146,6 +3147,29 @@ function vAvisosAEP(a0){
   const sp = (completar(a0).perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h));
   return `<div class="note warn" style="margin-bottom:12px"><b>Pontos para conferir nesta AEP</b> <span class="tiny">(não impedem nada; são ajustes de qualidade)</span><ul class="avisos">${av.map(x => `<li><b>${esc(x.curto.replace(/\s*\(.*\)$/, ""))}:</b> ${esc(x.longo)}</li>`).join("")}</ul>${sp.length ? `<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${sp.map(h => `<button class="btn small" type="button" data-act="fontePropria" data-id="${esc(h.id)}">Manter a fonte de ${esc(h.idRisco || h.codigo)} como escrevi</button>`).join("")}</div>` : ""}</div>`;
 }
+/* Medidas escritas em várias frases num item só: cada frase vira um item numerado.
+   Frase de natureza administrativa (orientação, organização, treinamento...) dentro de um item 1, 2 ou 3 passa a 4. */
+const MED_SEP = /\.\s+(?=[A-ZÁÂÃÉÊÍÓÔÕÚÇ])/;
+const MED_ADM = /^(Organização|Orientação|Treinamento|Capacitação|Procedimento|Apoio|Alternância|Pausa|Rodízio|Revezamento|DDS|Comunicação|Atuação|Instrução|Supervisão|Acompanhamento|Programação|Planejamento|Variabilidade|Execução em dupla|Disponibilidade de procedimentos)/i;
+function separarItem(x){
+  const p = String(x.t || "").split(MED_SEP).map(t => t.trim().replace(/[;.\s]+$/, "")).filter(Boolean);
+  if (p.length < 2 || p.some(t => t.length < 15)) return null;
+  return p.map((t, i) => ({ h: i && x.h && Number(x.h) < 4 && MED_ADM.test(t) ? "4" : x.h, t }));
+}
+function medidasAgrupadas(){
+  const out = [];
+  Object.values(S.aeps).forEach(a => Object.entries(a.classif || {}).forEach(([rid, c]) => { if (!c || c.corr || c.desvio) return;
+    if (medidasDe(c).some(x => separarItem(x))) out.push({ a, rid }); }));
+  return out;
+}
+const medSeparadas = c => { const L = [];
+  medidasDe(c).forEach(x => (separarItem(x) || [x]).forEach(y => { if (!L.some(z => norm(z.t) === norm(y.t))) L.push(y); })); return L; };
+function exemploSeparar(){
+  const vis = new Map(); medidasAgrupadas().forEach(({ a, rid }) => medidasDe(a.classif[rid]).forEach(x => { const s = separarItem(x); if (!s) return;
+    const k = `${x.h}|${x.t}`, o = vis.get(k) || { x, s, n: 0 }; o.n++; vis.set(k, o); }));
+  const it = y => `${y.h ? `${esc(y.h)} - ` : ""}${esc(y.t.length > 70 ? y.t.slice(0, 70) + "…" : y.t)}`;
+  return [...vis.values()].sort((p, q) => q.n - p.n).slice(0, 4).map(o => `<br><br><b>Hoje (${o.n} linha(s)):</b> ${it(o.x)}<br><b>Fica:</b> ${o.s.map(it).join("; ")}`).join("");
+}
 /* Correções em lote (aba Unidade) */
 function vCorrecoesLote(){
   const c = conferenciaPerigos(), nAeps = new Set(c.semPadrao.map(x => x.a.id)).size;
@@ -3154,6 +3178,7 @@ function vCorrecoesLote(){
   return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Correções em lote</b><span class="tiny muted">avisos que se resolvem de uma vez em várias AEPs</span></div><div class="panel-b">
     ${bloco("Etapa 3 diferente do modelo do setor", c.difModelo.length, "Troca a etapa 3 inteira pela do modelo do setor e lança os perigos que ela exige. Antes de gravar, o sistema baixa uma cópia de segurança. AEP concluída volta para “Em revisão”.", "modeloTodas", "modeloTodasSim", "Aplicar o modelo em todas", "modeloTodas")}
     ${bloco("Fonte sem o texto padrão da TAXONOMIA", c.semPadrao.length, `Coloca o texto padrão no início de ${c.semPadrao.length} fonte(s) em ${nAeps} AEP(s) e mantém o que foi escrito como complemento. AEP concluída volta para “Em revisão”.`, "fontes", "corrigirFontesSim", "Colocar o texto padrão em todas", "corrigirFontes")}
+    ${(() => { const m = medidasAgrupadas(); return bloco("Medidas com várias frases num item só", m.length, `Separa em itens numerados, uma medida por item, em ${m.length} linha(s) do inventário. Frase administrativa (orientação, organização, treinamento) passa a 4. Não muda nível nem categoria; as linhas já enviadas entram no próximo arquivo do PGR como alteradas.${exemploSeparar()}`, "separarMed", "separarMedidasSim", "Separar as medidas em todas", "separarMedidas"); })()}
     ${bloco("Observação do COPSOQ no modelo anterior de texto", c.redAnt.length, "Troca só as frases-modelo e mantém o que foi completado. AEP concluída volta para “Em revisão”.", "redacao", "redacaoTodasSim", "Atualizar a redação em todas", "redacaoTodas")}
     <p class="tiny muted" style="margin:10px 0 0">Os outros avisos são de cada AEP e aparecem na lista de AEPs (filtro “Com aviso”) e dentro da própria AEP. O que falta mandar ao PGR fica no Inventário, em Exportar para o PGR.</p>
   </div></div>`;
@@ -4237,7 +4262,8 @@ async function baixarDoc(){
 /* Linhas do PGR: perigos de AEPs concluídas com a classificação completa e sem alerta no Inventário.
    Cada linha guarda, ao ser marcada como enviada, a data e uma assinatura das colunas C a Z (c.pgr = { em, sig }).
    Se a classificação mudar depois, a assinatura deixa de bater e a linha volta para o próximo envio. */
-const PGR_TECNICA = h => (h.origemCopsoq || h.base === "copsoq") ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)";
+/* Inventário ergonômico: técnica sempre AEP. "AEP e COPSOQ II" é só dos perigos e riscos psicossociais, lançados por fora deste sistema */
+const PGR_TECNICA = () => "Avaliação Ergonômica Preliminar (AEP)";
 function linhaPGR(x){
   const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = medidasTxt(c);
   return [String(a.meta?.eg || ""), (a.meta?.cargo || "").trim(), `${a.numero} / ${h.idRisco}`, "Ergonomico", t.nome || "", String(h.fonte || "").trim(), "NA", "NA", t.danos || h.danos || "",
@@ -4299,7 +4325,7 @@ function linhasLigacao(){
     (a.perigos||[]).forEach(h => { const t = TAXMAP[h.codigo]; if (!t || !h.idRisco) return;
       const base = h.origemCopsoq ? "copsoq" : h.base;
       out.push([`${n}|${h.idRisco}`, n, h.idRisco, h.codigo, "Ergonomico", t.nome, String(h.fonte||"").trim(), LIG_ORIGEM[base] || "",
-        base === "copsoq" ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)", baseTexto(a, h), itensDoPerigo(a, h).join(", "),
+        PGR_TECNICA(h), baseTexto(a, h), itensDoPerigo(a, h).join(", "),
         LIG_STATUS[st] || "", "", "", "", "", cargo, eg, atu]); });
     if (fechada) melhoriasDaAEP(a).forEach(m => { const tr = S.melhorias[m.key] || {};
       out.push([`${n}|M-${m.key.split("|").pop()}`, n, "", "MELHORIA", m.tipo, m.texto, m.resp, m.prazo ? m.prazo.split("-").reverse().join("/") : "", m.sit, m.prio, "",
@@ -4631,6 +4657,11 @@ document.addEventListener("click", async e => {
     case "cancelConfirm": S.confirm = null; rerender(); break;
     case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
     case "corrigirFontes": S.confirm = "fontes"; render(); break;
+    case "separarMedidas": S.confirm = "separarMed"; render(); break;
+    case "separarMedidasSim": { let n = 0;
+      medidasAgrupadas().forEach(({ a, rid }) => { const c = Object.assign({}, a.classif[rid]); c.medidasL = medSeparadas(c); c.medidas = medidasTxt(c); delete c.hier;
+        a.classif = Object.assign({}, a.classif, { [rid]: c }); S.invPend[a.id] = true; n++; });
+      await salvarInventario(); AVISO_CACHE = new WeakMap(); S.confirm = null; render(); toast(`Medidas separadas em ${n} linha(s).`); break; }
     case "corrigirFontesSim": {
       const alvo = {}; conferenciaPerigos().semPadrao.forEach(x => { alvo[x.a.id] = true; });
       let n = 0, erro = 0;
