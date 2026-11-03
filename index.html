@@ -928,6 +928,17 @@ function melhoriasDaAEP(a){
 }
 const temDados = tr => !!tr && (["resp", "prazo", "sig", "acao", "evid", "conc", "efic"].some(k => String(tr[k] || "").trim()) || (!!tr.sit && tr.sit !== "Aberta"));
 const extrasDe = base => Object.keys(S.melhorias).filter(k => k.startsWith(base + "|")).sort((x, y) => Number(x.split("|")[2]) - Number(y.split("|")[2]));
+/* Dados do SIG (plano PLA202506SA20-30) para ações que já existem lá: preenche uma vez, só os campos vazios do Plano de ação */
+const SIG_ACOES = { 22: { acao: "Utilização de Caminhão de Aplicação de ANFO para carregamento de explosivo", resp: "Barbara Carolline Ferreira", prazo: "2027-02-01", sit: "Em andamento", sig: "PLA202506SA20-30 / 22" } };
+const PRE_SIG = { "AEP 267|R04": 22, "AEP 269|R04": 22, "AEP 270|R04": 22 };
+function aplicarPreSIG(){
+  if (!S.carregado || !S.melCarregado || !S.db) return; let mud = false; const m = { ...S.melhorias };
+  Object.entries(PRE_SIG).forEach(([k, n]) => { const [num, rid] = k.split("|"), a = Object.values(S.aeps).find(x => String(x.numero || "").trim() === num); if (!a) return;
+    const key = `${a.id}|${rid}`, tr = { ...(m[key] || {}) }; if (tr.preSig) return;
+    Object.entries(SIG_ACOES[n]).forEach(([f, v]) => { if (!String(tr[f] || "").trim() || (f === "sit" && tr[f] === "Aberta")) tr[f] = v; });
+    tr.preSig = new Date().toISOString(); m[key] = tr; mud = true; });
+  if (mud){ S.melhorias = m; S.melDirty = true; salvarMelhorias(); if (S.view === "melhorias") atualizarMelhorias(); }
+}
 function acoesDoRisco(a, h, r){
   const base = `${a.id}|${h.idRisco}`, pc = r.sit === "ok" ? (P_CAT[r.cat] || "") : "", extras = extrasDe(base);
   const keys = (pc || temDados(S.melhorias[base]) || extras.length) ? [base, ...extras] : [];
@@ -1539,7 +1550,7 @@ async function iniciar(){
     if (S.view === "aep") { renderBanner(); if (S.step === 3) renderStep(); }
   }, () => {});
   db.doc("config/plano").onSnapshot(d => { if (S.planoDirty) return; S.plano = d.exists ? (d.data().mes || {}) : {}; S.planoConta = d.exists ? (d.data().conta || {}) : {}; S.planoTeams = d.exists ? (d.data().teams || {}) : {}; if (S.view === "painel") render(); }, () => {});
-  db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {};
+  db.doc("config/melhorias").onSnapshot(d => { if (S.melDirty) return; S.melhorias = d.exists ? (d.data().itens || {}) : {}; S.melCarregado = true; setTimeout(aplicarPreSIG, 0);
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/pgrAnterior").onSnapshot(d => { if (S.pgrAntDirty) return; S.pgrAnt = d.exists ? (d.data().decisoes || {}) : {}; AVISO_CACHE = new WeakMap();
     if (S.view === "pgrant") render(); else if (S.view === "home") atualizarHome(); }, () => {});
@@ -1549,7 +1560,7 @@ async function iniciar(){
 function aoLerAEPs(snap){
     const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
     Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
-    S.aeps = m; S.padraoPend = velhas; S.carregado = true;
+    S.aeps = m; S.padraoPend = velhas; S.carregado = true; setTimeout(aplicarPreSIG, 0);
     if (S.view === "inventario") atualizarInventario();
     if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
     S.lidoEm = Date.now();
@@ -4262,8 +4273,8 @@ async function baixarDoc(){
 /* Linhas do PGR: perigos de AEPs concluídas com a classificação completa e sem alerta no Inventário.
    Cada linha guarda, ao ser marcada como enviada, a data e uma assinatura das colunas C a Z (c.pgr = { em, sig }).
    Se a classificação mudar depois, a assinatura deixa de bater e a linha volta para o próximo envio. */
-/* Inventário ergonômico: técnica sempre AEP. "AEP e COPSOQ II" é só dos perigos e riscos psicossociais, lançados por fora deste sistema */
-const PGR_TECNICA = () => "Avaliação Ergonômica Preliminar (AEP)";
+/* Técnica: perigos psicossociais (Organização do Trabalho, OT) saem "AEP e COPSOQ II", qualquer que seja a forma de lançamento; os demais, só AEP */
+const PGR_TECNICA = h => (TAXMAP[h.codigo] || {}).cat === "Organização do Trabalho" ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)";
 function linhaPGR(x){
   const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = medidasTxt(c);
   return [String(a.meta?.eg || ""), (a.meta?.cargo || "").trim(), `${a.numero} / ${h.idRisco}`, "Ergonomico", t.nome || "", String(h.fonte || "").trim(), "NA", "NA", t.danos || h.danos || "",
