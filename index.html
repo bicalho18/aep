@@ -928,6 +928,51 @@ function melhoriasDaAEP(a){
 }
 const temDados = tr => !!tr && (["resp", "prazo", "sig", "acao", "evid", "conc", "efic"].some(k => String(tr[k] || "").trim()) || (!!tr.sit && tr.sit !== "Aberta"));
 const extrasDe = base => Object.keys(S.melhorias).filter(k => k.startsWith(base + "|")).sort((x, y) => Number(x.split("|")[2]) - Number(y.split("|")[2]));
+/* Ajustes combinados na auditoria do PGR (30/10 e 03/11/2026). Cada um roda uma vez e fica marcado em config/ajustes. */
+const AJ_COERGO = "Comitê de Ergonomia (COERGO MSA), que trata as demandas e queixas dos empregados levantadas nas avaliações ergonômicas, com ações acompanhadas no SIG";
+const AJ_OT06 = {
+  campo: [["4", "DDS com participação dos operadores nas orientações e procedimentos da operação"], ["4", "Comunicação com a liderança (presencial, rádio ou telefone) para ajustar prioridades e solicitar pausas e paradas quando necessário"], ["4", AJ_COERGO]],
+  adm: [["4", "Organização da própria agenda e da sequência das tarefas dentro dos prazos definidos pela gestão"], ["4", "Comunicação com a liderança (presencial, telefone ou e-mail) para ajustar prioridades e prazos"], ["4", AJ_COERGO]] };
+const AJ_OT06_ADM = ["AEP 268", "AEP 284", "AEP 280", "AEP 281", "AEP 282", "AEP 278"];
+const AJ_OT06_ORIG = [["4", "DDS com participação dos operadores nas orientações e procedimentos da operação"], ["4", "Direito de recusa e parada da atividade em situação de risco"], ["4", "Comunicação com a liderança (presencial, rádio ou telefone) para ajustar prioridades e solicitar pausas e paradas quando necessário"]];
+const AJ_FONTE = { "AEP 267|R04": "Sacarias de explosivos levantadas, abaixadas e posicionadas em diferentes alturas e condições de terreno.",
+  "AEP 269|R04": "Sacarias de explosivos levantadas, abaixadas e posicionadas em diferentes alturas e condições de terreno.",
+  "AEP 283|R02": "Correção constante da rota dos veículos no software de despacho devido a erro de polígonos.", "AEP 178|R02": "" };
+async function aplicarAjustes(){
+  if (!S.carregado || !S.ajLidos || !S.db || S.ajRodando) return; S.ajRodando = true;
+  const feitos = { ...(S.ajustes || {}) }, agora = new Date().toISOString(), docs = new Set(), cls = new Set();
+  const aep = num => Object.values(S.aeps).find(x => String(x.numero || "").trim() === num);
+  const mexerC = (a, rid, fn) => { a.classif = { ...(a.classif || {}) }; const c = { ...(a.classif[rid] || {}) }; fn(c); c.em = agora; a.classif[rid] = c; cls.add(a.id); };
+  const revisao = a => { if (a.status === "concluida"){ a.status = "revisao"; a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; a.concluidoEm = null; } a.atualizadoEm = agora; };
+  const passo = (id, fn) => { if (feitos[id]) return; try { if (fn() !== false) feitos[id] = agora; } catch(e){ console.warn("ajuste", id, e); } };
+  const alvo = (num, rid, cod) => { const a = aep(num); if (!a) return null; const h = (a.perigos || []).find(x => x.idRisco === rid && x.codigo === cod); return h ? { a, h, c: (a.classif || {})[rid] || {} } : null; };
+  passo("separar-medidas", () => { medidasAgrupadas().forEach(({ a, rid }) => mexerC(a, rid, c => { c.medidasL = medSeparadas(c); c.medidas = medidasTxt(c); delete c.hier; })); });
+  passo("283-R02-eficaz", () => { const x = alvo("AEP 283", "R02", "EQ-06"); if (!x) return false; if (x.c.eficaz === "Sim") mexerC(x.a, "R02", c => { c.eficaz = "Não"; }); });
+  passo("273-R05-dispositivo", () => { const x = alvo("AEP 273", "R05", "BIO-04"); if (!x) return false;
+    if (!medidasOk(x.c).some(m => /dispositivo/i.test(m.t) && /bits/i.test(m.t))) mexerC(x.a, "R05", c => { c.medidasL = [...medidasDe(c), { h: "3", t: "Dispositivo auxiliar para troca de bits instalado nas perfuratrizes" }]; c.medidas = medidasTxt(c); delete c.hier; }); });
+  passo("183-R04-desvio", () => { const x = alvo("AEP 183", "R04", "EQ-01"); if (!x) return false;
+    if (!x.c.desvio && !x.c.corr) mexerC(x.a, "R04", c => { c.desvio = true; c.desvTxt = c.desvTxt || "Cadeira do posto de trabalho estragada: reparar ou substituir. Responsável e prazo a definir após apresentação ao gestor."; }); });
+  /* A troca automática das medidas de OT-06 (03/11) foi cancelada: o Relatório Técnico FRPT (Quadro 14) e o Levantamento de controles (linha 18)
+     registram o direito de recusa formalizado como medida do domínio. Se a troca já tiver rodado em algum navegador, volta às 3 medidas originais. */
+  passo("ot06-desfazer-v1", () => { Object.values(S.aeps).forEach(a => (a.perigos || []).filter(h => h.codigo === "OT-06" && h.idRisco).forEach(h => { const c = (a.classif || {})[h.idRisco];
+    if (!c || !medidasOk(c).some(m => m.t === AJ_COERGO)) return; mexerC(a, h.idRisco, c2 => { c2.medidasL = AJ_OT06_ORIG.map(([hh, t]) => ({ h: hh, t })); c2.medidas = medidasTxt(c2); delete c2.hier; }); })); });
+  passo("fontes-repetidas", () => { let achou = 0;
+    Object.entries(AJ_FONTE).forEach(([k, comp]) => { const [num, rid] = k.split("|"), a0 = aep(num); if (!a0) return; achou++;
+      const h0 = (a0.perigos || []).find(x => x.idRisco === rid); if (!h0 || estadoFonte(h0) !== "repete") return;
+      const a = completar(a0), h = a.perigos.find(x => x.idRisco === rid), t = TAXMAP[h.codigo]; if (!t) return;
+      h.fonte = comp ? `${t.fonte} ${comp}` : t.fonte; revisao(a); a.classif = S.aeps[a.id].classif; S.aeps[a.id] = a; docs.add(a.id); });
+    if (!achou) return false; });
+  passo("274-R02-supervisor", () => { const a0 = aep("AEP 274"); if (!a0) return false; const h0 = (a0.perigos || []).find(x => x.idRisco === "R02" && x.codigo === "OT-06"); if (!h0) return;
+    const a = completar(a0), sid = h0.origemCopsoq && SUBMAP[h0.origemCopsoq] ? h0.origemCopsoq : "influencia-no-trabalho", sb = SUBMAP[sid];
+    a.perigos = a.perigos.filter(x => x.id !== h0.id); a.classif = { ...(S.aeps[a.id].classif || {}) }; delete a.classif.R02;
+    if (sb){ a.copsoq = a.copsoq || {}; a.copsoq.dominios = a.copsoq.dominios || {}; const dd = a.copsoq.dominios[sb.dom] = { ...(a.copsoq.dominios[sb.dom] || {}) }; dd.dec = { ...(dd.dec || {}), [sid]: "nao" }; }
+    revisao(a); S.aeps[a.id] = a; docs.add(a.id); });
+  for (const id of docs){ try { await S.db.doc("aeps/" + id).set(S.aeps[id]); } catch(_){} cls.delete(id); }
+  cls.forEach(id => { S.invPend[id] = true; }); if (cls.size) await salvarInventario();
+  if (JSON.stringify(feitos) !== JSON.stringify(S.ajustes || {})){ S.ajustes = feitos; try { await S.db.doc("config/ajustes").set({ feitos }); } catch(_){} }
+  if (docs.size || cls.size){ AVISO_CACHE = new WeakMap(); render(); }
+  S.ajRodando = false;
+}
 /* Dados do SIG (plano PLA202506SA20-30) para ações que já existem lá: preenche uma vez, só os campos vazios do Plano de ação */
 const SIG_ACOES = { 22: { acao: "Utilização de Caminhão de Aplicação de ANFO para carregamento de explosivo", resp: "Barbara Carolline Ferreira", prazo: "2027-02-01", sit: "Em andamento", sig: "PLA202506SA20-30 / 22" } };
 const PRE_SIG = { "AEP 267|R04": 22, "AEP 269|R04": 22, "AEP 270|R04": 22 };
@@ -1465,7 +1510,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1481,6 +1526,18 @@ const FONTES_ANTERIORES = {};   /* fontes padrão de versões anteriores da TAXO
 const prefixosFonte = cod => [TAXMAP[cod]?.fonte, ...(FONTES_ALTERNATIVAS[cod]||[]), ...(FONTES_ANTERIORES[cod]||[])].filter(Boolean);
 const fontePropria = h => !!(h && h.id && (S.fontesProprias || {})[h.id]);
 const temPrefixoPadrao = h => fontePropria(h) || prefixosFonte(h.codigo).some(p => String(h.fonte||"").trim().startsWith(p));
+/* Modelo da fonte (decidido em 03/11/2026): frase padrão da TAXONOMIA + uma frase curta com o que é só deste cargo.
+   A frase padrão de BIO-01 (postura sentada em posto informatizado) e de BIO-02 (teclado e mouse) já descreve a situação: o complemento é opcional. */
+const prefixoFonteDe = h => { const f = String(h?.fonte || "").trim(); return prefixosFonte(h?.codigo).filter(p => f.startsWith(p)).sort((x, y) => y.length - x.length)[0] || ""; };
+const fonteBasta = (p, cod) => (cod === "BIO-01" || cod === "BIO-02") && p === TAXMAP[cod]?.fonte;
+const comecoTxt = x => norm(x).split(" ").filter(Boolean).slice(0, 4).join(" ");
+function estadoFonte(h){
+  if (!h || !TAXMAP[h.codigo]) return "ok"; if (fontePropria(h)) return "propria";
+  const p = prefixoFonteDe(h); if (!p) return "fora";
+  const comp = String(h.fonte || "").trim().slice(p.length).trim();
+  if (!comp) return fonteBasta(p, h.codigo) ? "ok" : "sem";
+  return prefixosFonte(h.codigo).some(q => comecoTxt(q) === comecoTxt(comp)) ? "repete" : "ok";
+}
 async function marcarFontePropria(id, sim){
   S.fontesProprias = { ...(S.fontesProprias || {}) }; if (sim) S.fontesProprias[id] = new Date().toISOString(); else delete S.fontesProprias[id];
   AVISO_CACHE = new WeakMap(); if (!S.db) return;
@@ -1554,13 +1611,14 @@ async function iniciar(){
     if (S.view === "melhorias") atualizarMelhorias(); const m = $("#melaep"); if (m && S.draft) m.innerHTML = vMelItensAEP(S.draft); }, () => {});
   db.doc("config/pgrAnterior").onSnapshot(d => { if (S.pgrAntDirty) return; S.pgrAnt = d.exists ? (d.data().decisoes || {}) : {}; AVISO_CACHE = new WeakMap();
     if (S.view === "pgrant") render(); else if (S.view === "home") atualizarHome(); }, () => {});
+  db.doc("config/ajustes").onSnapshot(d => { S.ajustes = d.exists ? (d.data().feitos || {}) : {}; S.ajLidos = true; setTimeout(aplicarAjustes, 0); }, () => {});
   db.doc("config/fontes").onSnapshot(d => { S.fontesProprias = d.exists ? (d.data().proprias || {}) : {}; AVISO_CACHE = new WeakMap(); if (S.view === "home") atualizarHome(); }, () => {});
   db.doc("config/unidade").onSnapshot(d => { S.config = d.exists ? d.data() : {}; if (S.view === "config" && !S.cfgDraft) render(); if (S.view === "painel") render(); }, () => {});
 }
 function aoLerAEPs(snap){
     const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
     Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
-    S.aeps = m; S.padraoPend = velhas; S.carregado = true; setTimeout(aplicarPreSIG, 0);
+    S.aeps = m; S.padraoPend = velhas; S.carregado = true; setTimeout(aplicarPreSIG, 0); setTimeout(aplicarAjustes, 0);
     if (S.view === "inventario") atualizarInventario();
     if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
     S.lidoEm = Date.now();
@@ -3147,6 +3205,9 @@ function avisosAEP(a0){
   if (modeloPendente(a)) av("Etapa 3 fora do modelo do setor", "A etapa 3 (COPSOQ) está diferente do texto-modelo do setor. Confira a etapa 3 ou use a correção em lote em Unidade.");
   const sp = (a.perigos || []).filter(h => TAXMAP[h.codigo] && !temPrefixoPadrao(h));
   if (sp.length) av(`Fonte fora do padrão (${sp.map(h => h.idRisco || h.codigo).join(", ")})`, `A fonte geradora de ${sp.map(h => h.idRisco || h.codigo).join(", ")} não começa pelo texto padrão da TAXONOMIA. Abra o perigo na etapa 4 e use o texto padrão, mantendo o seu complemento.`);
+  const fSem = (a.perigos || []).filter(h => estadoFonte(h) === "sem"), fRep = (a.perigos || []).filter(h => estadoFonte(h) === "repete"), ids = l => l.map(h => h.idRisco || h.codigo).join(", ");
+  if (fSem.length) av(`Fonte só com a frase padrão (${ids(fSem)})`, `A fonte de ${ids(fSem)} tem só a frase padrão. Escreva o que é deste cargo no perigo (etapa 4) ou, para várias AEPs de uma vez, em Unidade, “Completar as fontes”.`);
+  if (fRep.length) av(`Fonte repete a frase padrão (${ids(fRep)})`, `Em ${ids(fRep)}, o texto depois da frase padrão começa repetindo a própria frase padrão. Abra o perigo e deixe só o que é deste cargo.`);
   deficienciaSemItem(a).forEach(x => av(`Perigo sem item do checklist (${x.h.idRisco || x.h.codigo})`, `${x.h.idRisco || ""} ${x.h.codigo} é um perigo de deficiência, mas os itens ${x.itens.join(", ")} do checklist estão marcados “Não”. Marque o item que mostra a condição ou retire o perigo.`));
   perigosRepetidos(a).forEach(([x, y]) => av(`Perigo repetido (${x.idRisco || ""} e ${y.idRisco || ""})`, `${x.idRisco || ""} e ${y.idRisco || ""} têm o mesmo perigo (${x.codigo}) e a mesma fonte. Retire um deles ou escreva fontes diferentes.`));
   if (temRedacaoAntiga(a)) av("Texto do COPSOQ desatualizado", "A observação do COPSOQ na etapa 3 usa o modelo antigo de texto. Na etapa 3, use “Atualizar a redação”.");
@@ -3181,6 +3242,61 @@ function exemploSeparar(){
   const it = y => `${y.h ? `${esc(y.h)} - ` : ""}${esc(y.t.length > 70 ? y.t.slice(0, 70) + "…" : y.t)}`;
   return [...vis.values()].sort((p, q) => q.n - p.n).slice(0, 4).map(o => `<br><br><b>Hoje (${o.n} linha(s)):</b> ${it(o.x)}<br><b>Fica:</b> ${o.s.map(it).join("; ")}`).join("");
 }
+/* Completar as fontes: perigos com só a frase padrão. Sugestão pelo tipo de atividade do cargo, revisada antes de gravar */
+const tipoDoCargo = c => { const x = norm(c);
+  if (/almoxarif/.test(x)) return "log";
+  if (/controlador/.test(x)) return "ctl";
+  if (/analista|assistente|engenheir|ppcm|administrativ|tecnico operacional|seguranca do trabalho|controle de/.test(x)) return "adm";
+  if (/operador|motorista/.test(x)) return "ope";
+  if (/perfuracao|desmonte|blaster/.test(x)) return "cam";
+  if (/laborat/.test(x)) return "lab";
+  if (/mecanic|manutencao|especializado|inspecao|eletric|instrument|automacao/.test(x)) return "man";
+  return ""; };
+const sugFonteTipo = (cod, tp) => { const l = (SUG_FONTE[cod] || []).filter(x => x[0] === tp && x[1]); return ((l.find(x => !/\[/.test(x[1])) || l[0]) || [])[1] || ""; };
+function fontesSemComplemento(){
+  const out = [];
+  Object.values(S.aeps).sort((p, q) => idNum(p) - idNum(q)).forEach(a => (a.perigos || []).forEach(h => { if (estadoFonte(h) !== "sem") return;
+    const k = `${a.id}|${h.id}|${h.codigo}`; if (!S.cf[k]){ const tp = tipoDoCargo(a.meta?.cargo), sg = sugFonteTipo(h.codigo, tp); S.cf[k] = { tp, tx: sg, ok: false }; }
+    out.push({ k, a, h }); }));
+  return out;
+}
+function contarFc(){ const b = $("#btnFc"); if (!b) return; const n = fontesSemComplemento().filter(x => S.cf[x.k]?.ok).length; b.textContent = `Gravar as marcadas (${n})`; b.disabled = !n; }
+function vCompletarFontes(){
+  const L = fontesSemComplemento(); if (!S.fcAberto) return "";
+  const grupos = {}; L.forEach(x => (grupos[x.h.codigo] = grupos[x.h.codigo] || []).push(x));
+  const n = L.filter(x => S.cf[x.k]?.ok).length;
+  return `<div class="panel" style="margin-top:16px" id="fcpainel"><div class="panel-h"><b>Completar as fontes</b><span class="tiny muted">${L.length} perigo(s) com só a frase padrão</span></div><div class="panel-b stack">
+    <p class="small" style="margin:0">Cada linha já vem com uma sugestão pelo tipo de atividade do cargo, mas nada vem marcado: leia, ajuste o que não for verdade para aquele cargo e marque (uma a uma ou com “Marcar as deste perigo”). Sugestão com colchetes [ ] precisa ser completada antes. A AEP concluída que tiver a fonte alterada volta para “Em revisão”: depois use “Concluir de novo” em Correções em lote.</p>
+    ${Object.entries(grupos).map(([cod, l]) => `<div class="stack tight"><b class="small">${esc(cod)} ${esc(TAXMAP[cod]?.nome || "")} (${l.length})</b><p class="tiny muted" style="margin:0">Frase padrão: ${esc(prefixoFonteDe(l[0].h))}</p><div><button class="btn small" type="button" data-act="fcMarcar" data-cod="${esc(cod)}">Marcar as deste perigo (já li)</button></div>
+      <div style="overflow-x:auto"><table class="meltab"><thead><tr><th></th><th>AEP / cargo</th><th>Tipo de atividade</th><th>O que é deste cargo</th></tr></thead><tbody>
+      ${l.map(x => { const o = S.cf[x.k]; return `<tr><td><input type="checkbox" data-fcok="${esc(x.k)}" ${o.ok ? "checked" : ""} aria-label="Gravar"></td><td class="small"><span class="mono">${esc(x.a.numero)} / ${esc(x.h.idRisco || "")}</span><div>${esc(x.a.meta?.cargo || "")}</div></td>
+        <td><select data-fctp="${esc(x.k)}" aria-label="Tipo de atividade"><option value="">Escolha</option>${Object.entries(TIPOS_ATV).filter(([t]) => (SUG_FONTE[cod] || []).some(y => y[0] === t)).map(([t, nm]) => `<option value="${t}" ${o.tp === t ? "selected" : ""}>${esc(nm)}</option>`).join("")}</select></td>
+        <td style="min-width:340px"><textarea rows="2" data-fctx="${esc(x.k)}" style="width:100%" placeholder="O que é deste cargo">${esc(o.tx || "")}</textarea></td></tr>`; }).join("")}
+      </tbody></table></div></div>`).join("")}
+    <div class="row" style="gap:8px"><button class="btn primary" type="button" id="btnFc" data-act="fcGravar" ${n ? "" : "disabled"}>Gravar as marcadas (${n})</button><button class="btn" type="button" data-act="fcFechar">Fechar</button></div>
+  </div></div>`;
+}
+async function gravarFontesLote(){
+  const L = fontesSemComplemento().filter(x => S.cf[x.k]?.ok && String(S.cf[x.k].tx || "").trim() && !/\[/.test(S.cf[x.k].tx)), porAEP = {};
+  L.forEach(x => (porAEP[x.a.id] = porAEP[x.a.id] || []).push(x));
+  let n = 0, erro = 0;
+  for (const [id, l] of Object.entries(porAEP)){
+    const a2 = completar(S.aeps[id]);
+    l.forEach(x => { const h = a2.perigos.find(y => y.id === x.h.id); if (!h) return; const pre = prefixoFonteDe(h); if (!pre) return;
+      h.fonte = pre + " " + S.cf[x.k].tx.trim().replace(/\s+/g, " "); delete S.cf[x.k]; n++; });
+    if (a2.status === "concluida"){ a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
+    a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
+    if (S.db){ try { await S.db.doc("aeps/" + id).set(a2); } catch(_){ erro++; } }
+  }
+  AVISO_CACHE = new WeakMap(); render(); toast(erro ? `${n} fonte(s) gravadas; ${erro} AEP(s) não salvaram, tente de novo.` : `${n} fonte(s) completadas.`);
+}
+const revisaoProntas = () => Object.values(S.aeps).filter(a => a.status === "revisao" && !totalPend(pendencias(completar(a))));
+async function reconcluirTodas(){
+  let n = 0, erro = 0;
+  for (const a0 of revisaoProntas()){ const a = completar(a0); a.status = "concluida"; a.concluidoEm = new Date().toISOString(); a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; a.taxVersao = S.tax.versao || 1;
+    a.atualizadoEm = a.concluidoEm; S.aeps[a.id] = a; n++; if (S.db){ try { await S.db.doc("aeps/" + a.id).set(a); } catch(_){ erro++; } } }
+  AVISO_CACHE = new WeakMap(); S.confirm = null; render(); toast(erro ? `${n - erro} concluída(s); ${erro} não salvaram.` : `${n} AEP(s) concluída(s) de novo.`);
+}
 /* Correções em lote (aba Unidade) */
 function vCorrecoesLote(){
   const c = conferenciaPerigos(), nAeps = new Set(c.semPadrao.map(x => x.a.id)).size;
@@ -3189,6 +3305,9 @@ function vCorrecoesLote(){
   return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Correções em lote</b><span class="tiny muted">avisos que se resolvem de uma vez em várias AEPs</span></div><div class="panel-b">
     ${bloco("Etapa 3 diferente do modelo do setor", c.difModelo.length, "Troca a etapa 3 inteira pela do modelo do setor e lança os perigos que ela exige. Antes de gravar, o sistema baixa uma cópia de segurança. AEP concluída volta para “Em revisão”.", "modeloTodas", "modeloTodasSim", "Aplicar o modelo em todas", "modeloTodas")}
     ${bloco("Fonte sem o texto padrão da TAXONOMIA", c.semPadrao.length, `Coloca o texto padrão no início de ${c.semPadrao.length} fonte(s) em ${nAeps} AEP(s) e mantém o que foi escrito como complemento. AEP concluída volta para “Em revisão”.`, "fontes", "corrigirFontesSim", "Colocar o texto padrão em todas", "corrigirFontes")}
+    ${(() => { const L = fontesSemComplemento(); return `<div class="stack tight" style="padding:10px 0;border-bottom:1px solid var(--rule)"><b class="small">Fonte só com a frase padrão: ${L.length}</b>
+      ${L.length ? `<p class="tiny muted" style="margin:0">Falta o que é deste cargo depois da frase padrão. O sistema sugere o texto pelo tipo de atividade do cargo; você revisa e grava várias de uma vez.</p><div><button class="btn small" type="button" data-act="fcAbrir">Completar as fontes</button></div>` : `<p class="tiny muted" style="margin:0">Nada a corrigir.</p>`}</div>`; })()}
+    ${(() => { const r = revisaoProntas(); return bloco("Em revisão e sem pendência", r.length, `Prontas para concluir de novo: ${r.map(a => esc(a.numero)).join(", ")}. A data de conclusão passa a ser hoje; o mês em que a AEP foi feita (painel do plano) não muda.`, "reconcluir", "reconcluirSim", "Concluir de novo todas", "reconcluir"); })()}
     ${(() => { const m = medidasAgrupadas(); return bloco("Medidas com várias frases num item só", m.length, `Separa em itens numerados, uma medida por item, em ${m.length} linha(s) do inventário. Frase administrativa (orientação, organização, treinamento) passa a 4. Não muda nível nem categoria; as linhas já enviadas entram no próximo arquivo do PGR como alteradas.${exemploSeparar()}`, "separarMed", "separarMedidasSim", "Separar as medidas em todas", "separarMedidas"); })()}
     ${bloco("Observação do COPSOQ no modelo anterior de texto", c.redAnt.length, "Troca só as frases-modelo e mantém o que foi completado. AEP concluída volta para “Em revisão”.", "redacao", "redacaoTodasSim", "Atualizar a redação em todas", "redacaoTodas")}
     <p class="tiny muted" style="margin:10px 0 0">Os outros avisos são de cada AEP e aparecem na lista de AEPs (filtro “Com aviso”) e dentro da própria AEP. O que falta mandar ao PGR fica no Inventário, em Exportar para o PGR.</p>
@@ -3436,7 +3555,7 @@ const SUG_FONTE = {
   "OT-03": [["adm", "Permanência contínua no posto informatizado, com pausas não programadas e dependentes da demanda."], ["ctl", "Saída do posto na sala de controle condicionada à presença de substituto, com pausas dependentes da dinâmica da operação."], ["ope", "Pausas condicionadas à dinâmica da operação (fila de carregamento, troca de turno), com saída do posto restrita a [momentos]."], ["ope", "Refeição e pausas realizadas próximas ao equipamento, condicionadas a [liberação pelo despacho]."], ["man", "Serviços prolongados em [local ou equipamento], com interrupções limitadas pela janela de liberação."], ["lab", "Rotina contínua de preparação de amostras, com pausas dependentes do volume recebido."]],
   "OT-04": [["adm", "Lançamento e conferência de dados em sistema, com pouca variação de tarefas ao longo da jornada."], ["ope", "Ciclo de operação repetitivo de [carregamento, transporte ou descarga] ao longo do turno, com pouca variação de tarefas."], ["ope", "Transporte em ciclo repetitivo entre [frente de lavra] e [britador ou pilha], com rota e sequência fixas."], ["lab", "Preparação de amostras em sequência repetitiva ([secagem, quarteamento e pesagem]), com pouca variação ao longo do turno."], ["log", "Separação e conferência de itens em ciclo repetitivo, com pouca variação de tarefas."]],
   "OT-05": [["log", "Conferência simultânea de [notas, requisições e itens] com registro no sistema sob demanda de vários requisitantes."], ["adm", "Análise e conferência de dados e tomada de decisão em sistemas corporativos, com atenção contínua."], ["ctl", "Monitoramento simultâneo de telas, alarmes e comunicação por rádio, com decisões que afetam a continuidade da operação."], ["ope", "Atenção contínua ao entorno, à comunicação por rádio e aos indicadores do equipamento durante a operação."], ["ope", "Operação próxima a [bordas de bancada, outros equipamentos ou pessoas], com atenção contínua ao entorno."], ["man", "Diagnóstico de falhas e decisão sobre a liberação do equipamento, com leitura de manuais e esquemas."], ["cam", "Interpretação de dados técnicos e registros de campo que subsidiam decisões da operação."], ["cam", "Planejamento e execução de [desmonte ou levantamento], com exigência de atenção a procedimentos e áreas de isolamento."], ["lab", "Execução de procedimentos analíticos com exigência de precisão e conferência de resultados."]],
-  "OT-06": [["adm", "Prazos e prioridades definidos por [área ou sistema], com pouca margem para organizar a sequência do próprio trabalho."], ["ctl", "Decisões operacionais condicionadas a [procedimento ou aprovação], com pouca margem de ajuste pelo operador."], ["ope", "Sequência e ritmo das atividades definidos pela programação e pelo despacho, com pouca margem de decisão do trabalhador."], ["man", "Execução de serviços com sequência e prazo definidos pela janela de liberação do equipamento."]],
+  "OT-06": [["ope", "Percepção coletiva do setor puxada pela baixa influência na escolha dos colegas e na quantidade de trabalho, em operação organizada por escalas, turnos e despacho."], ["cam", "Percepção coletiva do setor puxada pela baixa influência na escolha dos colegas e na quantidade de trabalho, em operação organizada por escalas, turnos e programação de desmonte."], ["adm", "Prazos e prioridades definidos por [área ou sistema], com pouca margem para organizar a sequência do próprio trabalho."], ["ctl", "Decisões operacionais condicionadas a [procedimento ou aprovação], com pouca margem de ajuste pelo operador."], ["ope", "Sequência e ritmo das atividades definidos pela programação e pelo despacho, com pouca margem de decisão do trabalhador."], ["man", "Execução de serviços com sequência e prazo definidos pela janela de liberação do equipamento."]],
   "OT-12": [["log", "Atendimento a requisitantes em situações de urgência, cobrança por prazo ou falta de material."], ["adm", "Atendimento a empregados e terceiros em situações de conflito, reclamação ou notícia difícil."], ["adm", "Relacionamento com a comunidade do entorno em situações de reclamação ou conflito: [situação]."], ["ctl", "Coordenação da resposta a [ocorrências ou emergências] pelo rádio, com responsabilidade sobre equipes em campo."], ["ope", "Responsabilidade pela segurança própria e de terceiros na operação de equipamento de grande porte."], ["cam", "Atuação em atendimento a emergências e ocorrências com vítimas."], ["cam", "Isolamento de área e controle de acesso durante [detonações ou operações de risco], com responsabilidade sobre a segurança de terceiros."]],
   "BIO-01": [["adm", "", "padrao"], ["ctl", "", "padrao"], ["ope", "Permanência sentada na cabine do equipamento durante a operação, com [trepidação] e restrição de movimentos.", "alt"], ["ope", "Rotação de pescoço e tronco para visualizar [ponto de carregamento, furo ou caçamba] durante a operação.", "alt"], ["man", "Serviços com flexão de tronco, agachamento ou braços acima dos ombros em [componente ou equipamento].", "alt"], ["man", "Trabalho de joelhos ou deitado sob [equipamento] em serviços de [troca de componentes ou lubrificação].", "alt"], ["man", "Permanência em pé prolongada na bancada ou na oficina durante [serviço].", "alt"], ["cam", "Permanência em pé e deslocamentos em terreno irregular durante [inspeções, levantamentos ou coletas].", "alt"], ["lab", "Permanência em pé na bancada durante a preparação de amostras, com flexão de pescoço.", "alt"], ["log", "Flexão de tronco para separar e retirar itens em prateleiras baixas ou no piso.", "alt"]],
   "BIO-02": [["adm", "", "padrao"], ["ctl", "", "padrao"], ["ope", "Acionamento contínuo de comandos (joystick, pedais, alavancas) durante a operação do equipamento.", "alt"], ["man", "Uso repetido de ferramentas manuais para aperto, desmontagem e montagem de componentes.", "alt"], ["cam", "Manuseio repetido de amostras, frascos ou instrumentos durante [preparação ou análise].", "alt"], ["lab", "Uso repetido de [pipetas, peneiras ou instrumentos] durante a análise.", "alt"], ["log", "Leitura de códigos, digitação e manuseio repetido de itens na conferência de materiais.", "alt"]],
@@ -3496,7 +3615,11 @@ function vHzEditor(){
         return `<div class="stack tight" style="gap:6px"><span class="tiny muted">Sugestões por tipo de atividade. Clique para acrescentar à fonte e complete os colchetes com o que se viu:</span>
         <div class="row" style="gap:6px;flex-wrap:wrap">${["", ...tipos].map(k => `<button class="btn small${tp === k ? " primary" : ""}" type="button" data-act="sugTipo" data-tp="${k}">${k ? esc(TIPOS_ATV[k]) : "Todos"}</button>`).join("")}</div>
         ${sg.map(([k, x, base], i) => tp && k !== tp ? "" : `<div class="row" style="gap:6px;align-items:flex-start"><span class="chip">${esc(TIPOS_ATV[k])}</span><button class="btn small" type="button" data-act="sugFonte" data-i="${i}" style="text-align:left;white-space:normal">${esc(x || (base === "padrao" ? "Texto padrão do posto informatizado" : ""))}</button></div>`).join("")}</div>`; })() : ""}
-      ${el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da TAXONOMIA. Complemente depois dele com o que é específico deste cargo."})}
+      ${(() => { const pre = t && !fontePropria(h) ? prefixoFonteDe(h) : "";
+        if (!pre) return el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da TAXONOMIA. Complemente depois dele com o que é específico deste cargo."});
+        const comp = String(h.fonte || "").trim().slice(pre.length).trim(), basta = fonteBasta(pre, h.codigo);
+        return `<div class="f"><span>Fonte geradora: frase padrão <span class="faint" style="font-weight:400">(fixa, igual em todas as AEPs)</span></span><p class="small" id="hz-fpad" style="margin:4px 0 0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--surface-2)">${esc(pre)}</p></div>
+        <label class="f"><span>O que é deste cargo${basta ? ` <span class="faint" style="font-weight:400">(opcional: a frase padrão já descreve a situação)</span>` : " <em>*</em>"}</span><textarea id="f-fcomp" data-fcomp="1" rows="3" placeholder="Só o que diferencia este cargo: a tarefa, o objeto, o local ou a condição. Não repita a frase padrão.">${esc(comp)}</textarea><span class="hint">No PGR sai a frase padrão seguida deste texto. Ex.: “Sacarias de explosivos levantadas e posicionadas em diferentes alturas e condições de terreno.”</span></label>`; })()}
       <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" data-fonteprop="${esc(S.editHz?.id || "")}" ${fontePropria(S.editHz) ? "checked" : ""}> Fonte própria: escrevi a fonte do meu jeito, sem o texto padrão (o aviso de padrão não aparece para este perigo)</label>
       <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
@@ -3569,6 +3692,8 @@ function salvarHz(){
   const h = S.editHz, t = TAXMAP[h.codigo]; const erro = m => { S.hzErr = m; renderStep(); };
   if (!t) return erro("Selecione o perigo na taxonomia.");
   if (!h.fonte?.trim()) return erro("Descreva a fonte geradora específica desta situação.");
+  if (estadoFonte(h) === "sem") return erro("Escreva em “O que é deste cargo” o que diferencia esta situação (tarefa, objeto, local ou condição).");
+  if (estadoFonte(h) === "repete") return erro("O texto de “O que é deste cargo” repete a frase padrão. Escreva só o que é deste cargo.");
   if (!h.origemCopsoq && !BASE_PERIGO[h.base]) return erro("Indique a base: observado em campo, relatado pelo trabalhador ou rotina do cargo.");
   const igual = S.draft.perigos.find(x => x.id !== h.id && chaveHz(x) === chaveHz(h));
   if (igual) return erro(`Já existe a linha ${igual.idRisco||""} com o mesmo perigo (${h.codigo}) e a mesma fonte. Edite a linha existente, ou complemente a fonte com o que torna esta situação diferente.`);
@@ -3657,7 +3782,7 @@ function importarColagem(){
 /* =========================================================================
    UNIDADE
    ========================================================================= */
-function vConfig(){ return vConfig0() + vCorrecoesLote(); }
+function vConfig(){ return vConfig0() + vCorrecoesLote() + vCompletarFontes(); }
 function vConfig0(){
   if (!S.cfgDraft) S.cfgDraft = Object.assign({ empresa:"", unidade:"", cnpj:"", analista:"", registroAnalista:"", dataInicio:"", dataMeta:"" }, clone(S.config||{}));
   const c = S.cfgDraft, f = (k, rot, o={}) => `<label class="f ${o.cls||""}"><span>${rot}</span><input id="f-cfg-${k}" type="${o.type||"text"}" data-b="cfgDraft.${k}" value="${esc(c[k]||"")}" placeholder="${esc(o.ph||"")}"></label>`;
@@ -4274,7 +4399,8 @@ async function baixarDoc(){
    Cada linha guarda, ao ser marcada como enviada, a data e uma assinatura das colunas C a Z (c.pgr = { em, sig }).
    Se a classificação mudar depois, a assinatura deixa de bater e a linha volta para o próximo envio. */
 /* Técnica: perigos psicossociais (Organização do Trabalho, OT) saem "AEP e COPSOQ II", qualquer que seja a forma de lançamento; os demais, só AEP */
-const PGR_TECNICA = h => (TAXMAP[h.codigo] || {}).cat === "Organização do Trabalho" ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)";
+const PGR_TECNICA = h => { const t = TAXMAP[h.codigo] || {};
+  return t.cat === "Organização do Trabalho" && !/^\s*\((sem subescala|indireta)\)/i.test(String(t.subescalas || "")) ? "AEP e COPSOQ II" : "Avaliação Ergonômica Preliminar (AEP)"; };
 function linhaPGR(x){
   const { a, h, c, r } = x, t = TAXMAP[h.codigo] || {}, med = medidasTxt(c);
   return [String(a.meta?.eg || ""), (a.meta?.cargo || "").trim(), `${a.numero} / ${h.idRisco}`, "Ergonomico", t.nome || "", String(h.fonte || "").trim(), "NA", "NA", t.danos || h.danos || "",
@@ -4434,6 +4560,12 @@ function campo(e, isChange){
   if (el.dataset.orgsetor){ if (!isChange) return; const id = el.dataset.orgsetor, p = orgP()[id]; if (!p) return; const set = new Set(p.setores || []); el.checked ? set.add(el.value) : set.delete(el.value); mudarOrg(id, "setores", [...set].sort()); render(); return; }
   if (el.dataset.orgfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoOrg(el.dataset.orgfoto, f); return; }
   if (el.dataset.fonteprop !== undefined){ if (!isChange) return; marcarFontePropria(el.dataset.fonteprop, el.checked); return; }
+  if (el.dataset.fcomp !== undefined){ const h = S.editHz; if (!h) return; const pre = prefixoFonteDe(h) || TAXMAP[h.codigo]?.fonte || "", v = el.value.trim();
+    h.fonte = pre + (v ? " " + v : ""); onHzChange("editHz.fonte", el); return; }
+  if (el.dataset.fctp !== undefined){ if (!isChange) return; const k = el.dataset.fctp, sg = sugFonteTipo(k.split("|")[2], el.value); S.cf[k] = { tp: el.value, tx: sg, ok: false }; render(); return; }
+  if (el.dataset.fctx !== undefined){ const k = el.dataset.fctx, o = S.cf[k] = Object.assign({}, S.cf[k] || {}), v = el.value; o.tx = v; o.ok = !!v.trim() && !/\[/.test(v);
+    const cb = document.querySelector(`[data-fcok="${CSS.escape(k)}"]`); if (cb) cb.checked = o.ok; contarFc(); return; }
+  if (el.dataset.fcok !== undefined){ if (!isChange) return; const k = el.dataset.fcok; S.cf[k] = Object.assign({}, S.cf[k] || {}, { ok: el.checked }); contarFc(); return; }
   if (el.dataset.corrfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoCorr(el.dataset.corrfoto, f); return; }
   if (el.dataset.pgrj !== undefined){ const k = el.dataset.pgrj; S.pgrAnt = { ...(S.pgrAnt || {}) };
     if (String(el.value).trim()) S.pgrAnt[k] = { just: el.value, em: new Date().toISOString() }; else delete S.pgrAnt[k];
@@ -4669,6 +4801,12 @@ document.addEventListener("click", async e => {
     case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
     case "corrigirFontes": S.confirm = "fontes"; render(); break;
     case "separarMedidas": S.confirm = "separarMed"; render(); break;
+    case "fcAbrir": S.fcAberto = true; render(); { const p = $("#fcpainel"); if (p) p.scrollIntoView({ behavior: "smooth" }); } break;
+    case "fcFechar": S.fcAberto = false; render(); break;
+    case "fcMarcar": fontesSemComplemento().filter(x => x.h.codigo === d.cod).forEach(x => { const o = S.cf[x.k]; if (o && String(o.tx || "").trim() && !/\[/.test(o.tx)) o.ok = true; }); render(); break;
+    case "fcGravar": await gravarFontesLote(); break;
+    case "reconcluir": S.confirm = "reconcluir"; render(); break;
+    case "reconcluirSim": await reconcluirTodas(); break;
     case "separarMedidasSim": { let n = 0;
       medidasAgrupadas().forEach(({ a, rid }) => { const c = Object.assign({}, a.classif[rid]); c.medidasL = medSeparadas(c); c.medidas = medidasTxt(c); delete c.hier;
         a.classif = Object.assign({}, a.classif, { [rid]: c }); S.invPend[a.id] = true; n++; });
