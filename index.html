@@ -105,6 +105,9 @@ button,input,select,textarea{font:inherit;color:inherit}
   .brand-logo{border-right:0;padding-right:0}
 }
 .seg{display:flex;flex-wrap:wrap;gap:6px}
+.mesdrop{position:relative}
+.mesdrop-p{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:360px;overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:4px}
+.mesck{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;white-space:nowrap}
 .seg button{border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
 .seg button b{font-variant-numeric:tabular-nums;margin-left:4px;color:var(--ink-3)}
 .seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent);font-weight:600}
@@ -1510,7 +1513,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMes:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMeses:null, pMesAberto:false, plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -2330,10 +2333,14 @@ async function gerarPDFMeta(){
 }
 /* Lista do painel: previstas, concluídas, em andamento, em revisão, atrasadas ou todas */
 const P_LISTAS = [["previstas","Previstas"],["concluidas","Contam na meta"],["andamento","Em andamento"],["revisao","Em revisão"],["atrasadas","Atrasadas"],["todas","Todas"]];
+/* meses escolhidos no painel: null = mês atual; "todo" = todo o período; lista = vários meses somados */
+const mesesPainel = D => S.pMeses === "todo" ? [] : (Array.isArray(S.pMeses) && S.pMeses.length ? S.pMeses.slice().sort() : [D.atual]);
+const rotMeses = M => !M.length ? "" : M.length === 1 ? mesLongo(M[0]) : M.length <= 3 ? M.map(mesLongo).join(" + ") : `${M.length} meses (${mesRot(M[0])} a ${mesRot(M[M.length - 1])})`;
 function listaPainel(L, D, tipo, mes){
+  const M = Array.isArray(mes) ? mes : (mes ? [mes] : []);
   switch (tipo){
-    case "previstas": return L.filter(a => mes ? mesPlan(a) === mes : !!mesPlan(a));
-    case "concluidas": return L.filter(a => mesReal(a) && (!mes || D.conta[a.id] === mes));
+    case "previstas": return L.filter(a => M.length ? M.includes(mesPlan(a)) : !!mesPlan(a));
+    case "concluidas": return L.filter(a => mesReal(a) && (!M.length || M.includes(D.conta[a.id])));
     case "andamento": return L.filter(a => a.status === "andamento");
     case "revisao": return L.filter(a => a.status === "revisao");
     case "atrasadas": return D.atrasadas;
@@ -2341,16 +2348,21 @@ function listaPainel(L, D, tipo, mes){
   }
 }
 function vListaPainel(L, D){
-  const mes = S.pMes === "todo" ? "" : (S.pMes || D.atual), comMes = S.pLista === "previstas" || S.pLista === "concluidas";
-  const l = listaPainel(L, D, S.pLista, comMes ? mes : "").slice().sort((x, y) => (mesPlan(x) || "9").localeCompare(mesPlan(y) || "9") || idNum(x) - idNum(y));
-  const conta = t => listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? mes : "").length;
+  const mes = mesesPainel(D), comMes = S.pLista === "previstas" || S.pLista === "concluidas";
+  const l = listaPainel(L, D, S.pLista, comMes ? mes : []).slice().sort((x, y) => (mesPlan(x) || "9").localeCompare(mesPlan(y) || "9") || idNum(x) - idNum(y));
+  const conta = t => listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? mes : []).length;
   const dataC = a => dataRealizada(a) ? fmtData(dataRealizada(a)) : "";
-  const tit = { previstas: `Previstas ${mes ? "para " + mesLongo(mes) : "no plano"}`, concluidas: `Contam na meta ${mes ? "de " + mesLongo(mes) : "(todo o período)"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou e não foi realizada)", todas: "Todas as AEPs" }[S.pLista];
+  const tit = { previstas: `Previstas ${mes.length ? "para " + rotMeses(mes) : "no plano"}`, concluidas: `Contam na meta ${mes.length ? "de " + rotMeses(mes) : "(todo o período)"}`, andamento: "Em andamento", revisao: "Em revisão", atrasadas: "Atrasadas (mês previsto já passou e não foi realizada)", todas: "Todas as AEPs" }[S.pLista];
   return `<div class="panel-h" style="flex-wrap:wrap;gap:10px"><b>${esc(tit)}</b><span class="tiny muted">${l.length} AEP(s)</span></div>
   <div class="panel-b stack tight">
     <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center">
       <div class="seg" role="group" aria-label="Lista">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${S.pLista === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
-      ${comMes ? `<select data-pmes="1" aria-label="Mês" style="width:auto"><option value="todo" ${S.pMes === "todo" ? "selected" : ""}>Todo o período</option>${D.meses.map(m => `<option value="${m}" ${m === mes ? "selected" : ""}>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>` : ""}
+      ${comMes ? `<div class="mesdrop"><button type="button" class="btn" data-act="pMesAbrir" aria-expanded="${!!S.pMesAberto}">${esc(mes.length ? rotMeses(mes) : "Todo o período")} ▾</button>
+        ${S.pMesAberto ? `<div class="mesdrop-p" role="group" aria-label="Meses">
+          <label class="mesck"><input type="checkbox" data-pmesck="todo" ${!mes.length ? "checked" : ""}> Todo o período</label>
+          ${D.meses.map(m => `<label class="mesck"><input type="checkbox" data-pmesck="${m}" ${mes.includes(m) ? "checked" : ""}> ${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</label>`).join("")}
+          <div class="row" style="gap:6px;margin-top:6px"><button type="button" class="btn small" data-act="pMesAtual">Só o mês atual</button><button type="button" class="btn small primary" data-act="pMesAbrir">OK</button></div>
+          <span class="tiny muted">Marque um ou mais meses: a lista soma os meses marcados.</span></div>` : ""}</div>` : ""}
     </div>
     <div class="tablewrap"><table class="list" style="min-width:560px"><thead><tr><th>ID</th><th>Cargo</th><th>Previsto</th>${S.pLista === "concluidas" ? "<th>Realizada em</th><th>Conta na meta de</th>" : ""}<th>Situação</th></tr></thead><tbody>
     ${l.length ? l.map(a => { const st = a.status || "nao_iniciada"; return `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td class="small">${esc(mesRot(mesPlan(a)))}</td>${S.pLista === "concluidas" ? `<td class="small">${dataC(a) || "—"}</td><td>${vContaMeta(a, D)}</td>` : ""}<td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span></td></tr>`; }).join("") : `<tr><td colspan="5" class="small muted">Nenhuma AEP nesta lista.</td></tr>`}
@@ -4614,7 +4626,10 @@ function campo(e, isChange){
   if (el.dataset.plano !== undefined){ if (!isChange) return;
     const k = el.dataset.plano; S.plano = { ...S.plano }; if (el.value && el.value !== PLANO_PADRAO[k]) S.plano[k] = el.value; else if (el.value === PLANO_PADRAO[k]) delete S.plano[k]; else S.plano[k] = "";
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
-  if (el.dataset.pmes){ if (!isChange) return; S.pMes = el.value; atualizarListaPainel(); return; }
+  if (el.dataset.pmesck){ if (!isChange) return; const v = el.dataset.pmesck, D = dadosMeta(aepsFiltradas());
+    if (v === "todo") S.pMeses = el.checked ? "todo" : null;
+    else { const M = new Set(S.pMeses === "todo" ? [] : mesesPainel(D)); if (S.pMeses === "todo") M.clear(); el.checked ? M.add(v) : M.delete(v); S.pMeses = M.size ? [...M] : "todo"; }
+    atualizarListaPainel(); return; }
   if (el.dataset.copiar !== undefined){ if (!isChange || el.value === "") return; copiarClassif(el.dataset.copiar, ((S.copiaFontes || {})[el.dataset.copiar] || [])[Number(el.value)]); return; }
   if (el.dataset.trat !== undefined){ if (!isChange) return; const k = el.dataset.trat, v = el.value;
     mudarClassif(k, "corr", v === "corr"); mudarClassif(k, "desvio", v === "desvio"); atualizarInventario(); return; }
@@ -4718,6 +4733,8 @@ document.addEventListener("click", async e => {
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
     case "pLista": S.pLista = d.v; atualizarListaPainel(); break;
+    case "pMesAbrir": S.pMesAberto = !S.pMesAberto; atualizarListaPainel(); break;
+    case "pMesAtual": S.pMeses = null; S.pMesAberto = false; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
     case "invLoteAplicar": aplicarLote(); break;
     case "medMais": case "medTirar": {
