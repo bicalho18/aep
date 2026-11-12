@@ -90,7 +90,26 @@ button,input,select,textarea{font:inherit;color:inherit}
 .savestate{font-size:12px;color:var(--ink-3);min-width:90px;text-align:right}
 .nav button{display:inline-flex;align-items:center;gap:8px}
 .nav .ni{width:18px;height:18px;flex:none;opacity:.85}
-@media (max-width:1099px){.nav .ni{display:none}}
+.btn.menubtn{display:none}
+.navg{font-family:var(--f-cond);font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:12px 12px 4px}
+.navg:first-child{padding-top:2px}
+.pendg{border-bottom:1px solid var(--rule)}
+.pendg>summary{display:flex;justify-content:space-between;gap:8px;align-items:center;cursor:pointer;padding:7px 0;font-size:13px;font-weight:600;list-style:none}
+.pendg>summary::-webkit-details-marker{display:none}
+.pendg>summary::before{content:"▸";color:var(--ink-3);margin-right:6px}
+.pendg[open]>summary::before{content:"▾"}
+.pendg>summary span{flex:1}
+.pendg>summary b{font-family:var(--f-mono);font-size:12px;color:var(--bad-ink)}
+.pendg .pendlist{margin:0 0 4px 18px}
+@media (max-width:1099px){
+  .btn.menubtn{display:inline-flex;margin-left:auto}
+  .topbar-in{gap:10px}
+  .nav{display:none;order:9;flex-basis:100%;flex-direction:column;margin-left:0;padding-bottom:10px;border-top:1px solid var(--rule);padding-top:8px}
+  body.menu-open .nav{display:flex}
+  .nav button{justify-content:flex-start;padding:10px 12px}
+  .savestate{min-width:0}
+  #versao{display:none}
+}
 @media screen and (min-width:1100px){
   body{padding-left:236px}
   .topbar{position:fixed;left:0;top:0;bottom:0;width:236px;border-bottom:0;border-right:1px solid var(--rule);box-shadow:inset 3px 0 0 var(--brand);overflow-y:auto}
@@ -328,7 +347,15 @@ details.panel[open]>summary b::before{content:"▾ "}
 .melfilt{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .melfilt select{width:auto;flex:0 0 auto}
 .melfilt input{flex:1 1 220px;width:auto}
-.meltab td{vertical-align:top}
+.meltab{width:100%;border-collapse:collapse}
+.meltab th{text-align:left;font-family:var(--f-cond);font-weight:600;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);padding:10px 12px;border-bottom:1px solid var(--rule);background:var(--surface-2);white-space:nowrap}
+.meltab td{vertical-align:top;padding:11px 12px;border-bottom:1px solid var(--rule)}
+.meltab tr:last-child td{border-bottom:0}
+.meltab a{color:var(--ink);text-decoration:none;font-family:var(--f-mono);font-size:13px}
+.meltab a:hover{color:var(--accent);text-decoration:underline}
+details.como{margin-top:8px}
+details.como>summary{cursor:pointer;font-size:12px;color:var(--ink-3)}
+details.como p{margin:6px 0 0}
 .meltab select,.meltab input{font:inherit;font-size:13px;padding:5px 7px;border:1px solid var(--rule);border-radius:6px;background:var(--surface);color:var(--ink);max-width:100%}
 .meltab input[type=text]{width:100%;min-width:120px}
 .meltab tr.mel-atr td{background:var(--bad-bg)}
@@ -498,17 +525,20 @@ select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!
 <header class="topbar">
   <div class="topbar-in">
     <div class="brand"><span class="brand-logo"><img src="logo.png" alt="ArcelorMittal" width="68" height="28"></span><span class="brand-txt"><b>AEP</b><span>Avaliação Ergonômica Preliminar · Mina de Serra Azul</span></span></div>
-    <nav class="nav" aria-label="Seções">
+    <button type="button" class="btn menubtn" id="btn-menu" aria-expanded="false" aria-controls="nav-principal">Menu</button>
+    <nav class="nav" id="nav-principal" aria-label="Seções">
+      <span class="navg">Trabalho</span>
       <button type="button" data-go="home" id="nav-home"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a1 1 0 0 1 1 1v1H8V4a1 1 0 0 1 1-1z"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h4"/></svg><span>AEPs</span></button>
       <button type="button" data-go="inventario" id="nav-inventario"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/><circle cx="7" cy="6" r="1.2"/><circle cx="7" cy="12" r="1.2"/><circle cx="7" cy="18" r="1.2"/></svg><span>Inventário</span></button>
       <button type="button" data-go="melhorias" id="nav-melhorias"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg><span>Plano de ação</span></button>
       <button type="button" data-go="painel" id="nav-painel"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg><span>Meu painel</span></button>
-      <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button><button type="button" data-go="organograma" id="nav-organograma"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-3h14v3"/></svg><span>Organograma</span></button>
+      <button type="button" data-go="gerencia" id="nav-gerencia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg><span>Gerências</span></button><span class="navg">Configuração</span>
+<button type="button" data-go="organograma" id="nav-organograma"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v5M5 17v-3h14v3"/></svg><span>Organograma</span></button>
       <button type="button" data-go="copsoq" id="nav-copsoq"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14.5 14.5c.8-.3 1.6-.5 2.5-.5 2.8 0 5 2.2 5 5"/></svg><span>COPSOQ por setor</span></button>
       <button type="button" data-go="criterios" id="nav-criterios"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg><span>Critérios do GRO</span></button><button type="button" data-go="taxonomia" id="nav-taxonomia"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Taxonomia</span></button>
       <button type="button" data-go="config" id="nav-config"><svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Unidade</span></button>
     </nav>
-    <div class="savestate" id="savestate" aria-live="polite"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
+    <div class="savestate" id="savestate" aria-live="polite"></div><div class="tiny faint" id="versao" title="Versão do sistema" style="margin:2px 0 6px"></div><button class="btn ghost small" type="button" id="btn-sair">Sair</button>
   </div>
 </header>
 <main class="wrap" id="app"></main>
@@ -743,7 +773,19 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-function setSaveState(txt){ $("#savestate").textContent = txt; }
+const VERSAO = "2026.11.12c";
+function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
+  if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
+/* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
+const verAEP = a => `${(a && a.atualizadoEm) || ""}|${(a && a.classifEm) || ""}`;
+let avisoDesatT = null;
+async function gravarAEPLote(id, corpo){
+  const d = S.db.doc("aeps/" + id);
+  if (d.get && S.ver && S.ver[id] !== undefined){ const srv = await d.get();
+    if (srv && verAEP(srv) !== S.ver[id]){ clearTimeout(avisoDesatT); avisoDesatT = setTimeout(() => toast("Algumas AEPs foram alteradas em outra aba ou computador e não foram gravadas. Recarregue a página (F5) e repita."), 3600);
+      const e = new Error("desatualizada"); e.code = "desatualizada"; throw e; } }
+  await d.set(corpo); if (S.ver) S.ver[id] = verAEP(corpo);
+}
 
 /* =========================================================================
    RESUMO DOS PERIGOS (só contagem; a graduação do risco é feita no Inventário)
@@ -970,7 +1012,9 @@ async function aplicarAjustes(){
     a.perigos = a.perigos.filter(x => x.id !== h0.id); a.classif = { ...(S.aeps[a.id].classif || {}) }; delete a.classif.R02;
     if (sb){ a.copsoq = a.copsoq || {}; a.copsoq.dominios = a.copsoq.dominios || {}; const dd = a.copsoq.dominios[sb.dom] = { ...(a.copsoq.dominios[sb.dom] || {}) }; dd.dec = { ...(dd.dec || {}), [sid]: "nao" }; }
     revisao(a); S.aeps[a.id] = a; docs.add(a.id); });
-  for (const id of docs){ try { await S.db.doc("aeps/" + id).set(S.aeps[id]); } catch(_){} cls.delete(id); }
+  let falhou = 0;
+  for (const id of docs){ try { await gravarAEPLote(id, S.aeps[id]); } catch(_){ falhou++; } cls.delete(id); }
+  if (falhou){ S.ajRodando = false; toast("Um ajuste automático não foi gravado. Recarregue a página para ele rodar de novo."); return; }
   cls.forEach(id => { S.invPend[id] = true; }); if (cls.size) await salvarInventario();
   if (JSON.stringify(feitos) !== JSON.stringify(S.ajustes || {})){ S.ajustes = feitos; try { await S.db.doc("config/ajustes").set({ feitos }); } catch(_){} }
   if (docs.size || cls.size){ AVISO_CACHE = new WeakMap(); render(); }
@@ -1143,7 +1187,7 @@ function vMelhorias(){
   const l = listaMelhorias();
   const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
   const foco = S.melFoco ? itensPlanoDe(aepsPlano()).find(m => m.key === S.melFoco || m.base === S.melFoco) : null;
-  return `<div class="pagehead"><div><h1>Plano de ação</h1><p>Um plano só: as ações dos riscos do Inventário que pedem plano (P1 e P2) e as recomendações e oportunidades de melhoria das AEPs. Registre o Nº da ação no SIG, o responsável, o prazo e acompanhe até a eficácia.</p></div></div>
+  return `<div class="pagehead"><div><h1>Plano de ação</h1><p>Ações dos riscos (P1 e P2), recomendações e melhorias das AEPs.</p></div></div>
   <div class="panel"><div class="panel-b">
     ${foco ? `<div class="note" style="margin-bottom:12px">Mostrando só as ações do perigo <b>${esc(foco.h?.idRisco || "")}</b> da <b>${esc(foco.a.numero)}</b> (${esc(foco.a.meta?.cargo || "")}). <button class="btn small" type="button" data-act="planoTodos">Ver o plano inteiro</button></div>` : ""}
     <div class="melfilt">
@@ -1161,7 +1205,7 @@ function vMelhorias(){
     <p class="tiny muted" id="melcont">${contPlanoTxt(l)}</p>
     <div style="overflow-x:auto"><table class="meltab"><thead><tr><th>AEP / cargo</th><th>O que fazer</th><th>Nº SIG</th><th>Responsável</th><th>Prazo</th><th>Situação</th></tr></thead>
     <tbody id="melbody">${linhasMelhorias(l)}</tbody></table></div>${orgDatalist()}
-    <p class="tiny muted" style="margin-top:8px">A prioridade das ações dos riscos vem da categoria no Inventário (P1 = alta, P2 = média). A das melhorias você escolhe. Ao marcar “Concluída”, a data de conclusão é preenchida com o dia de hoje; registre a evidência e, depois, a eficácia.</p>
+    <details class="como"><summary>Como funciona</summary><p class="tiny muted">A prioridade das ações dos riscos vem da categoria no Inventário (P1 = alta, P2 = média). A das melhorias você escolhe. Ao marcar “Concluída”, a data de conclusão é preenchida com o dia de hoje; registre a evidência e, depois, a eficácia.</p></details>
   </div></div>`;
 }
 function atualizarMelhorias(){
@@ -1591,8 +1635,8 @@ async function iniciar(){
   render();
   let db = null;
   try { db = await window.claude?.use?.("db"); } catch(e){ db = null; }
-  S.db = db; S.dbOk = !!db;
-  if (!db){ S.carregado = true; setSaveState("Modo sem banco — nada é salvo"); render(); return; }
+  S.db = db; S.dbOk = !!db; { const vv = $("#versao"); if (vv) vv.textContent = "Versão " + VERSAO; }
+  if (!db){ S.carregado = true; setSaveState("Modo sem banco: nada é salvo"); render(); return; }
   try { S.assets = await window.claude.use("assets"); } catch(e){ S.assets = null; }
   try { S.downloads = await window.claude.use("downloads"); } catch(e){ S.downloads = null; }
   db.doc("config/organograma").onSnapshot(d => { if (S.orgDirty) return; const x = d.exists ? (d.data() || {}) : {}; S.org = { pessoas: x.pessoas || {}, aepSup: x.aepSup || {} };
@@ -1621,6 +1665,7 @@ async function iniciar(){
 function aoLerAEPs(snap){
     const m = {}, velhas = new Set(); snap.docs.forEach(d => { if (!d.exists) return; const x = d.data(); if ((x.padrao||0) < PADRAO_AEP){ velhas.add(d.id); S.brutas = S.brutas || {}; S.brutas[d.id] = clone(x); } m[d.id] = migrarAEP(x); });
     Object.keys(S.invPend || {}).forEach(id => { if (m[id] && S.aeps[id]) m[id].classif = S.aeps[id].classif; });
+    S.ver = {}; snap.docs.forEach(d => { if (d.exists) S.ver[d.id] = verAEP(d.data()); });
     S.aeps = m; S.padraoPend = velhas; S.carregado = true; setTimeout(aplicarPreSIG, 0); setTimeout(aplicarAjustes, 0);
     if (S.view === "inventario") atualizarInventario();
     if (S.view === "home") atualizarHome(); else if (S.view === "painel" || S.view === "pendencias" || S.view === "gerencia") render();
@@ -1640,7 +1685,7 @@ async function salvarAEP(){
   S.aeps[corpo.id] = corpo; if (S.padraoPend) S.padraoPend.delete(corpo.id);
   if (!S.db){ S.dirty = false; return; }
   setSaveState("Salvando…");
-  try { await S.db.doc("aeps/" + corpo.id).set(corpo); S.dirty = false; setSaveState("Salvo"); }
+  try { await S.db.doc("aeps/" + corpo.id).set(corpo); S.dirty = false; if (S.ver) S.ver[corpo.id] = verAEP(corpo); setSaveState("Salvo"); }
   catch(e){ setSaveState("Erro ao salvar"); toast(e && e.code === "quota_exceeded" ? "O banco atingiu o limite de registros." : "Não foi possível salvar. Tente de novo em instantes."); }
 }
 function numerarRiscos(a){
@@ -1686,7 +1731,7 @@ function pendencias(a){
   if (!(a.perigos||[]).length && !String(a.semPerigoJust||"").trim()) p[4].push("Nenhum perigo lançado: escrever a justificativa");
   pgrAntDaAEP(a).filter(x => x.st === "pendente").forEach(x => p[4].push(`PGR anterior: ${x.l.p} (${curto(x.l.f, 50, true)}). Lance ou ignore no quadro da etapa 4`));
   (a.perigos||[]).forEach(h => { if (/\[[^\]]*\]/.test(h.fonte||"")) p[4].push(`${h.idRisco||h.codigo}: complete os trechos entre colchetes da fonte geradora`); });
-  perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte — mantenha uma linha ou diferencie a fonte`));
+  perigosRepetidos(a).forEach(([x,y]) => p[4].push(`${x.idRisco||x.codigo} e ${y.idRisco||y.codigo}: mesmo perigo (${x.codigo}) com a mesma fonte: mantenha uma linha ou diferencie a fonte`));
   (a.fotos||[]).forEach((f,i) => { if (!f.titulo?.trim()) p[4].push(`Foto ${i+1} sem legenda`); });
   (a.perigos||[]).forEach(h => { if (!h.origemCopsoq && !BASE_PERIGO[h.base]) p[4].push(`${h.idRisco||h.codigo}: informar a base (observado em campo, relatado pelo trabalhador ou rotina do cargo)`); });
   (a.perigos||[]).forEach(h => { if (h.revisar) p[4].push(`${h.idRisco||h.codigo}: vinha do item 12 do checklist, que foi retirado. Confira o perigo e salve-o de novo`); });
@@ -1816,8 +1861,11 @@ function docPgrAnt(){ return ""; }
 /* Tela: lista simples do que falta olhar, AEP por AEP */
 function dadosPgrAnt(){
   const out = []; let alerta = 0;
-  Object.values(S.aeps).sort((p, q) => idNum(p) - idNum(q)).forEach(a => { const L = pgrAntDaAEP(a).filter(x => x.st === "pendente"); if (L.length){ out.push({ a, L }); alerta += L.length; } });
-  return { aeps: out, alerta };
+  let depois = 0, aepsDepois = 0;
+  Object.values(S.aeps).sort((p, q) => idNum(p) - idNum(q)).forEach(a => { const L = pgrAntDaAEP(a).filter(x => x.st === "pendente"); if (!L.length) return;
+    if ((a.status || "nao_iniciada") === "nao_iniciada"){ depois += L.length; aepsDepois++; return; }
+    out.push({ a, L }); alerta += L.length; });
+  return { aeps: out, alerta, depois, aepsDepois };
 }
 function vPgrAnt(){
   const R = dadosPgrAnt(), t = norm(S.pgrAntBusca || "");
@@ -1826,7 +1874,7 @@ function vPgrAnt(){
     <div class="row"><button class="btn" type="button" data-go="inventario">Voltar ao Inventário</button></div></div>
   <div class="panel"><div class="panel-b">
     <div class="melfilt"><input type="text" data-pgrbusca="1" value="${esc(S.pgrAntBusca || "")}" placeholder="Buscar AEP, cargo, GHE ou situação"></div>
-    <p class="tiny muted" style="margin:8px 0">${R.alerta} situação(ões) em ${R.aeps.length} AEP(s).</p>
+    <p class="tiny muted" style="margin:8px 0">${R.alerta} situação(ões) em ${R.aeps.length} AEP(s) já iniciada(s).${R.depois ? ` Outras ${R.depois}, de ${R.aepsDepois} AEP(s) ainda não iniciada(s), aparecem na etapa 4 quando você fizer cada uma.` : ""}</p>
     ${L.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>AEP</th><th>Cargo</th><th>Situação</th><th>O que falta olhar</th></tr></thead><tbody>
       ${L.map(x => `<tr><td class="mono"><a href="#aep=${encodeURIComponent(x.a.id)}" data-open="${esc(x.a.id)}" title="Botão direito: abrir em nova aba">${esc(x.a.numero)}</a></td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">GHE ${esc(gheDe(x.a))}</div></td><td><span class="chip ${STATUS_CLS[x.a.status || "nao_iniciada"]}">${STATUS[x.a.status || "nao_iniciada"]}</span></td>
         <td class="small">${x.L.map(y => `${esc(y.l.p)}: <span class="muted">${esc(curto(y.l.f, 70, true))}</span>`).join("<br>")}</td></tr>`).join("")}</tbody></table></div>`
@@ -1901,11 +1949,13 @@ function aplicarFiltroSetor(){
 function vHome(){
   const todas = Object.values(S.aeps);
   const lista = listaFiltrada();
-  const aviso = !S.dbOk && S.carregado ? `<div class="note warn" style="margin-bottom:16px"><b>Banco indisponível nesta visualização.</b> Você pode navegar e testar, mas nada será salvo.</div>` : "";
+  const dc = diasCopia();
+  const aviso = (!S.dbOk && S.carregado ? `<div class="note warn" style="margin-bottom:16px"><b>Banco indisponível nesta visualização.</b> Você pode navegar e testar, mas nada será salvo.</div>` : "")
+    + (S.dbOk && S.carregado && (dc === null || dc >= 7) ? `<div class="note" style="margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span><b>Cópia de segurança:</b> ${dc === null ? "nenhuma baixada neste computador" : `a última foi há ${dc} dias`}.</span><button class="btn small" type="button" data-act="copiaTudo">Baixar cópia de tudo</button></div>` : "");
   return `
   <div class="pagehead">
     <div><h1>AEPs 2026</h1><p>Uma AEP por cargo/função. As notas do COPSOQ vêm do setor ligado a cada cargo pelo de-para; a subescala acima de 3,66 aparece sinalizada.</p></div>
-    <div class="row"><button class="btn" type="button" data-act="toggleExport">Exportar para o PGR</button><button class="btn primary" type="button" data-act="nova">+ Nova AEP</button></div>
+    <div class="row"><button class="btn" type="button" data-act="listaExcel" id="btnListaX">Lista em Excel</button><button class="btn" type="button" data-act="toggleExport">Exportar para o PGR</button><button class="btn primary" type="button" data-act="nova">+ Nova AEP</button></div>
   </div>
   ${aviso}
   <div id="padraobox">${vPadraoBanner()}</div>
@@ -1950,7 +2000,7 @@ function campoCards(){
       <span class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px"><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<span class="chip done">Coletada ${fmtData(a.campo.em.slice(0,10))}</span>` : ""}${ck ? `<span class="tiny faint">${ck} itens respondidos</span>` : ""}${ft ? `<span class="tiny faint">${ft} foto${ft > 1 ? "s" : ""}</span>` : ""}</span></button>`; }).join("");
 }
 function vCampoLista(){
-  return `<div class="pagehead"><div><h1>Coleta de campo</h1><p>Para usar no tablet durante a observação. Escolha o cargo, responda o checklist, tire as fotos e anote o que viu. A redação da AEP fica para a mesa.</p></div></div>
+  return `<div class="pagehead"><div><h1>Coleta de campo</h1><p>Checklist, fotos e anotações durante a observação.</p></div></div>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar cargo</span><input type="search" id="f-cbusca" data-cbusca="1" value="${esc(S.campoBusca||"")}" placeholder="Cargo, ID ou área"></label>
     <div class="f span2"><span>Gerência / setor</span>${vMultiSetor("f-csetor")}</div>
@@ -2084,9 +2134,9 @@ function vConferencia(){
     <div class="stack tight"><b class="small">Perigo de deficiência lançado com o checklist conforme: ${c.defic.length}</b>
       ${c.defic.length ? `<p class="tiny muted">Perigo de deficiência (iluminação, conforto térmico, mobiliário, equipamento, organização) só se lança quando a condição inadequada foi constatada. Aqui, todos os itens do checklist ligados a ele estão “Não”: marque o item que evidencia a condição ou retire o perigo.</p>${lista(c.defic, x => lin(x.a, `${esc(x.h.idRisco||"")} ${esc(x.h.codigo)} · itens ${x.itens.join(", ")} = Não`))}` : `<p class="tiny muted">Nenhum.</p>`}</div>
     <div class="stack tight"><b class="small">Mesmo cargo com perigos diferentes: ${c.cargos.length}</b>
-      ${c.cargos.length ? `<p class="tiny muted">Pode ser legítimo (setor ou posto diferente), mas a diferença precisa estar explicada na descrição ou nas fontes geradoras.</p>${lista(c.cargos, x => `<div class="stack tight" style="gap:2px"><span class="small"><b>${esc(x.a.meta?.cargo||"")}</b></span>${x.g.map(a => `<div class="row between" style="gap:8px"><span class="small"><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.setor||"")} — ${[...new Set(a.perigos.map(h => h.codigo))].sort().map(esc).join(", ")}</span><button class="btn small" type="button" data-open="${esc(a.id)}">Abrir</button></div>`).join("")}</div>`)}` : `<p class="tiny muted">Nenhum.</p>`}</div>
+      ${c.cargos.length ? `<p class="tiny muted">Pode ser legítimo (setor ou posto diferente), mas a diferença precisa estar explicada na descrição ou nas fontes geradoras.</p>${lista(c.cargos, x => `<div class="stack tight" style="gap:2px"><span class="small"><b>${esc(x.a.meta?.cargo||"")}</b></span>${x.g.map(a => `<div class="row between" style="gap:8px"><span class="small"><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.setor||"")}: ${[...new Set(a.perigos.map(h => h.codigo))].sort().map(esc).join(", ")}</span><button class="btn small" type="button" data-open="${esc(a.id)}">Abrir</button></div>`).join("")}</div>`)}` : `<p class="tiny muted">Nenhum.</p>`}</div>
     <div class="stack tight"><b class="small">Observação do COPSOQ no modelo anterior de texto: ${c.redAnt.length}</b>
-      ${c.redAnt.length ? `<p class="tiny muted">A atualização troca só as frases-modelo e mantém o que foi completado. Pode ser feita AEP por AEP (etapa 3, “Atualizar a redação”) ou em todas de uma vez. AEP concluída volta para “Em revisão”: confira o texto e conclua de novo — se o documento já foi emitido, emita a nova versão.</p>
+      ${c.redAnt.length ? `<p class="tiny muted">A atualização troca só as frases-modelo e mantém o que foi completado. Pode ser feita AEP por AEP (etapa 3, “Atualizar a redação”) ou em todas de uma vez. AEP concluída volta para “Em revisão”: confira o texto e conclua de novo. Se o documento já foi emitido, emita a nova versão.</p>
       ${S.confirm === "redacao" ? `<span class="confirm">Atualizar a redação em ${c.redAnt.length} AEP(s)? As concluídas voltam para “Em revisão”. <button class="btn small primary" type="button" data-act="redacaoTodasSim">Atualizar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<div><button class="btn small primary" type="button" data-act="redacaoTodas">Atualizar a redação em todas</button></div>`}
       ${lista(c.redAnt, x => lin(x.a, STATUS[x.a.status||"nao_iniciada"]))}` : `<p class="tiny muted">Nenhuma.</p>`}</div>
     <div class="stack tight"><b class="small">Concluídas com pendência pelas regras atuais: ${c.comPend.length}</b>
@@ -2231,7 +2281,7 @@ function vRiscosPainel(L){
 }
 function vPendencias(){
   const L = Object.values(S.aeps).sort((x, y) => idNum(x) - idNum(y)), alertas = L.map(a => ({ a, al: alertaAET(a) })).filter(x => x.al);
-  return `<div class="pagehead"><div><h1>Pendências</h1><p>Conferência da qualidade das AEPs: decisões de AET que faltam e perigos que precisam de ajuste. Não entra na meta nem no que o gestor vê.</p></div></div>
+  return `<div class="pagehead"><div><h1>Pendências</h1><p>Decisões de AET que faltam e perigos a ajustar.</p></div></div>
   <div class="grid g2" style="align-items:start">
     <div class="panel"><div class="panel-h"><b>Decisão de AET</b><span class="tiny muted">${alertas.length} AEP(s)</span></div><div class="panel-b stack tight">
       ${alertas.length ? alertas.map(({a,al}) => `<div class="row between" style="flex-wrap:wrap;gap:6px"><span><span class="mono">${esc(a.numero)}</span> ${esc(a.meta?.cargo)}</span><button class="btn small" type="button" data-open="${esc(a.id)}" style="white-space:normal;text-align:left;max-width:100%">${esc(al)}</button></div>`).join("") : '<p class="small muted">Nenhuma pendência.</p>'}
@@ -2240,7 +2290,7 @@ function vPendencias(){
   </div>`;
 }
 function vPainel(){
-  return `<div class="pagehead"><div><h1>Meu painel</h1><p>Volume de AEPs realizadas e meta do plano PLA202609SA20-30 (SIG). Para mostrar à gerência, use a aba Gerências.</p></div>
+  return `<div class="pagehead"><div><h1>Meu painel</h1><p>AEPs realizadas e meta do plano PLA202609SA20-30 (SIG).</p></div>
     <div class="row"><button class="btn primary" type="button" data-act="evAbrir">Evidência do mês para o SIG</button><button class="btn" type="button" data-act="pdfMeta" id="btnPDFmeta">PDF: acompanhamento da meta</button></div></div>
   <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-painel")}</div>
   <div id="evbox">${S.evAberto ? vEvidencia() : ""}</div>
@@ -2516,7 +2566,7 @@ function vInvResumo(){
 }
 function vInvLinhas(){
   const L = listaInventario();
-  if (!L.length) return `<tr><td colspan="9" class="small muted" style="padding:18px">Nenhum perigo com estes filtros.</td></tr>`;
+  if (!L.length) return `<tr><td colspan="9" class="small muted" style="padding:18px">${S.invSit === "pendentes" && !S.invBusca ? "Nada a fazer aqui: todos os perigos desta seleção estão classificados. Para ver os prontos, troque “A fazer” por “Todos”." : "Nenhum perigo com estes filtros."}</td></tr>`;
   return L.map(x => { const t = TAXMAP[x.h.codigo], aberto = S.invAberto === x.k, sit = SIT_INV[x.r.sit];
     return `<tr class="click${aberto ? " sel" : ""}" data-inv="${esc(x.k)}" tabindex="0"><td data-selcell style="width:34px;padding:0"><label style="display:flex;align-items:center;justify-content:center;min-height:40px;cursor:pointer"><input type="checkbox" data-invsel="${esc(x.k)}" ${S.invSel.has(x.k) ? "checked" : ""} aria-label="Selecionar ${esc(x.a.numero)} ${esc(x.h.idRisco)}"></label></td><td class="mono">${esc(x.a.numero)}</td><td>${esc(x.a.meta?.cargo || "")}<div class="tiny faint">${esc((x.a.meta?.setor || "").trim())}</div></td>
       <td><span class="mono small">${esc(x.h.idRisco)}</span> <span class="code">${esc(x.h.codigo)}</span>${seloPGR(x.c)}<div class="small">${esc(t?.nome || "")}</div></td><td class="small">${esc(x.c.exp || "—")}</td>
@@ -2685,7 +2735,7 @@ async function fotoCorr(k, file){
 function vInventario(){
   const pend = Object.entries(IMPORT_PLANILHA).filter(([key]) => { const [num, rid] = key.split("|"); const a = Object.values(S.aeps).find(x => String(x.numero).trim() === num); return a && (a.perigos || []).some(h => h.idRisco === rid) && !(a.classif || {})[rid]; });
   const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
-  return `<div class="pagehead"><div><h1>Inventário de riscos</h1><p>Classificação de cada perigo das AEPs pela Seção 2 dos <button class="btn ghost small" type="button" data-go="criterios" style="padding:0">Critérios do GRO</button>. Classificar não muda a situação da AEP.</p></div>
+  return `<div class="pagehead"><div><h1>Inventário de riscos</h1><p>Classificação de cada perigo das AEPs pela Seção 2 dos <button class="btn ghost small" type="button" data-go="criterios" style="padding:0">Critérios do GRO</button>.</p></div>
     <div class="row"><button class="btn" type="button" data-go="pgrant">${(n => `PGR anterior${n ? ` (${n} a olhar)` : ""}`)(dadosPgrAnt().alerta)}</button><button class="btn primary" type="button" data-act="toggleExport">Exportar para o PGR</button></div></div>
   <div id="exportbox">${S.exportAberto ? vExportPanel() : ""}</div>
   ${S.invFoco ? (() => { const [id, rid] = S.invFoco.split("|"), a = S.aeps[id]; return `<div class="note" style="margin-bottom:14px">Mostrando só ${rid ? `o perigo <b>${esc(rid)}</b> da` : "os perigos da"} <b>${esc(a?.numero || "")}</b> (${esc(a?.meta?.cargo || "")}). <button class="btn small" type="button" data-act="invTodos">Ver o inventário inteiro</button></div>`; })() : ""}
@@ -2700,7 +2750,7 @@ function vInventario(){
     <div id="invlote">${vInvLote()}</div>
     <div class="tablewrap"><table class="list invtab"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" data-invselall="1" aria-label="Selecionar todos os perigos da lista"></th><th>AEP</th><th>Cargo</th><th>Perigo</th><th>Exposição</th><th class="num">P</th><th class="num">S</th><th>Categoria</th><th>Situação</th></tr></thead>
     <tbody id="invbody">${vInvLinhas()}</tbody></table></div>
-    <p class="tiny muted" style="margin-top:8px">Clique numa linha para classificar uma por uma, ou marque várias linhas para classificar em lote. Dica: busque pelo código (ex.: BIO-01) e use a caixa do cabeçalho para marcar todos da lista. P = probabilidade, S = severidade.</p>
+    <details class="como"><summary>Como funciona</summary><p class="tiny muted">Clique numa linha para classificar uma por uma, ou marque várias linhas para classificar em lote. Dica: busque pelo código (ex.: BIO-01) e use a caixa do cabeçalho para marcar todos da lista. P = probabilidade, S = severidade.</p></details>
   </div></div>`;
 }
 function atualizarInventario(soResultado){
@@ -2771,7 +2821,7 @@ async function salvarInventario(){
     try { let corpo = clone(a);
       if (S.db.doc("aeps/" + id).get){ const srv = await S.db.doc("aeps/" + id).get();
         if (srv){ corpo = clone(srv); corpo.classif = Object.assign({}, srv.classif || {}, clone(a.classif || {})); } }
-      corpo.classifEm = new Date().toISOString(); await S.db.doc("aeps/" + id).set(corpo); delete S.invPend[id];
+      corpo.classifEm = new Date().toISOString(); await S.db.doc("aeps/" + id).set(corpo); if (S.ver) S.ver[id] = verAEP(corpo); delete S.invPend[id];
       if (corpo !== a && S.aeps[id] === a){ const novo = migrarAEP(clone(corpo)); novo.classif = a.classif; S.aeps[id] = novo; } } catch(e){ erro++; } }
   setSaveState(erro ? "Erro ao salvar" : "Salvo");
 }
@@ -2967,7 +3017,7 @@ function vTaxHistorico(){
 function vTaxonomia(){
   const op = (k, v, t) => `<option value="${v}" ${S[k] === v ? "selected" : ""}>${t}</option>`;
   const nR = S.taxDraft ? taxDiferencas(taxPub(), S.taxDraft).length : 0;
-  return `<div class="pagehead"><div><h1>Taxonomia de perigos</h1><p>Lista padronizada de perigos usada nas AEPs, no Inventário e no PGR. As mudanças ficam num rascunho e só passam a valer quando você publica uma nova versão, com o motivo registrado.</p></div>
+  return `<div class="pagehead"><div><h1>Taxonomia de perigos</h1><p>Lista padronizada de perigos. As mudanças valem depois de publicar uma nova versão.</p></div>
     <div class="row"><button class="btn" type="button" data-act="taxPDF" id="btnTaxPDF">Salvar em PDF</button></div></div>
   <div class="note" style="margin-bottom:14px"><b>Vigente:</b> ${esc(taxVigenteTxt())}.${nR ? ` <b>Rascunho com ${nR} alteração(ões) ainda não publicada(s).</b> <button class="btn small primary" type="button" data-act="taxPubAbrir">Revisar e publicar</button> ${S.confirm === "taxDescartar" ? `<span class="confirm">Descartar o rascunho? <button class="btn small danger" type="button" data-act="taxDescartarSim">Descartar</button><button class="btn small" type="button" data-act="cancelConfirm">Cancelar</button></span>` : `<button class="btn small" type="button" data-act="taxDescartar">Descartar rascunho</button>`}` : " Nenhuma alteração em rascunho."}</div>
   <div id="taxpub">${S.taxPubAberto && nR ? vTaxPublicar() : ""}</div>
@@ -3141,7 +3191,7 @@ function ajustarOrg(){
 }
 function vOrganograma(){
   const p = S.orgSel && orgP()[S.orgSel], arv = orgVista() === "arvore", tem = Object.keys(orgP()).length;
-  return `<div class="pagehead"><div><h1>Organograma</h1><p>Diretor, gerentes, gerentes de área e supervisores, com foto e contato. Cada AEP fica ligada ao supervisor do seu setor, e o Plano de ação sugere essas pessoas como responsáveis.</p></div>
+  return `<div class="pagehead"><div><h1>Organograma</h1><p>Lideranças por setor, sugeridas como responsáveis no Plano de ação.</p></div>
     <div class="row"><button class="btn primary" type="button" data-act="orgNova">+ Pessoa</button></div></div>
   ${p ? vOrgEditor(p) : ""}
   <div class="panel">${tem ? `<div class="panel-h" style="flex-wrap:wrap;gap:8px"><div class="seg" role="group" aria-label="Forma de ver"><button type="button" data-act="orgVista" data-v="arvore" aria-pressed="${arv}">Organograma</button><button type="button" data-act="orgVista" data-v="lista" aria-pressed="${!arv}">Lista</button></div>
@@ -3298,7 +3348,7 @@ async function gravarFontesLote(){
       h.fonte = pre + " " + S.cf[x.k].tx.trim().replace(/\s+/g, " "); delete S.cf[x.k]; n++; });
     if (a2.status === "concluida"){ a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
     a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
-    if (S.db){ try { await S.db.doc("aeps/" + id).set(a2); } catch(_){ erro++; } }
+    if (S.db){ try { await gravarAEPLote(id, a2); } catch(_){ erro++; } }
   }
   AVISO_CACHE = new WeakMap(); render(); toast(erro ? `${n} fonte(s) gravadas; ${erro} AEP(s) não salvaram, tente de novo.` : `${n} fonte(s) completadas.`);
 }
@@ -3306,8 +3356,33 @@ const revisaoProntas = () => Object.values(S.aeps).filter(a => a.status === "rev
 async function reconcluirTodas(){
   let n = 0, erro = 0;
   for (const a0 of revisaoProntas()){ const a = completar(a0); a.status = "concluida"; a.concluidoEm = new Date().toISOString(); a.concluidoPrimeiro = a.concluidoPrimeiro || a.concluidoEm; a.taxVersao = S.tax.versao || 1;
-    a.atualizadoEm = a.concluidoEm; S.aeps[a.id] = a; n++; if (S.db){ try { await S.db.doc("aeps/" + a.id).set(a); } catch(_){ erro++; } } }
+    a.atualizadoEm = a.concluidoEm; S.aeps[a.id] = a; n++; if (S.db){ try { await gravarAEPLote(a.id, a); } catch(_){ erro++; } } }
   AVISO_CACHE = new WeakMap(); S.confirm = null; render(); toast(erro ? `${n - erro} concluída(s); ${erro} não salvaram.` : `${n} AEP(s) concluída(s) de novo.`);
+}
+/* Cópia de segurança: baixa um arquivo com todas as AEPs e configurações, lidas do banco na hora */
+const diasCopia = () => { const u = lsGet("aep.copia"); return u ? Math.floor((Date.now() - new Date(u).getTime()) / 864e5) : null; };
+const txtCopia = () => { const d = diasCopia(); return d === null ? "Nenhuma cópia baixada neste computador." : d === 0 ? "Última cópia: hoje." : `Última cópia: há ${d} dia(s).`; };
+async function baixarCopiaTudo(){
+  document.querySelectorAll('[data-act="copiaTudo"]').forEach(b => { b.disabled = true; b.textContent = "Preparando…"; });
+  try {
+    const nomes = ["ajustes", "fontes", "melhorias", "organograma", "pgrAnterior", "plano", "taxonomia", "unidade"], config = {};
+    let aeps = clone(S.aeps), copsoq = null;
+    if (S.db){
+      for (const n of nomes){ const d = S.db.doc("config/" + n); if (d.get) config[n] = await d.get(); }
+      const ler = col => new Promise((ok, no) => S.db.collection(col).onSnapshot(sn => ok(Object.fromEntries(sn.docs.filter(x => x.exists).map(x => [x.id, x.data()]))), no));
+      aeps = await ler("aeps"); try { copsoq = await ler("copsoq"); } catch(_){ copsoq = null; }
+    }
+    const corpo = { tipo: "copia-aep-serra-azul", versao: VERSAO, geradoEm: new Date().toISOString(), aeps, config, copsoq };
+    const blob = new Blob([JSON.stringify(corpo)], { type: "application/json" }), el = document.createElement("a");
+    el.href = URL.createObjectURL(blob); el.download = `copia-aep-${new Date().toISOString().slice(0, 10)}.json`; document.body.appendChild(el); el.click(); el.remove();
+    lsSet("aep.copia", new Date().toISOString()); toast(`Cópia baixada com ${Object.keys(aeps).length} AEPs. Guarde o arquivo num lugar seguro.`);
+  } catch(e){ console.error(e); toast("Não foi possível preparar a cópia. Tente de novo."); }
+  render();
+}
+function vCopiaSeg(){
+  return `<div class="panel" style="margin-top:16px"><div class="panel-h"><b>Cópia de segurança</b><span class="tiny muted">${esc(txtCopia())}</span></div><div class="panel-b stack tight">
+    <p class="small" style="margin:0">Baixa um arquivo com todas as AEPs, o inventário, o plano de ação e as configurações, do jeito que estão no banco agora. As fotos não entram no arquivo. Faça uma por semana e sempre antes de uma correção em lote.</p>
+    <div><button class="btn primary" type="button" data-act="copiaTudo">Baixar cópia de tudo</button></div></div></div>`;
 }
 /* Correções em lote (aba Unidade) */
 function vCorrecoesLote(){
@@ -3345,7 +3420,7 @@ function docBlocos(L){
     : t === "gen" ? vGerado(v) : t === "table" ? `<table class="ctab"><thead><tr>${v[0].map(x => `<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${v.slice(1).map(r => `<tr>${r.map(x => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table>` : "").join("");
 }
 function vCriterios(){
-  return `<div class="pagehead"><div><h1>Critérios do GRO</h1><p>Documento de critérios adotados no gerenciamento de riscos, anexo do Procedimento. A matriz, a grade de probabilidade, a tabela de exigência e as âncoras são geradas pelo mesmo cálculo do Inventário.</p></div>
+  return `<div class="pagehead"><div><h1>Critérios do GRO</h1><p>Critérios do gerenciamento de riscos, anexo do Procedimento.</p></div>
     <div class="row"><button class="btn" type="button" data-act="pdfCriterios" id="btnPDFcrit">Salvar em PDF</button></div></div>
   <div class="panel"><div class="panel-b cdoc">${docBlocos(CRITERIOS_DOC)}</div></div>
   <details class="panel" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Anexo: mapa de polaridade do COPSOQ II</b><span class="tiny muted">critério de recodificação dos 76 itens</span></summary>
@@ -3398,13 +3473,14 @@ function renderRail(){
 }
 function renderAside(){
   renderBanner(); const el = $("#aside"); if (!el) return; const a = S.draft, p = pendencias(a), tot = totalPend(p), nHz = (a.perigos||[]).length, nCk = ckCriticos(a).length;
-  const lista = Object.entries(p).flatMap(([n,l]) => l.map(x => `<li><button class="btn ghost small" type="button" data-step="${n}" style="padding:0;text-align:left;white-space:normal">Etapa ${n}</button> — ${esc(x)}</li>`));
+  const grupos = Object.entries(p).filter(([, l]) => l.length).map(([n, l]) => `<details class="pendg" ${Number(n) === S.step || tot <= 6 ? "open" : ""}><summary><span>Etapa ${n}: ${esc((ETAPAS[n - 1] || [])[1] || "")}</span><b>${l.length}</b></summary>
+      <ul class="pendlist">${l.map(x => `<li>${esc(x)}</li>`).join("")}</ul><button class="btn ghost small" type="button" data-step="${n}" style="padding:0 0 6px">Ir para a etapa ${n}</button></details>`).join("");
   el.innerHTML = `<div class="panel"><div class="panel-h"><span class="eyebrow">Resumo da AEP</span></div><div class="panel-b stack tight">
       <div class="kpis"><div><b class="num">${nHz}</b><span>perigo${nHz===1?"":"s"} registrado${nHz===1?"":"s"}</span></div><div><b class="num">${nCk}</b><span>${nCk===1?"item crítico":"itens críticos"} no checklist</span></div></div>
       <p class="tiny muted">Os perigos ficam registrados aqui; a graduação do risco é feita no Inventário.</p>
       <hr style="border:0;border-top:1px solid var(--rule);margin:6px 0">
       <span class="eyebrow">${tot ? `${tot} pendência(s) para concluir` : "Pronta para concluir"}</span>
-      ${tot ? `<ul class="pendlist">${lista.slice(0,12).join("")}${lista.length>12?`<li>+ ${lista.length-12} outra(s)</li>`:""}</ul>` : `<p class="small muted">Todas as etapas obrigatórias estão preenchidas.</p>`}
+      ${tot ? grupos : `<p class="small muted">Todas as etapas obrigatórias estão preenchidas.</p>`}
       <div class="row" style="margin-top:6px"><button class="btn" type="button" data-act="verDoc">Ver documento</button>
         ${a.status === "concluida" ? `<span class="chip done">Concluída em ${fmtData((a.concluidoEm||"").slice(0,10))}</span>` : `<button class="btn primary" type="button" data-act="concluir" ${tot?"disabled":""}>Concluir AEP</button>`}</div>
     </div></div>`;
@@ -3412,7 +3488,7 @@ function renderAside(){
 function stepHead(n, titulo, texto){ return `<div class="stephead"><span class="eyebrow">Etapa ${n} de ${ETAPAS.length}</span><h2>${esc(titulo)}</h2>${texto?`<p>${texto}</p>`:""}</div>`; }
 function stepNav(){ return `<div class="stepnav">${S.step>1 ? `<button class="btn" type="button" data-step="${S.step-1}">← ${esc(ETAPAS[S.step-2][1])}</button>` : "<span></span>"}${S.step<ETAPAS.length ? `<button class="btn primary" type="button" data-step="${S.step+1}">${esc(ETAPAS[S.step][1])} →</button>` : `<button class="btn primary" type="button" data-act="verDoc">Ver documento →</button>`}</div>`; }
 const fld = (b, rotulo, o={}) => {
-  const v = getPath(S.draft, b) ?? "", req = o.req ? " <em>*</em>" : "", hint = o.hint ? `<span class="hint">${o.hint}</span>` : "", cls = ` class="f ${o.cls||""}"`;
+  const v = getPath(S.draft, b) ?? "", req = o.req ? "\u00A0<em>*</em>" : "", hint = o.hint ? `<span class="hint">${o.hint}</span>` : "", cls = ` class="f ${o.cls||""}"`;
   if (o.area) return `<label${cls}><span>${rotulo}${req}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||4}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${hint}</label>`;
   return `<label${cls}><span>${rotulo}${req}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}" ${o.type==="number"?'min="0" inputmode="numeric"':""}>${hint}</label>`;
 };
@@ -3421,7 +3497,7 @@ function renderStep(){ if (S.view === "campo") { renderCampo(); return; } const 
 function vSetorCop(){
   const m = S.draft.meta, auto = setorPeloDepara(m.setor, m.area), setores = Object.values(S.areas).map(a => a.nome).sort();
   return auto && auto === m.setorCopsoq
-    ? `<div class="f"><span>Setor no COPSOQ</span><p class="small" style="margin:6px 0 0"><b>${esc(auto)}</b> <span class="faint">— pelo DE-PARA, notas puxadas automaticamente</span></p></div>`
+    ? `<div class="f"><span>Setor no COPSOQ</span><p class="small" style="margin:6px 0 0"><b>${esc(auto)}</b> <span class="faint">· pelo DE-PARA, notas puxadas automaticamente</span></p></div>`
     : `<label class="f"><span>Setor no COPSOQ</span><select id="f-setorcop" data-b="meta.setorCopsoq" data-rr="1"><option value="">—</option>${setores.map(s => `<option ${m.setorCopsoq===s?"selected":""}>${esc(s)}</option>`).join("")}</select><span class="hint">${auto ? `O DE-PARA indica ${esc(auto)}.` : "Setor e área sem correspondência no DE-PARA: escolha aqui."}</span></label>`;
 }
 function st1(){
@@ -3451,7 +3527,7 @@ function st4(){
     return `<div class="ck ${c.r==="sim"?"sim":""}"><span class="i">${String(n).padStart(2,"0")}</span>
       <div class="stack tight"><p>${esc(txt)}</p>${cands.length ? `<p class="tiny faint">Aciona: ${cands.map(x => `<span class="code">${x}</span>`).join(", ")}</p>` : ""}${n === CK_N_BASE ? vOutrosPerigos(a) : ""}
         ${c.r==="sim" ? `${fld(`checklist.${i}.obs`,"O que foi observado",{area:1,rows:2})}
-          ${a.perigos.length ? `<label class="f"><span>Perigo que responde a este item</span><select data-b="checklist.${i}.hz" data-rr="1"><option value="">Automático${(() => { const au = (a.perigos||[]).find(h => (cands.length ? cands.includes(h.codigo) : Number(h.checkItem) === n)); return au ? ` — ${esc(au.idRisco||"")} ${esc(au.codigo)}` : " — nenhum perigo da lista lançado"; })()}</option>${a.perigos.map(h => `<option value="${esc(h.id)}" ${c.hz===h.id?"selected":""}>${esc(h.idRisco||"")} ${esc(h.codigo)} — ${esc(TAXMAP[h.codigo]?.nome||"")}</option>`).join("")}</select>
+          ${a.perigos.length ? `<label class="f"><span>Perigo que responde a este item</span><select data-b="checklist.${i}.hz" data-rr="1"><option value="">Automático${(() => { const au = (a.perigos||[]).find(h => (cands.length ? cands.includes(h.codigo) : Number(h.checkItem) === n)); return au ? `: ${esc(au.idRisco||"")} ${esc(au.codigo)}` : ": nenhum perigo da lista lançado"; })()}</option>${a.perigos.map(h => `<option value="${esc(h.id)}" ${c.hz===h.id?"selected":""}>${esc(h.idRisco||"")} ${esc(h.codigo)} · ${esc(TAXMAP[h.codigo]?.nome||"")}</option>`).join("")}</select>
             <span class="hint">No automático, vale o perigo lançado que está na lista “Aciona” deste item. Escolha outro só se ele responder de fato a este item.</span></label>` : ""}
           ${vinc ? `<p class="tiny" style="color:var(--ok-ink)">Vinculado ao perigo <span class="code">${esc(vinc.idRisco||"")} ${esc(vinc.codigo)}</span>.</p>` : `<div class="row"><span class="tiny" style="color:var(--bad-ink)">Item crítico sem perigo vinculado.</span><button class="btn small" type="button" data-act="hzDoItem" data-n="${n}">Lançar perigo deste item</button></div>`}
           ${(() => { const cd = itemCorrigido(a, n); if (cd) return `<p class="tiny" style="color:var(--ok-ink)"><b>Corrigido em ${fmtData(cd)}</b> (registrado no Inventário). No documento sai “Sim, corrigido em ${fmtData(cd)}” e o item deixa de contar como crítico pendente.</p>`;
@@ -3466,9 +3542,9 @@ function st4(){
     `<div class="ck" style="background:var(--surface-2)"><span class="i">ADM</span><div class="stack tight"><p><b>${esc(CK_ADM_PERGUNTA)}</b></p><p class="tiny faint">Se Sim, abrem os itens 14 a 18, específicos do posto informatizado.</p></div><div class="seg" role="radiogroup" aria-label="Posto informatizado / administrativo">${optAdm("sim","Sim")}${optAdm("nao","Não")}</div></div>` +
     (a.checklistAdm === "sim" ? idx.slice(CK_N_BASE).map(linha).join("") : "");
   const ativos = ckLista(a), sim = ativos.filter(x => x.c.r==="sim").length, semResp = ativos.filter(x => !x.c.r).length;
-  return stepHead(2,"Checklist NR-17 — desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: o perigo correspondente é lançado sozinho (uma linha por item) com o que você descrever em “O que foi observado”. Confira na etapa 4.") +
+  return stepHead(2,"Checklist NR-17: desqualificação ergonômica","Item marcado <b>Sim</b> é item crítico: o perigo correspondente é lançado sozinho (uma linha por item) com o que você descrever em “O que foi observado”. Confira na etapa 4.") +
   (semResp ? `<div style="margin-bottom:10px"><button class="btn small" type="button" data-act="ckRestoNao">Marcar os ${semResp} item(ns) sem resposta como Não</button> <span class="tiny muted">Use depois de marcar os críticos. Não mexe nos itens já respondidos nem na pergunta do posto administrativo.</span></div>` : "") +
-  `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim — ${sim} item(ns).` : (a.checklistAdm && ativos.every(x => x.c.r) ? "Não." : "Responda todos os itens.")}</div>`;
+  `<div class="ckl">${rows}</div><div class="note ${sim?"bad":"ok"}" style="margin-top:14px"><b>Foram identificados itens de desqualificação ergonômica?</b> ${sim ? `Sim, ${sim} item(ns).` : (a.checklistAdm && ativos.every(x => x.c.r) ? "Não." : "Responda todos os itens.")}</div>`;
 }
 function st5(){
   const a = S.draft, snap = copsoqDaAEP(a);
@@ -3488,8 +3564,8 @@ function st5(){
   const blocos = DOMINIOS.map(d => { const r = resultadoDominio(a, d.id), dd = a.copsoq.dominios[d.id], sug = conclusaoSugerida(r);
     const linha = x => { const tx = TAXMAP[x.s.tax], ja = a.perigos.some(h => h.origemCopsoq === x.s.id);
       return `<div class="row" style="gap:8px;align-items:flex-start"><span class="chip ${x.f}">${x.f==="ris"?"ALTA · ":""}${esc(x.s.nome)} ${num2(x.m)}</span>
-        ${x.s.natureza==="efeito" ? `<span class="hint">Indicador de efeito — não vira perigo; prioriza a leitura das demais subescalas.</span>`
-        : x.s.natureza==="protetor" ? `<span class="hint">Protetor — se desfavorável, investigar OT-04, OT-06 ou OT-10.</span>`
+        ${x.s.natureza==="efeito" ? `<span class="hint">Indicador de efeito: não vira perigo; prioriza a leitura das demais subescalas.</span>`
+        : x.s.natureza==="protetor" ? `<span class="hint">Protetor: se desfavorável, investigar OT-04, OT-06 ou OT-10.</span>`
         : tx ? (ja ? `<span class="tiny" style="color:var(--ok-ink)">perigo <span class="code">${tx.codigo}</span> já lançado</span>` : `<button class="btn small" type="button" data-act="hzDoCopsoq" data-sub="${x.s.id}">Lançar perigo <span class="code">${tx.codigo}</span></button>`) : ""}
         ${tx?.inerente && x.f==="ris" ? `<span class="hint" style="flex-basis:100%">Exigência inerente à atividade: o resultado alto orienta a avaliação do cargo. O risco só é elevado se o campo mostrar que autonomia, pausas e suporte são insuficientes para a demanda.</span>` : ""}</div>`; };
     return `<div class="dom"><div class="dom-h"><h3>${esc(d.nome)}</h3>
@@ -3498,7 +3574,7 @@ function st5(){
         ${r.auto ? ((r.altas.length || r.inter.length) ? `<div class="stack tight"><span class="eyebrow">Subescalas fora da faixa favorável</span>${[...r.altas, ...r.inter].map(linha).join("")}</div>` : `<p class="small muted">Todas as subescalas do domínio em faixa favorável.</p>`) : ""}
         <label class="f"><span>Observação em campo <em>*</em></span><textarea id="f-obs-${d.id}" data-b="copsoq.dominios.${d.id}.obs" rows="7" placeholder="O que a atividade real mostrou sobre este domínio. Feche com “Perigos identificados: [códigos]” ou “Nenhum perigo adicional caracterizado neste eixo”.">${esc(dd.obs)}</textarea></label>
         <div class="stack tight" style="gap:6px">
-          <span class="tiny muted">Sugestões de texto — clique para acrescentar à observação:</span>
+          <span class="tiny muted">Sugestões de texto: clique para acrescentar à observação:</span>
           ${[...r.altas, ...r.inter].map(x => `<div class="row" style="gap:6px"><span class="chip ${x.f}">${esc(x.s.nome)} ${num2(x.m)}</span>${(x.s.natureza === "efeito" || x.s.natureza === "protetor" ? [{ id:"nao", rot:"Registrar leitura" }] : variantesDe(x.s)).map(v => `<button class="btn small${(dd.dec||{})[x.s.id]===v.id?" primary":""}" type="button" data-act="txtSub" data-dom="${d.id}" data-sub="${x.s.id}" data-v="${v.id}" aria-pressed="${(dd.dec||{})[x.s.id]===v.id}">${esc(v.rot)}</button>`).join("")}</div>`).join("")}
           ${r.fav.length && (r.altas.length || r.inter.length) ? `<div class="row" style="gap:6px"><span class="tiny muted">Favoráveis:</span>${r.fav.map(x => `<span class="chip fav">${esc(x.s.nome)} ${num2(x.m)}</span>`).join("")}<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="fav">Registrar favoráveis</button></div>` : ""}
           <div class="row" style="gap:6px"><span class="tiny muted">Geral:</span>${!(r.altas.length || r.inter.length) ? `<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="padrao">Texto padrão (sem achado relevante)</button>` : ""}<button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="semhz">Fechar: nenhum perigo adicional</button><button class="btn small" type="button" data-act="txtFecho" data-dom="${d.id}" data-v="hz">Fechar: perigos identificados</button></div>
@@ -3605,16 +3681,16 @@ function fonteRepetida(h){
 function vHzEditor(){
   const h = S.editHz, t = TAXMAP[h.codigo], ops = opcoesTax();
   const el = (b, rot, o={}) => { const v = getPath(S, b) ?? "";
-    if (o.area) return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
-    return `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}">${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`; };
-  const sel = (b, rot, lista, o={}) => `<label class="f ${o.cls||""}"><span>${rot}${o.req?" <em>*</em>":""}</span><select data-b="${b}"><option value="">—</option>${lista.map(x => `<option ${String(getPath(S,b)??"")===String(x)?"selected":""}>${esc(x)}</option>`).join("")}</select>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
+    if (o.area) return `<label class="f ${o.cls||""}"><span>${rot}${o.req?"\u00A0<em>*</em>":""}</span><textarea id="f-${b}" data-b="${b}" rows="${o.rows||3}" placeholder="${esc(o.ph||"")}">${esc(v)}</textarea>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
+    return `<label class="f ${o.cls||""}"><span>${rot}${o.req?"\u00A0<em>*</em>":""}</span><input id="f-${b}" type="${o.type||"text"}" data-b="${b}" value="${esc(v)}" placeholder="${esc(o.ph||"")}">${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`; };
+  const sel = (b, rot, lista, o={}) => `<label class="f ${o.cls||""}"><span>${rot}${o.req?"\u00A0<em>*</em>":""}</span><select data-b="${b}"><option value="">—</option>${lista.map(x => `<option ${String(getPath(S,b)??"")===String(x)?"selected":""}>${esc(x)}</option>`).join("")}</select>${o.hint?`<span class="hint">${o.hint}</span>`:""}</label>`;
   const rep = fonteRepetida(h);
   return `<div class="edbox"><div class="panel-h"><b>${h._novo ? "Novo perigo" : `Editar perigo ${esc(h.idRisco||"")}`}</b><span class="tiny muted">Os campos com * são obrigatórios</span></div>
     <div class="panel-b stack">
       <div class="grid g4">
-        <label class="f spanall"><span>Categoria</span><select id="f-hzcat" data-hz-cat="1"><option value="">Todas as categorias</option>${Object.entries(CATEG).map(([k,v]) => `<option value="${k}" ${S.hzCat===k?"selected":""}>${k} — ${esc(v)}</option>`).join("")}</select></label>
+        <label class="f spanall"><span>Categoria</span><select id="f-hzcat" data-hz-cat="1"><option value="">Todas as categorias</option>${Object.entries(CATEG).map(([k,v]) => `<option value="${k}" ${S.hzCat===k?"selected":""}>${k} · ${esc(v)}</option>`).join("")}</select></label>
         <label class="f spanall"><span>Perigo / fator de risco padronizado <em>*</em></span><select id="f-hzcod" data-b="editHz.codigo">
-            <option value="">— Selecione (${ops.length} opção/ões) —</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("")}</select>
+            <option value="">Selecione (${ops.length} opção/ões)</option>${t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} · ${esc(t.nome)}</option>` : ""}${ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} · ${esc(x.nome)}</option>`).join("")}</select>
           <span class="hint">${t ? `${esc(t.cat)} › ${esc(t.sub)}` : "O nome do perigo não se edita; o que varia é a fonte geradora."}</span>
           ${t ? (() => { const alta = S.draft ? altasComPerigo(S.draft).find(s => s.tax === t.codigo) : null, sn = S.draft ? copsoqDaAEP(S.draft) : null;
             if (alta) return `<span class="dica" id="hz-dica"><b>Quando lançar:</b> neste setor, ${esc(alta.nome.toLowerCase())} ficou em ${num2(sn?.medias?.[alta.id])}, acima de 3,66. Pelo critério adotado, o perigo entra pela percepção coletiva do setor, que sai no documento como base. Na fonte, descreva só a situação do cargo em que essa exigência aparece, com o que você sabe; o risco é graduado na planilha.</span>`;
@@ -3633,7 +3709,7 @@ function vHzEditor(){
         return `<div class="f"><span>Fonte geradora: frase padrão <span class="faint" style="font-weight:400">(fixa, igual em todas as AEPs)</span></span><p class="small" id="hz-fpad" style="margin:4px 0 0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--surface-2)">${esc(pre)}</p></div>
         <label class="f"><span>O que é deste cargo${basta ? ` <span class="faint" style="font-weight:400">(opcional: a frase padrão já descreve a situação)</span>` : ` <span class="faint" style="font-weight:400">(recomendado; se ficar vazio, a AEP mostra só um aviso)</span>`}</span><textarea id="f-fcomp" data-fcomp="1" rows="3" placeholder="Só o que diferencia este cargo: a tarefa, o objeto, o local ou a condição. Não repita a frase padrão.">${esc(comp)}</textarea><span class="hint">No PGR sai a frase padrão seguida deste texto. Ex.: “Sacarias de explosivos levantadas e posicionadas em diferentes alturas e condições de terreno.”</span></label>`; })()}
       <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" data-fonteprop="${esc(S.editHz?.id || "")}" ${fontePropria(S.editHz) ? "checked" : ""}> Fonte própria: escrevi a fonte do meu jeito, sem o texto padrão (o aviso de padrão não aparece para este perigo)</label>
-      <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
+      <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo: ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
       ${S.hzErr ? `<div class="note bad">${esc(S.hzErr)}</div>` : ""}
       <div class="row"><button class="btn primary" type="button" data-act="salvarHz">Salvar perigo</button><button class="btn" type="button" data-act="cancelarHz">Cancelar</button></div>
     </div></div>`;
@@ -3742,7 +3818,7 @@ function vAreas(){
     return `<tr class="click" data-area="${esc(ar.id)}" tabindex="0"><td><b>${esc(ar.nome)}</b><div class="tiny faint">${cont(ar.nome)} AEP(s)</div></td><td class="num">${esc(ar.n||"—")}</td>
       ${DOMINIOS.map(d => { const f = faixaDe(ar.dominios?.[d.id]); return `<td class="num"><span class="chip ${f||""}">${num2(ar.dominios?.[d.id])}</span></td>`; }).join("")}
       <td class="small">${altas.length ? altas.map(x => `${esc(x.s.nome)} ${num2(x.m)}`).join("<br>") : '<span class="faint">—</span>'}</td></tr>`; }).join("");
-  return `<div class="pagehead"><div><h1>COPSOQ II por setor</h1><p>Notas por setor e subescala, já com a polaridade corrigida (valor alto = pior em todas). Faixas: abaixo de 2,34 favorável; 2,34 a 3,66 intermédia; acima de 3,66 risco para a saúde. O domínio é panorama; a unidade de leitura é a subescala.</p></div><button class="btn" type="button" data-act="novaArea">+ Novo setor</button></div>
+  return `<div class="pagehead"><div><h1>COPSOQ II por setor</h1><p>Notas por setor e subescala (valor alto = pior). Abaixo de 2,34 favorável; até 3,66 intermediária; acima, risco para a saúde.</p></div><button class="btn" type="button" data-act="novaArea">+ Novo setor</button></div>
   <div class="panel">${L.length ? `<div class="tablewrap"><table class="list"><thead><tr><th>Setor</th><th>n</th>${DOMINIOS.map(d => `<th title="${esc(d.nome)}">${esc(d.id)}</th>`).join("")}<th>Subescalas altas</th></tr></thead><tbody>${linhas}</tbody></table></div>` : `<div class="empty">Nenhum setor cadastrado.</div>`}</div>
   <p class="tiny faint" style="margin-top:8px">${DOMINIOS.map(d => `${d.id} = ${d.nome}`).join(" · ")}</p>`;
 }
@@ -3793,11 +3869,11 @@ function importarColagem(){
 /* =========================================================================
    UNIDADE
    ========================================================================= */
-function vConfig(){ return vConfig0() + vCorrecoesLote() + vCompletarFontes(); }
+function vConfig(){ return vConfig0() + vCopiaSeg() + vCorrecoesLote() + vCompletarFontes(); }
 function vConfig0(){
   if (!S.cfgDraft) S.cfgDraft = Object.assign({ empresa:"", unidade:"", cnpj:"", analista:"", registroAnalista:"", dataInicio:"", dataMeta:"" }, clone(S.config||{}));
   const c = S.cfgDraft, f = (k, rot, o={}) => `<label class="f ${o.cls||""}"><span>${rot}</span><input id="f-cfg-${k}" type="${o.type||"text"}" data-b="cfgDraft.${k}" value="${esc(c[k]||"")}" placeholder="${esc(o.ph||"")}"></label>`;
-  return `<div class="pagehead"><div><h1>Dados da unidade</h1><p>Aparecem no cabeçalho dos documentos. O responsável técnico padrão é sugerido em cada AEP; início e meta alimentam o painel.</p></div></div>
+  return `<div class="pagehead"><div><h1>Dados da unidade</h1><p>Cabeçalho dos documentos, responsável técnico padrão e meta.</p></div></div>
   <div class="panel"><div class="panel-b grid g2">${f("empresa","Empresa")}${f("unidade","Unidade / estabelecimento")}${f("cnpj","CNPJ")}${f("analista","Responsável técnico padrão")}${f("registroAnalista","Qualificação / registro")}<span></span>${f("dataInicio","Início do projeto de AEPs",{type:"date"})}${f("dataMeta","Meta de conclusão",{type:"date"})}</div></div>`;
 }
 async function salvarConfig(){ clearTimeout(S.cfgTimer); if (!S.cfgDraft) return; S.config = clone(S.cfgDraft); if (!S.db) return; setSaveState("Salvando…");
@@ -3936,7 +4012,7 @@ function docHTML(a, cfg, fotos, opt={}){
   <div class="nota">${esc(TXT_NOTA_AET)}</div>
   <div class="ass"><div>${esc(m.analista||"Responsável técnico")}${m.registroAnalista?`<br>${esc(m.registroAnalista)}`:""}</div></div>`;
   return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(a.numero)} — ${esc((m.cargo||"AEP").trim())}</title>
+<title>${esc(a.numero)} · ${esc((m.cargo||"AEP").trim())}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap">
 <style>${DOC_CSS}</style></head><body>
 ${opt.preview?"":`<div class="tools"><button onclick="window.print()">Imprimir / salvar em PDF</button><span>No diálogo de impressão, escolha “Salvar como PDF” e deixe as margens em “Padrão”. O logotipo e o título se repetem em cada página; os dados da AEP saem só na primeira.</span></div>`}
@@ -3950,7 +4026,7 @@ function vDoc(){
     <span style="margin-left:auto" class="row"><button class="btn primary" type="button" data-act="gerarPDF" id="btnPDF">Salvar em PDF</button>${S.downloads ? `<button class="btn" type="button" data-act="baixar" id="btnBaixar">Baixar documento (HTML)</button>` : ""}</span></div>
   <div class="stack">
     <div class="note">${S.downloads ? `<b>Salvar em PDF:</b> abre o diálogo de impressão já com o documento; em <b>Destino</b>, escolha <b>Salvar como PDF</b>. O logotipo e o título se repetem em cada página; os dados da AEP saem só na primeira.` : `<b>O download não está disponível nesta visualização.</b> Abra o sistema pelo link no claude.ai para baixar o documento.`}
-    ${a.status !== "concluida" ? `<br><b>Esta AEP ainda não foi concluída</b> — ${totalPend(pendencias(a))} pendência(s).` : ""}</div>
+    ${a.status !== "concluida" ? `<br><b>Esta AEP ainda não foi concluída</b>: ${totalPend(pendencias(a))} pendência(s).` : ""}</div>
     <div class="docprev"><iframe id="prev" title="Prévia do documento da AEP"></iframe></div>
   </div>`;
 }
@@ -4309,7 +4385,7 @@ function gerExecHTML(setor, opt = {}){
 </div>`;
 }
 function vGerencia(){
-  return `<div class="pagehead"><div><h1>Gerências</h1><p>Visão para o gestor: quantas AEPs a área tem, quais são, quantas foram realizadas e o que elas geraram.</p></div></div>
+  return `<div class="pagehead"><div><h1>Gerências</h1><p>AEPs por área: quantas são, quantas foram feitas e o que geraram.</p></div></div>
   <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><span class="small" style="font-weight:600">Gerência</span> ${vMultiSetor("f-ger")}<span style="flex:1"></span>
     <button class="btn primary small" type="button" data-act="pdfGerencia" id="btnPDFger">PDF: resumo para a gerência</button>
     <button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">PDF: detalhamento por cargo</button></div>
@@ -4481,6 +4557,31 @@ function linhasLigacao(){
   });
   return out;
 }
+/* Lista de AEPs em Excel: mês planejado, situação, área e líder direto (supervisor ligado à AEP no Organograma) */
+async function exportarListaAEPs(){
+  const btn = $("#btnListaX"); if (btn){ btn.disabled = true; btn.textContent = "Gerando…"; }
+  try {
+    const X = await carregarXLSX();
+    const L = Object.values(S.aeps).slice().sort((p, q) => (mesPlan(p) || "9999").localeCompare(mesPlan(q) || "9999") || idNum(p) - idNum(q));
+    const linhas = L.map(a => { let sup = null; try { const r = respAEP(a); sup = r && (r.sup || null); } catch(_){ }
+      const man = orgP()[(S.org.aepSup || {})[a.id]], lider = man || sup || orgCuida("supervisor", chaveCop(copsoqNome(a)))[0] || null;
+      const m = mesPlan(a);
+      return [a.numero, (a.meta?.cargo || "").trim(), m ? mesLongo(m) : "", STATUS[a.status || "nao_iniciada"], (a.meta?.area || "").trim(), (a.meta?.setor || "").trim(), gheDe(a) || "", lider ? lider.nome : "",
+        dataRealizada(a) ? fmtData(dataRealizada(a)) : "", a.concluidoEm ? fmtData(a.concluidoEm.slice(0, 10)) : ""]; });
+    const ws = X.utils.aoa_to_sheet([["Nº AEP", "Cargo", "Mês planejado", "Status", "Área", "Setor", "GHE", "Líder direto", "Avaliação em campo", "Concluída em"], ...linhas]);
+    ws["!cols"] = [10, 44, 16, 14, 40, 30, 11, 30, 16, 14].map(w => ({ wch: w })); ws["!autofilter"] = { ref: `A1:J${linhas.length + 1}` };
+    const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "AEPs");
+    const dados = X.write(wb, { bookType: "xlsx", type: "array" }), nome = `Lista_AEPs_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    if (S.downloads) await S.downloads.save({ filename: nome, data: dados });
+    else { const el = document.createElement("a"); el.href = URL.createObjectURL(new Blob([dados], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })); el.download = nome; document.body.appendChild(el); el.click(); el.remove(); }
+    toast(`Lista gerada com ${linhas.length} AEPs.`);
+  } catch(e){
+    if (e && e.code === "declined") {}
+    else if (e && e.message === "xlsx") toast("Não foi possível carregar o gerador de Excel. Verifique a internet e tente de novo.");
+    else { console.error(e); toast("Não foi possível gerar a lista."); }
+  }
+  const b2 = $("#btnListaX"); if (b2){ b2.disabled = false; b2.textContent = "Lista em Excel"; }
+}
 async function exportarLigacao(){
   if (!S.downloads) return;
   const btn = $("#btnLig"); if (btn){ btn.disabled = true; btn.textContent = "Gerando…"; }
@@ -4531,9 +4632,9 @@ const rootOf = b => /^(editHz|editArea|cfgDraft)\./.test(b) ? S : S.draft;
 function atualizarSelectTax(){
   const sel = $("#f-hzcod"); if (!sel) return;
   const ops = opcoesTax(), h = S.editHz, t = TAXMAP[h.codigo];
-  sel.innerHTML = `<option value="">— Selecione (${ops.length} opção/ões) —</option>` +
-    (t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} — ${esc(t.nome)}</option>` : "") +
-    ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} — ${esc(x.nome)}</option>`).join("");
+  sel.innerHTML = `<option value="">Selecione (${ops.length} opção/ões)</option>` +
+    (t && !ops.includes(t) ? `<option value="${t.codigo}" selected>${t.codigo} · ${esc(t.nome)}</option>` : "") +
+    ops.map(x => `<option value="${x.codigo}" ${h.codigo===x.codigo?"selected":""}>${x.codigo} · ${esc(x.nome)}</option>`).join("");
 }
 function onHzChange(b, el){
   const h = S.editHz;
@@ -4549,7 +4650,7 @@ function onHzChange(b, el){
     }
     renderStep(); const s = $("#f-hzcod"); if (s) s.focus(); return;
   }
-  if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo — ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""; } return; }
+  if (b === "editHz.fonte"){ const r = $("#hz-rep"); if (r){ const rep = fonteRepetida(h); r.innerHTML = rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo: ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""; } return; }
 }
 function onAreaChange(b, el){
   const ar = S.editArea, live = el.dataset.areaLive;
@@ -4719,7 +4820,8 @@ function aposHz(){ S.step = 4; renderRail(); renderStep(); renderAside(); window
 document.addEventListener("click", async e => {
   const t = e.target; if (!t.closest) return;
   document.querySelectorAll("details.msel[open]").forEach(dt => { if (!dt.contains(t)) dt.open = false; });
-  const go = t.closest("[data-go]"); if (go){ e.preventDefault(); ir(go.dataset.go); return; }
+  const mb = t.closest("#btn-menu"); if (mb){ const ab = document.body.classList.toggle("menu-open"); mb.setAttribute("aria-expanded", ab); return; }
+  const go = t.closest("[data-go]"); if (go){ e.preventDefault(); document.body.classList.remove("menu-open"); const m = $("#btn-menu"); if (m) m.setAttribute("aria-expanded", "false"); ir(go.dataset.go); return; }
   const stp = t.closest("[data-step]"); if (stp && S.view === "aep"){ irEtapa(Number(stp.dataset.step)); return; }
   if (t.closest("[data-selcell]")) return;
   const op = t.closest("[data-open]"); if (op){ if (op.tagName === "A" && (e.ctrlKey || e.metaKey || e.shiftKey)) return; e.preventDefault(); abrirAEP(op.dataset.open); return; }
@@ -4813,9 +4915,11 @@ document.addEventListener("click", async e => {
       S.exportAberto = !S.exportAberto; S.confirm = null; const ex = $("#exportbox"); if (ex) ex.innerHTML = S.exportAberto ? vExportPanel() : ""; break; }
     case "exportarPGR": exportarPGR(); break;
     case "exportarLig": exportarLigacao(); break;
+    case "listaExcel": await exportarListaAEPs(); break;
     case "cancelConfirm": S.confirm = null; rerender(); break;
     case "delAEP": S.confirm = "delAEP"; renderTitulo(); break;
     case "corrigirFontes": S.confirm = "fontes"; render(); break;
+    case "copiaTudo": await baixarCopiaTudo(); break;
     case "separarMedidas": S.confirm = "separarMed"; render(); break;
     case "fcAbrir": S.fcAberto = true; render(); { const p = $("#fcpainel"); if (p) p.scrollIntoView({ behavior: "smooth" }); } break;
     case "fcFechar": S.fcAberto = false; render(); break;
@@ -4835,9 +4939,9 @@ document.addEventListener("click", async e => {
         a2.perigos.forEach(h => { const t = TAXMAP[h.codigo]; if (t && !temPrefixoPadrao(h)) { const txt = String(h.fonte||"").trim(), base = (FONTES_ALTERNATIVAS[h.codigo]||[])[0] || t.fonte; h.fonte = base + (txt ? " " + txt : ""); n++; } });
         if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
         a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
-        if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); } catch(_) { erro++; } }
+        if (S.db) { try { await gravarAEPLote(id, a2); } catch(_) { erro++; } }
       }
-      S.confirm = null; render(); toast(erro ? `Corrigidas ${n} fonte(s); ${erro} AEP(s) não salvaram — tente de novo.` : `Texto padrão colocado em ${n} fonte(s).`); break;
+      S.confirm = null; render(); toast(erro ? `Corrigidas ${n} fonte(s); ${erro} AEP(s) não salvaram. Tente de novo.` : `Texto padrão colocado em ${n} fonte(s).`); break;
     }
     case "delAEPsim": {
       const id = a.id; clearTimeout(S.saveTimer); S.dirty = false;
@@ -4950,7 +5054,7 @@ document.addEventListener("click", async e => {
       const b = $("#btnPadrao"); if (b) { b.disabled = true; b.textContent = "Gravando…"; }
       let n = 0, erro = 0, rev = 0;
       for (const id of alvo){ const x = S.aeps[id]; if (!x) continue; if (x.revisarItem12 && x.status === "revisao") rev++;
-        if (S.db) { try { await S.db.doc("aeps/" + id).set(x); S.padraoPend.delete(id); n++; } catch(_) { erro++; } } else { S.padraoPend.delete(id); n++; } }
+        if (S.db) { try { await gravarAEPLote(id, x); S.padraoPend.delete(id); n++; } catch(_) { erro++; } } else { S.padraoPend.delete(id); n++; } }
       S.confirm = null; render();
       toast(erro ? `Padrão gravado em ${n} AEP(s); ${erro} não salvaram. Clique de novo para tentar.` : `Padrão novo gravado em ${n} AEP(s)${rev ? `; ${rev} ${rev > 1 ? "voltaram" : "voltou"} para revisão por causa do item 12` : ""}.`);
       break;
@@ -4964,7 +5068,7 @@ document.addEventListener("click", async e => {
         if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; revis++; }
         if (perigosCopsoqSobrando(a2).length) sobra.push(a2.numero);
         a2.atualizadoEm = new Date().toISOString();
-        if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); S.aeps[id] = a2; } catch(_) { erro++; } } else S.aeps[id] = a2; }
+        if (S.db) { try { await gravarAEPLote(id, a2); S.aeps[id] = a2; } catch(_) { erro++; } } else S.aeps[id] = a2; }
       S.confirm = null; render();
       toast(erro ? `Modelo aplicado em ${n - erro} AEP(s); ${erro} não salvaram; clique de novo para tentar.` : `Modelo aplicado em ${n} AEP(s)${revis ? `; ${revis} concluída(s) voltaram para revisão` : ""}${novos ? `; ${novos} perigo(s) lançado(s)` : ""}.${sobra.length ? ` Confira na etapa 3 os perigos do COPSOQ que o modelo não pede: ${sobra.slice(0, 8).join(", ")}${sobra.length > 8 ? "…" : ""}.` : ""}`);
       break;
@@ -4980,8 +5084,8 @@ document.addEventListener("click", async e => {
       for (const id of alvo){ const a2 = completar(S.aeps[id]); if (!atualizarRedacao(a2)) continue; n++;
         if (a2.status === "concluida") { a2.status = "revisao"; a2.concluidoPrimeiro = a2.concluidoPrimeiro || a2.concluidoEm; a2.concluidoEm = null; }
         a2.atualizadoEm = new Date().toISOString(); S.aeps[id] = a2;
-        if (S.db) { try { await S.db.doc("aeps/" + id).set(a2); } catch(_) { erro++; } } }
-      S.confirm = null; render(); toast(erro ? `Redação atualizada em ${n - erro} AEP(s); ${erro} não salvaram — tente de novo.` : `Redação atualizada em ${n} AEP(s).`); break;
+        if (S.db) { try { await gravarAEPLote(id, a2); } catch(_) { erro++; } } }
+      S.confirm = null; render(); toast(erro ? `Redação atualizada em ${n - erro} AEP(s); ${erro} não salvaram. Tente de novo.` : `Redação atualizada em ${n} AEP(s).`); break;
     }
     case "atualizarRedacao": { const n = atualizarRedacao(a); if (n) { marcar(); renderStep(); renderRail(); renderAside(); toast(`Redação atualizada em ${n} trecho(s). Confira o texto de cada domínio.`); } break; }
     case "txtSub": case "txtFecho": {
