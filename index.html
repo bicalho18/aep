@@ -401,14 +401,22 @@ details.como p{margin:6px 0 0}
 .orgcard:hover,.orgcard.sel{border-color:var(--accent)}.orgcard.sel{background:var(--accent-soft)}
 .orgcard.n-diretor{border-left:4px solid var(--accent)}.orgcard.n-gerente{border-left:4px solid var(--ink-3)}
 .orgtx{display:flex;flex-direction:column;gap:1px;min-width:0}.orgtx b{font-size:14px}
-.orgfoto{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none;background:var(--surface-2)}
-.orgfoto.ini{display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--ink-2);border:1px solid var(--rule)}
-.orgfoto.g{width:72px;height:72px;font-size:22px}
 .orgsetores{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .orgresp{display:flex;flex-wrap:wrap;gap:14px}.orgmini{display:flex;gap:10px;align-items:center;min-width:220px}.orgmini>span{display:flex;flex-direction:column}
 .avisoink{color:var(--warn-ink);font-weight:600;margin-top:3px}
 ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px}
-.orgwrap{overflow:auto;padding:4px 0 8px}
+.orgwrap{overflow:auto;padding:4px 0 14px}
+.orgbar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--rule)}
+.orgbar .tit{font-family:var(--f-cond);font-size:15px;font-weight:700}
+.orgbar .sep{flex:1}
+.orgbar input[type=search]{min-width:190px}
+body.org-full .topbar,body.org-full .wrap>.pagehead,body.org-full #orgset,body.org-full .orged{display:none}
+body.org-full .wrap{max-width:none;padding:0}
+body.org-full .orgfs{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:var(--surface)}
+body.org-full .orgfs .orgwrap{flex:1;min-height:0;padding:10px 16px 24px}
+body.org-full .orgfs .panel{border:0;box-shadow:none;border-radius:0}
+body.org-full .orgfs .orged{display:block;position:fixed;right:16px;bottom:16px;width:min(390px,calc(100vw - 32px));max-height:72vh;overflow:auto;z-index:50;border:1px solid var(--rule-strong);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,.16);background:var(--surface);margin:0}
+body.org-full .orgfs .orged .panel-h{position:sticky;top:0;background:var(--surface);z-index:1}
 .ochart{display:inline-block;min-width:100%;text-align:center}
 .ochart ul{display:flex;justify-content:center;margin:0;padding:24px 0 0;list-style:none;position:relative}
 .ochart>ul{padding-top:0}
@@ -423,13 +431,18 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .ochart li:only-child::after{border-radius:0}
 .ochart>ul>li::before,.ochart>ul>li::after{display:none}
 .ochart ul ul::before{content:"";position:absolute;top:0;left:50%;height:24px;border-left:2px solid var(--rule-strong)}
-.onode{display:flex;flex-direction:column;align-items:center;gap:3px;width:116px;padding:8px 4px;border:1px solid transparent;border-radius:var(--radius-lg);background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
-.onode:hover{background:var(--surface-2);border-color:var(--rule)}
-.onode.sel{background:var(--accent-soft);border-color:var(--accent)}
-.onode b{font-size:12.5px;line-height:1.25;text-transform:uppercase;letter-spacing:.01em}
-.onode span{font-size:11.5px;line-height:1.25;color:var(--ink-2)}
-.orgfoto.o{width:66px;height:66px;border:3px solid var(--accent);font-size:20px;margin-bottom:3px}
-.onode.n-diretor .orgfoto.o{width:80px;height:80px;font-size:24px}
+.onode{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:2px;width:158px;padding:8px 10px 9px;border:1px solid var(--rule);border-top:3px solid var(--rule-strong);border-radius:var(--radius);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.onode:hover{border-color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.onode.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.onode.n-diretor{border-top-color:var(--brand)}.onode.n-gerente{border-top-color:var(--accent)}
+.onode.n-gerente_area{border-top-color:#8B9BAE}.onode.n-supervisor{border-top-color:var(--rule-strong)}
+.onode b{font-size:12.5px;line-height:1.25;font-weight:650}
+.onode span{font-size:11px;line-height:1.3;color:var(--ink-3)}
+.onode .onum{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);margin-top:2px}
+.onode.achou{border-color:var(--warn-line);box-shadow:0 0 0 2px var(--warn-bg)}
+.ofold{position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);z-index:2;min-width:22px;height:18px;padding:0 5px;border:1px solid var(--rule-strong);border-radius:999px;background:var(--surface);color:var(--ink-2);font-family:var(--f-mono);font-size:10px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.ofold:hover{border-color:var(--accent);color:var(--accent)}
+.ochart li.fold>ul{display:none}
 .orgsettab tr.falta td:first-child{box-shadow:inset 3px 0 0 var(--warn-line)}
 .lote{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius-lg);padding:12px 14px;margin:0 0 14px}
 .lote textarea,.lote input[type=text]{width:100%}
@@ -777,7 +790,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.12e";
+const VERSAO = "2026.11.12f";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1533,7 +1546,7 @@ const S = {
   editHz:null, hzErr:"", hzFiltro:"", hzCat:"",
   editArea:null, areaDirty:false, areaTimer:null, colar:"", colarMsg:"",
   cfgDraft:null, cfgTimer:null, confirm:null,
-  org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgDirty:false, orgTimer:null, fAviso:false,
+  org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgFull:false, orgFold:{}, orgBusca:"", orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
   invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, pLista:"previstas", pMeses:null, pMesAberto:false, plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
@@ -1765,6 +1778,7 @@ function render(){
   const ativo = S.view === "aep" || S.view === "doc" ? "home" : S.view === "pgrant" ? "inventario" : S.view;
   document.querySelectorAll(".nav [data-go]").forEach(b => b.setAttribute("aria-current", ativo === b.dataset.go ? "page" : "false"));
   const app = $("#app");
+  document.body.classList.toggle("org-full", S.view === "organograma" && !!S.orgFull);
   if (S.view === "home") app.innerHTML = vHome();
   else if (S.view === "painel") app.innerHTML = vPainel();
   else if (S.view === "gerencia") app.innerHTML = vGerencia();
@@ -3030,7 +3044,7 @@ async function gerarPDFTax(){
 }
 
 /* ---------------- ORGANOGRAMA ----------------
-   config/organograma = { pessoas: { id: { nome, nivel, cargo, email, telefone, foto, chefe, setores[] } }, aepSup: { idAEP: idPessoa } }
+   config/organograma = { pessoas: { id: { nome, nivel, cargo, email, telefone, chefe, setores[] } }, aepSup: { idAEP: idPessoa } }
    Cada AEP fica ligada ao supervisor pelo setor (gerência) da AEP; quando precisar, troca-se o supervisor de uma AEP (aepSup).
    O gerente de área, o gerente e o diretor vêm da cadeia "responde a". Nada disso altera a AEP. */
 const NIVEIS = [["diretor", "Diretor"], ["gerente", "Gerente"], ["gerente_area", "Gerente de área"], ["supervisor", "Supervisor"]];
@@ -3081,11 +3095,10 @@ function respAEP(a){
   return { sup, ga, ger, dir: chain.find(p => p.nivel === "diretor") || null, manual: !!man };
 }
 const iniciais = n => String(n || "?").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join("") || "?";
-const orgFoto = (p, cls = "") => p.foto ? `<img class="orgfoto ${cls}" data-foto="${esc(p.foto)}" alt="">` : `<span class="orgfoto ini ${cls}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
 const orgContato = p => [p.email ? `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>` : "", p.telefone ? `<a href="tel:${esc(String(p.telefone).replace(/[^0-9+]/g, ""))}">${esc(p.telefone)}</a>` : ""].filter(Boolean).join(" · ");
 function orgCard(p){
   const nA = Object.values(S.aeps).filter(a => { const r = respAEP(a); return [r.sup, r.ga, r.ger, r.dir].some(x => x && x.id === p.id); }).length;
-  return `<button type="button" class="orgcard${S.orgSel === p.id ? " sel" : ""} n-${esc(p.nivel)}" data-act="orgSel" data-id="${esc(p.id)}">${orgFoto(p)}
+  return `<button type="button" class="orgcard${S.orgSel === p.id ? " sel" : ""} n-${esc(p.nivel)}" data-act="orgSel" data-id="${esc(p.id)}">
     <span class="orgtx"><b>${esc(p.nome || "(sem nome)")}</b><span class="small">${esc(p.cargo || NIVEL_ROT[p.nivel] || "")}</span>
     <span class="tiny faint">${esc(NIVEL_ROT[p.nivel] || "")}${(p.setores || []).length ? ` · ${(p.setores || []).length} setor(es)` : ""}${nA ? ` · ${nA} AEP(s)` : ""}</span></span></button>`;
 }
@@ -3100,9 +3113,6 @@ function vOrgEditor(p){
   const chefes = orgLista().filter(x => x.id !== p.id && x.nivel !== "supervisor" && !orgCadeia(x).some(y => y.id === p.id));
   const cuida = p.nivel === "gerente" || p.nivel === "gerente_area" || p.nivel === "supervisor", outros = s => orgCuida(p.nivel, s).filter(x => x.id !== p.id).map(x => x.nome);
   return `<div class="panel orged" style="margin-bottom:14px"><div class="panel-h"><b>${esc(p.nome || "Nova pessoa")}</b><button class="btn ghost small" type="button" data-act="orgFechar">Fechar</button></div><div class="panel-b">
-    <div class="row" style="gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap">${orgFoto(p, "g")}
-      <span class="row" style="gap:8px;flex-wrap:wrap">${S.assets ? `<label class="btn small" for="orgFotoIn">${p.foto ? "Trocar foto" : "Pôr foto"}</label><input type="file" id="orgFotoIn" data-orgfoto="${k}" accept="image/*" hidden>` : `<span class="tiny muted">Fotos indisponíveis nesta visualização.</span>`}
-        ${p.foto ? `<button class="btn small ghost" type="button" data-act="orgTirarFoto" data-id="${k}">Tirar foto</button>` : ""}</span></div>
     <div class="grid g2">
       ${f("nome", "Nome *")}
       <label class="f"><span>Nível</span><select data-org="${k}" data-oc="nivel">${NIVEIS.map(([v, t]) => `<option value="${v}" ${p.nivel === v ? "selected" : ""}>${t}</option>`).join("")}</select></label>
@@ -3144,15 +3154,32 @@ function vOrgSetores(){
     </tbody></table></div><p class="tiny muted" style="padding:8px 16px 12px;margin:0">Numa AEP específica, a etapa 1 permite trocar o supervisor.</p></div>`;
 }
 /* Organograma em árvore (de cima para baixo, como o organograma da empresa) ou em lista (melhor no celular) */
+const orgBusca = () => norm(S.orgBusca || "").trim();
+const orgAchou = p => { const b = orgBusca(); return !!b && (norm(p.nome).includes(b) || norm(p.cargo || "").includes(b)); };
+const orgEquipe = id => { let n = 0; const anda = x => orgFilhos(x).forEach(y => { n++; anda(y.id); }); anda(id); return n; };
+const orgRecolhido = id => !!(S.orgFold || {})[id];
 function orgNo(p){
   const nA = Object.values(S.aeps).filter(a => { const r = respAEP(a); return [r.sup, r.ga, r.ger, r.dir].some(x => x && x.id === p.id); }).length;
-  return `<button type="button" class="onode n-${esc(p.nivel)}${S.orgSel === p.id ? " sel" : ""}" data-act="orgSel" data-id="${esc(p.id)}" title="${esc([NIVEL_ROT[p.nivel], (p.setores || []).length ? (p.setores || []).join(", ") : "", nA ? nA + " AEP(s)" : ""].filter(Boolean).join(" · "))}">
-    ${orgFoto(p, "o")}<b>${esc(p.nome || "(sem nome)")}</b><span>${esc(p.cargo || NIVEL_ROT[p.nivel] || "")}</span></button>`;
+  const dir = orgFilhos(p.id).length, eq = dir ? orgEquipe(p.id) : 0, rec = orgRecolhido(p.id);
+  return `<button type="button" class="onode n-${esc(p.nivel)}${S.orgSel === p.id ? " sel" : ""}${orgAchou(p) ? " achou" : ""}" data-act="orgSel" data-id="${esc(p.id)}" title="${esc([NIVEL_ROT[p.nivel], (p.setores || []).length ? (p.setores || []).join(", ") : "", nA ? nA + " AEP(s)" : ""].filter(Boolean).join(" · "))}">
+    <b>${esc(p.nome || "(sem nome)")}</b><span>${esc(p.cargo || NIVEL_ROT[p.nivel] || "")}</span>${nA || eq ? `<span class="onum">${[eq ? `${eq} na equipe` : "", nA ? `${nA} AEP(s)` : ""].filter(Boolean).join(" · ")}</span>` : ""}
+    ${dir ? `<span class="ofold" data-act="orgFold" data-id="${esc(p.id)}" role="button" tabindex="0" title="${rec ? "Mostrar a equipe" : "Recolher a equipe"}">${rec ? "+" + eq : "−"}</span>` : ""}</button>`;
 }
 function orgChartRamo(pai){
   const filhos = orgFilhos(pai);
   if (!filhos.length) return "";
-  return `<ul>${filhos.map(p => `<li>${orgNo(p)}${orgChartRamo(p.id)}</li>`).join("")}</ul>`;
+  return `<ul>${filhos.map(p => `<li${orgRecolhido(p.id) ? ' class="fold"' : ""}>${orgNo(p)}${orgChartRamo(p.id)}</li>`).join("")}</ul>`;
+}
+/* Busca: abre o caminho até quem foi encontrado e recolhe o resto */
+function orgBuscar(txt){
+  S.orgBusca = txt; const b = norm(txt || "").trim();
+  if (!b){ S.orgFold = {}; return; }
+  const fold = {}, achou = [];
+  Object.values(orgP()).forEach(p => { if (orgAchou(p)) achou.push(p); });
+  const abrir = new Set();
+  achou.forEach(p => orgCadeia(p).forEach(x => abrir.add(x.id)));
+  Object.values(orgP()).forEach(p => { if (orgFilhos(p.id).length && !abrir.has(p.id)) fold[p.id] = 1; });
+  S.orgFold = fold;
 }
 const orgVista = () => S.orgVista || (window.innerWidth < 700 ? "lista" : "arvore");
 function vOrgArv(){
@@ -3163,16 +3190,29 @@ function vOrgArv(){
 function ajustarOrg(){
   const c = $("#ochart"), w = $("#orgwrap"), pct = $("#orgzpct"); if (!c || !w) return;
   let z = S.orgZoom;
-  if (z == null || z === "fit"){ c.style.zoom = 1; z = Math.max(.4, Math.min(1, (w.clientWidth - 8) / Math.max(1, c.scrollWidth))); }
+  if (z == null || z === "fit"){ c.style.zoom = 1; const cs = getComputedStyle(w), pad = parseFloat(cs.paddingLeft || 0) + parseFloat(cs.paddingRight || 0);
+    z = Math.max(.3, Math.min(1, (w.clientWidth - pad - 6) / Math.max(1, c.scrollWidth)));
+    /* os tracinhos de ligacao passam um pouco da largura do quadro: corrige em ate duas passadas */
+    for (let i = 0; i < 2; i++){ c.style.zoom = z; if (w.scrollWidth <= w.clientWidth + 1) break; z = Math.max(.3, z * (w.clientWidth - 2) / w.scrollWidth); } }
   c.style.zoom = z; S.orgZoomAtual = z; if (pct) pct.textContent = Math.round(z * 100) + "%";
+}
+function orgBarra(arv, cheia){
+  const n = Object.keys(orgP()).length;
+  return `<div class="orgbar">
+    ${cheia ? `<button class="btn" type="button" data-act="orgFull" data-v="0">← Voltar</button><span class="tit">Organograma</span><span class="tiny muted">${n} pessoa(s)</span>` : `<div class="seg" role="group" aria-label="Forma de ver"><button type="button" data-act="orgVista" data-v="arvore" aria-pressed="${arv}">Organograma</button><button type="button" data-act="orgVista" data-v="lista" aria-pressed="${!arv}">Lista</button></div>`}
+    <span class="sep"></span>
+    <input type="search" data-orgbusca="1" value="${esc(S.orgBusca || "")}" placeholder="Buscar pessoa ou cargo" aria-label="Buscar pessoa">
+    ${arv ? `<span class="row" style="gap:6px;align-items:center"><button class="btn small" type="button" data-act="orgZoom" data-v="-" aria-label="Diminuir">−</button><span class="small" id="orgzpct" style="min-width:42px;text-align:center">100%</span><button class="btn small" type="button" data-act="orgZoom" data-v="+" aria-label="Aumentar">+</button><button class="btn small" type="button" data-act="orgZoom" data-v="fit">Ajustar à tela</button>
+      <button class="btn small" type="button" data-act="orgTudo" data-v="${Object.keys(S.orgFold || {}).length ? "abrir" : "fechar"}">${Object.keys(S.orgFold || {}).length ? "Abrir tudo" : "Só as chefias"}</button></span>` : ""}
+    ${cheia ? `<button class="btn primary small" type="button" data-act="orgNova">+ Pessoa</button>` : `<button class="btn" type="button" data-act="orgFull" data-v="1">Abrir em tela cheia</button>`}</div>`;
 }
 function vOrganograma(){
   const p = S.orgSel && orgP()[S.orgSel], arv = orgVista() === "arvore", tem = Object.keys(orgP()).length;
+  if (tem && S.orgFull) return `<div class="orgfs">${orgBarra(arv, true)}<div class="panel-b orgwrap0" id="orgarv">${vOrgArv()}</div>${p ? vOrgEditor(p) : ""}</div>`;
   return `<div class="pagehead"><div><h1>Organograma</h1><p>Lideranças por setor, sugeridas como responsáveis no Plano de ação.</p></div>
     <div class="row"><button class="btn primary" type="button" data-act="orgNova">+ Pessoa</button></div></div>
   ${p ? vOrgEditor(p) : ""}
-  <div class="panel">${tem ? `<div class="panel-h" style="flex-wrap:wrap;gap:8px"><div class="seg" role="group" aria-label="Forma de ver"><button type="button" data-act="orgVista" data-v="arvore" aria-pressed="${arv}">Organograma</button><button type="button" data-act="orgVista" data-v="lista" aria-pressed="${!arv}">Lista</button></div>
-    ${arv ? `<span class="row" style="gap:6px;align-items:center"><button class="btn small" type="button" data-act="orgZoom" data-v="-" aria-label="Diminuir">−</button><span class="small" id="orgzpct" style="min-width:42px;text-align:center">100%</span><button class="btn small" type="button" data-act="orgZoom" data-v="+" aria-label="Aumentar">+</button><button class="btn small" type="button" data-act="orgZoom" data-v="fit">Ajustar à tela</button></span>` : ""}</div>` : ""}
+  <div class="panel">${tem ? orgBarra(arv, false) : ""}
     <div class="panel-b" id="orgarv">${vOrgArv()}</div></div>
   <p class="tiny muted" style="margin:8px 2px 0">Clique numa pessoa para editar. Para pôr alguém abaixo de outra pessoa, clique nela primeiro e depois em “+ Pessoa”.</p>
   <div id="orgset">${vOrgSetores()}</div>`;
@@ -3197,12 +3237,6 @@ function novaPessoaOrg(){
   const id = "p" + uid(); mudarOrg(id, "nivel", nivel); mudarOrg(id, "nome", ""); if (sel && sel.nivel !== nivel) mudarOrg(id, "chefe", sel.id);
   S.orgSel = id; render(); const i = document.querySelector(`[data-org="${id}"][data-oc="nome"]`); if (i) i.focus();
 }
-async function fotoOrg(id, file){
-  if (!S.assets || !file) return;
-  try { setSaveState("Enviando foto…"); const r = await S.assets.upload(await comprimir(file), { type: "image/jpeg" }); const ant = orgP()[id]?.foto;
-    mudarOrg(id, "foto", r.id); await salvarOrg(); if (ant) { try { await S.assets.delete(ant); } catch(_){} } render(); toast("Foto colocada."); }
-  catch(e){ toast("Não foi possível enviar a foto."); setSaveState(""); }
-}
 async function excluirPessoaOrg(id){
   const p = orgP()[id]; if (!p) return; const pes = { ...orgP() }; delete pes[id];
   Object.values(pes).forEach(x => { if (x.chefe === id) pes[x.id] = { ...x, chefe: p.chefe || "" }; });
@@ -3225,7 +3259,7 @@ function vRespArea(L){
   const l = [...P.values()].sort((x, y) => (NIVEL_ORD[x.nivel] ?? 9) - (NIVEL_ORD[y.nivel] ?? 9) || String(x.nome).localeCompare(String(y.nome), "pt-BR"));
   if (!l.length) return "";
   return `<div class="panel" style="margin-bottom:16px"><div class="panel-h"><b>Responsáveis da área</b><span class="tiny muted">pelo organograma</span></div><div class="panel-b orgresp">
-    ${l.map(p => `<div class="orgmini">${orgFoto(p)}<span><b>${esc(p.nome)}</b><span class="tiny faint">${esc(p.cargo || NIVEL_ROT[p.nivel])}</span><span class="tiny">${orgContato(p)}</span></span></div>`).join("")}</div></div>`;
+    ${l.map(p => `<div class="orgmini"><span><b>${esc(p.nome)}</b><span class="tiny faint">${esc(p.cargo || NIVEL_ROT[p.nivel])}</span><span class="tiny">${orgContato(p)}</span></span></div>`).join("")}</div></div>`;
 }
 /* Plano de ação: sugestão de responsável e contato */
 const respSugerido = m => { const r = respAEP(m.a); return (r.sup || r.ga || r.ger || null); };
@@ -4644,7 +4678,6 @@ function campo(e, isChange){
     if (!isChange) return; mudarOrg(id, c, el.value); render(); return; }
   if (el.dataset.ligasetor !== undefined){ if (!isChange) return; ligarSetor(el.dataset.ligasetor, el.dataset.grupo, el.value); atualizarOrgParcial(); { const ed = $(".orged"), p = S.orgSel && orgP()[S.orgSel]; if (ed && p) ed.outerHTML = vOrgEditor(p); } toast(el.value ? "Área ligada." : "Área sem responsável."); return; }
   if (el.dataset.orgsetor){ if (!isChange) return; const id = el.dataset.orgsetor, p = orgP()[id]; if (!p) return; const set = new Set(p.setores || []); el.checked ? set.add(el.value) : set.delete(el.value); mudarOrg(id, "setores", [...set].sort()); render(); return; }
-  if (el.dataset.orgfoto){ if (!isChange) return; const f = el.files && el.files[0]; el.value = ""; fotoOrg(el.dataset.orgfoto, f); return; }
   if (el.dataset.fonteprop !== undefined){ if (!isChange) return; marcarFontePropria(el.dataset.fonteprop, el.checked); return; }
   if (el.dataset.fcomp !== undefined){ const h = S.editHz; if (!h) return; const pre = prefixoFonteDe(h) || TAXMAP[h.codigo]?.fonte || "", v = el.value.trim();
     h.fonte = pre + (v ? " " + v : ""); onHzChange("editHz.fonte", el); return; }
@@ -4658,6 +4691,8 @@ function campo(e, isChange){
     S.pgrAntDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.pgrAntTimer); S.pgrAntTimer = setTimeout(salvarPgrAnt, 700); AVISO_CACHE = new WeakMap();
     if (isChange && S.view === "aep" && S.draft) setTimeout(() => { renderAside(); renderRail(); }, 0); return; }
   if (el.dataset.pgrf){ if (!isChange) return; S.pgrAntFiltro = el.value; render(); return; }
+  if (el.dataset.orgbusca){ if (isChange) return; clearTimeout(S.orgBT);
+    S.orgBT = setTimeout(() => { orgBuscar(el.value); render(); const i = document.querySelector("[data-orgbusca]"); if (i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 300); return; }
   if (el.dataset.pgrbusca){ if (isChange) return; S.pgrAntBusca = el.value; clearTimeout(S.pgrBT);
     S.pgrBT = setTimeout(() => { render(); const i = document.querySelector("[data-pgrbusca]"); if (i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 300); return; }
   if (el.dataset.aepsup){ if (!isChange) return; const sup = { ...(S.org.aepSup || {}) }; if (el.value) sup[el.dataset.aepsup] = el.value; else delete sup[el.dataset.aepsup];
@@ -4779,6 +4814,7 @@ document.addEventListener("input", e => campo(e, false));
 document.addEventListener("change", e => campo(e, true));
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && S.orgFull && S.view === "organograma"){ S.orgFull = false; render(); return; }
   if (e.key === "Escape") { document.querySelectorAll("details.msel[open]").forEach(dt => { dt.open = false; dt.querySelector("summary")?.focus(); }); return; }
   if (e.key !== "Enter") return;
   const r = e.target.closest && e.target.closest("tr[data-open], tr[data-area]");
@@ -4831,8 +4867,16 @@ document.addEventListener("click", async e => {
     case "orgListaSim": { const r = aplicarGerentesLista(); S.confirm = null; await salvarOrg(); render(); toast(`${r.lig} área(s) ligada(s)${r.novos.length ? `; cadastrado(s): ${r.novos.join(", ")}` : ""}.`); break; }
     case "orgMover": moverOrg(d.id, Number(d.v)); break;
     case "orgVista": S.orgVista = d.v; render(); break;
+    case "orgFull": { S.orgFull = d.v === "1"; S.orgZoom = "fit";
+      /* organograma grande abre já recolhido nas chefias, senão fica ilegível */
+      if (S.orgFull && !Object.keys(S.orgFold || {}).length && Object.keys(orgP()).length > 25){
+        const f = {}; Object.values(orgP()).forEach(x => { if (x.nivel === "gerente_area" && orgFilhos(x.id).length) f[x.id] = 1; }); S.orgFold = f; }
+      render(); break; }
+    case "orgFold": { const f = { ...(S.orgFold || {}) }; f[d.id] ? delete f[d.id] : f[d.id] = 1; S.orgFold = f; atualizarOrgParcial(); break; }
+    case "orgTudo": { if (d.v === "abrir") S.orgFold = {};
+      else { const f = {}; Object.values(orgP()).forEach(p => { if (p.nivel === "gerente_area" && orgFilhos(p.id).length) f[p.id] = 1; }); S.orgFold = f; }
+      render(); break; }
     case "orgZoom": { const z = S.orgZoomAtual || 1; S.orgZoom = d.v === "fit" ? "fit" : d.v === "+" ? Math.min(1.6, +(z + .1).toFixed(2)) : Math.max(.3, +(z - .1).toFixed(2)); ajustarOrg(); break; }
-    case "orgTirarFoto": { const ant = orgP()[d.id]?.foto; mudarOrg(d.id, "foto", ""); await salvarOrg(); if (ant && S.assets) { try { await S.assets.delete(ant); } catch(_){} } render(); break; }
     case "orgDel": S.confirm = "orgDel-" + d.id; render(); break;
     case "orgDelSim": excluirPessoaOrg(d.id); break;
     case "usarResp": mudarMelhoria(d.key, "resp", d.nome); atualizarMelhorias(); break;
