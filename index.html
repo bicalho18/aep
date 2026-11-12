@@ -24,7 +24,7 @@
   --f-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --radius:6px;
+  --radius:6px; --radius-lg:10px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -125,7 +125,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 }
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .mesdrop{position:relative}
-.mesdrop-p{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:360px;overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:4px}
+.mesdrop-p{position:absolute;z-index:30;top:calc(100% + 4px);left:0;min-width:240px;max-height:360px;overflow:auto;background:var(--surface);border:1px solid var(--rule-strong);border-radius:var(--radius-lg);padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.12);display:flex;flex-direction:column;gap:4px}
 .mesck{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;white-space:nowrap}
 .seg button{border:1px solid var(--rule-strong);background:var(--surface);color:var(--ink-2);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer}
 .seg button b{font-variant-numeric:tabular-nums;margin-left:4px;color:var(--ink-3)}
@@ -178,7 +178,7 @@ label.row > input[type=checkbox] + span{flex:1 1 0;min-width:0}
 .note b{font-weight:600}
 
 /* ---------- Chips ---------- */
-.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--rule-strong);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--rule-strong);color:var(--ink-2);background:var(--surface);white-space:nowrap}
 .chip.fav{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
 .chip.int{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
 .chip.ris{border-color:var(--bad-line);background:var(--bad-bg);color:var(--bad-ink)}
@@ -192,7 +192,7 @@ label.row > input[type=checkbox] + span{flex:1 1 0;min-width:0}
 .pagehead p{margin-top:4px;color:var(--ink-2);max-width:68ch}
 .stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:18px}
 .stat{padding-left:12px;border-left:2px solid var(--rule)}
-.stat b{display:block;font-family:var(--f-cond);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat b{display:block;font-family:var(--f-cond);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
 .stat span{font-size:12px;color:var(--ink-3)}
 .tablewrap{overflow-x:auto}
 table.list{width:100%;border-collapse:collapse;min-width:760px}
@@ -235,7 +235,7 @@ table.list tr:last-child td{border-bottom:0}
 @media (max-width:1180px){.aside .panel{position:static}}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .kpis > div{border:1px solid var(--rule);border-radius:var(--radius);background:var(--surface-2);padding:8px 10px}
-.kpis b{display:block;font-family:var(--f-cond);font-size:24px;font-weight:700;line-height:1.1;color:var(--ink)}
+.kpis b{display:block;font-family:var(--f-cond);font-size:20px;font-weight:700;line-height:1.1;color:var(--ink)}
 .kpis span{font-size:11.5px;color:var(--ink-3);line-height:1.3}
 .pendlist{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-2)}
 
@@ -318,7 +318,7 @@ details.panel>summary{list-style:none;display:flex;justify-content:space-between
 details.panel>summary::-webkit-details-marker{display:none}
 details.panel>summary b::before{content:"▸ ";color:var(--ink-3)}
 details.panel[open]>summary b::before{content:"▾ "}
-.catchip{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.catchip{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
 .catchip.c1{background:#E3F4E4;color:#1F6B2B;border-color:#A9D8AE}.catchip.c2{background:#EFF4D2;color:#56620F;border-color:#CCD98A}
 .catchip.c3{background:#FFF1CC;color:#7A5200;border-color:#EBCB7C}.catchip.c4{background:#FFE0C7;color:#8A3B07;border-color:#F2B07E}.catchip.c5{background:#FBD9D5;color:#8E1C1C;border-color:#E9A9A5}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .catchip{filter:brightness(.85) saturate(1.1)}}
@@ -380,10 +380,10 @@ details.como p{margin:6px 0 0}
 .cb-f{display:block;height:100%;border-radius:0 4px 4px 0;min-width:0}
 .cb-f.c1{background:#7FC487}.cb-f.c2{background:#B9C95E}.cb-f.c3{background:#E3B94E}.cb-f.c4{background:#EC9150}.cb-f.c5{background:#DA6A63}
 .rtiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.rtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px;border:1px solid var(--rule);border-radius:8px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
-.rtile:hover{border-color:var(--accent)}.rtile b{font-size:22px;line-height:1.1}.rtile b.neg{color:var(--bad-ink)}.rtile span{font-size:12px;color:var(--ink-3)}
+.rtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px;border:1px solid var(--rule);border-radius:var(--radius-lg);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.rtile:hover{border-color:var(--accent)}.rtile b{font-size:19px;line-height:1.15}.rtile b.neg{color:var(--bad-ink)}.rtile span{font-size:12px;color:var(--ink-3)}
 @media (max-width:700px){.rtiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.pgrnum{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0}.pgrnum b{display:block;font-size:20px}.pgrnum span{font-size:12px;color:var(--ink-3)}
+.pgrnum{display:flex;gap:22px;flex-wrap:wrap;margin:4px 0}.pgrnum b{display:block;font-size:18px;font-variant-numeric:tabular-nums}.pgrnum span{font-size:12px;color:var(--ink-3)}
 .pgrtrans{margin-top:6px}.pgrtrans summary{cursor:pointer;color:var(--ink-3)}
 .taxalt{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--warn-line);vertical-align:middle}
 .taxtab tr.taxinat td{color:var(--ink-3)}
@@ -397,7 +397,7 @@ details.como p{margin:6px 0 0}
 .orgtree:first-child{padding-left:0;border-left:0}
 .orgtree li{margin:8px 0;position:relative}
 .orgtree .orgtree li::before{content:"";position:absolute;left:-22px;top:28px;width:18px;border-top:2px solid var(--rule)}
-.orgcard{display:inline-flex;gap:10px;align-items:center;text-align:left;padding:8px 12px 8px 8px;border:1px solid var(--rule);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;max-width:100%}
+.orgcard{display:inline-flex;gap:10px;align-items:center;text-align:left;padding:8px 12px 8px 8px;border:1px solid var(--rule);border-radius:var(--radius-lg);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer;max-width:100%}
 .orgcard:hover,.orgcard.sel{border-color:var(--accent)}.orgcard.sel{background:var(--accent-soft)}
 .orgcard.n-diretor{border-left:4px solid var(--accent)}.orgcard.n-gerente{border-left:4px solid var(--ink-3)}
 .orgtx{display:flex;flex-direction:column;gap:1px;min-width:0}.orgtx b{font-size:14px}
@@ -423,7 +423,7 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .ochart li:only-child::after{border-radius:0}
 .ochart>ul>li::before,.ochart>ul>li::after{display:none}
 .ochart ul ul::before{content:"";position:absolute;top:0;left:50%;height:24px;border-left:2px solid var(--rule-strong)}
-.onode{display:flex;flex-direction:column;align-items:center;gap:3px;width:116px;padding:8px 4px;border:1px solid transparent;border-radius:10px;background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
+.onode{display:flex;flex-direction:column;align-items:center;gap:3px;width:116px;padding:8px 4px;border:1px solid transparent;border-radius:var(--radius-lg);background:none;color:var(--ink);font:inherit;cursor:pointer;text-align:center}
 .onode:hover{background:var(--surface-2);border-color:var(--rule)}
 .onode.sel{background:var(--accent-soft);border-color:var(--accent)}
 .onode b{font-size:12.5px;line-height:1.25;text-transform:uppercase;letter-spacing:.01em}
@@ -431,7 +431,7 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 .orgfoto.o{width:66px;height:66px;border:3px solid var(--accent);font-size:20px;margin-bottom:3px}
 .onode.n-diretor .orgfoto.o{width:80px;height:80px;font-size:24px}
 .orgsettab tr.falta td:first-child{box-shadow:inset 3px 0 0 var(--warn-line)}
-.lote{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin:0 0 14px}
+.lote{border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--radius-lg);padding:12px 14px;margin:0 0 14px}
 .lote textarea,.lote input[type=text]{width:100%}
 .medlista{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin-top:4px}
 .medrow{display:grid;grid-template-columns:200px 1fr auto;gap:6px;width:100%;align-items:center}
@@ -439,18 +439,22 @@ ul.avisos{margin:6px 0 0 18px;padding:0}ul.avisos li{margin:2px 0;font-size:13px
 @media (max-width:700px){.medrow{grid-template-columns:1fr auto}.medrow select{grid-column:1/-1}}
 .mtipo.op{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 .mtipo.corr{background:var(--surface-2);color:var(--ok-ink);border:1px solid var(--ok-line)}
-.corrbox{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;margin:10px 0;background:var(--surface-2)}
+.corrbox{border:1px solid var(--rule);border-radius:var(--radius-lg);padding:10px 12px;margin:10px 0;background:var(--surface-2)}
 .corrbox.on{border-color:var(--ok-line);background:var(--ok-bg)}
-.pgrlin{border:1px solid var(--rule);border-radius:10px;padding:8px 12px}
+.pgrlin{border:1px solid var(--rule);border-radius:var(--radius-lg);padding:8px 12px}
 .pgrlin textarea{width:100%;margin-top:6px}
 .pgrign{margin-top:4px}.pgrign>summary{cursor:pointer}
-.selo{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.02em;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.selo{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;margin-left:6px;vertical-align:middle;white-space:nowrap}
 .selo.pgr{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--rule-strong)}
-.selo.fora{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
-.invjust{border:1px dashed var(--rule-strong);border-radius:10px;padding:8px 12px}
+.selo.fora{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--rule-strong)}
+.catdot{display:inline-block;width:9px;height:9px;border-radius:999px;margin-right:5px;vertical-align:0;border:1px solid rgba(0,0,0,.12)}
+.catdot.c1{background:#A9D8AE}.catdot.c2{background:#CCD98A}.catdot.c3{background:#EBCB7C}.catdot.c4{background:#F2B07E}.catdot.c5{background:#E9A9A5}
+.catcont{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline}
+.catcont span.n{font-weight:700;font-variant-numeric:tabular-nums}
+.invjust{border:1px dashed var(--rule-strong);border-radius:var(--radius-lg);padding:8px 12px}
 .invjust>summary{cursor:pointer;color:var(--ink-2);font-weight:600}
 .invjust[open]>summary{margin-bottom:8px}
-.corrfoto{max-width:220px;max-height:160px;border-radius:8px;display:block;margin:4px 0 6px;object-fit:cover;background:var(--surface-2)}
+.corrfoto{max-width:220px;max-height:160px;border-radius:var(--radius);display:block;margin:4px 0 6px;object-fit:cover;background:var(--surface-2)}
 select.prio-Alta{border-color:var(--bad-line)!important;background:var(--bad-bg)!important;color:var(--bad-ink)!important;font-weight:700}
 select.prio-Média{border-color:var(--warn-line)!important;background:var(--warn-bg)!important;color:var(--warn-ink)!important;font-weight:600}
 select.prio-Baixa{border-color:var(--ok-line)!important;background:var(--ok-bg)!important;color:var(--ok-ink)!important}
@@ -761,7 +765,7 @@ const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) 
 const hojeISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 const fmtData = iso => { if(!iso) return "—"; const [y,m,d] = String(iso).slice(0,10).split("-"); return d && m && y ? `${d}/${m}/${y}` : esc(iso); };
 const norm = s => String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-const clamp = n => Math.min(5, Math.max(1, Math.round(Number(n) || 1)));
+
 const num2 = v => (v === "" || v == null || isNaN(Number(v))) ? "—" : Number(v).toFixed(2).replace(".",",");
 const idNum = a => Number(String(a.numero||"").replace(/\D+/g,"")) || 0;
 function getPath(obj, path){ return path.split(".").reduce((o,k) => (o == null ? undefined : o[k]), obj); }
@@ -773,7 +777,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.12c";
+const VERSAO = "2026.11.12e";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -820,7 +824,7 @@ const ckCorrigidos = a => ckLista(a).filter(x => x.c.r === "sim" && !!itemCorrig
 const resolvido = r => r.sit === "ok" || r.sit === "corrigido" || r.sit === "desvio";
 /* Destino de cada perigo: exigência e deficiência de projeto vão ao PGR; corrigido e desvio de conservação ficam fora */
 const foraPGR = c => !!(c && (c.corr || c.desvio));
-const seloPGR = c => foraPGR(c) ? `<span class="selo fora" title="Não vai ao inventário do PGR">Fora do PGR</span>` : `<span class="selo pgr" title="Vai ao inventário do PGR">PGR</span>`;
+const seloPGR = c => foraPGR(c) ? `<span class="selo fora" title="Corrigido ou desvio de conservação: não vai ao inventário do PGR">Fora do PGR</span>` : "";
 /* Evidência da medida (Regra 1): escolha curta, sem amarrar a um documento específico */
 const EVID_TIPOS = [["campo", "Observação de campo registrada na AEP"], ["doc", "Registro documental (lista de presença, procedimento, OS)"], ["ambos", "Observação de campo e registro documental"]];
 /* Desvio de conservação (27/10/2026): item ADEQUADO que quebrou, queimou ou parou (cadeira regulável quebrada, lâmpada queimada, ventilador parado).
@@ -837,7 +841,7 @@ function desviosRecorrentes(){ const g = {};
 /* Lançamento na planilha de controle: marcação manual; vale enquanto a AEP não for concluída de novo depois dela */
 const dataLocal = iso => iso ? new Date(iso).toLocaleDateString("pt-BR") : "—";
 const lancadaOk = a => a.status === "concluida" && !!a.planilha?.em && (!a.concluidoEm || a.concluidoEm <= a.planilha.em);
-const lancadaVelha = a => !!a.planilha?.em && !lancadaOk(a);
+
 /* Etapa 3: modelo do setor. A leitura COPSOQ × campo é a mesma para os cargos do setor: monta-se uma vez,
    salva-se como modelo e as AEPs do setor com a etapa 3 vazia já abrem preenchidas (e com os perigos que a leitura exige). */
 const setorDaAEP = a => { const sn = copsoqDaAEP(a); return sn ? S.areas[sn.setorId] || null : null; };
@@ -1094,17 +1098,7 @@ function melStatsHTML(){
   const T = itensPlanoDe(aepsPlano()), ab = T.filter(m => abertaSit(m.sit)), venc = ab.filter(m => m.atrasada).length, falta = ab.filter(m => !m.resp || !m.prazo).length;
   return `<div class="melstats"><div><b>${ab.length}</b><span>em aberto</span></div><div><b${venc ? ` style="color:var(--bad-ink)"` : ""}>${venc}</b><span>com prazo vencido</span></div><div><b${falta ? ` style="color:var(--bad-ink)"` : ""}>${falta}</b><span>em aberto sem responsável ou prazo</span></div></div>`;
 }
-function melStatsHTMLAntigo(){
-  const R = resumoPlano(itensPlanoDe(aepsPlano()));
-  const red = n => n ? ` style="color:var(--bad-ink)"` : "";
-  return `<div class="melstats"><div><b>${R.abertas}</b><span>em aberto</span></div>
-    <div><b${red(R.p1)}>${R.p1}</b><span>ações P1 em aberto</span></div><div><b>${R.p2}</b><span>ações P2 em aberto</span></div>
-    <div><b${red(R.semacao)}>${R.semacao}</b><span>riscos com ação a definir</span></div>
-    <div><b${red(R.atrasadas)}>${R.atrasadas}</b><span>com prazo vencido</span></div>
-    <div><b${red(R.semsig)}>${R.semsig}</b><span>em aberto sem Nº do SIG</span></div>
-    <div><b>${R.concluidas}</b><span>concluídas</span></div>
-    <div><b>${R.eficacia}</b><span>concluídas com eficácia a verificar</span></div></div>`;
-}
+
 const selMel = (key, campo, lista, val, cls = "", vazio) => `<select data-mel="${esc(key)}" data-mc="${campo}" class="${cls}" aria-label="${{ prio: "Prioridade", sit: "Situação", hier: "Hierarquia", efic: "Eficácia" }[campo] || campo}">${vazio != null ? `<option value="">${esc(vazio)}</option>` : ""}${lista.map(x => `<option ${x === val ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
 const chipTipo = m => m.kind === "desv" ? `<span class="mtipo rec">Desvio de conservação</span>` : m.kind === "corr" ? `<span class="mtipo corr">Correção imediata</span>` : m.kind === "risco" ? `<span class="mtipo ${m.pc === "P1" ? "p1" : m.pc === "P2" ? "p2" : ""}">${esc(m.tipo)}</span>`
   : `<span class="mtipo ${m.op ? "op" : "rec"}">${m.op ? "Oportunidade de melhoria" : "Recomendação"}</span>`;
@@ -1133,28 +1127,12 @@ function oQueFazer(m){
     <div class="tiny faint">${esc(TIPO_CURTO(m))}${m.n > 1 ? ` · ação ${m.n}` : ""}${m.h ? ` · ${esc(m.h.idRisco || "")} ${esc(m.t?.nome || m.h.codigo)}` : ""}${(tag => tag ? ` · <span class="plaviso" style="font-weight:700">${esc(tag[0])}</span>` : "")(av.find(x => x[0] !== "Ação a definir"))}</div>
     <button class="btn ghost small" type="button" data-act="planoDet" data-key="${esc(m.key)}" style="padding:0;margin-top:2px">${S.melAberto === m.key ? "Fechar detalhes" : "Detalhes"}</button>`;
 }
-function oQueFazerAntigo(m){
-  const aviso = [];
-  if (m.kind === "risco" && !m.texto && m.sit !== "Não se aplica") aviso.push("Ação a definir");
-  if (m.sit === "Concluída" && !m.evid) aviso.push("Concluída sem evidência");
-  if (m.kind === "desv" && abertaSit(m.sit) && !m.prazo) aviso.push("Defina o prazo da correção");
-  if (m.kind === "desv" && abertaSit(m.sit) && !m.resp) aviso.push("Defina o responsável");
-  if (m.kind === "desv" && m.sit === "Concluída" && !m.conc) aviso.push("Informe a data de conclusão");
-  if (m.kind === "risco" && !m.precisa && m.r.corr) aviso.push("Perigo corrigido (correção imediata): se esta ação é a própria correção, marque como Concluída");
-  else if (m.kind === "risco" && !m.precisa) aviso.push(m.r.sit === "ok" ? `Risco agora ${m.r.cat.replace("Risco ", "")}: confira se a ação continua necessária` : "Classificação do risco incompleta no Inventário");
-  const cab = m.kind === "risco"
-    ? `${chipTipo(m)} <span class="mono small">${esc(m.h.idRisco)}${m.n > 1 ? ` · ação ${m.n}` : ""}</span> <span class="small">${esc(m.t?.nome || "")}</span> ${chipCat(m.r.cat)}
-       <div class="small" style="margin-top:3px">${m.texto ? esc(m.texto) : `<span class="faint">Descreva a ação em Detalhes.</span>`}</div>`
-    : m.kind === "corr" || m.kind === "desv" ? `${chipTipo(m)} <span class="mono small">${esc(m.h.idRisco)}</span> <span class="small">${esc(m.t?.nome || "")}</span><div class="small" style="margin-top:3px">${esc(m.texto)}</div>`
-    : `${chipTipo(m)}<div class="small">${esc(m.texto)}</div>`;
-  return `${cab}${m.kind === "risco" ? `<span class="selo pgr" title="Ação de um risco do inventário do PGR">PGR</span>` : `<span class="selo fora" title="Ação fora do inventário do PGR">Fora do PGR</span>`}${aviso.map(x => `<div class="tiny plaviso">${esc(x)}</div>`).join("")}
-    <button class="btn ghost small" type="button" data-act="planoDet" data-key="${esc(m.key)}" style="padding:0;margin-top:2px">${S.melAberto === m.key ? "Fechar detalhes" : "Detalhes"}</button>`;
-}
+
 function vPlanoDetalhe(m){
   const k = esc(m.key), inp = (campo, tipo, val, ph = "") => `<input type="${tipo}" data-mel="${k}" data-mc="${campo}" value="${esc(val)}" placeholder="${esc(ph)}">`;
   const risco = m.kind === "risco", av = avisosPlano(m).filter(x => x[1]);
   return `<div class="pldet grid g2">
-    <div class="spanall small">${chipTipo(m)} ${risco ? `${chipCat(m.r.cat)} ` : ""}${m.kind === "risco" ? `<span class="selo pgr">PGR</span>` : `<span class="selo fora">Fora do PGR</span>`}${m.h ? ` <span class="tiny muted">${esc(m.h.idRisco || "")} ${esc(m.h.codigo)}: ${esc(m.t?.nome || "")}</span>` : ""}</div>
+    <div class="spanall small">${chipTipo(m)} ${risco ? `${chipCat(m.r.cat)} ` : ""}${m.kind === "risco" ? "" : `<span class="selo fora">Fora do PGR</span>`}${m.h ? ` <span class="tiny muted">${esc(m.h.idRisco || "")} ${esc(m.h.codigo)}: ${esc(m.t?.nome || "")}</span>` : ""}</div>
     ${av.map(x => `<div class="spanall tiny plaviso">${esc(x[1])}</div>`).join("")}
     <label class="f"><span>Prioridade</span>${risco ? prioFixa(m) : selMel(m.key, "prio", MEL_PRIO, m.prio, "prio-" + m.prio)}</label><div></div>
     ${m.kind === "desv" ? `<div class="spanall small">Desvio de conservação (item adequado danificado): não vai ao PGR. Acompanhe aqui até a execução. Encaminhar não é resolver: conclua só com a data de conclusão e a evidência (foto, OS encerrada). <button class="btn ghost small" type="button" data-act="verRisco" data-key="${esc(m.base)}" style="padding:0">ver no Inventário</button></div>` : ""}
@@ -1856,7 +1834,6 @@ function vPgrAntAEP(a){
     ${vPgrAntIgn(a)}
   </div></div>`;
 }
-function docPgrAnt(){ return ""; }
 
 /* Tela: lista simples do que falta olhar, AEP por AEP */
 function dadosPgrAnt(){
@@ -2226,7 +2203,7 @@ function graficoMeta(D){
     <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.pa && x.ca < x.pa ? " neg" : ""}">${x.m > D.atual || !x.pa ? "" : pctTxt(x.ca / x.pa)}</td>`).join("")}</tr>
   </tbody></table></div>`;
 }
-const linhaAEP = (a, extra) => `<tr class="click" data-open="${esc(a.id)}" tabindex="0"><td class="mono">${esc(a.numero)}</td><td>${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td><td>${extra}</td></tr>`;
+
 function painelCorpo(){
   const L = aepsFiltradas(), tot = L.length, c = st => L.filter(a => (a.status||"nao_iniciada") === st).length;
   const concl = c("concluida"), and = c("andamento"), nao = c("nao_iniciada"), rev = c("revisao");
@@ -2562,7 +2539,7 @@ function vInvResumo(){
     <div hidden>
     <div class="stat"><b>${n("falta")}</b><span>falta classificar</span></div><div class="stat"><b>${n("incompleta")}</b><span>incompletos</span></div><div class="stat"><b style="${n("alerta") ? "color:var(--bad-ink)" : ""}">${n("alerta")}</b><span>com alerta</span></div>${n("corrigido") ? `<div class="stat"><b>${n("corrigido")}</b><span>corrigidos (fora do PGR)</span></div>` : ""}${n("desvio") ? `<div class="stat"><b>${n("desvio")}</b><span>desvios de conservação (fora do PGR)</span></div>` : ""}</div>
     ${(rec => rec.length ? `<div class="note warn" style="margin-bottom:12px"><b>Desvio de conservação repetido:</b> ${rec.map(([cod, q]) => `${esc(cod)} em ${q} AEPs`).join("; ")}. A repetição indica que a inspeção, a manutenção ou a reposição não está funcionando (NR-1, 1.5.4.4.6, c). Avalie tratar esse controle no PGR, com uma linha para o controle e não uma por item.</div>` : "")(desviosRecorrentes())}
-    <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">${CATEGORIAS.map(cn => `<span class="small">${chipCat(cn)} <b>${L.filter(x => x.r.cat === cn && x.r.sit === "ok").length}</b></span>`).join("")}<span class="tiny muted">classificados por categoria (residual)</span></div>`;
+    <div class="catcont small" style="margin-bottom:14px">${CATEGORIAS.map(cn => `<span><i class="catdot ${CAT_CLS[cn]}"></i>${esc(cn.replace("Risco ", ""))} <span class="n">${L.filter(x => x.r.cat === cn && x.r.sit === "ok").length}</span></span>`).join("")}<span class="tiny muted">classificados por categoria (residual)</span></div>`;
 }
 function vInvLinhas(){
   const L = listaInventario();
@@ -2899,7 +2876,7 @@ function taxDiferencas(de, para){
 }
 const taxPub = () => S.tax.itens || {};
 const taxRasc = () => S.taxDraft || taxPub();
-const taxTemRascunho = () => !!S.taxDraft && taxDiferencas(taxPub(), S.taxDraft).length > 0;
+
 /* uso de cada código nas AEPs, no Inventário e no PGR */
 function taxUso(cod){
   let perigos = 0, aeps = 0, classif = 0, pgr = 0;
@@ -3706,7 +3683,7 @@ function vHzEditor(){
       ${(() => { const pre = t && !fontePropria(h) ? prefixoFonteDe(h) : "";
         if (!pre) return el("editHz.fonte","Fonte(s) geradora(s)",{area:1,req:1,rows:4,ph:"Escolha o perigo: o texto padrão da planilha entra aqui. Depois dele, complemente com a condição deste cargo.",hint:"O início é o texto padrão da TAXONOMIA. Complemente depois dele com o que é específico deste cargo."});
         const comp = String(h.fonte || "").trim().slice(pre.length).trim(), basta = fonteBasta(pre, h.codigo);
-        return `<div class="f"><span>Fonte geradora: frase padrão <span class="faint" style="font-weight:400">(fixa, igual em todas as AEPs)</span></span><p class="small" id="hz-fpad" style="margin:4px 0 0;padding:8px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--surface-2)">${esc(pre)}</p></div>
+        return `<div class="f"><span>Fonte geradora: frase padrão <span class="faint" style="font-weight:400">(fixa, igual em todas as AEPs)</span></span><p class="small" id="hz-fpad" style="margin:4px 0 0;padding:8px 10px;border:1px solid var(--rule);border-radius:6px;background:var(--surface-2)">${esc(pre)}</p></div>
         <label class="f"><span>O que é deste cargo${basta ? ` <span class="faint" style="font-weight:400">(opcional: a frase padrão já descreve a situação)</span>` : ` <span class="faint" style="font-weight:400">(recomendado; se ficar vazio, a AEP mostra só um aviso)</span>`}</span><textarea id="f-fcomp" data-fcomp="1" rows="3" placeholder="Só o que diferencia este cargo: a tarefa, o objeto, o local ou a condição. Não repita a frase padrão.">${esc(comp)}</textarea><span class="hint">No PGR sai a frase padrão seguida deste texto. Ex.: “Sacarias de explosivos levantadas e posicionadas em diferentes alturas e condições de terreno.”</span></label>`; })()}
       <label class="row small" style="gap:8px;align-items:center;cursor:pointer"><input type="checkbox" data-fonteprop="${esc(S.editHz?.id || "")}" ${fontePropria(S.editHz) ? "checked" : ""}> Fonte própria: escrevi a fonte do meu jeito, sem o texto padrão (o aviso de padrão não aparece para este perigo)</label>
       <div id="hz-rep">${rep ? `<div class="note warn">Complemento da fonte idêntico em AEP de outro cargo: ${esc(rep)}. Complemento repetido entre cargos não identifica a condição do posto: revise.</div>` : ""}</div>
@@ -4263,7 +4240,7 @@ const ICO = {
 };
 const ico = (n, cls = "") => `<svg class="gx-i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICO[n]}</svg>`;
 const ICO_CAT = { OT: "relogio", BIO: "corpo", EQ: "ferramenta", AMB: "sol" };
-const icoItem = n => ICO_CAT[String((CK_PERIGOS[n]||[])[0] || "BIO").split("-")[0]] || "alert";
+
 const GX_CSS = `
 .gx-sub2{margin:0 0 8px;font-size:13px;color:var(--x-ink2)}
 .gx-pl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.gx-pl>div{border:1px solid var(--x-rule);border-radius:10px;padding:8px 12px}.gx-pl b{display:block;font-size:24px;line-height:1.1}.gx-pl span{font-size:12px;color:var(--x-ink3)}.gx-pl .hot b{color:var(--x-acc)}
@@ -4414,10 +4391,7 @@ function gerCorpo(){
   <p class="tiny muted" style="margin-top:10px">O detalhamento por cargo e por área sai no botão “PDF: detalhamento por cargo”.</p>`;
 }
 /* Detalhamento (aba Painel) */
-function vGerDetalhe(){
-  return `<div class="panel"><div class="panel-h" style="flex-wrap:wrap;gap:8px"><b>Detalhamento por gerência</b><span class="row" style="gap:8px;flex-wrap:wrap">${vMultiSetor("f-gerdet")}<button class="btn small" type="button" data-act="pdfGerDet" id="btnPDFgerDet">Salvar em PDF</button></span></div>
-    <div class="panel-b"><style>${GER_CSS}</style><div id="gerdetbox">${gerHTML(S.fSetor, {})}</div></div></div>`;
-}
+
 async function gerarPDFGerencia(det){
   const btn = $(det ? "#btnPDFgerDet" : "#btnPDFger"); if (!btn || btn.disabled) return; const txt = btn.textContent; btn.disabled = true; btn.textContent = "Preparando…";
   try {
