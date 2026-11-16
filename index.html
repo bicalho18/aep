@@ -275,6 +275,9 @@ table.list tr:last-child td{border-bottom:0}
 .msel-pop label span{flex:1}
 .msel-pop label b{font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:12px}
 .msel-pop label:has(input:checked){background:var(--accent-soft)}
+.msel-pop label.mselsub{padding-left:26px;font-size:13px;color:var(--ink-2)}
+.msel-pop label.mselsub input{width:15px;height:15px}
+.msel-pop .mselbusca{width:100%;margin:0 0 6px;padding:7px 10px;border:1px solid var(--rule-strong);border-radius:6px;font-size:13.5px;background:var(--surface);color:var(--ink)}
 .recm{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 12px;background:var(--surface-2)}
 .recm-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:8px}
 .recm-h b{font-size:13px}
@@ -807,7 +810,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.16b";
+const VERSAO = "2026.11.16c";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1098,7 +1101,7 @@ function itensPlanoDe(L){ return L.flatMap(a => [...acoesDaAEP(a), ...correcoesD
 function aepsPlano(){
   return Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y))
     .filter(a => S.melEsc === "todas" || fechadaAEP(a))
-    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
+    .filter(a => passaSetor(a));
 }
 const PL_SIT = {
   abertas: m => abertaSit(m.sit), atrasadas: m => m.atrasada, semsig: m => abertaSit(m.sit) && !m.sig,
@@ -1566,7 +1569,7 @@ const S = {
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgFull:false, orgFold:{}, orgBusca:"", orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
   invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, fPlano:"todas", pMeses:null, pMesAberto:false, repAberto:false, repSai:{}, repEntra:{}, cancelBox:false, cancelMotivo:"", cancelObs:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
-  busca:"", fStatus:[], fSetor:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
+  busca:"", fStatus:[], fSetor:[], fArea:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
 function proximoNumero(){ return Math.max(0, ...Object.values(S.aeps).map(idNum).filter(n => n < 1000)) + 1; }
@@ -1928,15 +1931,16 @@ function listaBase(){
   return Object.values(S.aeps)
     .filter(a => S.fStatus.includes("cancelada") || ativa(a))
     .filter(a => !S.fStatus.length || S.fStatus.includes(a.status||"nao_iniciada"))
-    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .filter(a => passaSetor(a))
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area} ${a.meta?.eg}`).includes(t));
 }
 /* Recorte do plano (previstas, contam na meta, atrasadas): aplicado por cima dos outros filtros */
 function porRecorte(L, D, tipo){
-  if (!tipo || tipo === "todas") return L;
-  const M = (tipo === "previstas" || tipo === "concluidas") ? mesesPainel(D) : [];
-  const ok = new Set(listaPainel(L, D, tipo, M).map(a => a.id));
-  return L.filter(a => ok.has(a.id));
+  const t = tipo || "todas", M = mesesRecorte(D, t);
+  let R = L;
+  if (t !== "todas"){ const ok = new Set(listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? M : []).map(a => a.id)); R = L.filter(a => ok.has(a.id)); }
+  if (M.length && t !== "previstas" && t !== "concluidas") R = R.filter(a => M.includes(mesPlan(a)));
+  return R;
 }
 function listaFiltrada(){
   const L = listaBase();
@@ -1985,22 +1989,50 @@ function atualizarHome(){
 }
 /* Seleção de uma ou mais gerências (setor da AEP). O mesmo filtro vale para a lista, a aba Gerências e o detalhamento do Painel. */
 const rotuloSetores = (l, todas = "Todas as gerências") => !l.length ? todas : l.length === 1 ? l[0] : l.length === 2 ? `${l[0]} e ${l[1]}` : `${l.length} gerências`;
+/* O setor da AEP é a gerência do plano do SIG; a área é a equipe dentro dela (ex.: Administração > Medicina do Trabalho).
+   O filtro aceita os dois níveis: marcar a gerência pega tudo dela, marcar só a área pega só aquela equipe. */
+const areaNome = a => (a.meta?.area || "").trim() || "Sem área";
+const areaChave = a => `${setorNome(a)} · ${areaNome(a)}`;
+const temFiltroSetor = () => !!(S.fSetor.length || S.fArea.length);
+const passaSetor = a => !temFiltroSetor() || S.fSetor.includes(setorNome(a)) || S.fArea.includes(areaChave(a));
+const setoresSel = () => Array.from(new Set([...S.fSetor, ...S.fArea.map(k => k.split(" · ")[0])]));
+const rotuloFiltro = () => {
+  if (!temFiltroSetor()) return "Todas as gerências";
+  if (S.fSetor.length === 1 && !S.fArea.length) return S.fSetor[0];
+  if (!S.fSetor.length && S.fArea.length === 1) return S.fArea[0].split(" · ")[1];
+  return `${S.fSetor.length + S.fArea.length} selecionados`;
+};
+function arvoreSetores(){
+  const arv = {};
+  Object.values(S.aeps).forEach(a => { const s = setorNome(a), k = areaChave(a);
+    const no = arv[s] = arv[s] || { n: 0, areas: {} }; no.n++; no.areas[k] = (no.areas[k] || 0) + 1; });
+  return arv;
+}
 function vMultiSetor(id){
-  const lista = gerencias(), cont = {}; Object.values(S.aeps).forEach(a => { const k = setorNome(a); cont[k] = (cont[k]||0) + 1; });
-  S.fSetor = S.fSetor.filter(s => lista.includes(s));
-  return `<details class="msel" id="${id}"><summary><span data-msel-rot>${esc(rotuloSetores(S.fSetor))}</span></summary>
-    <div class="msel-pop" role="group" aria-label="Gerências"><div class="msel-top"><button type="button" class="btn ghost small" data-act="mselTodas">Mostrar todas</button><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
-    ${lista.map(s => `<label><input type="checkbox" data-msel="${esc(s)}" ${S.fSetor.includes(s) ? "checked" : ""}><span>${esc(s)}</span><b>${cont[s]||0}</b></label>`).join("")}</div></details>`;
+  const arv = arvoreSetores(), setores = Object.keys(arv).sort((x, y) => x.localeCompare(y, "pt-BR"));
+  S.fSetor = S.fSetor.filter(x => setores.includes(x));
+  S.fArea = (S.fArea || []).filter(k => setores.some(x => arv[x].areas[k]));
+  const linha = (s) => { const areas = Object.keys(arv[s].areas).sort((x, y) => x.localeCompare(y, "pt-BR"));
+    const busca = `${s} ${areas.map(k => k.split(" · ")[1]).join(" ")}`;
+    return `<label data-mselrow="${esc(busca)}"><input type="checkbox" data-msel="${esc(s)}" ${S.fSetor.includes(s) ? "checked" : ""}><span>${esc(s)}</span><b>${arv[s].n}</b></label>
+      ${areas.map(k => `<label class="mselsub" data-mselrow="${esc(s + " " + k.split(" · ")[1])}"><input type="checkbox" data-mselarea="${esc(k)}" ${S.fArea.includes(k) || S.fSetor.includes(s) ? "checked" : ""} ${S.fSetor.includes(s) ? "disabled" : ""}><span>${esc(k.split(" · ")[1])}</span><b>${arv[s].areas[k]}</b></label>`).join("")}`; };
+  return `<details class="msel" id="${id}"><summary><span data-msel-rot>${esc(rotuloFiltro())}</span></summary>
+    <div class="msel-pop" role="group" aria-label="Gerências e áreas"><div class="msel-top"><button type="button" class="btn ghost small" data-act="mselTodas">Mostrar todas</button><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+    <input type="text" class="mselbusca" data-mselb="1" placeholder="Digite a gerência ou a área (ex.: medicina)" aria-label="Procurar gerência ou área">
+    <div data-mselvazio class="small muted" style="padding:8px;display:none">Nada com esse nome. A AEP pode estar em outra gerência: procure pelo cargo no campo Buscar.</div>
+    ${setores.map(linha).join("")}</div></details>`;
 }
 function aplicarFiltroSetor(){
-  document.querySelectorAll("[data-msel-rot]").forEach(x => x.textContent = rotuloSetores(S.fSetor));
+  document.querySelectorAll("[data-msel-rot]").forEach(x => x.textContent = rotuloFiltro());
   document.querySelectorAll("input[data-msel]").forEach(x => x.checked = S.fSetor.includes(x.dataset.msel));
+  document.querySelectorAll("input[data-mselarea]").forEach(x => { const s = x.dataset.mselarea.split(" · ")[0];
+    x.checked = S.fArea.includes(x.dataset.mselarea) || S.fSetor.includes(s); x.disabled = S.fSetor.includes(s); });
   if (S.view === "home") atualizarHome();
   const pc = $("#painelcorpo"); if (pc) { pc.innerHTML = painelCorpo(); return; }
   if (S.view === "inventario") { atualizarInventario(); return; }
   const gc = $("#gercorpo"); if (gc) { gc.innerHTML = gerCorpo(); return; }
-  const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(S.fSetor, { logo: "logo.png" });
-  const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(S.fSetor, {});
+  const g = $("#gerbox"); if (g) g.innerHTML = gerExecHTML(setoresSel(), { logo: "logo.png" });
+  const d = $("#gerdetbox"); if (d) d.innerHTML = gerHTML(setoresSel(), {});
   const c = $("#campocards"); if (c) c.innerHTML = campoCards();
   if (S.view === "melhorias") atualizarMelhorias();
 }
@@ -2048,7 +2080,7 @@ function vNotasCampo(a){
 function campoLista(){
   const t = norm(S.campoBusca || "");
   return Object.values(S.aeps)
-    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .filter(a => passaSetor(a))
     .filter(a => S.campoTodas || (a.status||"nao_iniciada") !== "concluida")
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area}`).includes(t))
     .sort((a, b) => idNum(a) - idNum(b));
@@ -2233,7 +2265,7 @@ function dataRealizada(a){
 }
 function mesReal(a){ return dataRealizada(a).slice(0, 7); }
 const mesesPlano = () => [...new Set([...Object.values(PLANO_PADRAO), ...Object.values(S.plano||{})])].filter(Boolean).sort();
-const aepsFiltradas = () => Object.values(S.aeps).filter(ativa).filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)));
+const aepsFiltradas = () => Object.values(S.aeps).filter(ativa).filter(a => passaSetor(a));
 /* Contabilização na meta do SIG: cada AEP realizada conta no primeiro mês, a partir do mês em que foi realizada
    (data da avaliação em campo), que ainda tem vaga na meta. O que passa da meta do mês vira adiantamento e conta nos meses seguintes.
    Nunca conta num mês anterior ao da realização. O mês pode ser escolhido à mão em config/plano.conta, com a mesma regra. */
@@ -2290,6 +2322,13 @@ function graficoMeta(D){
   </tbody></table></div>`;
 }
 
+/* Quantas AEPs foram canceladas e de que meses do plano elas saíram: é o que muda no SIG. */
+function resumoCancel(){
+  const L = Object.values(S.aeps).filter(cancelada); if (!L.length) return "";
+  const por = {}; L.forEach(a => { const m = mesPlan(a) || "sem mês"; por[m] = (por[m] || 0) + 1; });
+  const det = Object.keys(por).sort().map(m => `${m === "sem mês" ? "sem mês" : mesRot(m)}: ${por[m]}`).join(", ");
+  return ` · ${L.length} cancelada(s) fora da conta (${esc(det)})`;
+}
 function vResumoPlano(){
   const D = dadosMeta(aepsFiltradas()), L = aepsFiltradas();
   const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
@@ -2303,7 +2342,7 @@ function painelCorpo(){
   const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
   const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
   return `
-  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${S.fSetor.length ? "nas gerências selecionadas" : "cadastradas"}${(() => { const c = Object.values(S.aeps).filter(cancelada).length; return c ? ` · ${c} cancelada(s) fora da conta` : ""; })()}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
+  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${temFiltroSetor() ? "no filtro de gerência" : "cadastradas"}${resumoCancel()}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
   <div class="grid g4 metacards">
     <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
       <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
@@ -2422,7 +2461,7 @@ async function gerarPDFEvidencia(){
 async function gerarPDFMeta(){
   const btn = $("#btnPDFmeta"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
   try {
-    const L = aepsFiltradas(), D = dadosMeta(L), mesTxt = mesLongo(D.atual), ger = S.fSetor.length ? rotuloSetores(S.fSetor) : "Todas as gerências";
+    const L = aepsFiltradas(), D = dadosMeta(L), mesTxt = mesLongo(D.atual), ger = rotuloFiltro();
     const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
     const nome = nomeArquivo(`Acompanhamento da meta de AEP - ${mesTxt} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
     const css = `@page{size:A4 landscape;margin:12mm}body{font:10pt/1.4 Arial,sans-serif;color:#222}h1{font-size:16pt;margin:0}p{margin:2px 0 8px}
@@ -2447,6 +2486,9 @@ async function gerarPDFMeta(){
 const P_LISTAS = [["todas","Todas"],["previstas","Previstas"],["concluidas","Contam na meta"],["atrasadas","Atrasadas"]];
 /* meses escolhidos no painel: null = mês atual; "todo" = todo o período; lista = vários meses somados */
 const mesesPainel = D => S.pMeses === "todo" ? [] : (Array.isArray(S.pMeses) && S.pMeses.length ? S.pMeses.slice().sort() : [D.atual]);
+/* Em Previstas e Contam na meta, sem escolha o mês é o atual (é o que a meta cobra).
+   Em Todas e Atrasadas, sem escolha é todo o período: o filtro de mês só vale se você marcar algum. */
+const mesesRecorte = (D, t) => (t === "previstas" || t === "concluidas") ? mesesPainel(D) : (Array.isArray(S.pMeses) && S.pMeses.length ? S.pMeses.slice().sort() : []);
 const P_FILTROS = { previstas: "previstas", concluidas: "concluidas", atrasadas: "atrasadas" };
 const rotMeses = M => !M.length ? "" : M.length === 1 ? mesLongo(M[0]) : M.length <= 3 ? M.map(mesLongo).join(" + ") : `${M.length} meses (${mesRot(M[0])} a ${mesRot(M[M.length - 1])})`;
 function listaPainel(L, D, tipo, mes){
@@ -2461,16 +2503,17 @@ function listaPainel(L, D, tipo, mes){
   }
 }
 function vRecorte(){
-  const L = listaBase(), D = dadosMeta(aepsFiltradas()), mes = mesesPainel(D), comMes = S.fPlano === "previstas" || S.fPlano === "concluidas";
+  const L = listaBase(), D = dadosMeta(aepsFiltradas()), t0 = S.fPlano || "todas", mes = mesesRecorte(D, t0);
   const conta = t => porRecorte(L, D, t).length;
   return `<span class="small" style="font-weight:600">Plano</span>
-    <div class="seg" role="group" aria-label="Recorte do plano">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${(S.fPlano || "todas") === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
-    ${comMes ? `<div class="mesdrop"><button type="button" class="btn" data-act="pMesAbrir" aria-expanded="${!!S.pMesAberto}">${esc(mes.length ? rotMeses(mes) : "Todo o período")} ▾</button>
+    <div class="seg" role="group" aria-label="Recorte do plano">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${t0 === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
+    <span class="small" style="font-weight:600;margin-left:6px">Mês</span>
+    ${true ? `<div class="mesdrop"><button type="button" class="btn" data-act="pMesAbrir" aria-expanded="${!!S.pMesAberto}">${esc(mes.length ? rotMeses(mes) : "Todo o período")} ▾</button>
       ${S.pMesAberto ? `<div class="mesdrop-p" role="group" aria-label="Meses">
         <label class="mesck"><input type="checkbox" data-pmesck="todo" ${!mes.length ? "checked" : ""}> Todo o período</label>
         ${D.meses.map(m => `<label class="mesck"><input type="checkbox" data-pmesck="${m}" ${mes.includes(m) ? "checked" : ""}> ${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</label>`).join("")}
         <div class="row" style="gap:6px;margin-top:6px"><button type="button" class="btn small" data-act="pMesAtual">Só o mês atual</button><button type="button" class="btn small primary" data-act="pMesAbrir">OK</button></div>
-        <span class="tiny muted">Marque um ou mais meses: a lista soma os meses marcados.</span></div>` : ""}</div>` : ""}`;
+        <span class="tiny muted">Marque um ou mais meses: a lista soma os meses marcados. O mês é o do plano; em “Contam na meta”, é o mês em que a AEP conta.</span></div>` : ""}</div>` : ""}`;
 }
 function vContaMeta(a, D){
   const r0 = mesReal(a), r = r0 < D.meses[0] ? D.meses[0] : r0, man = mesContaManual(a), m = D.conta[a.id];
@@ -2682,7 +2725,7 @@ const chipCat = cat => cat ? `<span class="catchip ${CAT_CLS[cat]}">${esc(cat.re
 function linhasInventario(){
   const out = [];
   Object.values(S.aeps).filter(a => S.invEsc === "todas" || a.status === "concluida" || a.status === "revisao")
-    .filter(a => !S.fSetor.length || S.fSetor.includes(setorNome(a)))
+    .filter(a => passaSetor(a))
     .sort((x, y) => idNum(x) - idNum(y))
     .forEach(a => (a.perigos || []).filter(h => h.idRisco && TAXMAP[h.codigo]).forEach(h => { const c = (a.classif || {})[h.idRisco] || {};
       out.push({ a, h, c, k: `${a.id}|${h.idRisco}`, r: calcRisco(h, c) }); }));
@@ -4563,7 +4606,7 @@ function gerCorpo(){
     .sort((x, y) => (abertaSit(y.sit) - abertaSit(x.sit)) || MEL_PRIO.indexOf(x.prio) - MEL_PRIO.indexOf(y.prio) || idNum(x.a) - idNum(y.a) || KIND_ORD[x.kind] - KIND_ORD[y.kind]);
   const nR = mel.filter(m => m.kind === "risco" && abertaSit(m.sit)), prioChip = m => `<span class="prio-fixa prio-${m.prio}">${esc(m.prio)}${m.pc ? ` (${m.pc})` : ""}</span>`;
   const dataC = a => { const x = a.concluidoPrimeiro || a.concluidoEm; return (a.status === "concluida" || a.status === "revisao") && x ? fmtData(String(x).slice(0,10)) : "—"; };
-  return `<style>${GX_CSS}</style>${vRespArea(L)}<div id="gerbox">${gerExecHTML(S.fSetor, { logo: "logo.png" })}</div>
+  return `<style>${GX_CSS}</style>${vRespArea(L)}<div id="gerbox">${gerExecHTML(setoresSel(), { logo: "logo.png" })}</div>
   <details class="panel gerlista" style="margin-top:16px"><summary class="panel-h" style="cursor:pointer"><b>Ver a lista de AEPs da área</b><span class="tiny muted">${L.length} AEP(s) · ${L.filter(a => a.status === "concluida" || a.status === "revisao").length} realizada(s)</span></summary>
     <div class="tablewrap"><table class="list" style="min-width:640px"><thead><tr><th>ID</th><th>Cargo</th><th>Situação</th><th>Concluída em</th><th class="num">Perigos</th><th class="num">Itens críticos</th></tr></thead><tbody>
     ${L.length ? L.map(a => { const st = a.status || "nao_iniciada", fe = st === "concluida" || st === "revisao";
@@ -4584,8 +4627,8 @@ async function gerarPDFGerencia(det){
   const btn = $(det ? "#btnPDFgerDet" : "#btnPDFger"); if (!btn || btn.disabled) return; const txt = btn.textContent; btn.disabled = true; btn.textContent = "Preparando…";
   try {
     const logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "";
-    const nome = nomeArquivo(`${det ? "Detalhamento de ergonomia" : "Painel de ergonomia"} - ${S.fSetor.length > 2 ? `${S.fSetor.length} gerências` : tituloGer(S.fSetor)} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
-    const corpo = det ? `<style>${GER_CSS}</style>${gerHTML(S.fSetor, { logo, print: true })}` : `<style>${GX_CSS}</style>${gerExecHTML(S.fSetor, { logo })}`;
+    const nome = nomeArquivo(`${det ? "Detalhamento de ergonomia" : "Painel de ergonomia"} - ${setoresSel().length > 2 ? `${setoresSel().length} gerências` : tituloGer(setoresSel())} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
+    const corpo = det ? `<style>${GER_CSS}</style>${gerHTML(setoresSel(), { logo, print: true })}` : `<style>${GX_CSS}</style>${gerExecHTML(setoresSel(), { logo })}`;
     await imprimirHTML(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@600&display=swap">
 <style>@page{size:A4 landscape;margin:9mm}body{margin:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>${corpo}</body></html>`, nome);
   } catch(e){ toast("Não foi possível preparar o PDF. Tente de novo."); }
@@ -4911,7 +4954,15 @@ function campo(e, isChange){
   if (el.id === "fileFotos"){ if (isChange) { enviarFotos(el.files); el.value = ""; } return; }
   if (el.dataset.cbusca){ if (isChange) return; S.campoBusca = el.value; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
   if (el.dataset.ctodas){ if (!isChange) return; S.campoTodas = el.checked; const b = $("#campocards"); if (b) b.innerHTML = campoCards(); return; }
-  if (el.dataset.msel !== undefined){ if (!isChange) return; const k = el.dataset.msel; S.fSetor = el.checked ? [...new Set([...S.fSetor, k])] : S.fSetor.filter(x => x !== k); aplicarFiltroSetor(); return; }
+  if (el.dataset.msel !== undefined){ if (!isChange) return; const k = el.dataset.msel;
+    S.fSetor = el.checked ? [...new Set([...S.fSetor, k])] : S.fSetor.filter(x => x !== k);
+    if (el.checked) S.fArea = (S.fArea || []).filter(x => x.split(" · ")[0] !== k);
+    aplicarFiltroSetor(); return; }
+  if (el.dataset.mselarea !== undefined){ if (!isChange) return; const k = el.dataset.mselarea;
+    S.fArea = el.checked ? [...new Set([...(S.fArea || []), k])] : (S.fArea || []).filter(x => x !== k); aplicarFiltroSetor(); return; }
+  if (el.dataset.mselb !== undefined){ const t = norm(el.value), pop = el.closest(".msel-pop"); let n = 0;
+    pop.querySelectorAll("[data-mselrow]").forEach(r => { const ok = !t || norm(r.dataset.mselrow).includes(t); r.style.display = ok ? "" : "none"; if (ok) n++; });
+    const v = pop.querySelector("[data-mselvazio]"); if (v) v.style.display = n ? "none" : ""; return; }
   if (el.dataset.sel || el.dataset.selall){ if (!isChange) return;
     if (el.dataset.selall) listaFiltrada().forEach(a => el.checked ? S.sel.add(a.id) : S.sel.delete(a.id));
     else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
@@ -4948,7 +4999,7 @@ function campo(e, isChange){
     S.planoDirty = true; setSaveState("Alterações não salvas"); clearTimeout(S.planoTimer); S.planoTimer = setTimeout(salvarPlano, 500); toast(el.value ? `Planejada para ${mesLongo(el.value)}.` : "AEP sem mês planejado."); return; }
   if (el.dataset.pmesck){ if (!isChange) return; const v = el.dataset.pmesck, D = dadosMeta(aepsFiltradas());
     if (v === "todo") S.pMeses = el.checked ? "todo" : null;
-    else { const M = new Set(S.pMeses === "todo" ? [] : mesesPainel(D)); if (S.pMeses === "todo") M.clear(); el.checked ? M.add(v) : M.delete(v); S.pMeses = M.size ? [...M] : "todo"; }
+    else { const M = new Set(mesesRecorte(D, S.fPlano || "todas")); el.checked ? M.add(v) : M.delete(v); S.pMeses = M.size ? [...M] : "todo"; }
     atualizarListaPainel(); return; }
   if (el.dataset.copiar !== undefined){ if (!isChange || el.value === "") return; copiarClassif(el.dataset.copiar, ((S.copiaFontes || {})[el.dataset.copiar] || [])[Number(el.value)]); return; }
   if (el.dataset.trat !== undefined){ if (!isChange) return; const k = el.dataset.trat, v = el.value;
@@ -5064,9 +5115,9 @@ document.addEventListener("click", async e => {
     case "reabrirAEP": await reabrirAEP(d.id); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "pLista": S.fPlano = d.v; if (d.v !== "previstas" && d.v !== "concluidas") S.pMesAberto = false; atualizarListaPainel(); break;
+    case "pLista": S.fPlano = d.v; atualizarListaPainel(); break;
     case "pMesAbrir": S.pMesAberto = !S.pMesAberto; atualizarListaPainel(); break;
-    case "pMesAtual": S.pMeses = null; S.pMesAberto = false; atualizarListaPainel(); break;
+    case "pMesAtual": S.pMeses = [dadosMeta(aepsFiltradas()).atual]; S.pMesAberto = false; atualizarListaPainel(); break;
     case "importarPlanilha": importarPlanilha(); break;
     case "invLoteAplicar": aplicarLote(); break;
     case "medMais": case "medTirar": {
@@ -5149,7 +5200,7 @@ document.addEventListener("click", async e => {
     case "campoVoltar": await salvarAEP(); S.draft = null; S.aepId = null; render(); window.scrollTo({ top: 0 }); break;
     case "campoConcluir": concluirCampo(); break;
     case "campoEditor": { const id = S.aepId; await salvarAEP(); S.draft = null; await abrirAEP(id); break; }
-    case "mselTodas": S.fSetor = []; aplicarFiltroSetor(); break;
+    case "mselTodas": S.fSetor = []; S.fArea = []; aplicarFiltroSetor(); break;
     case "mselFechar": { const dt = btn.closest("details"); if (dt) dt.open = false; break; }
     case "pdfGerencia": gerarPDFGerencia(); break;
     case "pdfGerDet": gerarPDFGerencia(true); break;
