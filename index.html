@@ -277,6 +277,11 @@ table.list tr:last-child td{border-bottom:0}
 .msel-pop label:has(input:checked){background:var(--accent-soft)}
 .msel-pop label.mselsub{padding-left:26px;font-size:13px;color:var(--ink-2)}
 .msel-pop label.mselsub input{width:15px;height:15px}
+.msel-pop label.mselop{align-items:flex-start;padding:8px}
+.msel-pop label.mselop input{margin-top:2px}
+.msel-pop label.mselop small{display:block;font-size:12px;color:var(--ink-3);font-weight:400;line-height:1.35;margin-top:1px}
+.msel-pop .msel-top b.small{align-self:center;color:var(--ink-2)}
+.semfiltro{display:flex;align-items:center;min-height:38px;padding:7px 12px;border:1px dashed var(--rule-strong);border-radius:var(--radius);color:var(--ink-3);font-size:13.5px}
 .msel-pop .mselbusca{width:100%;margin:0 0 6px;padding:7px 10px;border:1px solid var(--rule-strong);border-radius:6px;font-size:13.5px;background:var(--surface);color:var(--ink)}
 .recm{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 12px;background:var(--surface-2)}
 .recm-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin-bottom:8px}
@@ -810,7 +815,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.16c";
+const VERSAO = "2026.11.18";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1568,7 +1573,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgFull:false, orgFold:{}, orgBusca:"", orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, fPlano:"todas", pMeses:null, pMesAberto:false, repAberto:false, repSai:{}, repEntra:{}, cancelBox:false, cancelMotivo:"", cancelObs:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, fPlano:"todas", pMeses:null, pMesAberto:false, drop:null, repAberto:false, repSai:{}, repEntra:{}, cancelBox:false, cancelMotivo:"", cancelObs:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], fArea:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1937,6 +1942,7 @@ function listaBase(){
 /* Recorte do plano (previstas, contam na meta, atrasadas): aplicado por cima dos outros filtros */
 function porRecorte(L, D, tipo){
   const t = tipo || "todas", M = mesesRecorte(D, t);
+  if (t === "semmes") return L.filter(a => !mesPlan(a));
   let R = L;
   if (t !== "todas"){ const ok = new Set(listaPainel(L, D, t, (t === "previstas" || t === "concluidas") ? M : []).map(a => a.id)); R = L.filter(a => ok.has(a.id)); }
   if (M.length && t !== "previstas" && t !== "concluidas") R = R.filter(a => M.includes(mesPlan(a)));
@@ -1986,6 +1992,18 @@ function atualizarHome(){
   const lista = listaFiltrada(); tb.innerHTML = linhasHome(lista); ct.textContent = `${lista.length} de ${Object.keys(S.aeps).length} AEP(s)`;
   atualizarSel(lista); { const pb = $("#padraobox"); if (pb) pb.innerHTML = vPadraoBanner(); }
   { const rb = $("#resumobox"); if (rb) rb.innerHTML = vResumoPlano(); }
+}
+/* Situação da AEP: lista com uma ou mais marcadas. Nenhuma marcada mostra todas, menos as canceladas. */
+const rotStatus = () => !S.fStatus.length ? "Todas as situações" : S.fStatus.length === 1 ? STATUS[S.fStatus[0]] : S.fStatus.length === 2 ? S.fStatus.map(k => STATUS[k]).join(" + ") : `${S.fStatus.length} situações`;
+const filtroLigado = () => !!(S.busca || temFiltroSetor() || S.fStatus.length || (S.fPlano && S.fPlano !== "todas") || (Array.isArray(S.pMeses) && S.pMeses.length) || S.pMeses === "todo");
+function vFiltroStatus(todas){
+  const cont = {}; todas.forEach(a => { const k = a.status || "nao_iniciada"; cont[k] = (cont[k] || 0) + 1; });
+  return `<span>Situação <span class="faint" style="font-weight:400">uma ou mais</span></span>
+    <details class="msel" id="f-situacao" ${S.drop === "f-situacao" ? "open" : ""}><summary><span data-fst-rot>${esc(rotStatus())}</span></summary>
+    <div class="msel-pop" role="group" aria-label="Situação">
+      <div class="msel-top"><button type="button" class="btn ghost small" data-act="fstTodas">Mostrar todas</button><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+      ${Object.entries(STATUS).map(([k, v]) => `<label><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k) ? "checked" : ""}><span>${esc(v)}</span><b>${cont[k] || 0}</b></label>`).join("")}
+      <span class="tiny muted" style="padding:4px 8px 2px">Nenhuma marcada mostra todas, menos as canceladas.</span></div></details>`;
 }
 /* Seleção de uma ou mais gerências (setor da AEP). O mesmo filtro vale para a lista, a aba Gerências e o detalhamento do Painel. */
 const rotuloSetores = (l, todas = "Todas as gerências") => !l.length ? todas : l.length === 1 ? l[0] : l.length === 2 ? `${l[0]} e ${l[1]}` : `${l.length} gerências`;
@@ -2055,10 +2073,11 @@ function vHome(){
   <details class="resumo" id="resumobox" ${lsGet("aep.resumo") === "0" ? "" : "open"}>${vResumoPlano()}</details>
   <div class="panel" style="margin-bottom:14px"><div class="panel-b grid g4">
     <label class="f span2"><span>Buscar</span><input type="text" id="f-busca" data-filtro="busca" value="${esc(S.busca)}" placeholder="ID, cargo, setor ou área"></label>
-    <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">marque uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
-    <div class="f spanall"><span style="font-size:12px;font-weight:600;color:var(--ink-2)">Situação <span class="faint" style="font-weight:400">marque uma ou mais; nenhuma marcada mostra todas</span></span><div class="row" style="gap:8px">${Object.entries(STATUS).map(([k,v]) => { const n = todas.filter(a => (a.status||"nao_iniciada") === k).length; return `<label class="fchip"><input type="checkbox" data-fst="${k}" ${S.fStatus.includes(k)?"checked":""}><span>${v} <b class="num">${n}</b></span></label>`; }).join("")}</div></div>
+    <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
+    <div class="f">${vFiltroStatus(todas)}</div>
+    <div id="recortebox" style="display:contents">${vRecorte()}</div>
+    <div class="f" style="justify-content:flex-end"><button class="btn ghost" type="button" data-act="limparFiltros" ${filtroLigado() ? "" : "disabled"}>Limpar filtros</button></div>
   </div></div>
-  <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px" id="recortebox">${vRecorte()}</div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span></span></div>
   <div class="panel">
@@ -2253,7 +2272,7 @@ const MESES_PT = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","n
 const MESES_LONGO = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const mesRot = k => k ? `${MESES_PT[Number(k.slice(5,7))-1]}/${k.slice(2,4)}` : "—";
 const mesLongo = k => k ? `${MESES_LONGO[Number(k.slice(5,7))-1]}/${k.slice(0,4)}` : "—";
-const mesPlan = a => { const n = String(a.numero||"").trim(); return (S.plano && S.plano[n]) || PLANO_PADRAO[n] || ""; };
+const mesPlan = a => { const n = String(a.numero||"").trim(); return (S.plano && n in S.plano) ? (S.plano[n] || "") : (PLANO_PADRAO[n] || ""); };
 /* Data em que a AEP foi realizada: a data da avaliação em campo (etapa 1). Se ela estiver vazia ou depois da conclusão,
    vale a data da primeira conclusão no sistema. Assim, AEP feita em campo em setembro e concluída no sistema em outubro conta em setembro. */
 function dataRealizada(a){
@@ -2483,7 +2502,15 @@ async function gerarPDFMeta(){
   finally { const b = $("#btnPDFmeta"); if (b){ b.disabled = false; b.textContent = "PDF: acompanhamento da meta"; } }
 }
 /* Lista do painel: previstas, concluídas, em andamento, em revisão, atrasadas ou todas */
-const P_LISTAS = [["todas","Todas"],["previstas","Previstas"],["concluidas","Contam na meta"],["atrasadas","Atrasadas"]];
+/* Recorte do plano. "Previstas" saiu da lista porque virou o filtro de Mês: Todas + novembro/2026 é a mesma coisa.
+   "Feitas que contam no mês" são as já realizadas que entram na meta do mês escolhido, inclusive as adiantadas. */
+const P_LISTAS = [
+  ["todas", "Todas", "a lista inteira, com os outros filtros"],
+  ["concluidas", "Feitas que contam no mês", "já realizadas e que entram na meta do mês escolhido"],
+  ["atrasadas", "Atrasadas", "o mês previsto já passou e a AEP ainda não foi feita"],
+  ["semmes", "Sem mês no plano", "AEPs sem mês previsto, normalmente criadas depois do plano"]
+];
+const rotPlano = t => (P_LISTAS.find(x => x[0] === t) || P_LISTAS[0])[1];
 /* meses escolhidos no painel: null = mês atual; "todo" = todo o período; lista = vários meses somados */
 const mesesPainel = D => S.pMeses === "todo" ? [] : (Array.isArray(S.pMeses) && S.pMeses.length ? S.pMeses.slice().sort() : [D.atual]);
 /* Em Previstas e Contam na meta, sem escolha o mês é o atual (é o que a meta cobra).
@@ -2505,15 +2532,20 @@ function listaPainel(L, D, tipo, mes){
 function vRecorte(){
   const L = listaBase(), D = dadosMeta(aepsFiltradas()), t0 = S.fPlano || "todas", mes = mesesRecorte(D, t0);
   const conta = t => porRecorte(L, D, t).length;
-  return `<span class="small" style="font-weight:600">Plano</span>
-    <div class="seg" role="group" aria-label="Recorte do plano">${P_LISTAS.map(([k, t]) => `<button type="button" data-act="pLista" data-v="${k}" aria-pressed="${t0 === k}">${t}<b>${conta(k)}</b></button>`).join("")}</div>
-    <span class="small" style="font-weight:600;margin-left:6px">Mês</span>
-    ${true ? `<div class="mesdrop"><button type="button" class="btn" data-act="pMesAbrir" aria-expanded="${!!S.pMesAberto}">${esc(mes.length ? rotMeses(mes) : "Todo o período")} ▾</button>
-      ${S.pMesAberto ? `<div class="mesdrop-p" role="group" aria-label="Meses">
-        <label class="mesck"><input type="checkbox" data-pmesck="todo" ${!mes.length ? "checked" : ""}> Todo o período</label>
-        ${D.meses.map(m => `<label class="mesck"><input type="checkbox" data-pmesck="${m}" ${mes.includes(m) ? "checked" : ""}> ${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</label>`).join("")}
-        <div class="row" style="gap:6px;margin-top:6px"><button type="button" class="btn small" data-act="pMesAtual">Só o mês atual</button><button type="button" class="btn small primary" data-act="pMesAbrir">OK</button></div>
-        <span class="tiny muted">Marque um ou mais meses: a lista soma os meses marcados. O mês é o do plano; em “Contam na meta”, é o mês em que a AEP conta.</span></div>` : ""}</div>` : ""}`;
+  const semMes = t0 === "semmes";
+  return `<div class="f"><span>Plano <span class="faint" style="font-weight:400">uma opção</span></span>
+    <details class="msel" id="f-plano" ${S.drop === "f-plano" ? "open" : ""}><summary><span data-pl-rot>${esc(rotPlano(t0))}</span></summary>
+      <div class="msel-pop" role="group" aria-label="Recorte do plano">
+        <div class="msel-top"><b class="small">Recorte do plano</b><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+        ${P_LISTAS.map(([k, t, d]) => `<label class="mselop"><input type="radio" name="fplano" data-pl="${k}" ${t0 === k ? "checked" : ""}><span>${esc(t)}<small>${esc(d)}</small></span><b>${conta(k)}</b></label>`).join("")}
+      </div></details></div>
+  <div class="f"><span>Mês <span class="faint" style="font-weight:400">do plano</span></span>
+    ${semMes ? `<div class="semfiltro">não se aplica</div>` : `<details class="msel" id="f-mes" ${S.drop === "f-mes" ? "open" : ""}><summary><span>${esc(mes.length ? rotMeses(mes) : "Todo o período")}</span></summary>
+      <div class="msel-pop" role="group" aria-label="Meses">
+        <div class="msel-top"><button type="button" class="btn ghost small" data-act="pMesAtual">Só o mês atual</button><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+        <label><input type="checkbox" data-pmesck="todo" ${!mes.length ? "checked" : ""}><span>Todo o período</span></label>
+        ${D.meses.map(m => `<label><input type="checkbox" data-pmesck="${m}" ${mes.includes(m) ? "checked" : ""}><span>${esc(mesLongo(m))}${m === D.atual ? " (mês atual)" : ""}</span><b>${L.filter(a => mesPlan(a) === m).length}</b></label>`).join("")}
+        <span class="tiny muted" style="padding:4px 8px 2px">Marque um ou mais meses: a lista soma os meses marcados. Em “Feitas que contam no mês”, o mês é o da meta.</span></div></details>`}</div>`;
 }
 function vContaMeta(a, D){
   const r0 = mesReal(a), r = r0 < D.meses[0] ? D.meses[0] : r0, man = mesContaManual(a), m = D.conta[a.id];
@@ -2521,7 +2553,8 @@ function vContaMeta(a, D){
     <option value="">Automático${!man ? ` (${esc(mesRot(m))})` : ""}</option>${D.meses.filter(k => k >= r).map(k => `<option value="${k}" ${man === k ? "selected" : ""}>${esc(mesRot(k))}</option>`).join("")}</select>${m > D.atual ? `<div class="tiny" style="color:var(--ok-ink)">adiantada (feita em ${esc(mesRot(r))})</div>` : ""}`;
 }
 const atualizarRep = () => { const b = $("#repbox"); if (b) b.innerHTML = vRepPainel(); };
-const atualizarListaPainel = () => { if (S.view !== "home") return render(); const r = $("#recortebox"); if (!r) return render(); r.innerHTML = vRecorte(); atualizarHome(); };
+const atualizarListaPainel = () => { if (S.view !== "home") return render(); const r = $("#recortebox"); if (!r) return render();
+  r.innerHTML = vRecorte(); const b = document.querySelector('[data-act="limparFiltros"]'); if (b) b.disabled = !filtroLigado(); atualizarHome(); };
 /* Mês planejado de uma AEP (etapa 1): fica em config/plano e não altera a situação da AEP */
 function vMesPlano(a){
   const atual = mesPlan(a), padrao = PLANO_PADRAO[String(a.numero||"").trim()] || "";
@@ -4968,7 +5001,10 @@ function campo(e, isChange){
     else el.checked ? S.sel.add(el.dataset.sel) : S.sel.delete(el.dataset.sel);
     if (el.dataset.selall) { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); }
     atualizarSel(); return; }
-  if (el.dataset.fst){ if (!isChange) return; const k = el.dataset.fst; S.fStatus = el.checked ? [...new Set([...S.fStatus, k])] : S.fStatus.filter(x => x !== k); atualizarHome(); return; }
+  if (el.dataset.fst){ if (!isChange) return; const k = el.dataset.fst;
+    S.fStatus = el.checked ? [...new Set([...S.fStatus, k])] : S.fStatus.filter(x => x !== k);
+    document.querySelectorAll("[data-fst-rot]").forEach(x => x.textContent = rotStatus()); atualizarListaPainel(); return; }
+  if (el.dataset.pl){ if (!isChange || !el.checked) return; S.fPlano = el.dataset.pl; atualizarListaPainel(); return; }
   if (el.dataset.filtro){
     if (el.tagName === "SELECT" && !isChange) return;
     if (el.tagName !== "SELECT" && isChange) return;
@@ -5076,7 +5112,7 @@ document.addEventListener("change", e => campo(e, true));
 
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && S.orgFull && S.view === "organograma"){ S.orgFull = false; render(); return; }
-  if (e.key === "Escape") { document.querySelectorAll("details.msel[open]").forEach(dt => { dt.open = false; dt.querySelector("summary")?.focus(); }); return; }
+  if (e.key === "Escape") { document.querySelectorAll("details.msel[open]").forEach(dt => { dt.open = false; if (S.drop === dt.id) S.drop = null; dt.querySelector("summary")?.focus(); }); return; }
   if (e.key !== "Enter") return;
   const r = e.target.closest && e.target.closest("tr[data-open], tr[data-area]");
   if (r) { e.preventDefault(); r.click(); }
@@ -5090,7 +5126,8 @@ document.addEventListener("drop", e => { const d = e.target.closest && e.target.
 function aposHz(){ S.step = 4; renderRail(); renderStep(); renderAside(); window.scrollTo({top:0}); }
 document.addEventListener("click", async e => {
   const t = e.target; if (!t.closest) return;
-  document.querySelectorAll("details.msel[open]").forEach(dt => { if (!dt.contains(t)) dt.open = false; });
+  document.querySelectorAll("details.msel[open]").forEach(dt => { if (!dt.contains(t)){ dt.open = false; if (S.drop === dt.id) S.drop = null; } });
+  { const sm = t.closest("details.msel > summary"); if (sm){ const dt = sm.parentElement; S.drop = dt.open ? null : dt.id; } }
   if (t.closest("#resumobox > summary")) setTimeout(() => { const r = $("#resumobox"); if (r) lsSet("aep.resumo", r.open ? "1" : "0"); }, 0);
   const mb = t.closest("#btn-menu"); if (mb){ const ab = document.body.classList.toggle("menu-open"); mb.setAttribute("aria-expanded", ab); return; }
   const go = t.closest("[data-go]"); if (go){ e.preventDefault(); document.body.classList.remove("menu-open"); const m = $("#btn-menu"); if (m) m.setAttribute("aria-expanded", "false"); ir(go.dataset.go); return; }
@@ -5115,9 +5152,12 @@ document.addEventListener("click", async e => {
     case "reabrirAEP": await reabrirAEP(d.id); break;
     case "limparSel": S.sel.clear(); { const tb = $("#tbody-aeps"); if (tb) tb.innerHTML = linhasHome(listaFiltrada()); } atualizarSel(); break;
     case "pdfVarias": gerarPDFVarias(); break;
-    case "pLista": S.fPlano = d.v; atualizarListaPainel(); break;
-    case "pMesAbrir": S.pMesAberto = !S.pMesAberto; atualizarListaPainel(); break;
-    case "pMesAtual": S.pMeses = [dadosMeta(aepsFiltradas()).atual]; S.pMesAberto = false; atualizarListaPainel(); break;
+    case "pMesAtual": S.pMeses = [dadosMeta(aepsFiltradas()).atual]; atualizarListaPainel(); break;
+    case "fstTodas": S.fStatus = [];
+      document.querySelectorAll("input[data-fst]").forEach(x => x.checked = false);
+      document.querySelectorAll("[data-fst-rot]").forEach(x => x.textContent = rotStatus());
+      atualizarListaPainel(); break;
+    case "limparFiltros": S.busca = ""; S.fSetor = []; S.fArea = []; S.fStatus = []; S.fPlano = "todas"; S.pMeses = null; S.drop = null; render(); break;
     case "importarPlanilha": importarPlanilha(); break;
     case "invLoteAplicar": aplicarLote(); break;
     case "medMais": case "medTirar": {
@@ -5201,7 +5241,7 @@ document.addEventListener("click", async e => {
     case "campoConcluir": concluirCampo(); break;
     case "campoEditor": { const id = S.aepId; await salvarAEP(); S.draft = null; await abrirAEP(id); break; }
     case "mselTodas": S.fSetor = []; S.fArea = []; aplicarFiltroSetor(); break;
-    case "mselFechar": { const dt = btn.closest("details"); if (dt) dt.open = false; break; }
+    case "mselFechar": { const dt = btn.closest("details"); if (dt){ dt.open = false; if (S.drop === dt.id) S.drop = null; } break; }
     case "pdfGerencia": gerarPDFGerencia(); break;
     case "pdfGerDet": gerarPDFGerencia(true); break;
     case "toggleExport": { if (S.view !== "inventario"){ S.exportAberto = true; S.invFoco = ""; ir("inventario"); break; }
