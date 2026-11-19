@@ -325,6 +325,7 @@ table.list tr:last-child td{border-bottom:0}
 .glegend i.gp,.gmeta .gp{fill:var(--rule-strong);background:var(--rule-strong)}
 .glegend i.gr,.gmeta .gr{fill:var(--accent);background:var(--accent)}
 .glegend i.gra,.gmeta .gra{fill:color-mix(in srgb,var(--accent) 45%,var(--surface));background:color-mix(in srgb,var(--accent) 45%,var(--surface))}
+.glegend i.gk,.gmeta .gk{fill:var(--ink-3);background:var(--ink-3)}
 .gmeta{display:block;max-width:none}
 .gmeta .gcur{fill:var(--accent-soft)}
 .gmeta .gaxis{stroke:var(--rule-strong);stroke-width:1}
@@ -815,7 +816,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.18";
+const VERSAO = "2026.11.19";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1956,7 +1957,7 @@ function listaFiltrada(){
 function colPlano(a){
   const prev = mesPlan(a), real = dataRealizada(a), D = HOME_META || dadosMeta(aepsFiltradas()), conta = real ? D.conta[a.id] : "";
   const adiant = conta && mesReal(a) && conta > mesReal(a);
-  if (cancelada(a)) return `<span class="faint">cancelada</span><div class="tiny faint">${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? ` · ${esc(a.cancel.obs)}` : ""}</div>`;
+  if (cancelada(a)) return `<span class="faint">cancelada${mesPlan(a) ? `, fecha ${esc(mesRot(mesPlan(a)))}` : ""}</span><div class="tiny faint">${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? ` · ${esc(a.cancel.obs)}` : ""}</div>`;
   const rem = (S.planoRem || []).filter(r => r.n === String(a.numero || "").trim()).slice(-1)[0];
   return `${prev ? `previsto ${esc(mesRot(prev))}` : `<span class="faint">sem mês</span>`}${rem && !real ? `<div class="tiny faint" title="${esc(rem.motivo || "")}">replanejada${rem.de ? ` de ${esc(mesRot(rem.de))}` : ""}</div>` : ""}
     ${real ? `<div class="tiny faint">feita em ${esc(fmtData(real))}${conta ? ` · conta em ${esc(mesRot(conta))}${adiant ? " (adiantada)" : ""}` : ""}</div>${S.fPlano === "concluidas" ? `<div style="margin-top:4px">${vContaMeta(a, D)}</div>` : ""}` : ""}`;
@@ -2284,7 +2285,9 @@ function dataRealizada(a){
 }
 function mesReal(a){ return dataRealizada(a).slice(0, 7); }
 const mesesPlano = () => [...new Set([...Object.values(PLANO_PADRAO), ...Object.values(S.plano||{})])].filter(Boolean).sort();
-const aepsFiltradas = () => Object.values(S.aeps).filter(ativa).filter(a => passaSetor(a));
+/* A cancelada continua no plano: ela ocupa a linha dela e fecha o mês previsto, em separado das realizadas.
+   20 planejadas = 18 realizadas + 2 canceladas com justificativa. O total do plano não muda. */
+const aepsFiltradas = () => Object.values(S.aeps).filter(a => passaSetor(a));
 /* Contabilização na meta do SIG: cada AEP realizada conta no primeiro mês, a partir do mês em que foi realizada
    (data da avaliação em campo), que ainda tem vaga na meta. O que passa da meta do mês vira adiantamento e conta nos meses seguintes.
    Nunca conta num mês anterior ao da realização. O mês pode ser escolhido à mão em config/plano.conta, com a mesma regra. */
@@ -2303,17 +2306,22 @@ function dadosMeta(L){
   const atual = hoje < ini ? ini : hoje > fim ? fim : hoje;
   const plan = Object.fromEntries(meses.map(m => [m, 0])), real = Object.fromEntries(meses.map(m => [m, 0]));
   L.forEach(a => { const p = mesPlan(a); if (p in plan) plan[p]++; const r = mesReal(a); if (r) real[r < ini ? ini : r > fim ? fim : r]++; });
-  const AL = alocarMeta(L, meses, plan), cont = Object.fromEntries(meses.map(m => [m, 0])), vinda = Object.fromEntries(meses.map(m => [m, 0]));
+  const canc = Object.fromEntries(meses.map(m => [m, 0]));
+  L.forEach(a => { if (!cancelada(a)) return; const p = mesPlan(a); if (p in canc) canc[p]++; });
+  const livre = Object.fromEntries(meses.map(m => [m, Math.max(0, plan[m] - canc[m])]));
+  const AL = alocarMeta(L, meses, livre), cont = Object.fromEntries(meses.map(m => [m, 0])), vinda = Object.fromEntries(meses.map(m => [m, 0]));
   Object.entries(AL.conta).forEach(([id, m]) => { cont[m]++; if (m > atual) vinda[m]++; });
-  let pa = 0, ra = 0, ca = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; ca += cont[m]; return { m, p: plan[m], r: real[m], c: cont[m], v: vinda[m], pa, ra, ca }; });
-  const at = acum.find(x => x.m === atual) || { p: 0, r: 0, c: 0, v: 0, pa: 0, ra: 0, ca: 0 };
-  const feitas = L.filter(a => mesReal(a)).length, faltam = L.length - feitas, mesesRest = meses.filter(m => m >= atual).length;
+  meses.forEach(m => { cont[m] += canc[m]; });
+  let pa = 0, ra = 0, ca = 0, ka = 0; const acum = meses.map(m => { pa += plan[m]; ra += real[m]; ca += cont[m]; ka += canc[m]; return { m, p: plan[m], r: real[m], c: cont[m], v: vinda[m], k: canc[m], pa, ra, ca, ka }; });
+  const at = acum.find(x => x.m === atual) || { p: 0, r: 0, c: 0, v: 0, k: 0, pa: 0, ra: 0, ca: 0, ka: 0 };
+  const feitas = L.filter(a => mesReal(a)).length, cancel = L.filter(cancelada).length;
+  const faltam = Math.max(0, L.length - feitas - cancel), mesesRest = meses.filter(m => m >= atual).length;
   const garantidas = Object.values(AL.conta).filter(m => m > atual).length;
-  return { meses, atual, hoje, acum, at, feitas, faltam, conta: AL.conta, garantidas,
+  return { meses, atual, hoje, acum, at, feitas, faltam, cancel, canc, conta: AL.conta, garantidas,
     indice: at.pa ? at.ca / at.pa : null,
     necessario: mesesRest ? faltam / mesesRest : null,
     doMes: L.filter(a => mesPlan(a) === atual).sort((x, y) => (mesReal(x) ? 1 : 0) - (mesReal(y) ? 1 : 0) || idNum(x) - idNum(y)),
-    atrasadas: L.filter(a => mesPlan(a) && mesPlan(a) < atual && !mesReal(a)).sort((x, y) => mesPlan(x).localeCompare(mesPlan(y)) || idNum(x) - idNum(y)),
+    atrasadas: L.filter(a => mesPlan(a) && mesPlan(a) < atual && !mesReal(a) && !cancelada(a)).sort((x, y) => mesPlan(x).localeCompare(mesPlan(y)) || idNum(x) - idNum(y)),
     adiantadas: L.filter(a => mesReal(a) && mesPlan(a) > mesReal(a)).length,
     semPlano: L.filter(a => !mesPlan(a)).length };
 }
@@ -2322,19 +2330,21 @@ function graficoMeta(D){
   const n = D.acum.length, bw = 16, gap = 4, slot = 56, top = 26, h = 150, W = 40 + n * slot, H = top + h + 34;
   const max = Math.max(1, ...D.acum.map(x => Math.max(x.p, x.c)));
   const y = v => top + h - (v / max) * h, alt = v => (v / max) * h;
-  const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual, x1 = x0 + bw + gap, prop = x.c - x.v;
+  const barras = D.acum.map((x, i) => { const x0 = 40 + i * slot + (slot - 2*bw - gap) / 2, cur = x.m === D.atual, x1 = x0 + bw + gap, prop = x.c - x.v - x.k;
     const pl = x.p ? `<rect x="${x0}" y="${y(x.p)}" width="${bw}" height="${alt(x.p)}" rx="3" class="gp"><title>${mesLongo(x.m)}: planejadas ${x.p}</title></rect><text x="${x0 + bw/2}" y="${y(x.p) - 5}" text-anchor="middle" class="gv">${x.p}</text>` : "";
     const ct = x.c ? `${prop ? `<rect x="${x1}" y="${y(prop)}" width="${bw}" height="${alt(prop)}" rx="3" class="gr"><title>${mesLongo(x.m)}: ${prop} realizada(s)</title></rect>` : ""}
+      ${x.k ? `<rect x="${x1}" y="${y(prop + x.k)}" width="${bw}" height="${alt(x.k)}" rx="3" class="gk"><title>${mesLongo(x.m)}: ${x.k} cancelada(s) com justificativa</title></rect>` : ""}
       ${x.v ? `<rect x="${x1}" y="${y(x.c)}" width="${bw}" height="${alt(x.v)}" rx="3" class="gra"><title>${mesLongo(x.m)}: ${x.v} adiantada(s), já garantida(s)</title></rect>` : ""}
       <text x="${x1 + bw/2}" y="${y(x.c) - 5}" text-anchor="middle" class="gv">${x.c}</text>` : "";
     return `${cur ? `<rect x="${40 + i*slot + 2}" y="${top - 18}" width="${slot - 4}" height="${h + 52}" rx="6" class="gcur"/>` : ""}${pl}${ct}
       <text x="${40 + i*slot + slot/2}" y="${top + h + 18}" text-anchor="middle" class="gl${cur ? " gb" : ""}">${mesRot(x.m)}</text>`; }).join("");
-  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas</span><span><i class="gra"></i>Adiantadas (já garantem meses seguintes)</span><span class="tiny muted">Destaque: mês atual</span></div>
+  return `<div class="glegend"><span><i class="gp"></i>Planejadas</span><span><i class="gr"></i>Realizadas</span><span><i class="gra"></i>Adiantadas (já garantem meses seguintes)</span><span><i class="gk"></i>Canceladas com justificativa</span><span class="tiny muted">Destaque: mês atual</span></div>
   <div class="tablewrap"><svg class="gmeta" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="AEPs planejadas e contabilizadas na meta por mês">
     <line x1="34" x2="${W - 6}" y1="${top + h}" y2="${top + h}" class="gaxis"/>${barras}</svg></div>
   <div class="tablewrap"><table class="list mtab"><thead><tr><th>Mês</th>${D.acum.map(x => `<th class="num${x.m === D.atual ? " cur" : ""}">${mesRot(x.m)}</th>`).join("")}</tr></thead><tbody>
     <tr><td>Planejadas</td>${D.acum.map(x => `<td class="num">${x.p}</td>`).join("")}</tr>
     <tr><td><b>Contam na meta</b></td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.c < x.p ? " neg" : ""}"><b>${x.m > D.atual && !x.c ? "" : x.c}</b></td>`).join("")}</tr>
+    ${D.cancel ? `<tr><td>Canceladas <span class="tiny faint">(incluídas na linha acima)</span></td>${D.acum.map(x => `<td class="num">${x.k || ""}</td>`).join("")}</tr>` : ""}
     <tr><td>Acumulado planejado</td>${D.acum.map(x => `<td class="num">${x.pa}</td>`).join("")}</tr>
     <tr><td>Acumulado na meta</td>${D.acum.map(x => `<td class="num">${x.m > D.atual ? "" : x.ca}</td>`).join("")}</tr>
     <tr><td>Atendimento acumulado</td>${D.acum.map(x => `<td class="num${x.m <= D.atual && x.pa && x.ca < x.pa ? " neg" : ""}">${x.m > D.atual || !x.pa ? "" : pctTxt(x.ca / x.pa)}</td>`).join("")}</tr>
@@ -2346,7 +2356,7 @@ function resumoCancel(){
   const L = Object.values(S.aeps).filter(cancelada); if (!L.length) return "";
   const por = {}; L.forEach(a => { const m = mesPlan(a) || "sem mês"; por[m] = (por[m] || 0) + 1; });
   const det = Object.keys(por).sort().map(m => `${m === "sem mês" ? "sem mês" : mesRot(m)}: ${por[m]}`).join(", ");
-  return ` · ${L.length} cancelada(s) fora da conta (${esc(det)})`;
+  return ` · ${L.length} cancelada(s) com justificativa, que fecham o mês previsto (${esc(det)})`;
 }
 function vResumoPlano(){
   const D = dadosMeta(aepsFiltradas()), L = aepsFiltradas();
@@ -2365,16 +2375,16 @@ function painelCorpo(){
   <div class="grid g4 metacards">
     <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
       <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
-      <span class="tiny muted">${D.at.c >= D.at.p ? "Meta do mês atingida." : `Faltam ${D.at.p - D.at.c} para a meta do mês.`}${D.garantidas ? ` <b class="pos">+${D.garantidas} adiantada(s)</b> já contam para os próximos meses.` : ""}</span></div></div>
+      <span class="tiny muted">${D.at.k ? `${D.at.c - D.at.k} realizada(s) + ${D.at.k} cancelada(s) com justificativa. ` : ""}${D.at.c >= D.at.p ? "Meta do mês atingida." : `Faltam ${D.at.p - D.at.c} para a meta do mês.`}${D.garantidas ? ` <b class="pos">+${D.garantidas} adiantada(s)</b> já contam para os próximos meses.` : ""}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Atendimento acumulado</span><p class="mbig"><b class="${D.indice != null && D.indice < 1 ? "neg" : "pos"}">${pctTxt(D.indice)}</b></p>
       <span class="tiny muted">${D.at.ca} na meta de ${D.at.pa} planejadas até ${esc(mesTxt)}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Atrasadas</span><p class="mbig"><b class="${D.atrasadas.length ? "neg" : "pos"}">${D.atrasadas.length}</b></p>
       <span class="tiny muted">planejadas para meses anteriores e ainda não realizadas${D.adiantadas ? ` · ${D.adiantadas} realizada(s) antes do mês previsto` : ""}</span></div></div>
     <div class="panel"><div class="panel-b"><span class="eyebrow">Para fechar o plano</span><p class="mbig"><b>${D.faltam}</b> AEPs</p>
-      <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}</span></div></div>
+      <span class="tiny muted">${D.necessario != null ? `média de ${D.necessario.toFixed(1).replace(".", ",")} por mês até ${esc(mesRot(D.meses[D.meses.length-1]))}` : ""}${D.cancel ? ` · ${D.cancel} cancelada(s) já resolvida(s)` : ""}</span></div></div>
   </div>
-  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x contam na meta, por mês</b><span class="tiny muted">plano PLA202609SA20-30 · realizada = data da avaliação em campo · o que passa da meta de um mês conta nos meses seguintes</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
-  ${vRiscosPainel(L)}`;
+  <div class="panel" style="margin:16px 0"><div class="panel-h"><b>Planejadas x contam na meta, por mês</b><span class="tiny muted">plano PLA202609SA20-30 · realizada = data da avaliação em campo · o que passa da meta de um mês conta nos meses seguintes · a cancelada com justificativa fecha o mês previsto dela</span></div><div class="panel-b">${graficoMeta(D)}</div></div>
+  ${vRiscosPainel(L.filter(ativa))}`;
 }
 /* Riscos e plano de ação no painel: classificação no Inventário, categorias, plano e envio ao PGR */
 function dadosRiscos(L){
@@ -2425,12 +2435,14 @@ const feitaEv = a => a.status === "concluida" || a.status === "revisao";
 function dadosEvidencia(mes){
   const L = Object.values(S.aeps), D = dadosMeta(L), m = mes || D.atual, ordem = ordemSIG(D.meses, m);
   const prev = mm => L.filter(a => mesPlan(a) === mm);
-  const lista = prev(m).sort((p, q) => idNum(p) - idNum(q)), p = lista.length, c = lista.filter(feitaEv).length;
-  const pct = p ? Math.round(c / p * 100) : 0, teams = String((S.planoTeams || {})[m] || "").trim();
-  const hist = D.meses.map(k => { const l = prev(k); return { m: k, p: l.length, c: k <= m ? l.filter(feitaEv).length : null }; });
+  const lista = prev(m).sort((p, q) => idNum(p) - idNum(q)), p = lista.length;
+  const canc = lista.filter(cancelada), k = canc.length, c = lista.filter(feitaEv).length, tr = c + k;
+  const pct = p ? Math.round(tr / p * 100) : 0, teams = String((S.planoTeams || {})[m] || "").trim();
+  const hist = D.meses.map(x => { const l = prev(x); return { m: x, p: l.length, c: x <= m ? l.filter(feitaEv).length + l.filter(cancelada).length : null }; });
   const acm = hist.filter(y => y.m <= m && (!ordem || y.m >= "2026-10")), pa = acm.reduce((t, y) => t + y.p, 0), ca = acm.reduce((t, y) => t + y.c, 0), ac = pa ? Math.round(ca / pa * 100) : 0;
-  const texto = `${mesLongo(m).replace(/^./, x => x.toUpperCase())}: concluídas ${c} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%). Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs previstas no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
-  return { D, m, lista, p, c, pct, ordem, teams, texto, pa, ca, ac, hist };
+  const txtCanc = k ? ` ${k} AEP(s) do mês foram canceladas com justificativa e estão identificadas no anexo: ${canc.map(a => `${a.numero} (${(a.cancel?.motivo || "").toLowerCase()})`).join("; ")}.` : "";
+  const texto = `${mesLongo(m).replace(/^./, x => x.toUpperCase())}: ${k ? `tratadas ${tr} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%), sendo ${c} realizada(s) em campo e ${k} cancelada(s) com justificativa` : `concluídas ${c} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%)`}.${txtCanc} Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs previstas no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
+  return { D, m, lista, p, c, k, tr, pct, ordem, teams, texto, pa, ca, ac, hist };
 }
 function vEvidencia(){
   const E = dadosEvidencia(S.evMes), D = E.D;
@@ -2439,7 +2451,7 @@ function vEvidencia(){
       <label class="f"><span>Mês</span><select data-evmes="1">${D.meses.map(k => `<option value="${k}" ${k === E.m ? "selected" : ""}>${esc(mesLongo(k))}${ordemSIG(D.meses, k) ? ` · ordem ${ordemSIG(D.meses, k)} no SIG` : " · fora do SIG"}</option>`).join("")}</select></label>
       <label class="f span2"><span>Pasta das AEPs no Teams (opcional, entra no texto e no PDF)</span><input type="text" data-evteams="${E.m}" value="${esc(E.teams)}" placeholder="Cole aqui o link ou o caminho da pasta do mês"></label>
     </div>
-    <div class="pgrnum"><div><b>${E.c} de ${E.p}</b><span>previstas para ${esc(mesLongo(E.m))} concluídas</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
+    <div class="pgrnum"><div><b>${E.tr} de ${E.p}</b><span>previstas para ${esc(mesLongo(E.m))} tratadas${E.k ? ` (${E.c} realizadas + ${E.k} canceladas)` : ""}</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
     <label class="f"><span>Texto para o campo “Situação” do acompanhamento</span><textarea rows="4" readonly id="evtexto">${esc(E.texto)}</textarea></label>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn small" type="button" data-act="evCopiar">Copiar o texto</button><button class="btn small primary" type="button" data-act="evPDF" id="btnEvPDF" ${E.lista.length ? "" : "disabled"}>Baixar o PDF para anexar</button>
       <span class="tiny muted">O PDF traz o gráfico do plano inteiro (concluídas só até o mês escolhido) e a lista das AEPs previstas no mês, sem datas e sem adiantamentos.</span></div>
@@ -2459,7 +2471,7 @@ async function gerarPDFEvidencia(){
   try {
     const E = dadosEvidencia(S.evMes), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "", hoje = new Date().toLocaleDateString("pt-BR");
     const nome = nomeArquivo(`Evidencia AEP - ${mesLongo(E.m)} - ${hoje.replace(/\//g, "-")}`);
-    const linhas = E.lista.map((a, i) => `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${esc(STATUS[a.status || "nao_iniciada"] || "")}</td></tr>`).join("");
+    const linhas = E.lista.map((a, i) => `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${esc(STATUS[a.status || "nao_iniciada"] || "")}${cancelada(a) ? `<div class="s">${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? `: ${esc(a.cancel.obs)}` : ""}</div>` : ""}</td></tr>`).join("");
     const css = `@page{size:A4;margin:14mm}body{font:9.5pt/1.4 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}h2{font-size:11pt;margin:12px 0 4px}p{margin:3px 0}
       .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:10px}
       .box{display:flex;gap:10px;margin:10px 0}.box div{flex:1;border:1px solid #ddd;border-radius:6px;padding:7px 9px}.box b{display:block;font-size:16pt}.box span{font-size:8.5pt;color:#555}
@@ -2467,7 +2479,7 @@ async function gerarPDFEvidencia(){
       .ass{margin-top:34px;display:flex;gap:40px}.ass div{flex:1;border-top:1px solid #444;padding-top:4px;font-size:9pt;text-align:center}tr{page-break-inside:avoid}`;
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
       <div class="head"><div><h1>Evidência de execução: Análises Ergonômicas Preliminares</h1><p>${esc(S.config.empresa || "ArcelorMittal")}${S.config.unidade ? ` · ${esc(S.config.unidade)}` : " · Mina de Serra Azul"} · Plano PLA202609SA20-30 (SIG)${E.ordem ? ` · ação de ordem ${E.ordem}` : ""}</p><p><b>Mês de referência:</b> ${esc(mesLongo(E.m))} · emitido em ${hoje}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
-      <div class="box"><div><span>Previstas para o mês</span><b>${E.p}</b></div><div><span>Concluídas</span><b>${E.c}</b></div><div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
+      <div class="box"><div><span>Previstas para o mês</span><b>${E.p}</b></div><div><span>Realizadas em campo</span><b>${E.c}</b></div>${E.k ? `<div><span>Canceladas com justificativa</span><b>${E.k}</b></div>` : ""}<div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
       <h2>Previstas x concluídas por mês</h2>${graficoEvidencia(E.hist, E.m)}<p class="s">Os meses seguintes mostram só o previsto no plano.</p>
       <h2>AEPs previstas para ${esc(mesLongo(E.m))}</h2>
       <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
@@ -2485,8 +2497,8 @@ async function gerarPDFMeta(){
     const nome = nomeArquivo(`Acompanhamento da meta de AEP - ${mesTxt} - ${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}`);
     const css = `@page{size:A4 landscape;margin:12mm}body{font:10pt/1.4 Arial,sans-serif;color:#222}h1{font-size:16pt;margin:0}p{margin:2px 0 8px}
       .cards{display:flex;gap:10px;margin:10px 0}.card{flex:1;border:1px solid #ddd;border-radius:6px;padding:8px 10px}.card b.big{font-size:20pt;display:block}.card span{font-size:8.5pt;color:#555}
-      .gmeta .gp{fill:#c9c9c9}.gmeta .gr{fill:#E8501E}.gmeta .gra{fill:#F4A27F}.gmeta .gcur{fill:#FDEEE8}.gmeta .gaxis{stroke:#999}.gmeta .gv{font-size:10px;font-weight:700;fill:#333}.gmeta .gl{font-size:10px;fill:#666}.gmeta .gl.gb{font-weight:700;fill:#222}
-      .glegend{display:flex;gap:16px;font-size:9pt;margin:4px 0}.glegend i{display:inline-block;width:10px;height:10px;margin-right:5px}.glegend i.gp{background:#c9c9c9}.glegend i.gr{background:#E8501E}.glegend i.gra{background:#F4A27F}.tiny{font-size:8pt}.muted{color:#666}
+      .gmeta .gp{fill:#c9c9c9}.gmeta .gr{fill:#E8501E}.gmeta .gra{fill:#F4A27F}.gmeta .gk{fill:#8a8a8a}.gmeta .gcur{fill:#FDEEE8}.gmeta .gaxis{stroke:#999}.gmeta .gv{font-size:10px;font-weight:700;fill:#333}.gmeta .gl{font-size:10px;fill:#666}.gmeta .gl.gb{font-weight:700;fill:#222}
+      .glegend{display:flex;gap:16px;font-size:9pt;margin:4px 0}.glegend i{display:inline-block;width:10px;height:10px;margin-right:5px}.glegend i.gp{background:#c9c9c9}.glegend i.gr{background:#E8501E}.glegend i.gra{background:#F4A27F}.glegend i.gk{background:#8a8a8a}.tiny{font-size:8pt}.muted{color:#666}
       table{border-collapse:collapse;width:100%;font-size:8.5pt}th,td{border:1px solid #ddd;padding:3px 5px;text-align:right}td:first-child,th:first-child{text-align:left}th.cur{color:#E8501E}.neg{color:#b42318}
       .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:8px}.tablewrap{overflow:visible}svg{max-width:100%;height:auto}`;
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
@@ -4797,11 +4809,13 @@ function linhasLigacao(){
 }
 /* Refaz o Planejamento AEP no formato do SIG (ID AEP, EG, Setor, Área, Cargo, Data final) e lista o que mudou
    em relação ao plano que já está lançado lá (PLANO_PADRAO): datas replanejadas, AEPs canceladas e AEPs novas. */
-const PLANO_COLS = ["ID AEP", "EG", "SETOR", "ÁREA", "CARGO", "Data Final (Quando)"];
+const PLANO_COLS = ["ID AEP", "EG", "SETOR", "ÁREA", "CARGO", "Data Final (Quando)", "SITUAÇÃO"];
 const MUD_COLS = ["ID AEP", "Cargo", "No plano do SIG", "Agora no sistema", "O que fazer no SIG", "Motivo", "Mudou em"];
-const linhaPlanoSIG = a => [String(a.numero || "").trim(), gheDe(a) || "", (a.meta?.setor || "").trim(), (a.meta?.area || "").trim(), (a.meta?.cargo || "").trim(), mesPlan(a) ? mesLongo(mesPlan(a)) : ""];
+const sitPlanoSIG = a => cancelada(a) ? `Cancelada: ${a.cancel?.motivo || ""}${a.cancel?.obs ? ` (${a.cancel.obs})` : ""}`
+  : mesReal(a) ? `Realizada em ${fmtData(dataReal(a))}` : "Prevista";
+const linhaPlanoSIG = a => [String(a.numero || "").trim(), gheDe(a) || "", (a.meta?.setor || "").trim(), (a.meta?.area || "").trim(), (a.meta?.cargo || "").trim(), mesPlan(a) ? mesLongo(mesPlan(a)) : "", sitPlanoSIG(a)];
 function linhasPlanoSIG(){
-  return Object.values(S.aeps).filter(ativa).map(completar)
+  return Object.values(S.aeps).map(completar)
     .sort((p, q) => (mesPlan(p) || "9999-99").localeCompare(mesPlan(q) || "9999-99") || idNum(p) - idNum(q))
     .map(linhaPlanoSIG);
 }
@@ -4812,7 +4826,7 @@ function linhasMudancaSIG(){
     const orig = PLANO_PADRAO[n] || "", atual = mesPlan(a);
     const rem = (S.planoRem || []).filter(r => r.n === n).slice(-1)[0];
     if (cancelada(a)){
-      if (orig) out.push([n, cargo, mesLongo(orig), "Cancelada", "Excluir esta AEP do plano", `${a.cancel?.motivo || ""}${a.cancel?.obs ? ": " + a.cancel.obs : ""}`, fmtData(String(a.cancel?.em || "").slice(0, 10))]);
+      if (orig) out.push([n, cargo, mesLongo(orig), "Cancelada", "Manter a linha e marcar como cancelada com justificativa", `${a.cancel?.motivo || ""}${a.cancel?.obs ? ": " + a.cancel.obs : ""}`, fmtData(String(a.cancel?.em || "").slice(0, 10))]);
       return;
     }
     if (!orig){ out.push([n, cargo, "não está no SIG", atual ? mesLongo(atual) : "sem mês", `Incluir no plano${atual ? " com data " + mesLongo(atual) : ""}`, "AEP criada depois do lançamento do plano", fmtData(String(a.criadoEm || "").slice(0, 10))]); return; }
@@ -4825,7 +4839,7 @@ async function exportarPlanoSIG(){
   try {
     const X = await carregarXLSX(), linhas = linhasPlanoSIG(), mud = linhasMudancaSIG();
     const ws = X.utils.aoa_to_sheet([PLANO_COLS, ...linhas]);
-    ws["!cols"] = [10, 10, 30, 46, 46, 18].map(w => ({ wch: w })); ws["!autofilter"] = { ref: `A1:F${linhas.length + 1}` };
+    ws["!cols"] = [10, 10, 30, 46, 46, 18, 40].map(w => ({ wch: w })); ws["!autofilter"] = { ref: `A1:G${linhas.length + 1}` };
     const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "PLANEJAMENTO");
     const wm = X.utils.aoa_to_sheet([MUD_COLS, ...(mud.length ? mud : [["—", "", "", "", "Nada mudou em relação ao plano do SIG", "", ""]])]);
     wm["!cols"] = [10, 46, 18, 18, 40, 44, 12].map(w => ({ wch: w })); X.utils.book_append_sheet(wb, wm, "O QUE MUDOU");
