@@ -816,7 +816,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.19";
+const VERSAO = "2026.11.20";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1461,6 +1461,9 @@ const decisaoExigePerigo = (s, v) => !!s.tax && v !== "nao" && (PERIGOS_DEFICIEN
 /* Margem (28/10/2026, regra 7 dos Critérios): se na etapa 3 a subescala ficou "não confirmada" para o cargo, o perigo não é exigido;
    a divergência fica registrada no cruzamento e o resultado do setor continua no registro por domínio. */
 const subNaoConf = (a, s) => a.copsoq?.dominios?.[s.dom]?.dec?.[s.id] === "nao";
+/* Rótulo do botão que dispensa o perigo na etapa 3, conforme o tipo da subescala:
+   exigência -> "Não é exigência relevante"; recurso -> "Percepção não confirmada". */
+const rotNao = s => (variantesDe(s).find(v => v.id === "nao") || {}).rot || "Não é exigência relevante";
 const altasTodas = a => { const sn = copsoqDaAEP(a); if (!sn) return [];
   return SUBS.filter(s => s.tax && s.natureza !== "efeito" && s.natureza !== "protetor" && faixaDe(sn.medias?.[s.id]) === "ris"); };
 const altasComPerigo = a => altasTodas(a).filter(s => !subNaoConf(a, s));
@@ -1741,7 +1744,7 @@ function pendencias(a){
       if (v === "nao" && lanc.has(s.tax) && !altasComPerigo(a).some(x => x.tax === s.tax) && !Object.entries(dec).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax) && !DOMINIOS.some(dm => dm.id !== d.id && Object.entries(a.copsoq?.dominios?.[dm.id]?.dec || {}).some(([o, w]) => w !== "nao" && SUBMAP[o]?.tax === s.tax)))
         p[3].push(`${s.nome}: marcada como “Não é exigência relevante”, mas o perigo ${s.tax} está lançado na etapa 4`); });
     altasComPerigo(a).filter(s => s.dom === d.id && !lanc.has(s.tax) && !p[4].some(x => x.includes("o perigo " + s.tax + " ") || x.endsWith("o perigo " + s.tax))).forEach(s =>
-      p[4].push(`${s.nome}: acima de 3,66 no setor (etapa 3); lançar o perigo ${s.tax}, mesmo que o risco seja graduado como baixo no Inventário`));
+      p[4].push(`${s.nome}: acima de 3,66 no setor (etapa 3); lançar o perigo ${s.tax}, mesmo que o risco seja graduado como baixo no Inventário, ou, se a avaliação em campo não confirmar isso neste cargo, marcar “${rotNao(s)}” na etapa 3`));
     if (dd.concl === CONCLUSOES[2] && !perigosDoDominio(a, d.id).length) p[3].push(`${d.nome}: conclusão “Necessita melhorias” sem perigo deste domínio lançado na etapa 4`); });
   ckLista(a).forEach(({c,n}) => { if (c.r === "sim" && !perigoDoItem(a, n)) p[4].push(`Item ${n} do checklist marcado Sim sem perigo vinculado`); });
   esperadosFaltando(a).forEach(c => { if (!String(a.naoLancados?.[c]||"").trim()) p[4].push(`Posto administrativo: lançar ${c} (${TAXMAP[c]?.nome||""}) ou justificar por que essa exigência não é relevante neste cargo`); });
@@ -2352,6 +2355,11 @@ function graficoMeta(D){
 }
 
 /* Quantas AEPs foram canceladas e de que meses do plano elas saíram: é o que muda no SIG. */
+/* Aviso no resumo: algum mês ficou com quantidade diferente da do plano do SIG. */
+function resumoDrift(){
+  const f = foraDoAlvo(); if (!f.length) return "";
+  return ` · <b class="neg">${f.length} mês(es) fora do número do SIG</b> (${esc(f.slice(0, 4).map(rotDrift).join(", "))}${f.length > 4 ? ", …" : ""}), equilibre em Replanejar mês`;
+}
 function resumoCancel(){
   const L = Object.values(S.aeps).filter(cancelada); if (!L.length) return "";
   const por = {}; L.forEach(a => { const m = mesPlan(a) || "sem mês"; por[m] = (por[m] || 0) + 1; });
@@ -2371,7 +2379,7 @@ function painelCorpo(){
   const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
   const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
   return `
-  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${temFiltroSetor() ? "no filtro de gerência" : "cadastradas"}${resumoCancel()}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
+  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${temFiltroSetor() ? "no filtro de gerência" : "cadastradas"}${resumoCancel()}${resumoDrift()}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
   <div class="grid g4 metacards">
     <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
       <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
@@ -2576,12 +2584,20 @@ function vMesPlano(a){
 }
 /* Replanejamento do mês: adiar quem não está disponível e trazer outra AEP no lugar, mantendo a meta do mês */
 const REP_MOTIVOS = ["Profissional de férias", "Profissional afastado", "Profissional desligado ou transferido", "Equipe em parada ou pico de produção", "Acesso à área indisponível", "Mudança de prioridade", "Outro"];
+/* ALVO_MES é a quantidade de AEPs que cada mês tem no plano original do SIG (PLANO_PADRAO).
+   Esse número não muda: trocar uma AEP de mês exige trazer outra no lugar, senão o mês sai do alvo. */
+const ALVO_MES = (() => { const o = {}; Object.values(PLANO_PADRAO).forEach(m => { if (m) o[m] = (o[m] || 0) + 1; }); return o; })();
+const previstasDe = m => Object.values(S.aeps).filter(a => mesPlan(a) === m).length;
+const driftMes = () => [...new Set([...Object.keys(ALVO_MES), ...Object.values(S.aeps).map(mesPlan).filter(Boolean)])].sort()
+  .map(m => { const alvo = ALVO_MES[m] || 0, agora = previstasDe(m); return { m, alvo, agora, d: agora - alvo }; });
+const foraDoAlvo = () => driftMes().filter(x => x.d);
+const rotDrift = x => `${mesRot(x.m)} ${x.d > 0 ? "+" : ""}${x.d}`;
 const repAlvo = () => S.repMes || dadosMeta(aepsFiltradas()).atual;
 /* por padrão a AEP adiada vai para o mês seguinte, nunca para um mês que já passou */
 const repDestino = (m, meses) => { const L = meses.filter(x => x !== m); return (S.repDest && L.includes(S.repDest)) ? S.repDest : (L.find(x => x > m) || L[L.length - 1] || ""); };
-const repLista = m => Object.values(S.aeps).filter(a => !mesReal(a) && mesPlan(a) === m).sort((x, y) => idNum(x) - idNum(y));
-const repCandidatas = m => { const t = norm(S.repBusca || "");
-  return Object.values(S.aeps).filter(a => !mesReal(a) && mesPlan(a) !== m)
+const repLista = m => Object.values(S.aeps).filter(a => !mesReal(a) && !cancelada(a) && mesPlan(a) === m).sort((x, y) => idNum(x) - idNum(y));
+const repCandidatas = (m, dest) => { const t = norm(S.repBusca || "");
+  return Object.values(S.aeps).filter(a => !mesReal(a) && !cancelada(a) && mesPlan(a) === dest && mesPlan(a) !== m)
     .filter(a => !t || norm(`${a.numero} ${a.meta?.cargo} ${a.meta?.setor} ${a.meta?.area}`).includes(t))
     .sort((x, y) => (mesPlan(x) || "9999").localeCompare(mesPlan(y) || "9999") || idNum(x) - idNum(y)); };
 function vCancelBox(){
@@ -2611,32 +2627,38 @@ function vRepPainel(){
   const linha = (a, tipo, marcado) => `<tr><td style="width:28px"><input type="checkbox" data-rep${tipo}="${esc(a.id)}" ${marcado ? "checked" : ""} aria-label="Escolher ${esc(a.numero)}"></td>
     <td class="mono small">${esc(a.numero)}</td><td class="small">${esc(a.meta?.cargo || "")}<div class="tiny faint">${esc((a.meta?.setor || "").trim())}</div></td>
     <td class="small">${esc(mesPlan(a) ? mesRot(mesPlan(a)) : "sem mês")}</td><td class="small">${esc(STATUS[a.status || "nao_iniciada"])}</td></tr>`;
-  const cand = repCandidatas(m);
+  const dest = repDestino(m, meses), cand = repCandidatas(m, dest), fora = foraDoAlvo();
+  const alvoM = ALVO_MES[m] || 0, alvoD = ALVO_MES[dest] || 0;
+  const hojeD = previstasDe(dest), depoisD = hojeD + nSai - nEntra;
   return `<div class="panel" id="reppainel" style="margin-bottom:16px;border-color:var(--accent)">
     <div class="panel-h" style="flex-wrap:wrap;gap:8px"><b>Replanejar o mês</b>
       <select data-repmes="1" aria-label="Mês" style="width:auto">${meses.map(x => `<option value="${x}" ${x === m ? "selected" : ""}>${esc(mesLongo(x))}${x === D.atual ? " (mês atual)" : ""}</option>`).join("")}</select>
+      <span class="small">trocar com</span>
+      <select data-repdest="1" aria-label="Mês de troca" style="width:auto">${meses.filter(x => x !== m).map(x => `<option value="${x}" ${x === dest ? "selected" : ""}>${esc(mesLongo(x))}</option>`).join("")}</select>
       <span class="sep" style="flex:1"></span><button class="btn small ghost" type="button" data-act="repFechar">Fechar</button></div>
     <div class="panel-b stack">
-      <p class="small" style="margin:0">Quando o profissional não está disponível, adie a AEP dele e traga outra para o lugar. Assim o mês continua com a mesma quantidade prevista e fica registrado o motivo.</p>
+      <p class="small" style="margin:0">Quando o profissional não está disponível, adie a AEP dele e traga outra do mês de troca para o lugar. Saiu uma, entra uma: assim os dois meses continuam com a quantidade do plano do SIG e fica registrado o motivo.</p>
+      <div class="note ${fora.length ? "warn" : "ok"}" style="margin:0">${fora.length
+        ? `<b>${fora.length} mês(es) fora do número do plano do SIG:</b> ${esc(fora.map(rotDrift).join(" · "))}. Tire do mês que está com sinal de mais e leve para o que está com sinal de menos, até zerar os dois.`
+        : `<b>O plano bate com o SIG.</b> Todos os meses estão com a quantidade original do plano.`}</div>
       <div class="repcols">
         <div><b class="small">1. Adiar deste mês</b>
           <p class="tiny muted" style="margin:2px 0 6px">${repLista(m).length ? "Marque quem não vai dar para fazer." : "Nenhuma AEP em aberto neste mês."}</p>
           ${repLista(m).length ? `<div class="tablewrap" style="max-height:230px;overflow:auto"><table class="list"><tbody>${repLista(m).map(a => linha(a, "sai", sai[a.id])).join("")}</tbody></table></div>
           <div class="row" style="gap:8px;margin-top:8px;flex-wrap:wrap">
-            <label class="f" style="flex:1;min-width:150px"><span>Novo mês</span><select data-repdest="1">${meses.filter(x => x !== m).map(x => `<option value="${x}" ${x === repDestino(m, meses) ? "selected" : ""}>${esc(mesLongo(x))}</option>`).join("")}</select></label>
-            <label class="f" style="flex:1;min-width:170px"><span>Motivo</span><select data-repmot="1">${REP_MOTIVOS.map(x => `<option ${x === (S.repMotivo || REP_MOTIVOS[0]) ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></label></div>
+            <label class="f" style="flex:1;min-width:170px"><span>Motivo (as marcadas vão para ${esc(mesRot(dest))})</span><select data-repmot="1">${REP_MOTIVOS.map(x => `<option ${x === (S.repMotivo || REP_MOTIVOS[0]) ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></label></div>
           ${(S.repMotivo || REP_MOTIVOS[0]) === "Outro" ? `<label class="f"><span>Qual motivo</span><input type="text" data-repmot2="1" value="${esc(S.repMotivo2 || "")}" placeholder="Escreva o motivo"></label>` : ""}` : ""}
         </div>
-        <div><b class="small">2. Trazer para ${esc(mesRot(m))}</b>
-          <p class="tiny muted" style="margin:2px 0 6px">Marque ${nSai ? `${nSai} AEP(s)` : "as AEPs"} de outro mês para entrar no lugar.</p>
+        <div><b class="small">2. Trazer de ${esc(mesRot(dest))} para ${esc(mesRot(m))}</b>
+          <p class="tiny muted" style="margin:2px 0 6px">${cand.length ? `Marque ${nSai ? `${nSai} AEP(s)` : "as AEPs"} de ${esc(mesRot(dest))} para entrar no lugar.` : `Nenhuma AEP em aberto em ${esc(mesRot(dest))}.`}</p>
           <input type="search" data-repbusca="1" value="${esc(S.repBusca || "")}" placeholder="Buscar cargo, setor ou ID" style="margin-bottom:6px">
           <div class="tablewrap" style="max-height:230px;overflow:auto"><table class="list"><tbody>${cand.slice(0, 60).map(a => linha(a, "entra", entra[a.id])).join("")}</tbody></table></div>
           ${cand.length > 60 ? `<p class="tiny muted" style="margin:4px 0 0">Mostrando 60 de ${cand.length}. Use a busca.</p>` : ""}
         </div>
       </div>
       <div class="row between" style="flex-wrap:wrap;gap:8px;border-top:1px solid var(--rule);padding-top:10px">
-        <p class="small" style="margin:0">${esc(mesLongo(m))} fica com <b>${depois}</b> AEP(s) previstas${depois === hoje ? " (a meta não muda)" : hoje ? ` <span style="color:var(--${depois < hoje ? "bad" : "ok"}-ink)">(hoje são ${hoje})</span>` : ""}.</p>
-        <button class="btn primary" type="button" data-act="repAplicar" ${nSai + nEntra ? "" : "disabled"}>Aplicar o replanejamento</button></div>
+        <p class="small" style="margin:0">${esc(mesRot(m))} fica com <b class="${depois === alvoM ? "pos" : "neg"}">${depois}</b> de ${alvoM} · ${esc(mesRot(dest))} fica com <b class="${depoisD === alvoD ? "pos" : "neg"}">${depoisD}</b> de ${alvoD}${depois === alvoM && depoisD === alvoD ? " · os dois meses no número do SIG" : ` · ${nSai === nEntra ? "um dos meses já estava fora do número" : `saem ${nSai} e entram ${nEntra}: desequilibra os dois meses`}`}.</p>
+        <button class="btn ${depois === alvoM && depoisD === alvoD ? "primary" : "danger"}" type="button" data-act="repAplicar" ${nSai + nEntra ? "" : "disabled"}>${depois === alvoM && depoisD === alvoD ? "Aplicar a troca" : "Aplicar mesmo com mês fora do número"}</button></div>
       ${(S.planoRem || []).length ? `<details><summary class="small">Replanejamentos já feitos (${(S.planoRem || []).length})</summary>
         <div class="tablewrap" style="max-height:200px;overflow:auto;margin-top:8px"><table class="list"><thead><tr><th>AEP</th><th>De</th><th>Para</th><th>Motivo</th><th>Quando</th></tr></thead><tbody>
         ${(S.planoRem || []).slice().reverse().slice(0, 50).map(r => `<tr><td class="mono small">${esc(r.n)}</td><td class="small">${esc(r.de ? mesRot(r.de) : "sem mês")}</td><td class="small">${esc(r.para ? mesRot(r.para) : "sem mês")}</td><td class="small">${esc(r.motivo || "")}</td><td class="small">${esc(fmtData(String(r.em || "").slice(0, 10)))}</td></tr>`).join("")}
@@ -3714,7 +3736,8 @@ function renderBanner0(){
   el.innerHTML = !altas.length
     ? `<div class="note ok" style="margin-bottom:16px">Setor ${esc(snap.nome)}: nenhuma subescala acima de 3,66.</div>`
     : faltam.length
-    ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes) com perigo ainda não lançado nesta AEP: ${itens}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button></div>`
+    ? `<div class="note bad" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes) com perigo ainda não lançado nesta AEP: ${itens}. <button class="btn small" type="button" data-step="3" style="margin-left:6px">Ver no cruzamento</button>
+      <div class="tiny" style="margin-top:6px">Isto é o resultado do setor, não uma obrigação. Se a avaliação em campo mostrar que neste cargo a situação é outra, marque na etapa 3 a opção que dispensa o perigo (“${esc([...new Set(faltam.map(x => rotNao(x.s)))].join("” ou “"))}”): a frase da decisão entra no texto do domínio e o perigo deixa de ser exigido.</div></div>`
     : `<div class="note" style="margin-bottom:16px"><b>Subescalas acima de 3,66 no setor ${esc(snap.nome)}</b> (${esc(snap.n||"?")} respondentes): ${itens}. Perigos já lançados nesta AEP; a graduação é feita no Inventário.</div>`;
 }
 function renderRail(){
@@ -4986,7 +5009,7 @@ function campo(e, isChange){
   if (el.dataset.cancelmot){ if (!isChange) return; S.cancelMotivo = el.value; S.cancelObs = ""; { const c = $("#cancelbox-wrap"); if (c) c.innerHTML = vCancelBox(); } return; }
   if (el.dataset.cancelobs !== undefined){ S.cancelObs = el.value; return; }
   if (el.dataset.repmes){ if (!isChange) return; S.repMes = el.value; S.repDest = ""; S.repSai = {}; S.repEntra = {}; atualizarRep(); return; }
-  if (el.dataset.repdest){ if (!isChange) return; S.repDest = el.value; return; }
+  if (el.dataset.repdest){ if (!isChange) return; S.repDest = el.value; S.repEntra = {}; atualizarRep(); return; }
   if (el.dataset.repmot){ if (!isChange) return; S.repMotivo = el.value; atualizarRep(); return; }
   if (el.dataset.repmot2 !== undefined){ S.repMotivo2 = el.value; return; }
   if (el.dataset.repbusca){ if (isChange) return; clearTimeout(S.repBT);
