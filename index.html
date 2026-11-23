@@ -277,6 +277,11 @@ table.list tr:last-child td{border-bottom:0}
 .msel-pop label:has(input:checked){background:var(--accent-soft)}
 .msel-pop label.mselsub{padding-left:26px;font-size:13px;color:var(--ink-2)}
 .msel-pop label.mselsub input{width:15px;height:15px}
+.rchips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.rchip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--rule);border-radius:999px;padding:4px 6px 4px 12px}
+.rchip:not(:has(button)){padding-right:12px}
+.rchip.warn{color:var(--warn-ink);background:var(--warn-soft);border-color:var(--warn-line)}
+.rchip .btn{border-radius:999px;padding:2px 10px}
 .msel-pop label.mselop{align-items:flex-start;padding:8px}
 .msel-pop label.mselop input{margin-top:2px}
 .msel-pop label.mselop small{display:block;font-size:12px;color:var(--ink-3);font-weight:400;line-height:1.35;margin-top:1px}
@@ -816,7 +821,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.23";
+const VERSAO = "2026.11.23b";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -2355,16 +2360,15 @@ function graficoMeta(D){
 }
 
 /* Quantas AEPs foram canceladas e de que meses do plano elas saíram: é o que muda no SIG. */
-/* Aviso no resumo: algum mês ficou com quantidade diferente da do plano do SIG. */
-function resumoDrift(){
-  const f = foraDoAlvo(); if (!f.length) return "";
-  return ` · <b class="neg">${f.length} mês(es) fora do número do SIG</b> (${esc(f.slice(0, 4).map(rotDrift).join(", "))}${f.length > 4 ? ", …" : ""}), equilibre em Replanejar mês`;
-}
-function resumoCancel(){
-  const L = Object.values(S.aeps).filter(cancelada); if (!L.length) return "";
-  const por = {}; L.forEach(a => { const m = mesPlan(a) || "sem mês"; por[m] = (por[m] || 0) + 1; });
+/* Os dois avisos do plano em etiquetas, fora da linha dos números: canceladas e meses fora do número do SIG. */
+function vResumoAvisos(){
+  const C = Object.values(S.aeps).filter(cancelada), f = foraDoAlvo();
+  if (!C.length && !f.length) return "";
+  const por = {}; C.forEach(a => { const m = mesPlan(a) || "sem mês"; por[m] = (por[m] || 0) + 1; });
   const det = Object.keys(por).sort().map(m => `${m === "sem mês" ? "sem mês" : mesRot(m)}: ${por[m]}`).join(", ");
-  return ` · ${L.length} cancelada(s) com justificativa, que fecham o mês previsto (${esc(det)})`;
+  return `<div class="rchips">
+    ${C.length ? `<span class="rchip" title="${esc(det)}">${C.length} cancelada(s) com justificativa · fecham o mês previsto</span>` : ""}
+    ${f.length ? `<span class="rchip warn" title="${esc(f.map(rotDrift).join(", "))}">${f.length} mês(es) fora do número do SIG<button class="btn small" type="button" data-act="repAbrir">Equilibrar</button></span>` : ""}</div>`;
 }
 function vResumoPlano(){
   const D = dadosMeta(aepsFiltradas()), L = aepsFiltradas();
@@ -2379,7 +2383,8 @@ function painelCorpo(){
   const pm = D.at.p ? Math.min(1, D.at.c / D.at.p) : 0;
   const stChip = a => { const st = a.status || "nao_iniciada"; return `<span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>`; };
   return `
-  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${temFiltroSetor() ? "no filtro de gerência" : "cadastradas"}${resumoCancel()}${resumoDrift()}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
+  <div class="stats" style="margin-top:0"><div class="stat"><b>${tot}</b><span>AEPs ${temFiltroSetor() ? "no filtro de gerência" : "cadastradas"}</span></div><div class="stat"><b>${concl + rev}</b><span>Realizadas${rev ? ` <span class="faint">(${rev} em revisão)</span>` : ""}</span></div><div class="stat"><b>${and}</b><span>Em andamento</span></div><div class="stat"><b>${nao}</b><span>Não iniciadas</span></div></div>
+  ${vResumoAvisos()}
   <div class="grid g4 metacards">
     <div class="panel"><div class="panel-b"><span class="eyebrow">Meta de ${esc(mesTxt)}</span><p class="mbig"><b>${D.at.c}</b> de ${D.at.p}</p>
       <div class="mbar" role="progressbar" aria-valuemin="0" aria-valuemax="${D.at.p}" aria-valuenow="${D.at.c}"><div style="width:${(pm*100).toFixed(0)}%"></div></div>
@@ -2443,14 +2448,20 @@ const feitaEv = a => a.status === "concluida" || a.status === "revisao";
 function dadosEvidencia(mes){
   const L = Object.values(S.aeps), D = dadosMeta(L), m = mes || D.atual, ordem = ordemSIG(D.meses, m);
   const prev = mm => L.filter(a => mesPlan(a) === mm);
-  const lista = prev(m).sort((p, q) => idNum(p) - idNum(q)), p = lista.length;
-  const canc = lista.filter(cancelada), k = canc.length, c = lista.filter(feitaEv).length, tr = c + k;
+  /* Mesma conta do acompanhamento da meta: o mês fecha com as realizadas que contam nele mais as canceladas previstas para ele. */
+  const X = D.acum.find(y => y.m === m) || { p: 0, c: 0, k: 0 };
+  const canc = prev(m).filter(cancelada), k = X.k, tr = X.c, c = tr - k, p = X.p;
+  const ordenar = l => l.sort((x, y) => idNum(x) - idNum(y));
+  const contam = ordenar(L.filter(a => D.conta[a.id] === m));
+  const ante = contam.filter(a => mesPlan(a) !== m).length;
+  const lista = [...contam, ...ordenar(canc)];
+  const pend = ordenar(prev(m).filter(a => !cancelada(a) && D.conta[a.id] !== m));
   const pct = p ? Math.round(tr / p * 100) : 0, teams = String((S.planoTeams || {})[m] || "").trim();
-  const hist = D.meses.map(x => { const l = prev(x); return { m: x, p: l.length, c: x <= m ? l.filter(feitaEv).length + l.filter(cancelada).length : null }; });
+  const hist = D.acum.map(x => ({ m: x.m, p: x.p, c: x.m <= m ? x.c : null }));
   const acm = hist.filter(y => y.m <= m && (!ordem || y.m >= "2026-10")), pa = acm.reduce((t, y) => t + y.p, 0), ca = acm.reduce((t, y) => t + y.c, 0), ac = pa ? Math.round(ca / pa * 100) : 0;
   const txtCanc = k ? ` ${k} AEP(s) do mês foram canceladas com justificativa e estão identificadas no anexo: ${canc.map(a => `${a.numero} (${(a.cancel?.motivo || "").toLowerCase()})`).join("; ")}.` : "";
-  const texto = `${mesLongo(m).replace(/^./, x => x.toUpperCase())}: ${k ? `tratadas ${tr} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%), sendo ${c} realizada(s) em campo e ${k} cancelada(s) com justificativa` : `concluídas ${c} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%)`}.${txtCanc} Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs previstas no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
-  return { D, m, lista, p, c, k, tr, pct, ordem, teams, texto, pa, ca, ac, hist };
+  const texto = `${mesLongo(m).replace(/^./, x => x.toUpperCase())}: ${k ? `tratadas ${tr} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%), sendo ${c} realizada(s) em campo e ${k} cancelada(s) com justificativa` : `concluídas ${c} de ${p} Análises Ergonômicas Preliminares (AEP) previstas para o mês (${pct}%)`}.${txtCanc}${ante ? ` Entre as realizadas, ${ante === 1 ? "1 estava prevista para mês posterior e foi antecipada" : `${ante} estavam previstas para meses posteriores e foram antecipadas`}, conforme a regra de contagem do plano.` : ""} Acumulado ${ordem ? "do plano do SIG" : "até o mês"}: ${ca} de ${pa} (${ac}%). Relação das AEPs no documento anexo.${teams ? ` Documentos das AEPs disponíveis no Teams: ${teams}.` : " Documentos das AEPs disponíveis no Teams."}`;
+  return { D, m, lista, pend, ante, p, c, k, tr, pct, ordem, teams, texto, pa, ca, ac, hist };
 }
 function vEvidencia(){
   const E = dadosEvidencia(S.evMes), D = E.D;
@@ -2459,7 +2470,7 @@ function vEvidencia(){
       <label class="f"><span>Mês</span><select data-evmes="1">${D.meses.map(k => `<option value="${k}" ${k === E.m ? "selected" : ""}>${esc(mesLongo(k))}${ordemSIG(D.meses, k) ? ` · ordem ${ordemSIG(D.meses, k)} no SIG` : " · fora do SIG"}</option>`).join("")}</select></label>
       <label class="f span2"><span>Pasta das AEPs no Teams (opcional, entra no texto e no PDF)</span><input type="text" data-evteams="${E.m}" value="${esc(E.teams)}" placeholder="Cole aqui o link ou o caminho da pasta do mês"></label>
     </div>
-    <div class="pgrnum"><div><b>${E.tr} de ${E.p}</b><span>previstas para ${esc(mesLongo(E.m))} tratadas${E.k ? ` (${E.c} realizadas + ${E.k} canceladas)` : ""}</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
+    <div class="pgrnum"><div><b>${E.tr} de ${E.p}</b><span>da meta de ${esc(mesLongo(E.m))} atendida${E.k ? ` (${E.c} realizadas + ${E.k} canceladas)` : ""}</span></div><div><b>${E.pct}%</b><span>Realizado (%) para o SIG</span></div><div><b>${E.ordem || "—"}</b><span>${E.ordem ? "ordem da ação no SIG" : "mês fora do SIG"}</span></div></div>
     <label class="f"><span>Texto para o campo “Situação” do acompanhamento</span><textarea rows="4" readonly id="evtexto">${esc(E.texto)}</textarea></label>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn small" type="button" data-act="evCopiar">Copiar o texto</button><button class="btn small primary" type="button" data-act="evPDF" id="btnEvPDF" ${E.lista.length ? "" : "disabled"}>Baixar o PDF para anexar</button>
       <span class="tiny muted">O PDF traz o gráfico do plano inteiro (concluídas só até o mês escolhido) e a lista das AEPs previstas no mês, sem datas e sem adiantamentos.</span></div>
@@ -2479,7 +2490,10 @@ async function gerarPDFEvidencia(){
   try {
     const E = dadosEvidencia(S.evMes), logo = (typeof logoDataURL === "function" ? await logoDataURL() : "") || "", hoje = new Date().toLocaleDateString("pt-BR");
     const nome = nomeArquivo(`Evidencia AEP - ${mesLongo(E.m)} - ${hoje.replace(/\//g, "-")}`);
-    const linhas = E.lista.map((a, i) => `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${esc(STATUS[a.status || "nao_iniciada"] || "")}${cancelada(a) ? `<div class="s">${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? `: ${esc(a.cancel.obs)}` : ""}</div>` : ""}</td></tr>`).join("");
+    const sitEv = a => cancelada(a) ? `Cancelada<div class="s">${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? `: ${esc(a.cancel.obs)}` : ""}</div>`
+      : mesReal(a) ? `Realizada<div class="s">${esc(fmtData(dataReal(a)))}</div>` : esc(STATUS[a.status || "nao_iniciada"] || "");
+    const linha = (a, i) => `<tr><td class="c">${i + 1}</td><td class="mono">${esc(a.numero)}</td><td>${esc((a.meta?.cargo || "").trim())}</td><td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? `<div class="s">${esc(a.meta.area)}</div>` : ""}</td><td class="c">${esc(mesRot(mesPlan(a)) || "—")}</td><td class="c">${sitEv(a)}</td></tr>`;
+    const linhas = E.lista.map(linha).join(""), linhasPend = E.pend.map(linha).join("");
     const css = `@page{size:A4;margin:14mm}body{font:9.5pt/1.4 Arial,sans-serif;color:#222}h1{font-size:15pt;margin:0 0 2px}h2{font-size:11pt;margin:12px 0 4px}p{margin:3px 0}
       .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:10px}
       .box{display:flex;gap:10px;margin:10px 0}.box div{flex:1;border:1px solid #ddd;border-radius:6px;padding:7px 9px}.box b{display:block;font-size:16pt}.box span{font-size:8.5pt;color:#555}
@@ -2489,8 +2503,11 @@ async function gerarPDFEvidencia(){
       <div class="head"><div><h1>Evidência de execução: Análises Ergonômicas Preliminares</h1><p>${esc(S.config.empresa || "ArcelorMittal")}${S.config.unidade ? ` · ${esc(S.config.unidade)}` : " · Mina de Serra Azul"} · Plano PLA202609SA20-30 (SIG)${E.ordem ? ` · ação de ordem ${E.ordem}` : ""}</p><p><b>Mês de referência:</b> ${esc(mesLongo(E.m))} · emitido em ${hoje}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
       <div class="box"><div><span>Previstas para o mês</span><b>${E.p}</b></div><div><span>Realizadas em campo</span><b>${E.c}</b></div>${E.k ? `<div><span>Canceladas com justificativa</span><b>${E.k}</b></div>` : ""}<div><span>Realizado</span><b>${E.pct}%</b></div><div><span>${E.ordem ? "Acumulado do plano do SIG" : "Acumulado até o mês"}</span><b>${E.ca} de ${E.pa}</b></div></div>
       <h2>Previstas x concluídas por mês</h2>${graficoEvidencia(E.hist, E.m)}<p class="s">Os meses seguintes mostram só o previsto no plano.</p>
-      <h2>AEPs previstas para ${esc(mesLongo(E.m))}</h2>
-      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
+      <h2>AEPs que atenderam a meta de ${esc(mesLongo(E.m))}</h2>
+      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Mês previsto</th><th class="c">Situação</th></tr></thead><tbody>${linhas}</tbody></table>
+      <p class="s" style="margin-top:6px">Regra de contagem do plano: cada AEP conta no mês em que foi realizada e o que passa da meta de um mês conta nos meses seguintes, nunca em mês anterior ao da realização. Por isso a relação pode conter AEPs previstas para outros meses, identificadas na coluna “Mês previsto”. A AEP cancelada conta no mês previsto dela, com a justificativa na coluna “Situação”.</p>
+      ${linhasPend ? `<h2>Previstas para ${esc(mesLongo(E.m))} que serão contadas em outro mês</h2>
+      <table><thead><tr><th class="c">Nº</th><th>AEP</th><th>Cargo</th><th>Gerência / área</th><th class="c">Mês previsto</th><th class="c">Situação</th></tr></thead><tbody>${linhasPend}</tbody></table>` : ""}
       <p class="s" style="margin-top:8px">Os documentos das AEPs ficam no Teams${E.teams ? ` (${esc(E.teams)})` : ""} e no sistema de AEP.</p>
       <div class="ass"><div>${esc(S.config.analista || "Responsável técnico")}<br><span class="s">${esc(S.config.registroAnalista || "")}</span></div><div>Gestor responsável pela ação</div></div></body></html>`;
     await imprimirHTML(html, nome);
@@ -2499,18 +2516,24 @@ async function gerarPDFEvidencia(){
 }
 /* Justificativa das AEPs canceladas, para o PDF de acompanhamento da meta.
    A cancelada fecha o mês previsto dela, então o motivo de cada uma precisa estar escrito no mesmo documento. */
-function justCanceladasHTML(L){
-  const C = L.filter(cancelada).map(completar)
+function justCanceladasHTML(L, mes){
+  const todas = L.filter(cancelada).map(completar)
     .sort((x, y) => (mesPlan(x) || "9999-99").localeCompare(mesPlan(y) || "9999-99") || idNum(x) - idNum(y));
-  if (!C.length) return "";
+  const C = mes ? todas.filter(a => mesPlan(a) === mes) : todas, outras = todas.length - C.length;
+  const por = {}; todas.filter(a => mesPlan(a) !== mes).forEach(a => { const k = mesPlan(a) || "sem mês"; por[k] = (por[k] || 0) + 1; });
+  const ondeTxt = esc(Object.keys(por).sort().map(k => `${k === "sem mês" ? "sem mês" : mesLongo(k)}: ${por[k]}`).join(", "));
+  const outrasTxt = !outras ? "" : `<p class="tiny muted" style="margin-top:6px">${outras === 1
+    ? `Outra AEP do plano foi cancelada com justificativa em mês ainda não encerrado (${ondeTxt}) e é detalhada no acompanhamento daquele mês.`
+    : `Outras ${outras} AEPs do plano foram canceladas com justificativa em meses ainda não encerrados (${ondeTxt}) e são detalhadas no acompanhamento de cada mês.`}</p>`;
+  if (!C.length) return outrasTxt;
   const linhas = C.map(a => `<tr><td class="c">${esc(a.numero || "")}</td><td>${esc(a.meta?.cargo || "")}</td>
     <td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? ` · ${esc(a.meta.area.trim())}` : ""}</td>
     <td class="c">${esc(mesPlan(a) ? mesLongo(mesPlan(a)) : "sem mês")}</td>
     <td>${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? `: ${esc(a.cancel.obs)}` : ""}</td>
     <td class="c">${esc(fmtData(String(a.cancel?.em || "").slice(0, 10)))}</td></tr>`).join("");
-  return `<h2>Justificativa das ${C.length} AEP(s) cancelada(s)</h2>
+  return `<h2>Justificativa das ${C.length} AEP(s) cancelada(s) de ${esc(mesLongo(mes))}</h2>
     <table class="just"><thead><tr><th>AEP</th><th>Cargo</th><th>Setor e área</th><th>Mês previsto</th><th>Motivo do cancelamento</th><th>Cancelada em</th></tr></thead><tbody>${linhas}</tbody></table>
-    <p class="tiny muted" style="margin-top:6px">A AEP cancelada permanece no plano e fecha o mês previsto dela, somada às realizadas em campo, porque em todos os casos acima não há análise a executar: o cargo deixou de existir na unidade, está sem efetivo, teve a atividade terceirizada, ou a análise já está contemplada em outra AEP indicada na justificativa. Nenhum cancelamento decorre de indisponibilidade de profissional ou de área, situação tratada como replanejamento de mês, com registro próprio.</p>`;
+    <p class="tiny muted" style="margin-top:6px">A AEP cancelada permanece no plano e fecha o mês previsto dela, somada às realizadas em campo, porque em todos os casos acima não há análise a executar: o cargo deixou de existir na unidade, está sem efetivo, teve a atividade terceirizada, ou a análise já está contemplada em outra AEP indicada na justificativa. Nenhum cancelamento decorre de indisponibilidade de profissional ou de área, situação tratada como replanejamento de mês, com registro próprio.</p>${outrasTxt}`;
 }
 async function gerarPDFMeta(){
   const btn = $("#btnPDFmeta"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
@@ -2532,7 +2555,7 @@ async function gerarPDFMeta(){
         <div class="card"><span>Adiantadas para os próximos meses</span><b class="big">${D.garantidas}</b><span>realizadas além da meta, já contam nos meses seguintes</span></div>
         <div class="card"><span>Para fechar o plano</span><b class="big">${D.faltam}</b><span>AEPs a realizar</span></div></div>
       ${graficoMeta(D)}
-      ${justCanceladasHTML(L)}</body></html>`;
+      ${justCanceladasHTML(L, D.atual)}</body></html>`;
     await imprimirHTML(html, nome);
   } catch(e){ toast("Não foi possível preparar o PDF."); }
   finally { const b = $("#btnPDFmeta"); if (b){ b.disabled = false; b.textContent = "PDF: acompanhamento da meta"; } }
