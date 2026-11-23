@@ -816,7 +816,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.20";
+const VERSAO = "2026.11.23";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -2497,6 +2497,21 @@ async function gerarPDFEvidencia(){
   } catch(e){ toast("Não foi possível preparar o PDF."); }
   finally { const b = $("#btnEvPDF"); if (b){ b.disabled = false; b.textContent = "Baixar o PDF para anexar"; } }
 }
+/* Justificativa das AEPs canceladas, para o PDF de acompanhamento da meta.
+   A cancelada fecha o mês previsto dela, então o motivo de cada uma precisa estar escrito no mesmo documento. */
+function justCanceladasHTML(L){
+  const C = L.filter(cancelada).map(completar)
+    .sort((x, y) => (mesPlan(x) || "9999-99").localeCompare(mesPlan(y) || "9999-99") || idNum(x) - idNum(y));
+  if (!C.length) return "";
+  const linhas = C.map(a => `<tr><td class="c">${esc(a.numero || "")}</td><td>${esc(a.meta?.cargo || "")}</td>
+    <td>${esc((a.meta?.setor || "").trim())}${a.meta?.area ? ` · ${esc(a.meta.area.trim())}` : ""}</td>
+    <td class="c">${esc(mesPlan(a) ? mesLongo(mesPlan(a)) : "sem mês")}</td>
+    <td>${esc(a.cancel?.motivo || "")}${a.cancel?.obs ? `: ${esc(a.cancel.obs)}` : ""}</td>
+    <td class="c">${esc(fmtData(String(a.cancel?.em || "").slice(0, 10)))}</td></tr>`).join("");
+  return `<h2>Justificativa das ${C.length} AEP(s) cancelada(s)</h2>
+    <table class="just"><thead><tr><th>AEP</th><th>Cargo</th><th>Setor e área</th><th>Mês previsto</th><th>Motivo do cancelamento</th><th>Cancelada em</th></tr></thead><tbody>${linhas}</tbody></table>
+    <p class="tiny muted" style="margin-top:6px">A AEP cancelada permanece no plano e fecha o mês previsto dela, somada às realizadas em campo, porque em todos os casos acima não há análise a executar: o cargo deixou de existir na unidade, está sem efetivo, teve a atividade terceirizada, ou a análise já está contemplada em outra AEP indicada na justificativa. Nenhum cancelamento decorre de indisponibilidade de profissional ou de área, situação tratada como replanejamento de mês, com registro próprio.</p>`;
+}
 async function gerarPDFMeta(){
   const btn = $("#btnPDFmeta"); if (btn){ btn.disabled = true; btn.textContent = "Preparando…"; }
   try {
@@ -2508,7 +2523,8 @@ async function gerarPDFMeta(){
       .gmeta .gp{fill:#c9c9c9}.gmeta .gr{fill:#E8501E}.gmeta .gra{fill:#F4A27F}.gmeta .gk{fill:#8a8a8a}.gmeta .gcur{fill:#FDEEE8}.gmeta .gaxis{stroke:#999}.gmeta .gv{font-size:10px;font-weight:700;fill:#333}.gmeta .gl{font-size:10px;fill:#666}.gmeta .gl.gb{font-weight:700;fill:#222}
       .glegend{display:flex;gap:16px;font-size:9pt;margin:4px 0}.glegend i{display:inline-block;width:10px;height:10px;margin-right:5px}.glegend i.gp{background:#c9c9c9}.glegend i.gr{background:#E8501E}.glegend i.gra{background:#F4A27F}.glegend i.gk{background:#8a8a8a}.tiny{font-size:8pt}.muted{color:#666}
       table{border-collapse:collapse;width:100%;font-size:8.5pt}th,td{border:1px solid #ddd;padding:3px 5px;text-align:right}td:first-child,th:first-child{text-align:left}th.cur{color:#E8501E}.neg{color:#b42318}
-      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:8px}.tablewrap{overflow:visible}svg{max-width:100%;height:auto}`;
+      .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #E8501E;padding-bottom:6px;margin-bottom:8px}.tablewrap{overflow:visible}svg{max-width:100%;height:auto}
+      h2{font-size:11pt;margin:14px 0 4px;break-after:avoid;page-break-after:avoid}table.just th,table.just td{text-align:left}table.just td.c{text-align:center;white-space:nowrap}table.just tr{break-inside:avoid;page-break-inside:avoid}`;
     const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(nome)}</title><style>${css}</style></head><body>
       <div class="head"><div><h1>Acompanhamento da meta de AEP</h1><p>Plano PLA202609SA20-30 (SIG) · ${esc(ger)} · posição em ${new Date().toLocaleDateString("pt-BR")}</p></div>${logo ? `<img src="${logo}" alt="" style="height:30px">` : ""}</div>
       <div class="cards"><div class="card"><span>Meta de ${esc(mesTxt)}</span><b class="big">${D.at.c} de ${D.at.p}</b><span>${D.at.c >= D.at.p ? "meta do mês atingida" : `faltam ${D.at.p - D.at.c}`}</span></div>
@@ -2516,7 +2532,7 @@ async function gerarPDFMeta(){
         <div class="card"><span>Adiantadas para os próximos meses</span><b class="big">${D.garantidas}</b><span>realizadas além da meta, já contam nos meses seguintes</span></div>
         <div class="card"><span>Para fechar o plano</span><b class="big">${D.faltam}</b><span>AEPs a realizar</span></div></div>
       ${graficoMeta(D)}
-      <p class="tiny muted" style="margin-top:8px">Regra de contagem: cada AEP conta na meta do mês em que foi realizada (data da avaliação em campo); o que passa da meta do mês conta como adiantamento nos meses seguintes, nunca em mês anterior ao da realização. A data real de conclusão de cada AEP fica registrada no sistema.</p></body></html>`;
+      ${justCanceladasHTML(L)}</body></html>`;
     await imprimirHTML(html, nome);
   } catch(e){ toast("Não foi possível preparar o PDF."); }
   finally { const b = $("#btnPDFmeta"); if (b){ b.disabled = false; b.textContent = "PDF: acompanhamento da meta"; } }
