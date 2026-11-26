@@ -821,7 +821,7 @@ function setPath(obj, path, val){
 let toastTimer;
 function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 3400); }
 function toastAcao(msg, rot, act, k){ const t = $("#toast"); t.innerHTML = `${esc(msg)} <button type="button" class="btn small" data-act="${act}" data-k="${esc(k)}" style="margin-left:8px;padding:2px 10px">${esc(rot)}</button>`; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 6500); }
-const VERSAO = "2026.11.23b";
+const VERSAO = "2026.11.26";
 function setSaveState(txt){ const el = $("#savestate"); if (!el) return; const erro = /^Erro/.test(txt); el.textContent = txt; el.style.color = erro ? "var(--bad-ink)" : ""; el.style.fontWeight = erro ? "700" : "";
   if (erro) toast("Não salvou. Confira a internet e tente de novo. Se continuar, recarregue a página."); }
 /* Gravação em lote protegida: se a AEP mudou no banco depois que esta aba carregou (outra aba ou outro computador), não grava por cima */
@@ -1109,6 +1109,35 @@ function desviosDaAEP(a){
       texto: (String(x.desvTxt || "").trim() || "Desvio a descrever no Inventário") + (os ? ` (${os})` : ""), prio: tr.prio || "Alta" }); }).filter(Boolean);
 }
 function itensPlanoDe(L){ return L.flatMap(a => [...acoesDaAEP(a), ...correcoesDaAEP(a), ...desviosDaAEP(a), ...melhoriasDaAEP(a)]); }
+/* Encaminhamento da AEP: o que ela gerou de plano de ação e em que pé está.
+   "A definir" é o que ainda falta eu levar para a área: item em aberto sem responsável ou sem prazo. */
+function planoDaAEP(a){
+  const T = itensPlanoDe([completar(a)]).filter(m => m.sit !== "Não se aplica");
+  const ab = T.filter(m => abertaSit(m.sit)), def = ab.filter(m => !m.resp || !m.prazo);
+  return { n: T.length, ab, def, crit: ab.filter(m => m.prio === "Alta"), venc: ab.filter(m => m.atrasada), conc: T.filter(m => m.sit === "Concluída") };
+}
+const ENC_ORDEM = ["nada", "definir", "critica", "aberta", "fechada"];
+function encaminhaDe(a){
+  const P = planoDaAEP(a);
+  if (!P.n) return { k: "nada", P };
+  if (P.def.length) return { k: "definir", P };
+  if (P.crit.length) return { k: "critica", P };
+  if (P.ab.length) return { k: "aberta", P };
+  return { k: "fechada", P };
+}
+const ENC_ROT = { nada: "Nada a tratar", definir: "Ação a definir", critica: "Crítica em aberto", aberta: "Em andamento na área", fechada: "Tudo concluído" };
+const ENC_CLS = { nada: "ok", definir: "warn", critica: "bad", aberta: "", fechada: "ok" };
+const ENC_LISTA = [["", "Todos"], ["nada", "Nada a tratar"], ["definir", "Ação a definir"], ["critica", "Crítica em aberto"], ["aberta", "Em andamento na área"], ["fechada", "Tudo concluído"]];
+function colEncaminha(a){
+  const st = a.status || "nao_iniciada";
+  if (st !== "concluida" && st !== "revisao") return `<span class="faint">—</span>`;
+  const { k, P } = encaminhaDe(a);
+  const pl = (n, u, m) => `${n} ${n > 1 ? m : u}`;
+  const outras = P.ab.length - P.def.length - P.crit.length;
+  const det = [P.def.length ? `${P.def.length} a definir` : "", P.crit.length ? pl(P.crit.length, "crítica", "críticas") : "",
+    outras > 0 ? `${outras} em aberto` : "", P.conc.length ? pl(P.conc.length, "concluída", "concluídas") : ""].filter(Boolean).join(" · ");
+  return `<span class="chip ${ENC_CLS[k]}">${ENC_ROT[k]}</span>${det ? `<div class="tiny faint" style="margin-top:3px">${esc(det)}</div>` : ""}`;
+}
 function aepsPlano(){
   return Object.values(S.aeps).map(completar).sort((x, y) => idNum(x) - idNum(y))
     .filter(a => S.melEsc === "todas" || fechadaAEP(a))
@@ -1582,7 +1611,7 @@ const S = {
   cfgDraft:null, cfgTimer:null, confirm:null,
   org:{ pessoas:{}, aepSup:{} }, orgSel:null, orgFull:false, orgFold:{}, orgBusca:"", orgDirty:false, orgTimer:null, fAviso:false,
   tax:{ versao:1, em:"", itens:{}, historico:[] }, taxDraft:null, taxSel:null, taxBusca:"", taxCat:"", taxAtivos:"ativos", taxDirty:false, taxTimer:null, taxMotivo:"", taxPubAberto:false,
-  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, fPlano:"todas", pMeses:null, pMesAberto:false, drop:null, repAberto:false, repSai:{}, repEntra:{}, cancelBox:false, cancelMotivo:"", cancelObs:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
+  invSit:"pendentes", invCat:"", invEsc:"fechadas", invBusca:"", invAberto:null, invSel:new Set(), invLote:{}, invFoco:"", pgrEsc:"novos", invPend:{}, invTimer:null, fPlano:"todas", pMeses:null, pMesAberto:false, drop:null, fEnc:"", repAberto:false, repSai:{}, repEntra:{}, cancelBox:false, cancelMotivo:"", cancelObs:"", plano:{}, planoTimer:null, planoDirty:false, melhorias:{}, melBusca:"", melSit:"abertas", melEsc:"fechadas", melTipo:"", melPrio:"", melPGR:"", cf:{}, fcAberto:false, melFoco:"", melAberto:null, melTimer:null, melDirty:false,
   busca:"", fStatus:[], fSetor:[], fArea:[], sel:new Set(), exportAberto:false, expEscopo:"concluidas", expGHE:"",
   db:null, assets:null, downloads:null, dbOk:false, carregado:false
 };
@@ -1958,7 +1987,7 @@ function porRecorte(L, D, tipo){
   return R;
 }
 function listaFiltrada(){
-  const L = listaBase();
+  const L = listaBase().filter(a => !S.fEnc || ((a.status === "concluida" || a.status === "revisao") && encaminhaDe(a).k === S.fEnc));
   return porRecorte(L, dadosMeta(aepsFiltradas()), S.fPlano).sort((a,b) => idNum(a) - idNum(b));
 }
 /* Coluna "Plano": mês previsto e, quando já realizada, quando foi feita e em que mês conta na meta */
@@ -1982,6 +2011,7 @@ function linhasHome(lista){
       <td class="small">${esc(a.meta?.setorCopsoq || "—")}${altas ? ` <span class="chip ris" title="Subescalas acima de 3,66 no setor">${altas} alta${altas>1?"s":""}</span>` : ""}</td>
       <td><span class="chip ${STATUS_CLS[st]}">${STATUS[st]}</span>${a.campo?.em ? `<div class="tiny faint" style="margin-top:3px">Coleta de campo ${fmtData(a.campo.em.slice(0,10))}</div>` : ""}${al ? `<div class="tiny" style="color:var(--bad-ink);margin-top:3px">${esc(al)}</div>` : ""}${(av => av.length ? `<div class="tiny avisoink" title="${esc(av.map(x => x.longo).join("\n"))}">⚠ ${esc(av[0].curto)}${av.length > 1 ? ` (+${av.length - 1})` : ""}</div>` : "")(st === "concluida" || st === "revisao" ? avisosAEP(a) : [])}</td>
       <td class="small">${colPlano(a)}</td>
+      <td class="small">${colEncaminha(a)}</td>
       <td class="num">${(a.perigos||[]).length || "—"}</td>
       <td class="num">${ckCriticos(a).length || "—"}${ckCorrigidos(a).length ? `<div class="tiny faint">+${ckCorrigidos(a).length} corrigido(s)</div>` : ""}</td></tr>`;
   }).join("");
@@ -2004,7 +2034,7 @@ function atualizarHome(){
 }
 /* Situação da AEP: lista com uma ou mais marcadas. Nenhuma marcada mostra todas, menos as canceladas. */
 const rotStatus = () => !S.fStatus.length ? "Todas as situações" : S.fStatus.length === 1 ? STATUS[S.fStatus[0]] : S.fStatus.length === 2 ? S.fStatus.map(k => STATUS[k]).join(" + ") : `${S.fStatus.length} situações`;
-const filtroLigado = () => !!(S.busca || temFiltroSetor() || S.fStatus.length || (S.fPlano && S.fPlano !== "todas") || (Array.isArray(S.pMeses) && S.pMeses.length) || S.pMeses === "todo");
+const filtroLigado = () => !!(S.busca || S.fEnc || temFiltroSetor() || S.fStatus.length || (S.fPlano && S.fPlano !== "todas") || (Array.isArray(S.pMeses) && S.pMeses.length) || S.pMeses === "todo");
 function vFiltroStatus(todas){
   const cont = {}; todas.forEach(a => { const k = a.status || "nao_iniciada"; cont[k] = (cont[k] || 0) + 1; });
   return `<span>Situação <span class="faint" style="font-weight:400">uma ou mais</span></span>
@@ -2085,12 +2115,18 @@ function vHome(){
     <div class="f span2"><span>Gerência / setor <span class="faint" style="font-weight:400">uma ou mais</span></span>${vMultiSetor("f-setor")}</div>
     <div class="f">${vFiltroStatus(todas)}</div>
     <div id="recortebox" style="display:contents">${vRecorte()}</div>
-    <div class="f" style="justify-content:flex-end"><button class="btn ghost" type="button" data-act="limparFiltros" ${filtroLigado() ? "" : "disabled"}>Limpar filtros</button></div>
+    <div class="f"><span>Encaminhamento <span class="faint" style="font-weight:400">plano de ação</span></span>
+      <details class="msel" id="f-enc" ${S.drop === "f-enc" ? "open" : ""}><summary><span>${esc((ENC_LISTA.find(x => x[0] === (S.fEnc || "")) || ENC_LISTA[0])[1])}</span></summary>
+      <div class="msel-pop" role="group" aria-label="Encaminhamento">
+        <div class="msel-top"><b class="small">O que a AEP gerou</b><button type="button" class="btn ghost small" data-act="mselFechar">Fechar</button></div>
+        ${ENC_LISTA.map(([k, t]) => `<label class="mselop"><input type="radio" name="fenc" data-enc="${k}" ${(S.fEnc || "") === k ? "checked" : ""}><span>${esc(t)}</span><b>${k ? listaBase().filter(a => (a.status === "concluida" || a.status === "revisao") && encaminhaDe(a).k === k).length : ""}</b></label>`).join("")}
+        <span class="tiny muted" style="padding:4px 8px 2px">Vale só para AEP concluída ou em revisão. “Ação a definir” é a que ainda está sem responsável ou sem prazo.</span></div></details></div>
+    <div class="f spanall" style="align-items:flex-end;margin-top:-4px"><button class="btn ghost" type="button" data-act="limparFiltros" ${filtroLigado() ? "" : "disabled"} style="align-self:flex-end">Limpar filtros</button></div>
   </div></div>
   <div class="row between" style="gap:8px;margin-bottom:8px;flex-wrap:wrap"><p class="small muted" style="margin:0" id="contagem">${lista.length} de ${todas.length} AEP(s)</p>
     <span class="row" style="gap:8px;flex-wrap:wrap"><span id="selbar">${vSelBar()}</span></span></div>
   <div class="panel">
-    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Plano</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
+    ${todas.length ? `<div class="tablewrap"><table class="list"><thead><tr><th data-selcell style="width:34px;padding:0;text-align:center"><input type="checkbox" id="selAll" data-selall="1" aria-label="Selecionar todas as AEPs da lista" ${lista.length && lista.every(a => S.sel.has(a.id)) ? "checked" : ""}></th><th>ID</th><th>Cargo / setor</th><th>Setor COPSOQ</th><th>Situação</th><th>Plano</th><th title="O que esta AEP gerou de plano de ação">Encaminhamento</th><th>Perigos</th><th title="Itens do checklist NR-17 marcados Sim">Itens críticos</th></tr></thead><tbody id="tbody-aeps">${linhasHome(lista)}</tbody></table></div>`
     : `<div class="empty">${S.carregado ? "Nenhuma AEP registrada ainda." : "Carregando…"}</div>`}
   </div>`;
 }
@@ -4581,7 +4617,7 @@ const ICO_CAT = { OT: "relogio", BIO: "corpo", EQ: "ferramenta", AMB: "sol" };
 
 const GX_CSS = `
 .gx-sub2{margin:0 0 8px;font-size:13px;color:var(--x-ink2)}
-.gx-pl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.gx-pl>div{border:1px solid var(--x-rule);border-radius:10px;padding:8px 12px}.gx-pl b{display:block;font-size:24px;line-height:1.1}.gx-pl span{font-size:12px;color:var(--x-ink3)}.gx-pl .hot b{color:var(--x-acc)}
+.gx-pl{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.gx-pl>div{border:1px solid var(--x-rule);border-radius:10px;padding:8px 12px}.gx-pl>div{padding:8px 10px}.gx-pl b{display:block;font-size:21px;line-height:1.1}.gx-pl span{font-size:11.5px;color:var(--x-ink3);line-height:1.25;display:block}.gx-pl .hot b{color:var(--x-acc)}
 .gx-acts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}.gx-acts li{border-left:3px solid var(--x-o2);padding:2px 0 2px 10px}.gx-acts .t{font-weight:600;font-size:13px}.gx-acts .s{font-size:12px;color:var(--x-ink3)}
 .gx{--x-ink:var(--ink,#232323);--x-ink2:var(--ink-2,#4F4F4F);--x-ink3:var(--ink-3,#767676);--x-rule:var(--rule,#E0DFDD);--x-surf:var(--surface,#fff);--x-paper:var(--surface-2,#F8F8F7);
   --x-o1:#9E3612;--x-o2:#D9622E;--x-o3:#EE9A6C;--x-track:var(--rule,#E7E5E2);--x-soft:var(--accent-soft,#FDF2EC);--x-acc:var(--accent,#C2451A);
@@ -4653,6 +4689,8 @@ function gerExecHTML(setor, opt = {}){
   const linha = (icone, t, v, max, sub) => `<li><span class="ic">${ico(icone)}</span><div><div class="t">${t}</div><div class="bar"><i style="width:${max ? Math.max(6, v / max * 100) : 0}%"></i></div></div><div class="n">${v}<small>${sub}</small></div></li>`;
   const passos = [];
   if (D.acoes.length) passos.push(["alvo", `Corrigir ${D.acoes.length} ponto${D.acoes.length > 1 ? "s" : ""} crítico${D.acoes.length > 1 ? "s" : ""}`, `em ${D.cargosCk} AEP${D.cargosCk > 1 ? "s" : ""}, pelo Plano de Ação (detalhe no quadro ao lado)`]);
+  { const Pg = itensPlanoDe(D.val.map(completar)).filter(m => m.sit !== "Não se aplica" && abertaSit(m.sit) && (!m.resp || !m.prazo));
+    if (Pg.length) passos.push(["flag", `Definir responsável e prazo de ${Pg.length} ação(ões)`, `pontos levantados nas AEPs que ainda não têm dono nem data; combinar com a gerência e lançar no SIG`]); }
   if (D.aet.length) passos.push(["doc", `Acompanhar ${D.aet.length} AET`, D.aet.length === 1 ? esc(D.aet[0].meta?.cargo || "") : `${D.aet.length} cargos com análise aprofundada`]);
   if (faltam) passos.push(["users", `Realizar as ${faltam} AEP${faltam > 1 ? "s" : ""} que faltam`, `${D.st.andamento} em andamento e ${D.st.nao_iniciada} não iniciada${D.st.nao_iniciada === 1 ? "" : "s"}; liberar os trabalhadores para a avaliação`]);
   if (!passos.length) passos.push(["check", "Área em dia", "Todas as avaliações concluídas e sem ponto crítico em aberto"]);
@@ -4686,13 +4724,15 @@ function gerExecHTML(setor, opt = {}){
         if (r.sit === "ok") R.cat[r.cat] = (R.cat[r.cat] || 0) + 1; else if (r.sit === "corrigido" || r.sit === "desvio") R.fora++; else R.falta++; }));
       const cats = CATEGORIAS.filter(cn => R.cat[cn]), maxC = Math.max(1, ...cats.map(cn => R.cat[cn])), nCl = cats.reduce((t, cn) => t + R.cat[cn], 0), altos = (R.cat["Risco moderado"] || 0) + (R.cat["Risco substancial"] || 0) + (R.cat["Risco intolerável"] || 0);
       const P = itensPlanoDe(D.val.map(completar)).filter(m => m.sit !== "Não se aplica"), ab = P.filter(m => abertaSit(m.sit)), venc = ab.filter(m => m.atrasada), concl = P.filter(m => m.sit === "Concluída");
-      const prox = ab.slice().sort((x, y) => (x.atrasada ? 0 : 1) - (y.atrasada ? 0 : 1) || String(x.prazo || "9").localeCompare(String(y.prazo || "9"))).slice(0, 4);
+      const adef = ab.filter(m => !m.resp || !m.prazo);
+      const prox = ab.slice().sort((x, y) => ((!x.resp || !x.prazo) ? 0 : 1) - ((!y.resp || !y.prazo) ? 0 : 1) || (x.atrasada ? 0 : 1) - (y.atrasada ? 0 : 1) || String(x.prazo || "9").localeCompare(String(y.prazo || "9"))).slice(0, 4);
       return `<div class="gx-row gx-r2">
     <div class="gx-box"><h2>${ico("alert")}Como estão os riscos</h2>
       ${nCl ? `<p class="gx-sub2">${nCl} risco(s) classificado(s)${altos ? `, <b>${altos} pede(m) plano de ação</b> (moderado ou acima)` : ", todos sob controle (trivial ou tolerável)"}.</p><ul class="gx-list">${cats.map(cn => linha(cn === "Risco trivial" || cn === "Risco tolerável" ? "check" : "alert", esc(cn.replace("Risco ", "").replace(/^./, c => c.toUpperCase())), R.cat[cn], maxC, R.cat[cn] > 1 ? "riscos" : "risco")).join("")}</ul>` : `<p class="gx-vazio">${ico("check")}Nenhum risco classificado ainda.</p>`}
       ${R.falta || R.fora ? `<p class="gx-sub2" style="margin-top:8px">${R.falta ? `${R.falta} ainda em classificação` : ""}${R.falta && R.fora ? " · " : ""}${R.fora ? `${R.fora} corrigido(s) ou em correção, fora do PGR` : ""}.</p>` : ""}</div>
     <div class="gx-box"><h2>${ico("flag")}Como está o plano de ação</h2>
-      <div class="gx-pl"><div><b>${ab.length}</b><span>em aberto</span></div><div class="${venc.length ? "hot" : ""}"><b>${venc.length}</b><span>prazo vencido</span></div><div><b>${concl.length}</b><span>concluídas</span></div></div>
+      <div class="gx-pl"><div><b>${ab.length}</b><span>em aberto</span></div><div class="${adef.length ? "hot" : ""}"><b>${adef.length}</b><span>a definir com a área</span></div><div class="${venc.length ? "hot" : ""}"><b>${venc.length}</b><span>prazo vencido</span></div><div><b>${concl.length}</b><span>concluídas</span></div></div>
+      ${adef.length ? `<p class="gx-sub2">A definir: ação sem responsável ou sem prazo. É o que precisa ser combinado com a gerência para entrar no SIG.</p>` : ""}
       ${prox.length ? `<ul class="gx-acts">${prox.map(m => `<li><div class="t">${esc(curto(m.texto || "Ação a definir", 90, true))}</div><div class="s">${esc(m.a.meta?.cargo || m.a.numero)} · ${esc(m.resp || "sem responsável")} · ${m.prazo ? `${m.atrasada ? "<b>vencido em</b> " : "até "}${fmtData(m.prazo)}` : "sem prazo"}</div></li>`).join("")}</ul>` : `<p class="gx-vazio">${ico("check")}Nenhuma ação em aberto.</p>`}</div>
   </div>`; })()}
   <div class="gx-box" style="margin-bottom:12px"><h2>${ico("flag")}Próximos passos</h2><div class="gx-next">${passos.map(([i, t, s]) => `<div class="gx-step">${ico(i)}<div><b>${t}</b><span>${s}</span></div></div>`).join("")}</div></div>
@@ -4926,9 +4966,11 @@ async function exportarListaAEPs(){
       const man = orgP()[(S.org.aepSup || {})[a.id]], lider = man || sup || orgCuida("supervisor", chaveCop(copsoqNome(a)))[0] || null;
       const m = mesPlan(a);
       return [a.numero, (a.meta?.cargo || "").trim(), m ? mesLongo(m) : "", STATUS[a.status || "nao_iniciada"], (a.meta?.area || "").trim(), (a.meta?.setor || "").trim(), gheDe(a) || "", lider ? lider.nome : "",
-        dataRealizada(a) ? fmtData(dataRealizada(a)) : "", a.concluidoEm ? fmtData(a.concluidoEm.slice(0, 10)) : ""]; });
-    const ws = X.utils.aoa_to_sheet([["Nº AEP", "Cargo", "Mês planejado", "Status", "Área", "Setor", "GHE", "Líder direto", "Avaliação em campo", "Concluída em"], ...linhas]);
-    ws["!cols"] = [10, 44, 16, 14, 40, 30, 11, 30, 16, 14].map(w => ({ wch: w })); ws["!autofilter"] = { ref: `A1:J${linhas.length + 1}` };
+        dataRealizada(a) ? fmtData(dataRealizada(a)) : "", a.concluidoEm ? fmtData(a.concluidoEm.slice(0, 10)) : "",
+        ...(() => { const st = a.status || "nao_iniciada"; if (st !== "concluida" && st !== "revisao") return ["", "", "", ""];
+          const { k, P } = encaminhaDe(a); return [ENC_ROT[k], P.def.length, P.ab.length, P.conc.length]; })()]; });
+    const ws = X.utils.aoa_to_sheet([["Nº AEP", "Cargo", "Mês planejado", "Status", "Área", "Setor", "GHE", "Líder direto", "Avaliação em campo", "Concluída em", "Encaminhamento", "Ações a definir", "Ações em aberto", "Ações concluídas"], ...linhas]);
+    ws["!cols"] = [10, 44, 16, 14, 40, 30, 11, 30, 16, 14, 22, 15, 15, 16].map(w => ({ wch: w })); ws["!autofilter"] = { ref: `A1:N${linhas.length + 1}` };
     const wb = X.utils.book_new(); X.utils.book_append_sheet(wb, ws, "AEPs");
     const dados = X.write(wb, { bookType: "xlsx", type: "array" }), nome = `Lista_AEPs_${new Date().toISOString().slice(0, 10)}.xlsx`;
     if (S.downloads) await S.downloads.save({ filename: nome, data: dados });
@@ -5081,6 +5123,7 @@ function campo(e, isChange){
     S.fStatus = el.checked ? [...new Set([...S.fStatus, k])] : S.fStatus.filter(x => x !== k);
     document.querySelectorAll("[data-fst-rot]").forEach(x => x.textContent = rotStatus()); atualizarListaPainel(); return; }
   if (el.dataset.pl){ if (!isChange || !el.checked) return; S.fPlano = el.dataset.pl; atualizarListaPainel(); return; }
+  if (el.dataset.enc !== undefined){ if (!isChange || !el.checked) return; S.fEnc = el.dataset.enc; render(); return; }
   if (el.dataset.filtro){
     if (el.tagName === "SELECT" && !isChange) return;
     if (el.tagName !== "SELECT" && isChange) return;
@@ -5233,7 +5276,7 @@ document.addEventListener("click", async e => {
       document.querySelectorAll("input[data-fst]").forEach(x => x.checked = false);
       document.querySelectorAll("[data-fst-rot]").forEach(x => x.textContent = rotStatus());
       atualizarListaPainel(); break;
-    case "limparFiltros": S.busca = ""; S.fSetor = []; S.fArea = []; S.fStatus = []; S.fPlano = "todas"; S.pMeses = null; S.drop = null; render(); break;
+    case "limparFiltros": S.busca = ""; S.fSetor = []; S.fArea = []; S.fStatus = []; S.fPlano = "todas"; S.fEnc = ""; S.pMeses = null; S.drop = null; render(); break;
     case "importarPlanilha": importarPlanilha(); break;
     case "invLoteAplicar": aplicarLote(); break;
     case "medMais": case "medTirar": {
